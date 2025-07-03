@@ -38,6 +38,7 @@ export type DayOfWeek = 'lunes' | 'martes' | 'miércoles' | 'jueves' | 'viernes'
 // Nueva interface para formulario con series individuales
 export interface WorkoutFormDataAdvanced {
   sets: WorkoutSet[];
+  date?: Date; // Fecha opcional para registrar entrenamientos pasados
 }
 
 // Interface original mantenida para compatibilidad
@@ -45,6 +46,7 @@ export interface WorkoutFormData {
   weight: number;
   reps: number;
   sets: number;
+  date?: Date; // Fecha opcional para registrar entrenamientos pasados
 }
 
 export interface NotificationState {

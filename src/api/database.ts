@@ -166,11 +166,11 @@ export const updateAssignmentsOrder = async (assignments: ExerciseAssignment[]) 
 };
 
 // Workout Records
-export const createWorkoutRecord = async (record: Omit<WorkoutRecord, 'id' | 'date'>) => {
+export const createWorkoutRecord = async (record: Omit<WorkoutRecord, 'id' | 'date'>, customDate?: Date) => {
   try {
     const recordWithDate = {
       ...record,
-      date: Timestamp.now()
+      date: customDate ? Timestamp.fromDate(customDate) : Timestamp.now()
     };
     const docRef = await addDoc(collection(db, 'workoutRecords'), recordWithDate);
     return docRef.id;

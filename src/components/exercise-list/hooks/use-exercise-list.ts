@@ -98,7 +98,7 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
           individualSets: sets
         };
 
-        await createWorkoutRecord(workoutData);
+        await createWorkoutRecord(workoutData, data.date);
 
         // Mensaje personalizado para modo avanzado
         const seriesText = sets.map((set, i) => `Serie ${i + 1}: ${set.weight}kg x ${set.reps}`).join(', ');
@@ -117,7 +117,7 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
           dayOfWeek
         };
 
-        await createWorkoutRecord(workoutData);
+        await createWorkoutRecord(workoutData, simpleData.date);
 
         showNotification(
           `Entrenamiento registrado: ${simpleData.sets} series de ${simpleData.reps} reps con ${simpleData.weight}kg`,

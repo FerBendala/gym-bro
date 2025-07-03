@@ -4,6 +4,7 @@ import type { UseFormReturn } from 'react-hook-form';
 import { useFieldArray } from 'react-hook-form';
 import type { WorkoutFormData, WorkoutFormDataAdvanced } from '../../../interfaces';
 import { Button } from '../../button';
+import { DatePicker } from '../../date-picker';
 import { Input } from '../../input';
 
 interface ExerciseCardFormProps {
@@ -155,6 +156,13 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
           </div>
         )}
 
+        {/* Selector de fecha */}
+        <DatePicker
+          label="Fecha del entrenamiento"
+          value={advancedWatch('date')}
+          onChange={date => advancedFormMethods.setValue('date', date)}
+        />
+
         <div className="flex space-x-2">
           <Button
             type="submit"
@@ -231,6 +239,12 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
           error={errors.sets?.message}
         />
       </div>
+      {/* Selector de fecha */}
+      <DatePicker
+        label="Fecha del entrenamiento"
+        value={formMethods.watch('date')}
+        onChange={date => formMethods.setValue('date', date)}
+      />
       <div className="flex space-x-2">
         <Button
           type="submit"

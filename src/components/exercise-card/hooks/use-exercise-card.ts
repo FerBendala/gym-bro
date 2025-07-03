@@ -19,7 +19,8 @@ export const useExerciseCard = (): UseExerciseCardReturn => {
     defaultValues: {
       weight: 0,
       reps: 1,
-      sets: 1
+      sets: 1,
+      date: new Date() // Fecha por defecto: hoy
     }
   });
 
@@ -27,7 +28,8 @@ export const useExerciseCard = (): UseExerciseCardReturn => {
   const advancedFormMethods = useForm<WorkoutFormDataAdvanced>({
     mode: 'onChange',
     defaultValues: {
-      sets: []
+      sets: [],
+      date: new Date() // Fecha por defecto: hoy
     }
   });
 
