@@ -74,15 +74,16 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
 
   if (isAdvancedMode) {
     return (
-      <form onSubmit={advancedHandleSubmit(onSubmit)} className="space-y-4 pt-3 border-t border-gray-700">
+      <form onSubmit={advancedHandleSubmit(onSubmit)} className="space-y-3 pt-2 border-t border-gray-700">
         <div className="flex items-center justify-between">
-          <h4 className="text-sm font-medium text-white">Series Individuales</h4>
-          <div className="flex space-x-2">
+          <h4 className="text-xs font-medium text-white">Series Individuales</h4>
+          <div className="flex space-x-1">
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={switchToSimple}
+              className="text-xs px-2 py-1"
             >
               Modo Simple
             </Button>
@@ -91,8 +92,9 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
               variant="secondary"
               size="sm"
               onClick={addSet}
+              className="text-xs px-2 py-1"
             >
-              <Plus className="w-4 h-4 mr-1" />
+              <Plus className="w-3 h-3 mr-1" />
               Añadir Serie
             </Button>
           </div>
@@ -176,25 +178,27 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
 
   // Modo simple (original)
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 pt-3 border-t border-gray-700">
-      <div className="flex items-center justify-between mb-3">
-        <h4 className="text-sm font-medium text-white">Registro Rápido</h4>
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-2 pt-2 border-t border-gray-700">
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="text-xs font-medium text-white">Registro Rápido</h4>
         <Button
           type="button"
           variant="ghost"
           size="sm"
           onClick={switchToAdvanced}
+          className="text-xs px-2 py-1"
         >
           Modo Avanzado
         </Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-3 gap-2">
         <Input
           label="Peso (kg)"
           type="number"
           step="0.5"
           min="0"
+          sizeVariant="sm"
           {...register('weight', {
             required: 'El peso es requerido',
             min: { value: 0, message: 'El peso debe ser positivo' },
@@ -206,6 +210,7 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
           label="Reps"
           type="number"
           min="1"
+          sizeVariant="sm"
           {...register('reps', {
             required: 'Las repeticiones son requeridas',
             min: { value: 1, message: 'Mínimo 1 repetición' },
@@ -217,6 +222,7 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
           label="Series"
           type="number"
           min="1"
+          sizeVariant="sm"
           {...register('sets', {
             required: 'Las series son requeridas',
             min: { value: 1, message: 'Mínimo 1 serie' },
@@ -229,6 +235,7 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
         <Button
           type="submit"
           loading={loading}
+          size="sm"
           className="flex-1"
         >
           Registrar
@@ -236,6 +243,7 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
         <Button
           type="button"
           variant="secondary"
+          size="sm"
           onClick={onCancel}
         >
           Cancelar

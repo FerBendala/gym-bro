@@ -25,10 +25,10 @@ export const OfflineWarning: React.FC<OfflineWarningProps> = ({
   const alertStyles = `${THEME_CONTAINERS.alert.base} ${THEME_CONTAINERS.alert.variants[variant]}`;
 
   return (
-    <div className={`${alertStyles} ${className}`}>
+    <div className={`${alertStyles} ${className} py-2 px-3`}>
       <div className="flex items-center space-x-2">
-        <Icon className={`w-4 h-4 text-yellow-400 ${iconClassName}`} />
-        <p className="text-yellow-400 text-sm">{message}</p>
+        <Icon className={`w-3.5 h-3.5 text-yellow-400 ${iconClassName}`} />
+        <p className="text-yellow-400 text-xs">{message}</p>
       </div>
     </div>
   );

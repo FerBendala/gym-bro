@@ -466,16 +466,16 @@ export const THEME_TABS = {
  */
 export const THEME_URL_PREVIEW = {
   compact: {
-    container: 'flex items-center space-x-3 p-3 rounded-lg border transition-colors hover:bg-gray-750',
+    container: 'flex items-center space-x-2 p-2 rounded-lg border transition-colors hover:bg-gray-750',
     clickable: 'cursor-pointer',
     icon: 'flex-shrink-0',
-    iconSize: 'w-4 h-4',
+    iconSize: 'w-3.5 h-3.5',
     content: 'flex-1 min-w-0',
-    title: 'text-sm font-medium text-white truncate',
-    url: 'text-xs text-gray-400 truncate',
+    title: 'text-xs font-medium text-white truncate',
+    url: 'text-xs text-gray-400 truncate hidden sm:block',
     thumbnail: 'flex-shrink-0',
-    thumbnailImg: 'w-12 h-12 object-cover rounded border border-gray-600',
-    externalIcon: 'flex-shrink-0 w-4 h-4 text-gray-400'
+    thumbnailImg: 'w-10 h-10 object-cover rounded border border-gray-600',
+    externalIcon: 'flex-shrink-0 w-3.5 h-3.5 text-gray-400'
   },
   loading: {
     container: 'flex items-center space-x-2 p-2 bg-gray-800 rounded-lg border border-gray-700',

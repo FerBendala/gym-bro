@@ -140,7 +140,7 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
           items={sortedAssignments.map(assignment => assignment.id)}
           strategy={verticalListSortingStrategy}
         >
-          <div className="space-y-4 relative z-10">
+          <div className="space-y-2 relative z-10">
             {sortedAssignments.map((assignment) => (
               <SortableExerciseCard
                 key={assignment.id}

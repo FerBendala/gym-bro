@@ -30,8 +30,8 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ assignment, onRecord
 
   return (
     <>
-      <Card className={`mb-4 ${isTrainedToday ? 'border-green-500 border-2 shadow-lg shadow-green-500/20' : ''}`}>
-        <CardContent className="p-4">
+      <Card className={`mb-3 ${isTrainedToday ? 'border-green-500 border-2 shadow-lg shadow-green-500/20' : ''}`}>
+        <CardContent className="p-3 sm:p-4">
           <ExerciseCardHeader
             assignment={assignment}
             disabled={disabled}
@@ -41,12 +41,12 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ assignment, onRecord
           />
 
           {assignment.exercise?.description && (
-            <p className="text-sm text-gray-400 mb-3">{assignment.exercise.description}</p>
+            <p className="text-xs sm:text-sm text-gray-400 mb-2">{assignment.exercise.description}</p>
           )}
 
           {/* Vista previa de URL */}
           {assignment.exercise?.url && (
-            <div className="mb-3">
+            <div className="mb-2">
               <URLPreview
                 url={assignment.exercise.url}
                 onClick={() => setShowPreview(true)}
