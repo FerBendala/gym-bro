@@ -1,9 +1,8 @@
 import { Plus, Save, XCircle } from 'lucide-react';
 import React from 'react';
-import { useForm } from 'react-hook-form';
 import { EXERCISE_CATEGORIES } from '../../../constants';
+import { useExerciseForm } from '../../../hooks';
 import type { Exercise } from '../../../interfaces';
-import { validateURL } from '../../../utils/functions/url-validation';
 import { Button } from '../../button';
 import { Card, CardContent, CardHeader } from '../../card';
 import { Input } from '../../input';
@@ -31,32 +30,11 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
   const {
     register,
     handleSubmit,
-    reset,
-    watch,
-    formState: { errors }
-  } = useForm<ExerciseFormData>({
-    mode: 'onChange',
-    defaultValues: {
-      name: exercise?.name || '',
-      category: exercise?.category || EXERCISE_CATEGORIES[0],
-      description: exercise?.description || '',
-      url: exercise?.url || ''
-    }
-  });
-
-  const watchedUrl = watch('url');
-  const isEditing = !!exercise;
-
-  const handleFormSubmit = async (data: ExerciseFormData) => {
-    if (data.url && !validateURL(data.url)) {
-      return;
-    }
-
-    const success = await onSubmit(data);
-    if (success && !isEditing) {
-      reset();
-    }
-  };
+    errors,
+    watchedUrl,
+    isEditing,
+    validateURL
+  } = useExerciseForm({ exercise, onSubmit });
 
   return (
     <Card>
@@ -66,7 +44,7 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
         </h3>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Input
               label="Nombre del ejercicio"

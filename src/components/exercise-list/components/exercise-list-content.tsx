@@ -1,22 +1,13 @@
+import { DndContext } from '@dnd-kit/core';
 import {
-  closestCenter,
-  DndContext,
-  KeyboardSensor,
-  PointerSensor,
-  useSensor,
-  useSensors,
-  type DragEndEvent,
-} from '@dnd-kit/core';
-import {
-  arrayMove,
   SortableContext,
-  sortableKeyboardCoordinates,
   useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
-import React, { useState } from 'react';
+import React from 'react';
+import { useDragAndDrop } from '../../../hooks';
 import { ExerciseCard } from '../../exercise-card';
 import type { ExerciseListContentProps } from '../types';
 
@@ -56,12 +47,13 @@ const SortableExerciseCard: React.FC<SortableExerciseCardProps> = ({
       style={style}
       className={`relative group ${isDragging ? 'opacity-50 scale-105' : ''} transition-all duration-200`}
     >
-      {/* Handle de drag mejorado */}
+      {/* Handle de drag mejorado para móvil */}
       <div
         {...attributes}
         {...listeners}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-3 cursor-grab active:cursor-grabbing bg-gradient-to-r from-blue-600/80 to-blue-700/80 rounded-r-lg shadow-lg opacity-0 group-hover:opacity-100 hover:from-blue-600 hover:to-blue-700 transition-all duration-200 backdrop-blur-sm border border-blue-500/30"
+        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-3 cursor-grab active:cursor-grabbing bg-gradient-to-r from-blue-600/80 to-blue-700/80 rounded-r-lg shadow-lg opacity-0 group-hover:opacity-100 hover:from-blue-600 hover:to-blue-700 transition-all duration-200 backdrop-blur-sm border border-blue-500/30 touch-manipulation"
         title="Arrastra para reordenar"
+        style={{ touchAction: 'none' }}
       >
         <GripVertical className="w-4 h-4 text-white drop-shadow-sm" />
       </div>
@@ -93,15 +85,6 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
   onReorder,
   exercisesTrainedToday
 }) => {
-  const [isDragging, setIsDragging] = useState(false);
-
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates,
-    })
-  );
-
   // Ordenar assignments por el campo order (si existe)
   const sortedAssignments = [...assignments].sort((a, b) => {
     const orderA = a.order ?? 0;
@@ -109,22 +92,19 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
     return orderA - orderB;
   });
 
-  const handleDragStart = () => {
-    setIsDragging(true);
-  };
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    setIsDragging(false);
-    const { active, over } = event;
-
-    if (active.id !== over?.id) {
-      const oldIndex = sortedAssignments.findIndex((item) => item.id === active.id);
-      const newIndex = sortedAssignments.findIndex((item) => item.id === over?.id);
-
-      const newAssignments = arrayMove(sortedAssignments, oldIndex, newIndex);
-
+  // Usar el hook personalizado para drag and drop
+  const {
+    sensors,
+    isDragging,
+    handleDragStart,
+    handleDragEnd,
+    collisionDetection
+  } = useDragAndDrop({
+    items: sortedAssignments,
+    getItemId: (item) => item.id,
+    onReorder: (reorderedItems) => {
       // Actualizar los números de order
-      const updatedAssignments = newAssignments.map((assignment, index) => ({
+      const updatedAssignments = reorderedItems.map((assignment, index) => ({
         ...assignment,
         order: index
       }));
@@ -132,10 +112,13 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
       // Llamar al callback de reordenamiento
       onReorder?.(updatedAssignments);
     }
-  };
+  });
 
   return (
-    <div className={`relative ${isDragging ? 'bg-blue-500/5 rounded-xl' : ''} transition-all duration-200`}>
+    <div
+      className={`relative ${isDragging ? 'bg-blue-500/5 rounded-xl' : ''} transition-all duration-200`}
+      style={{ touchAction: isDragging ? 'none' : 'auto' }}
+    >
       {/* Indicador visual de zona de drop */}
       {isDragging && (
         <div className="absolute inset-0 border-2 border-dashed border-blue-500/50 rounded-xl bg-blue-500/5 pointer-events-none">
@@ -149,7 +132,7 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
 
       <DndContext
         sensors={sensors}
-        collisionDetection={closestCenter}
+        collisionDetection={collisionDetection}
         onDragStart={handleDragStart}
         onDragEnd={handleDragEnd}
       >
