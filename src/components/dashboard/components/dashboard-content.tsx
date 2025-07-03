@@ -6,13 +6,19 @@ import { ExerciseStats } from '../../exercise-stats';
 import { RecentWorkouts } from '../../recent-workouts';
 import { WorkoutCalendar } from '../../workout-calendar';
 import type { DashboardContentProps } from '../types';
+import { AdvancedTab } from './advanced-tab';
+import { CategoryTab } from './category-tab';
+import { PerformanceTab } from './performance-tab';
+import { TrendsTab } from './trends-tab';
 
 export const DashboardContent: React.FC<DashboardContentProps> = ({
   filteredRecords,
   allRecords,
+  activeTab,
   onDeleteRecord
 }) => {
-  return (
+  // Vista principal - Resumen general
+  const renderOverviewTab = () => (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
       {/* Estadísticas generales */}
       <div className="lg:col-span-2">
@@ -64,4 +70,20 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
       </div>
     </div>
   );
+
+  // Renderizar contenido según el tab activo
+  switch (activeTab) {
+    case 'overview':
+      return renderOverviewTab();
+    case 'performance':
+      return <PerformanceTab records={filteredRecords} />;
+    case 'categories':
+      return <CategoryTab records={filteredRecords} />;
+    case 'trends':
+      return <TrendsTab records={filteredRecords} />;
+    case 'advanced':
+      return <AdvancedTab records={filteredRecords} />;
+    default:
+      return renderOverviewTab();
+  }
 }; 

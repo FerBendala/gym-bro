@@ -63,7 +63,7 @@ export const THEME_CONTAINERS = {
     overlay: 'fixed inset-0 bg-black/50 flex items-end lg:items-center justify-center p-0 lg:p-4 z-50',
     container: 'w-full h-full lg:h-auto lg:max-h-[90vh] bg-gray-900 rounded-t-lg lg:rounded-lg lg:max-w-4xl xl:max-w-6xl overflow-hidden',
     header: 'flex items-center justify-between p-4 sm:p-6 border-b border-gray-700',
-    content: 'overflow-y-auto h-[calc(100vh-80px)] lg:max-h-[calc(90vh-80px)] p-4 sm:p-6'
+    content: 'overflow-y-auto h-[calc(100vh-80px)] lg:max-h-[calc(90vh-80px)] p-4 sm:p-6 scroll-smooth'
   },
   alert: {
     base: 'rounded-lg p-3 mb-3',

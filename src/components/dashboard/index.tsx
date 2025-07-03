@@ -16,10 +16,12 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const {
     selectedExercise,
     timeFilter,
+    activeTab,
     filteredRecords,
     timeFilterLabel,
     setSelectedExercise,
-    setTimeFilter
+    setTimeFilter,
+    setActiveTab
   } = useDashboardFilters(workoutRecords);
 
   if (loading) {
@@ -40,6 +42,8 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
       <div className={THEME_CONTAINERS.modal.container}>
         <DashboardHeader
           timeFilterLabel={timeFilterLabel}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
           onClose={onClose}
         />
 
@@ -48,7 +52,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
         )}
 
         <div className={THEME_CONTAINERS.modal.content}>
-          <div className="p-6 space-y-6">
+          <div className="p-6 space-y-6 pb-16 sm:pb-20">
             <DashboardFilters
               selectedExercise={selectedExercise}
               timeFilter={timeFilter}
@@ -64,6 +68,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
               <DashboardContent
                 filteredRecords={filteredRecords}
                 allRecords={workoutRecords}
+                activeTab={activeTab}
                 onDeleteRecord={handleDeleteRecord}
               />
             )}

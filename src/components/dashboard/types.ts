@@ -6,8 +6,20 @@ export interface DashboardProps {
 
 export type TimeFilter = 'week' | 'month' | 'all';
 
+// Nuevos tipos para el sistema de tabs
+export type DashboardTab = 'overview' | 'performance' | 'categories' | 'trends' | 'advanced';
+
+export interface DashboardTabConfig {
+  id: DashboardTab;
+  label: string;
+  icon: React.ComponentType<any>;
+  description: string;
+}
+
 export interface DashboardHeaderProps {
   timeFilterLabel: string;
+  activeTab: DashboardTab;
+  onTabChange: (tab: DashboardTab) => void;
   onClose: () => void;
 }
 
@@ -27,5 +39,6 @@ export interface DashboardEmptyStateProps {
 export interface DashboardContentProps {
   filteredRecords: WorkoutRecord[];
   allRecords: WorkoutRecord[];
+  activeTab: DashboardTab;
   onDeleteRecord?: (recordId: string) => Promise<void>;
 } 
