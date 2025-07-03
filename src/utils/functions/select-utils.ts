@@ -156,6 +156,7 @@ export const enumToSelectOptions = <T extends Record<string, string>>(
 
 /**
  * Agrupa ejercicios por categoría para su uso en Select con optgroups
+ * Ahora maneja ejercicios con múltiples categorías
  */
 export const groupExercisesByCategory = (exercises: Exercise[]): SelectGroup[] => {
   // Crear un mapa de categorías con sus ejercicios
@@ -166,17 +167,27 @@ export const groupExercisesByCategory = (exercises: Exercise[]): SelectGroup[] =
     exercisesByCategory.set(category, []);
   });
 
+  // Agregar categoría especial para ejercicios sin categorías
+  exercisesByCategory.set('Sin categoría', []);
+
   // Agrupar ejercicios por categoría
   exercises.forEach(exercise => {
-    const category = exercise.category;
-    if (exercisesByCategory.has(category)) {
-      exercisesByCategory.get(category)!.push(exercise);
+    if (exercise.categories && exercise.categories.length > 0) {
+      // Un ejercicio puede aparecer en múltiples categorías
+      exercise.categories.forEach(category => {
+        if (exercisesByCategory.has(category)) {
+          exercisesByCategory.get(category)!.push(exercise);
+        } else {
+          // Si la categoría no existe en EXERCISE_CATEGORIES, crear un grupo "Otros"
+          if (!exercisesByCategory.has('Otros')) {
+            exercisesByCategory.set('Otros', []);
+          }
+          exercisesByCategory.get('Otros')!.push(exercise);
+        }
+      });
     } else {
-      // Si la categoría no existe en EXERCISE_CATEGORIES, crear un grupo "Otros"
-      if (!exercisesByCategory.has('Otros')) {
-        exercisesByCategory.set('Otros', []);
-      }
-      exercisesByCategory.get('Otros')!.push(exercise);
+      // Ejercicios sin categorías
+      exercisesByCategory.get('Sin categoría')!.push(exercise);
     }
   });
 
@@ -211,7 +222,7 @@ export const groupExercisesByCategory = (exercises: Exercise[]): SelectGroup[] =
     if (aIndex !== -1) return -1;
     if (bIndex !== -1) return 1;
 
-    // Si ninguno está (ej: "Otros"), ordenar alfabéticamente
+    // Si ninguno está (ej: "Otros", "Sin categoría"), ordenar alfabéticamente
     return a.label.localeCompare(b.label);
   });
 };

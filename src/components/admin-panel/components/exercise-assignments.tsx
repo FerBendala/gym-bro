@@ -136,10 +136,17 @@ export const ExerciseAssignments: React.FC<ExerciseAssignmentsProps> = ({
                         <p className="text-white font-medium">
                           {assignment.exercise?.name || 'Ejercicio no encontrado'}
                         </p>
-                        {assignment.exercise?.category && (
-                          <p className="text-sm text-blue-400 bg-blue-500/10 px-2 py-0.5 rounded-full inline-block mt-1">
-                            {assignment.exercise.category}
-                          </p>
+                        {assignment.exercise?.categories && assignment.exercise.categories.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {assignment.exercise.categories.map((category) => (
+                              <span
+                                key={category}
+                                className="text-xs text-blue-300 bg-blue-500/15 px-1.5 py-0.5 rounded-full font-medium border border-blue-500/20"
+                              >
+                                {category}
+                              </span>
+                            ))}
+                          </div>
                         )}
                       </div>
                       <Button

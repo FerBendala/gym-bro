@@ -9,7 +9,7 @@ export interface AdminPanelProps {
 
 export interface ExerciseFormData {
   name: string;
-  category: string;
+  categories: string[];
   description: string;
   url: string;
 }

@@ -72,7 +72,7 @@ export const useAdminData = (selectedDay: DayOfWeek, isOnline: boolean) => {
     try {
       const exerciseData = {
         name: data.name,
-        category: data.category,
+        categories: data.categories,
         description: data.description || undefined,
         url: data.url || undefined
       };
@@ -103,7 +103,7 @@ export const useAdminData = (selectedDay: DayOfWeek, isOnline: boolean) => {
     try {
       const exerciseData = {
         name: data.name,
-        category: data.category,
+        categories: data.categories,
         description: data.description || undefined,
         url: data.url || undefined
       };

@@ -4,7 +4,7 @@ import { Button } from '../../button';
 import type { ExerciseCardHeaderProps } from '../types';
 
 /**
- * Header del ExerciseCard con título, categoría y botones de acción
+ * Header del ExerciseCard con título, categorías y botones de acción
  */
 export const ExerciseCardHeader: React.FC<ExerciseCardHeaderProps> = ({
   assignment,
@@ -19,12 +19,21 @@ export const ExerciseCardHeader: React.FC<ExerciseCardHeaderProps> = ({
         <div className="p-1.5 bg-blue-600 rounded-lg flex-shrink-0">
           <Dumbbell className="w-4 h-4 text-white" />
         </div>
-        <div>
+        <div className="min-w-0 flex-1">
           <h3 className="text-sm sm:text-base font-semibold text-white leading-tight">
             {assignment.exercise?.name || 'Ejercicio'}
           </h3>
-          {assignment.exercise?.category && (
-            <p className="text-xs text-gray-400">{assignment.exercise.category}</p>
+          {assignment.exercise?.categories && assignment.exercise.categories.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {assignment.exercise.categories.map((category) => (
+                <span
+                  key={category}
+                  className="text-xs text-blue-300 bg-blue-500/15 px-1.5 py-0.5 rounded-full font-medium border border-blue-500/20"
+                >
+                  {category}
+                </span>
+              ))}
+            </div>
           )}
         </div>
       </div>

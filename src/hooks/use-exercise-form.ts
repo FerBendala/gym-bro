@@ -1,7 +1,6 @@
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import type { ExerciseFormData } from '../components/admin-panel/types';
-import { EXERCISE_CATEGORIES } from '../constants';
 import type { Exercise } from '../interfaces';
 import { validateURL } from '../utils/functions/url-validation';
 
@@ -16,18 +15,20 @@ export const useExerciseForm = ({ exercise, onSubmit }: UseExerciseFormProps) =>
     handleSubmit,
     reset,
     watch,
+    setValue,
     formState: { errors }
   } = useForm<ExerciseFormData>({
     mode: 'onChange',
     defaultValues: {
       name: '',
-      category: EXERCISE_CATEGORIES[0],
+      categories: [],
       description: '',
       url: ''
     }
   });
 
   const watchedUrl = watch('url');
+  const watchedCategories = watch('categories');
   const isEditing = !!exercise;
 
   // Reset del formulario cuando cambia el ejercicio a editar
@@ -35,7 +36,7 @@ export const useExerciseForm = ({ exercise, onSubmit }: UseExerciseFormProps) =>
     if (exercise) {
       reset({
         name: exercise.name || '',
-        category: exercise.category || EXERCISE_CATEGORIES[0],
+        categories: exercise.categories || [],
         description: exercise.description || '',
         url: exercise.url || ''
       });
@@ -43,7 +44,7 @@ export const useExerciseForm = ({ exercise, onSubmit }: UseExerciseFormProps) =>
       // Reset a valores vacíos cuando no hay ejercicio (modo crear)
       reset({
         name: '',
-        category: EXERCISE_CATEGORIES[0],
+        categories: [],
         description: '',
         url: ''
       });
@@ -66,7 +67,9 @@ export const useExerciseForm = ({ exercise, onSubmit }: UseExerciseFormProps) =>
     handleSubmit: handleSubmit(handleFormSubmit),
     errors,
     watchedUrl,
+    watchedCategories,
     isEditing,
-    validateURL
+    validateURL,
+    setValue
   };
 }; 

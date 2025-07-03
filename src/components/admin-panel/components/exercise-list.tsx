@@ -25,9 +25,9 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
       { id: 'all', name: 'Todos', count: exercises.length }
     ];
 
-    // Agregar categorías existentes con contador
+    // Contar ejercicios por categoría (un ejercicio puede estar en múltiples categorías)
     EXERCISE_CATEGORIES.forEach(category => {
-      const count = exercises.filter(ex => ex.category === category).length;
+      const count = exercises.filter(ex => ex.categories?.includes(category)).length;
       if (count > 0) {
         categories.push({ id: category, name: category, count });
       }
@@ -42,7 +42,7 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
       return exercises.sort((a, b) => a.name.localeCompare(b.name));
     }
     return exercises
-      .filter(ex => ex.category === selectedCategory)
+      .filter(ex => ex.categories?.includes(selectedCategory))
       .sort((a, b) => a.name.localeCompare(b.name));
   }, [exercises, selectedCategory]);
 
@@ -77,8 +77,8 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
                 >
                   <span>{category.name}</span>
                   <span className={`text-xs px-1.5 py-0.5 rounded-full ${selectedCategory === category.id
-                      ? 'bg-white/20 text-white'
-                      : 'bg-gray-600/50 text-gray-300'
+                    ? 'bg-white/20 text-white'
+                    : 'bg-gray-600/50 text-gray-300'
                     }`}>
                     {category.count}
                   </span>
@@ -101,11 +101,18 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
                       <div className="flex items-center justify-between">
                         <div className="min-w-0 flex-1">
                           <h4 className="text-white font-medium truncate">{exercise.name}</h4>
-                          <div className="flex items-center space-x-2 mt-1">
-                            <span className="text-xs text-blue-300 bg-blue-500/15 px-2 py-1 rounded-full font-medium border border-blue-500/20">
-                              {exercise.category}
-                            </span>
-                          </div>
+                          {exercise.categories && exercise.categories.length > 0 && (
+                            <div className="flex flex-wrap gap-1 mt-1">
+                              {exercise.categories.map((category) => (
+                                <span
+                                  key={category}
+                                  className="text-xs text-blue-300 bg-blue-500/15 px-2 py-1 rounded-full font-medium border border-blue-500/20"
+                                >
+                                  {category}
+                                </span>
+                              ))}
+                            </div>
+                          )}
                           {exercise.description && (
                             <p className="text-sm text-gray-500 mt-2 line-clamp-2">{exercise.description}</p>
                           )}

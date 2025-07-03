@@ -6,7 +6,7 @@ import type { Exercise } from '../../../interfaces';
 import { Button } from '../../button';
 import { Card, CardContent, CardHeader } from '../../card';
 import { Input } from '../../input';
-import { Select } from '../../select';
+import { MultiSelect } from '../../multi-select';
 import { URLPreview } from '../../url-preview';
 import type { ExerciseFormData } from '../types';
 
@@ -32,8 +32,10 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
     handleSubmit,
     errors,
     watchedUrl,
+    watchedCategories,
     isEditing,
-    validateURL
+    validateURL,
+    setValue
   } = useExerciseForm({ exercise, onSubmit });
 
   return (
@@ -55,13 +57,29 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
               })}
               error={errors.name?.message}
             />
-            <Select
-              label="Categoría"
-              disabled={!isOnline}
-              options={EXERCISE_CATEGORIES.map(cat => ({ value: cat, label: cat }))}
-              {...register('category', { required: 'La categoría es requerida' })}
-              error={errors.category?.message}
-            />
+            <div>
+              <input
+                type="hidden"
+                {...register('categories', {
+                  validate: (value) => {
+                    if (!value || value.length === 0) {
+                      return 'Selecciona al menos una categoría';
+                    }
+                    return true;
+                  }
+                })}
+                value={JSON.stringify(watchedCategories)}
+              />
+              <MultiSelect
+                label="Categorías"
+                disabled={!isOnline}
+                options={EXERCISE_CATEGORIES.map(cat => ({ value: cat, label: cat }))}
+                value={watchedCategories}
+                onChange={(values) => setValue('categories', values)}
+                error={errors.categories?.message}
+                placeholder="Selecciona categorías..."
+              />
+            </div>
           </div>
 
           <Input

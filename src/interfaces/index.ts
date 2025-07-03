@@ -1,7 +1,7 @@
 export interface Exercise {
   id: string;
   name: string;
-  category: string;
+  categories: string[];
   description?: string;
   url?: string;
 }

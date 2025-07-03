@@ -243,3 +243,38 @@ export const deleteWorkoutRecord = async (recordId: string) => {
     handleFirebaseError(error, 'eliminar registro de entrenamiento');
   }
 };
+
+// Función de migración para actualizar ejercicios con category a categories
+export const migrateExercisesToMultipleCategories = async () => {
+  try {
+    console.log('🔄 Iniciando migración de categorías...');
+
+    const exercises = await getExercises();
+    const batch = writeBatch(db);
+    let migratedCount = 0;
+
+    exercises.forEach((exercise) => {
+      // Solo migrar si tiene category (string) pero no categories (array)
+      if ('category' in exercise && !exercise.categories) {
+        const exerciseRef = doc(db, 'exercises', exercise.id);
+        batch.update(exerciseRef, {
+          categories: [(exercise as any).category], // Convertir a array
+          category: null // Eliminar el campo antiguo
+        });
+        migratedCount++;
+      }
+    });
+
+    if (migratedCount > 0) {
+      await batch.commit();
+      console.log(`✅ Migración completada: ${migratedCount} ejercicio(s) actualizado(s)`);
+    } else {
+      console.log('ℹ️ No hay ejercicios para migrar');
+    }
+
+    return migratedCount;
+  } catch (error) {
+    handleFirebaseError(error, 'migrar ejercicios a categorías múltiples');
+    return 0;
+  }
+};

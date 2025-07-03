@@ -39,37 +39,64 @@ export interface CategoryAnalysis {
 
 /**
  * Calcula métricas por categoría de ejercicio
+ * Ahora maneja ejercicios con múltiples categorías
  */
 export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetrics[] => {
   if (records.length === 0) return [];
 
-  // Agrupar records por categoría
-  const recordsByCategory = records.reduce((acc, record) => {
-    const category = record.exercise?.category || 'Sin categoría';
-    if (!acc[category]) {
-      acc[category] = [];
-    }
-    acc[category].push(record);
-    return acc;
-  }, {} as Record<string, WorkoutRecord[]>);
+  // Agrupar records por categoría (un record puede contar para múltiples categorías)
+  const recordsByCategory: Record<string, WorkoutRecord[]> = {};
+  const workoutsByCategory: Record<string, number> = {};
+  const volumeByCategory: Record<string, number> = {};
 
-  const totalWorkouts = records.length;
+  records.forEach(record => {
+    const categories = record.exercise?.categories || [];
+
+    if (categories.length === 0) {
+      // Sin categorías
+      const category = 'Sin categoría';
+      if (!recordsByCategory[category]) {
+        recordsByCategory[category] = [];
+        workoutsByCategory[category] = 0;
+        volumeByCategory[category] = 0;
+      }
+      recordsByCategory[category].push(record);
+      workoutsByCategory[category]++;
+      volumeByCategory[category] += record.weight * record.reps * record.sets;
+    } else {
+      // Distribuir entre múltiples categorías
+      const volumePerCategory = (record.weight * record.reps * record.sets) / categories.length;
+      const workoutContribution = 1 / categories.length;
+
+      categories.forEach(category => {
+        if (!recordsByCategory[category]) {
+          recordsByCategory[category] = [];
+          workoutsByCategory[category] = 0;
+          volumeByCategory[category] = 0;
+        }
+        recordsByCategory[category].push(record);
+        workoutsByCategory[category] += workoutContribution;
+        volumeByCategory[category] += volumePerCategory;
+      });
+    }
+  });
+
+  const totalWorkouts = Object.values(workoutsByCategory).reduce((sum, count) => sum + count, 0);
   const metrics: CategoryMetrics[] = [];
 
   // Calcular métricas para cada categoría
   Object.entries(recordsByCategory).forEach(([category, categoryRecords]) => {
-    const workouts = categoryRecords.length;
+    const workouts = workoutsByCategory[category];
+    const totalVolume = volumeByCategory[category];
 
-    const totalVolume = categoryRecords.reduce((sum, record) =>
-      sum + (record.weight * record.reps * record.sets), 0
-    );
-
+    // Calcular pesos promedio y máximo considerando todos los ejercicios de la categoría
     const weights = categoryRecords.map(record => record.weight);
     const avgWeight = weights.reduce((sum, weight) => sum + weight, 0) / weights.length;
     const maxWeight = Math.max(...weights);
 
     // Calcular entrenamientos por semana aproximado
     const dates = categoryRecords.map(record => new Date(record.date));
+    const uniqueDates = [...new Set(dates.map(d => d.toDateString()))];
     const earliestDate = new Date(Math.min(...dates.map(d => d.getTime())));
     const latestDate = new Date(Math.max(...dates.map(d => d.getTime())));
     const daysDifference = Math.max(1, Math.ceil((latestDate.getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24)));
@@ -80,8 +107,8 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
 
     metrics.push({
       category,
-      workouts,
-      totalVolume,
+      workouts: Math.round(workouts * 100) / 100,
+      totalVolume: Math.round(totalVolume),
       avgWeight: Math.round(avgWeight * 100) / 100,
       maxWeight,
       avgWorkoutsPerWeek: Math.round(avgWorkoutsPerWeek * 100) / 100,
