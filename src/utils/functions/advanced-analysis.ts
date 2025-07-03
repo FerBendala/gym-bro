@@ -263,7 +263,7 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
 
   const comparisons: PeriodComparison[] = [];
 
-  periods.forEach((period, index) => {
+  periods.forEach((period) => {
     const endDate = new Date();
     const startDate = subDays(endDate, period.days);
     const periodRecords = records.filter(r => {
