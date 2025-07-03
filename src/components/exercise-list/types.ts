@@ -1,0 +1,57 @@
+import type { DayOfWeek, ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced } from '../../interfaces';
+
+/**
+ * Props principales del ExerciseList
+ */
+export interface ExerciseListProps {
+  dayOfWeek: DayOfWeek;
+  onOpenAdmin: () => void;
+}
+
+/**
+ * Props para el header del ExerciseList
+ */
+export interface ExerciseListHeaderProps {
+  dayOfWeek: DayOfWeek;
+  isOnline: boolean;
+  onOpenAdmin: () => void;
+  hasExercises?: boolean;
+}
+
+/**
+ * Props para el estado vacío del ExerciseList
+ */
+export interface ExerciseListEmptyStateProps {
+  dayOfWeek: DayOfWeek;
+  isOnline: boolean;
+  onOpenAdmin: () => void;
+}
+
+/**
+ * Props para la lista de contenido del ExerciseList
+ */
+export interface ExerciseListContentProps {
+  assignments: ExerciseAssignment[];
+  isOnline: boolean;
+  onRecord: (assignmentId: string, data: WorkoutFormData | WorkoutFormDataAdvanced) => Promise<void>;
+  onReorder?: (assignments: ExerciseAssignment[]) => Promise<void>;
+  exercisesTrainedToday: string[];
+}
+
+/**
+ * Estado del hook use-exercise-list
+ */
+export interface ExerciseListState {
+  assignments: ExerciseAssignment[];
+  loading: boolean;
+}
+
+/**
+ * Return type del hook use-exercise-list
+ */
+export interface UseExerciseListReturn extends ExerciseListState {
+  handleRecordWorkout: (assignmentId: string, data: WorkoutFormData | WorkoutFormDataAdvanced) => Promise<void>;
+  loadAssignments: () => Promise<void>;
+  handleReorderAssignments: (assignments: ExerciseAssignment[]) => Promise<void>;
+  exercisesTrainedToday: string[];
+} 
