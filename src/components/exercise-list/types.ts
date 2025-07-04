@@ -1,4 +1,4 @@
-import type { DayOfWeek, ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced } from '../../interfaces';
+import type { DayOfWeek, ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '../../interfaces';
 
 /**
  * Props principales del ExerciseList
@@ -36,6 +36,7 @@ export interface ExerciseListContentProps {
   onRecord: (assignmentId: string, data: WorkoutFormData | WorkoutFormDataAdvanced) => Promise<void>;
   onReorder?: (assignments: ExerciseAssignment[]) => Promise<void>;
   exercisesTrainedToday: string[];
+  workoutRecords: WorkoutRecord[];
 }
 
 /**
@@ -54,4 +55,5 @@ export interface UseExerciseListReturn extends ExerciseListState {
   loadAssignments: () => Promise<void>;
   handleReorderAssignments: (assignments: ExerciseAssignment[]) => Promise<void>;
   exercisesTrainedToday: string[];
+  workoutRecords: WorkoutRecord[];
 } 

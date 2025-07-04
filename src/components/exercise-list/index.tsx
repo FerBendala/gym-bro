@@ -22,7 +22,7 @@ export interface ExerciseListProps {
  */
 export const ExerciseList: React.FC<ExerciseListProps> = ({ dayOfWeek, onOpenAdmin }) => {
   const isOnline = useOnlineStatus();
-  const { assignments, loading, handleRecordWorkout, handleReorderAssignments, exercisesTrainedToday } = useExerciseList(dayOfWeek);
+  const { assignments, loading, handleRecordWorkout, handleReorderAssignments, exercisesTrainedToday, workoutRecords } = useExerciseList(dayOfWeek);
 
   if (loading) {
     return <ExerciseListLoadingState />;
@@ -61,6 +61,7 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ dayOfWeek, onOpenAdm
             onRecord={handleRecordWorkout}
             onReorder={handleReorderAssignments}
             exercisesTrainedToday={exercisesTrainedToday}
+            workoutRecords={workoutRecords}
           />
         </div>
       )}

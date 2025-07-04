@@ -19,13 +19,15 @@ interface SortableExerciseCardProps {
   onRecord: any;
   disabled?: boolean;
   isTrainedToday?: boolean;
+  workoutRecords: any[];
 }
 
 const SortableExerciseCard: React.FC<SortableExerciseCardProps> = ({
   assignment,
   onRecord,
   disabled,
-  isTrainedToday = false
+  isTrainedToday = false,
+  workoutRecords
 }) => {
   const {
     attributes,
@@ -68,6 +70,7 @@ const SortableExerciseCard: React.FC<SortableExerciseCardProps> = ({
           onRecord={onRecord}
           disabled={disabled}
           isTrainedToday={isTrainedToday}
+          workoutRecords={workoutRecords}
         />
       </div>
     </div>
@@ -83,7 +86,8 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
   isOnline,
   onRecord,
   onReorder,
-  exercisesTrainedToday
+  exercisesTrainedToday,
+  workoutRecords
 }) => {
   // Ordenar assignments por el campo order (si existe)
   const sortedAssignments = [...assignments].sort((a, b) => {
@@ -148,6 +152,7 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
                 onRecord={onRecord}
                 disabled={!isOnline}
                 isTrainedToday={exercisesTrainedToday.includes(assignment.exerciseId)}
+                workoutRecords={workoutRecords}
               />
             ))}
           </div>

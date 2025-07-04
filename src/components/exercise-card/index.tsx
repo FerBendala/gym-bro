@@ -1,9 +1,11 @@
 import { WifiOff } from 'lucide-react';
 import React from 'react';
+import type { WorkoutRecord } from '../../interfaces';
 import { Card, CardContent } from '../card';
 import { OfflineWarning } from '../offline-warning';
 import { URLPreview } from '../url-preview';
 import { ExerciseCardForm, ExerciseCardHeader } from './components';
+import { LastWorkoutSummary } from './components/last-workout-summary';
 import { useExerciseCard } from './hooks';
 import type { ExerciseCardProps } from './types';
 
@@ -11,7 +13,11 @@ import type { ExerciseCardProps } from './types';
  * Componente principal del ExerciseCard
  * Orquesta los subcomponentes y maneja la lógica principal
  */
-export const ExerciseCard: React.FC<ExerciseCardProps> = ({ assignment, onRecord, disabled = false, isTrainedToday = false }) => {
+interface ExerciseCardWithRecordsProps extends ExerciseCardProps {
+  workoutRecords: WorkoutRecord[];
+}
+
+export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignment, onRecord, disabled = false, isTrainedToday = false, workoutRecords }) => {
   const {
     showForm,
     loading,
@@ -21,8 +27,10 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ assignment, onRecord
     handleSubmit,
     resetForm,
     formMethods,
-    advancedFormMethods
-  } = useExerciseCard();
+    advancedFormMethods,
+    lastRecord,
+    loadingLast
+  } = useExerciseCard(assignment.exerciseId, assignment.exercise, workoutRecords);
 
   const onSubmitForm = async (data: any) => {
     await handleSubmit(assignment.id, data, onRecord);
@@ -62,6 +70,9 @@ export const ExerciseCard: React.FC<ExerciseCardProps> = ({ assignment, onRecord
               variant="warning"
             />
           )}
+
+          {/* Resumen del último entrenamiento */}
+          <LastWorkoutSummary record={lastRecord} />
 
           {/* Formulario modular */}
           {showForm && !disabled && (

@@ -19,6 +19,7 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
   const [assignments, setAssignments] = useState<ExerciseAssignment[]>([]);
   const [loading, setLoading] = useState(true);
   const [exercisesTrainedToday, setExercisesTrainedToday] = useState<string[]>([]);
+  const [workoutRecords, setWorkoutRecords] = useState<WorkoutRecord[]>([]);
 
   const loadAssignments = async () => {
     if (!isOnline) {
@@ -41,6 +42,7 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
       }));
 
       setAssignments(assignmentsWithExercises);
+      setWorkoutRecords(workoutRecords);
 
       // Determinar qué ejercicios se entrenaron hoy Y están en el tab correcto
       const trainedToday = getExercisesTrainedTodayForCurrentDay(workoutRecords, dayOfWeek);
@@ -200,6 +202,7 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
     handleRecordWorkout,
     loadAssignments,
     handleReorderAssignments,
-    exercisesTrainedToday
+    exercisesTrainedToday,
+    workoutRecords
   };
 }; 

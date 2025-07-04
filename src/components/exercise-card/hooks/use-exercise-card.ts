@@ -1,6 +1,6 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import type { WorkoutFormData, WorkoutFormDataAdvanced } from '../../../interfaces';
+import type { Exercise, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '../../../interfaces';
 import type { ExerciseCardProps, UseExerciseCardReturn } from '../types';
 
 /**
@@ -8,10 +8,16 @@ import type { ExerciseCardProps, UseExerciseCardReturn } from '../types';
  * Centraliza el manejo del formulario, estados de carga y UI
  * Soporta tanto modo simple como avanzado con series individuales
  */
-export const useExerciseCard = (): UseExerciseCardReturn => {
+export const useExerciseCard = (
+  exerciseId?: string,
+  exerciseObj?: Exercise,
+  workoutRecords?: WorkoutRecord[]
+): UseExerciseCardReturn & { lastRecord: WorkoutRecord | null, loadingLast: boolean } => {
   const [showForm, setShowForm] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [lastRecord, setLastRecord] = useState<WorkoutRecord | null>(null);
+  const [loadingLast, setLoadingLast] = useState(false);
 
   // Formulario para modo simple
   const formMethods = useForm<WorkoutFormData>({
@@ -32,6 +38,22 @@ export const useExerciseCard = (): UseExerciseCardReturn => {
       date: new Date() // Fecha por defecto: hoy
     }
   });
+
+  // Función para obtener el último registro en memoria
+  const fetchLastRecord = () => {
+    if (!exerciseId || !workoutRecords) return;
+    setLoadingLast(true);
+    // Filtrar en memoria por exerciseId y ordenar por fecha descendente
+    const filtered = workoutRecords
+      .filter(r => r.exerciseId === exerciseId)
+      .sort((a, b) => b.date.getTime() - a.date.getTime());
+    let enriched: WorkoutRecord | null = filtered.length > 0 ? filtered[0] : null;
+    if (enriched && exerciseObj) {
+      enriched = { ...enriched, exercise: exerciseObj };
+    }
+    setLastRecord(enriched);
+    setLoadingLast(false);
+  };
 
   const toggleForm = () => {
     setShowForm(!showForm);
@@ -56,6 +78,8 @@ export const useExerciseCard = (): UseExerciseCardReturn => {
     try {
       await onRecord(assignmentId, data);
       resetForm();
+      // Volver a consultar el último registro tras guardar
+      fetchLastRecord();
     } catch (error) {
       console.error('Error recording workout:', error);
       throw error;
@@ -63,6 +87,12 @@ export const useExerciseCard = (): UseExerciseCardReturn => {
       setLoading(false);
     }
   };
+
+  // Obtener el último registro del ejercicio al abrir el formulario o cuando cambian los registros
+  useEffect(() => {
+    fetchLastRecord();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exerciseId, showForm, workoutRecords]);
 
   return {
     showForm,
@@ -73,6 +103,8 @@ export const useExerciseCard = (): UseExerciseCardReturn => {
     handleSubmit,
     resetForm,
     formMethods,
-    advancedFormMethods
+    advancedFormMethods,
+    lastRecord,
+    loadingLast
   };
 }; 
