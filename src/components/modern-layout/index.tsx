@@ -69,7 +69,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const [isNavigationVisible, setIsNavigationVisible] = useState(true);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 relative">
+    <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 relative flex flex-col">
       {/* Top Navigation */}
       <header className={cn(
         MODERN_THEME.navigation.topNav.container,
@@ -132,7 +132,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
       {/* Main Content */}
       <main className={cn(
-        'min-h-screen pt-8 pb-20', // Espacio para header y bottom nav
+        'min-h-max py-8 grow', // Espacio para header y bottom nav
         MODERN_THEME.layout.container.base,
         MODERN_THEME.responsive.spacing.section
       )}>
@@ -180,12 +180,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
                     </span>
                   )}
                 </div>
-                <span className={cn(
-                  'text-xs font-medium',
-                  isActive ? 'text-blue-400' : 'text-gray-400'
-                )}>
-                  {item.label}
-                </span>
               </button>
             );
           })}

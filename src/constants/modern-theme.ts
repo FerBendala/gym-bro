@@ -259,7 +259,7 @@ export const MODERN_TOUCH = {
 // Navegación moderna
 export const MODERN_NAVIGATION = {
   bottomNav: {
-    container: 'fixed bottom-0 left-0 right-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-700/50 px-4 py-2 safe-bottom z-40',
+    container: 'sticky bottom-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-700/50 px-4 py-2 safe-bottom z-40',
     grid: 'grid grid-cols-5 gap-1',
     item: 'flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all duration-200 min-h-[48px]',
     active: 'bg-blue-600/20 text-blue-400',

@@ -1,4 +1,4 @@
-import { Calendar, ChevronDown, Filter } from 'lucide-react';
+import { Calendar, ChevronDown } from 'lucide-react';
 import React, { useState } from 'react';
 import { ExerciseList } from '../../../components/exercise-list';
 import { ModernButton, ModernCard, ModernPage, ModernSection } from '../../../components/modern-ui';
@@ -104,15 +104,6 @@ export const ModernHome: React.FC<ModernHomeProps> = ({
               </div>
             )}
           </div>
-
-          {/* Botón de filtros */}
-          <ModernButton
-            variant="ghost"
-            size="sm"
-            onClick={() => {/* TODO: Implementar filtros */ }}
-          >
-            <Filter className="w-4 h-4" />
-          </ModernButton>
         </div>
       }
     >
@@ -133,14 +124,6 @@ export const ModernHome: React.FC<ModernHomeProps> = ({
           </div>
         </ModernCard>
       )}
-
-      {/* Lista de ejercicios */}
-      <ModernSection>
-        <ExerciseList
-          dayOfWeek={activeDay}
-          onOpenAdmin={onOpenAdmin}
-        />
-      </ModernSection>
 
       {/* Navegación rápida entre días */}
       <ModernSection title="Navegación rápida" className="mt-8">
@@ -178,6 +161,16 @@ export const ModernHome: React.FC<ModernHomeProps> = ({
           })}
         </div>
       </ModernSection>
+
+      {/* Lista de ejercicios */}
+      <ModernSection>
+        <ExerciseList
+          dayOfWeek={activeDay}
+          onOpenAdmin={onOpenAdmin}
+        />
+      </ModernSection>
+
+
     </ModernPage>
   );
 }; 

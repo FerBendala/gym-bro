@@ -31,6 +31,7 @@ export const THEME_COLORS = {
  */
 export const THEME_SPACING = {
   padding: {
+    none: 'p-0',
     sm: 'px-4 py-2',
     md: 'px-6 py-4',
     lg: 'px-8 py-6'

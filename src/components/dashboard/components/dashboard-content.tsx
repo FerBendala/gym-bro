@@ -60,7 +60,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
               Entrenamientos Recientes
             </h3>
           </CardHeader>
-          <CardContent>
+          <CardContent size="none">
             <RecentWorkouts
               records={filteredRecords.slice(0, 10)}
               onDeleteRecord={onDeleteRecord}
