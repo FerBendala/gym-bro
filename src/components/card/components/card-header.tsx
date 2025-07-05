@@ -11,7 +11,7 @@ export const CardHeader: React.FC<CardHeaderProps> = ({
   return (
     <div className={clsx(
       THEME_SPACING.padding[size],
-      `border-b ${THEME_CONTAINERS.divider}`,
+      `border-b mb-4 ${THEME_CONTAINERS.divider}`,
       className
     )}>
       {children}

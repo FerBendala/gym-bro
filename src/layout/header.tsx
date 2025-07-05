@@ -11,7 +11,7 @@ interface HeaderProps {
 
 export const Header: React.FC<HeaderProps> = ({ onOpenAdmin, onOpenDashboard }) => {
   return (
-    <header className="bg-gray-900 border-b border-gray-700">
+    <header className="bg-gray-900 border-b border-gray-700 sticky top-0 z-50">
       <div className={cn(
         THEME_RESPONSIVE.container.base,
         THEME_RESPONSIVE.container.maxWidths.xl,

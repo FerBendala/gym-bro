@@ -29,7 +29,6 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignmen
     formMethods,
     advancedFormMethods,
     lastRecord,
-    loadingLast
   } = useExerciseCard(assignment.exerciseId, assignment.exercise, workoutRecords);
 
   const onSubmitForm = async (data: any) => {
@@ -38,8 +37,8 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignmen
 
   return (
     <>
-      <Card className={`mb-3 ${isTrainedToday ? 'border-green-500 border-2 shadow-lg shadow-green-500/20' : ''}`}>
-        <CardContent className="p-3 sm:p-4">
+      <Card className={`mb-3 ${isTrainedToday && 'border-green-500 border-2 shadow-lg shadow-green-500/20'}`}>
+        <CardContent>
           <ExerciseCardHeader
             assignment={assignment}
             disabled={disabled}
@@ -85,16 +84,18 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignmen
             />
           )}
         </CardContent>
-      </Card>
+      </Card >
 
       {/* Modal de vista previa completa */}
-      {showPreview && assignment.exercise?.url && (
-        <URLPreview
-          url={assignment.exercise.url}
-          showFullPreview={true}
-          onClose={() => setShowPreview(false)}
-        />
-      )}
+      {
+        showPreview && assignment.exercise?.url && (
+          <URLPreview
+            url={assignment.exercise.url}
+            showFullPreview={true}
+            onClose={() => setShowPreview(false)}
+          />
+        )
+      }
     </>
   );
 };

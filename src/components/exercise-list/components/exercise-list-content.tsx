@@ -64,7 +64,7 @@ const SortableExerciseCard: React.FC<SortableExerciseCardProps> = ({
       <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500/30 rounded-full opacity-0 group-hover:opacity-60 transition-opacity duration-200" />
 
       {/* ExerciseCard con padding left para el handle */}
-      <div className="pl-4 group-hover:pl-6 transition-all duration-200">
+      <div className="group-hover:pl-4 transition-all duration-200">
         <ExerciseCard
           assignment={assignment}
           onRecord={onRecord}

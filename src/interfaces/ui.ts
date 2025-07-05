@@ -4,7 +4,7 @@
  */
 
 export type UIVariant = 'default' | 'primary' | 'secondary' | 'success' | 'warning' | 'danger' | 'ghost';
-export type UISize = 'sm' | 'md' | 'lg';
+export type UISize = 'sm' | 'md' | 'lg' | 'none';
 
 export interface BaseUIProps {
   variant?: UIVariant;
