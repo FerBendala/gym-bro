@@ -6,7 +6,7 @@ import type { CardContentProps } from '../types';
 export const CardContent: React.FC<CardContentProps> = ({
   children,
   className,
-  size = 'md'
+  size = 'none'
 }) => {
   return (
     <div className={clsx(

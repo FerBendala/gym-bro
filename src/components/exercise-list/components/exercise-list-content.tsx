@@ -122,7 +122,7 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
     <div
       className={`relative ${isDragging ? 'bg-blue-500/5 rounded-xl' : ''} transition-all duration-200`}
       style={{ touchAction: isDragging ? 'none' : 'auto' }}
-    >
+    >ss
       {/* Indicador visual de zona de drop */}
       {isDragging && (
         <div className="absolute inset-0 border-2 border-dashed border-blue-500/50 rounded-xl bg-blue-500/5 pointer-events-none">

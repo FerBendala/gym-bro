@@ -16,6 +16,7 @@ export const THEME_COLORS = {
     ghost: 'text-gray-300 hover:text-white hover:bg-gray-800 focus:ring-gray-500'
   } satisfies Record<UIVariant, string>,
   sizes: {
+    none: 'p-0',
     sm: 'px-3 py-1.5 text-sm',
     md: 'px-4 py-2 text-sm',
     lg: 'px-6 py-3 text-base'
@@ -635,8 +636,8 @@ export const THEME_RESPONSIVE = {
   // Spacing responsive
   spacing: {
     section: {
-      mobile: 'py-8',
-      tablet: 'md:py-12',
+      mobile: '',
+      tablet: '',
       desktop: 'lg:py-16'
     },
     component: {

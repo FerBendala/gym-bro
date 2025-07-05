@@ -1,4 +1,4 @@
-import { Dumbbell, ExternalLink, Plus, WifiOff } from 'lucide-react';
+import { Dumbbell, Plus, WifiOff } from 'lucide-react';
 import React from 'react';
 import { Button } from '../../button';
 import type { ExerciseCardHeaderProps } from '../types';
@@ -15,7 +15,7 @@ export const ExerciseCardHeader: React.FC<ExerciseCardHeaderProps> = ({
 }) => {
   return (
     <div className="flex items-start justify-between mb-2">
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center space-x-4">
         <div className="p-1.5 bg-blue-600 rounded-lg flex-shrink-0">
           <Dumbbell className="w-4 h-4 text-white" />
         </div>
@@ -40,17 +40,6 @@ export const ExerciseCardHeader: React.FC<ExerciseCardHeaderProps> = ({
       <div className="flex items-center space-x-1">
         {disabled && (
           <WifiOff className="w-3.5 h-3.5 text-red-500" />
-        )}
-        {assignment.exercise?.url && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={onShowPreview}
-            className="flex-shrink-0 p-1 min-w-0"
-            title="Ver referencia"
-          >
-            <ExternalLink className="w-3.5 h-3.5" />
-          </Button>
         )}
         <Button
           variant="ghost"

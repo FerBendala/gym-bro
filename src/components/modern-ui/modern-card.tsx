@@ -154,7 +154,6 @@ export const ModernStatsCard: React.FC<ModernStatsCardProps> = ({
   return (
     <ModernCard
       variant="default"
-      padding="md"
       className={cn('text-center', className)}
     >
       <div className="flex flex-col items-center space-y-3">
