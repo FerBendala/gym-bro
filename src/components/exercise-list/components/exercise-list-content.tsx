@@ -64,7 +64,7 @@ const SortableExerciseCard: React.FC<SortableExerciseCardProps> = ({
       <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500/30 rounded-full opacity-0 group-hover:opacity-60 transition-opacity duration-200" />
 
       {/* ExerciseCard con padding left para el handle */}
-      <div className="pl-4 group-hover:pl-6 transition-all duration-200">
+      <div className="group-hover:pl-4 transition-all duration-200">
         <ExerciseCard
           assignment={assignment}
           onRecord={onRecord}
@@ -122,7 +122,7 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
     <div
       className={`relative ${isDragging ? 'bg-blue-500/5 rounded-xl' : ''} transition-all duration-200`}
       style={{ touchAction: isDragging ? 'none' : 'auto' }}
-    >ss
+    >
       {/* Indicador visual de zona de drop */}
       {isDragging && (
         <div className="absolute inset-0 border-2 border-dashed border-blue-500/50 rounded-xl bg-blue-500/5 pointer-events-none">

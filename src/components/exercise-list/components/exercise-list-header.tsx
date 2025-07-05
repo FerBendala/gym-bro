@@ -14,21 +14,25 @@ export const ExerciseListHeader: React.FC<ExerciseListHeaderProps> = ({
   hasExercises = false
 }) => {
   return (
-    <div className="flex items-center justify-between mb-6">
+    <div className="flex items-center justify-between mb-6 mt-8">
       <div className="flex items-center space-x-3">
-        <h2 className="text-xl font-bold text-white capitalize">
-          {dayOfWeek}
-        </h2>
-        <ConnectionIndicator isOnline={isOnline} />
-
-        {/* Tooltip de drag and drop */}
-        {hasExercises && (
-          <div className="flex items-center space-x-2 text-xs text-gray-400 bg-gray-800/50 px-2 py-1 rounded-lg">
-            <Move className="w-3 h-3" />
-            <span className="hidden sm:inline">Arrastra para reordenar</span>
-            <span className="sm:hidden">Arrastra</span>
+        <div className="flex flex-col space-y-2">
+          <h2 className="text-xl font-bold text-white capitalize">
+            {dayOfWeek}
+          </h2>
+          <div className="flex items-center space-x-4">
+            {/* Tooltip de drag and drop */}
+            {hasExercises && (
+              <div className="flex items-center space-x-2 text-xs text-gray-400 bg-gray-800/50 px-2 py-1 rounded-lg">
+                <Move className="w-3 h-3" />
+                <span className="hidden sm:inline">Arrastra para reordenar</span>
+                <span className="sm:hidden">Arrastra</span>
+              </div>
+            )}
+            <ConnectionIndicator isOnline={isOnline} />
           </div>
-        )}
+        </div>
+
       </div>
       <Button onClick={onOpenAdmin} variant="secondary" size="sm">
         <Plus className="w-4 h-4 mr-2" />
