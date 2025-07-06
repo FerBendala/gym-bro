@@ -7,6 +7,7 @@ import type { MainStatsProps, StatConfig } from '../types';
 /**
  * Estadísticas principales del ExerciseStats
  * Muestra las 4 métricas más importantes usando StatCard genérico
+ * Incluye tooltips explicativos para cada métrica
  */
 export const MainStats: React.FC<MainStatsProps> = ({ stats }) => {
   const statConfigs: StatConfig[] = [
@@ -15,28 +16,32 @@ export const MainStats: React.FC<MainStatsProps> = ({ stats }) => {
       title: 'Total Entrenamientos',
       value: stats.totalWorkouts.toString(),
       icon: Target,
-      variant: 'primary'
+      variant: 'primary',
+      tooltip: 'Número total de sesiones de entrenamiento registradas para este ejercicio'
     },
     {
       id: 'totalVolume',
       title: 'Volumen Total',
       value: `${formatNumber(stats.totalVolume)} kg`,
       icon: TrendingUp,
-      variant: 'success'
+      variant: 'success',
+      tooltip: 'Suma total de peso levantado (peso × repeticiones × series) a lo largo de todos los entrenamientos'
     },
     {
       id: 'averageWeight',
       title: 'Peso Promedio',
       value: `${formatNumber(stats.averageWeight)} kg`,
       icon: Zap,
-      variant: 'warning'
+      variant: 'warning',
+      tooltip: 'Peso promedio utilizado en todas las series de este ejercicio'
     },
     {
       id: 'maxWeight',
       title: 'Peso Máximo',
       value: `${formatNumber(stats.maxWeight)} kg`,
       icon: TrendingUp,
-      variant: 'danger'
+      variant: 'danger',
+      tooltip: 'Peso máximo levantado en una sola serie para este ejercicio'
     }
   ];
 
@@ -49,6 +54,8 @@ export const MainStats: React.FC<MainStatsProps> = ({ stats }) => {
           value={config.value}
           icon={config.icon}
           variant={config.variant}
+          tooltip={config.tooltip}
+          tooltipPosition="top"
         />
       ))}
     </div>

@@ -5,6 +5,7 @@ import { formatNumber } from '../../../utils/functions';
 import { calculateTrendsAnalysis } from '../../../utils/functions/trends-analysis';
 import { Card, CardContent, CardHeader } from '../../card';
 import { StatCard } from '../../stat-card';
+import { InfoTooltip } from '../../tooltip';
 
 interface TrendsTabProps {
   records: WorkoutRecord[];
@@ -38,12 +39,16 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
           value={analysis.workoutHabits.preferredDay}
           icon={Calendar}
           variant="primary"
+          tooltip="El día de la semana en el que entrenas con mayor frecuencia. Útil para planificar tu rutina semanal."
+          tooltipPosition="top"
         />
         <StatCard
           title="Hora Preferida"
           value={analysis.workoutHabits.preferredTime}
           icon={Clock}
           variant="success"
+          tooltip="El rango horario en el que realizas la mayoría de tus entrenamientos. Indica tu ventana de mayor energía."
+          tooltipPosition="top"
         />
         <StatCard
           title="Consistencia"
@@ -51,12 +56,16 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
           icon={Target}
           variant={analysis.workoutHabits.consistencyScore >= 70 ? 'success' :
             analysis.workoutHabits.consistencyScore >= 50 ? 'warning' : 'danger'}
+          tooltip="Puntuación de qué tan regular eres en tus entrenamientos. 70%+ es excelente, 50-69% es bueno, <50% necesita mejoras."
+          tooltipPosition="top"
         />
         <StatCard
           title="Patrón Descanso"
           value={analysis.workoutHabits.restDayPattern}
           icon={Activity}
           variant="teal"
+          tooltip="Tu patrón típico de días de descanso entre entrenamientos. Importante para la recuperación muscular."
+          tooltipPosition="top"
         />
       </div>
 
@@ -67,6 +76,11 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <Calendar className="w-5 h-5 mr-2" />
               Entrenamientos por Día
+              <InfoTooltip
+                content="Distribución de tus entrenamientos a lo largo de la semana. Te ayuda a identificar patrones y optimizar tu programación."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -104,6 +118,11 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <Clock className="w-5 h-5 mr-2" />
               Patrones Horarios
+              <InfoTooltip
+                content="Análisis de las horas del día en las que entrenas. Te ayuda a identificar tus momentos de mayor rendimiento."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -141,6 +160,11 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <TrendingUp className="w-5 h-5 mr-2" />
               Evolución Temporal
+              <InfoTooltip
+                content="Seguimiento de tu progreso a lo largo del tiempo. Muestra tendencias semanales y patrones de mejora o declive."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -170,9 +194,15 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
 
               {/* Tendencias por día de la semana */}
               <div className="pt-4 border-t border-gray-700">
-                <h4 className="text-sm font-medium text-gray-300 mb-3">
-                  Tendencia por Día (últimas 4 semanas)
-                </h4>
+                <div className="flex items-center space-x-2 mb-3">
+                  <h4 className="text-sm font-medium text-gray-300">
+                    Tendencia por Día (últimas 4 semanas)
+                  </h4>
+                  <InfoTooltip
+                    content="Cambio porcentual en volumen por día de la semana comparando las últimas 4 semanas. Verde = mejora, Rojo = declive."
+                    position="top"
+                  />
+                </div>
                 <div className="grid grid-cols-7 gap-2">
                   {analysis.volumeTrendByDay.map((dayTrend) => (
                     <div key={dayTrend.day} className="text-center">
@@ -180,7 +210,7 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
                         {dayTrend.day}
                       </p>
                       <p className={`text-sm font-medium ${dayTrend.trend > 0 ? 'text-green-400' :
-                          dayTrend.trend < 0 ? 'text-red-400' : 'text-gray-400'
+                        dayTrend.trend < 0 ? 'text-red-400' : 'text-gray-400'
                         }`}>
                         {dayTrend.trend > 0 ? '+' : ''}{dayTrend.trend}%
                       </p>
@@ -193,9 +223,15 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
               <div className="pt-4 border-t border-gray-700">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-300">
-                      Mejor Período de Rendimiento
-                    </h4>
+                    <div className="flex items-center space-x-2">
+                      <h4 className="text-sm font-medium text-gray-300">
+                        Mejor Período de Rendimiento
+                      </h4>
+                      <InfoTooltip
+                        content="La semana en la que registraste el mayor volumen total de entrenamiento. Útil para identificar condiciones óptimas."
+                        position="top"
+                      />
+                    </div>
                     <p className="text-xs text-gray-400">
                       Semana con mayor volumen total
                     </p>
@@ -215,6 +251,11 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <Activity className="w-5 h-5 mr-2" />
               Análisis de Hábitos
+              <InfoTooltip
+                content="Métricas clave sobre tus patrones de entrenamiento. Te ayuda a entender y optimizar tus rutinas."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -223,37 +264,71 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
                 <p className="text-2xl font-bold text-blue-400">
                   {analysis.workoutHabits.avgSessionDuration}
                 </p>
-                <p className="text-sm text-gray-400">Minutos/sesión (est.)</p>
+                <div className="text-sm text-gray-400 flex items-center justify-center">
+                  <span>Minutos/sesión (est.)</span>
+                  <InfoTooltip
+                    content="Duración estimada promedio de tus sesiones de entrenamiento basada en patrones de registro."
+                    position="top"
+                    className="ml-1"
+                  />
+                </div>
               </div>
 
               <div className="text-center p-3 bg-gray-800 rounded-lg">
                 <p className="text-2xl font-bold text-green-400">
                   {analysis.workoutHabits.peakProductivityHours.length}
                 </p>
-                <p className="text-sm text-gray-400">Horas productivas</p>
+                <div className="text-sm text-gray-400 flex items-center justify-center">
+                  <span>Horas productivas</span>
+                  <InfoTooltip
+                    content="Número de franjas horarias en las que muestras mayor rendimiento y volumen de entrenamiento."
+                    position="top"
+                    className="ml-1"
+                  />
+                </div>
               </div>
 
               <div className="text-center p-3 bg-gray-800 rounded-lg">
                 <p className="text-2xl font-bold text-purple-400">
                   {analysis.dayMetrics.filter(d => d.workouts > 0).length}
                 </p>
-                <p className="text-sm text-gray-400">Días activos</p>
+                <div className="text-sm text-gray-400 flex items-center justify-center">
+                  <span>Días activos</span>
+                  <InfoTooltip
+                    content="Número de días de la semana en los que has registrado al menos un entrenamiento."
+                    position="top"
+                    className="ml-1"
+                  />
+                </div>
               </div>
 
               <div className="text-center p-3 bg-gray-800 rounded-lg">
                 <p className="text-2xl font-bold text-yellow-400">
                   {Math.round((analysis.dayMetrics.reduce((sum, d) => sum + d.workouts, 0) / 7) * 10) / 10}
                 </p>
-                <p className="text-sm text-gray-400">Entrenamientos/semana</p>
+                <div className="text-sm text-gray-400 flex items-center justify-center">
+                  <span>Entrenamientos/semana</span>
+                  <InfoTooltip
+                    content="Promedio de entrenamientos que realizas por semana. Ideal para evaluar tu frecuencia de entrenamiento."
+                    position="top"
+                    className="ml-1"
+                  />
+                </div>
               </div>
             </div>
 
             {/* Horas de mayor productividad */}
             {analysis.workoutHabits.peakProductivityHours.length > 0 && (
               <div className="mt-4 pt-4 border-t border-gray-700">
-                <h4 className="text-sm font-medium text-gray-300 mb-2">
-                  Horarios de Mayor Productividad
-                </h4>
+                <div className="flex items-center space-x-2 mb-2">
+                  <h4 className="text-sm font-medium text-gray-300">
+                    Horarios de Mayor Productividad
+                  </h4>
+                  <InfoTooltip
+                    content="Las franjas horarias en las que registras mayor volumen de entrenamiento y mejor rendimiento."
+                    position="top"
+                  />
+                </div>
                 <div className="flex flex-wrap gap-2">
                   {analysis.workoutHabits.peakProductivityHours.map((hour, index) => (
                     <span

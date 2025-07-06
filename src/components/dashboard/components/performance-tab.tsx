@@ -5,6 +5,7 @@ import { formatNumber, getDaysAgo } from '../../../utils/functions';
 import { calculatePerformanceMetrics } from '../../../utils/functions/performance-metrics';
 import { Card, CardContent, CardHeader } from '../../card';
 import { StatCard } from '../../stat-card';
+import { InfoTooltip } from '../../tooltip';
 
 interface PerformanceTabProps {
   records: WorkoutRecord[];
@@ -38,24 +39,32 @@ export const PerformanceTab: React.FC<PerformanceTabProps> = ({ records }) => {
           value={`${metrics.totalVolumeTrend > 0 ? '+' : ''}${metrics.totalVolumeTrend}%`}
           icon={TrendingUp}
           variant={metrics.totalVolumeTrend > 0 ? 'success' : metrics.totalVolumeTrend < 0 ? 'danger' : 'indigo'}
+          tooltip="Cambio porcentual en el volumen total de entrenamiento comparado con el período anterior"
+          tooltipPosition="top"
         />
         <StatCard
           title="Ganancia Fuerza"
           value={`${metrics.strengthGains > 0 ? '+' : ''}${metrics.strengthGains}%`}
           icon={Award}
           variant={metrics.strengthGains > 0 ? 'success' : metrics.strengthGains < 0 ? 'danger' : 'indigo'}
+          tooltip="Incremento porcentual en la fuerza máxima registrada en tus ejercicios principales"
+          tooltipPosition="top"
         />
         <StatCard
           title="Racha Actual"
           value={`${metrics.consistency.currentStreak} días`}
           icon={Flame}
           variant="warning"
+          tooltip="Número consecutivo de días que has mantenido tu rutina de entrenamiento activa"
+          tooltipPosition="top"
         />
         <StatCard
           title="Racha Máxima"
           value={`${metrics.consistency.longestStreak} días`}
           icon={Calendar}
           variant="primary"
+          tooltip="La racha más larga de días consecutivos de entrenamiento que has logrado"
+          tooltipPosition="top"
         />
       </div>
 
@@ -66,6 +75,11 @@ export const PerformanceTab: React.FC<PerformanceTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <Award className="w-5 h-5 mr-2" />
               Records Personales
+              <InfoTooltip
+                content="Tus mejores marcas en cada ejercicio. El volumen se calcula multiplicando peso × repeticiones para cada serie."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -108,6 +122,11 @@ export const PerformanceTab: React.FC<PerformanceTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <Calendar className="w-5 h-5 mr-2" />
               Análisis de Consistencia
+              <InfoTooltip
+                content="Análisis de tu regularidad en el entrenamiento. La consistencia es clave para el progreso a largo plazo."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -168,6 +187,11 @@ export const PerformanceTab: React.FC<PerformanceTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <TrendingUp className="w-5 h-5 mr-2" />
               Progresión Semanal (Últimas 8 semanas)
+              <InfoTooltip
+                content="Evolución de tu volumen de entrenamiento y peso máximo por semana. Te ayuda a identificar patrones y ajustar tu rutina."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>

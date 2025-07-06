@@ -2,6 +2,7 @@ import React from 'react';
 import { THEME_CHART } from '../../constants/theme';
 import type { ChartDimensions } from '../../utils/functions';
 import { ChartLegend } from '../chart-legend';
+import { InfoTooltip } from '../tooltip';
 import { ChartEmptyState, ChartGrid, ChartProgressLines } from './components';
 import { useChartData } from './hooks';
 import type { ExerciseProgressChartProps } from './types';
@@ -46,12 +47,30 @@ export const ExerciseProgressChart: React.FC<ExerciseProgressChartProps> = ({ re
       </div>
 
       {/* Leyenda usando componente genérico */}
-      <ChartLegend items={legendItems} className="mt-4" />
+      <div className="flex items-center justify-between mt-4">
+        <ChartLegend items={legendItems} />
+        <InfoTooltip
+          content="Cada línea representa un ejercicio diferente. Los puntos muestran el peso máximo utilizado en cada fecha de entrenamiento."
+          position="left"
+        />
+      </div>
 
-      {/* Información adicional */}
-      <div className="mt-4 text-xs text-gray-400">
-        <p>Progreso de peso a lo largo del tiempo</p>
-        <p>Eje X: Tiempo | Eje Y: Peso (kg)</p>
+      {/* Información adicional con tooltips */}
+      <div className="mt-4 text-xs text-gray-400 space-y-1">
+        <div className="flex items-center space-x-2">
+          <span>Progreso de peso a lo largo del tiempo</span>
+          <InfoTooltip
+            content="Este gráfico te ayuda a visualizar si estás progresando en fuerza al aumentar gradualmente el peso en tus ejercicios."
+            position="top"
+          />
+        </div>
+        <div className="flex items-center space-x-2">
+          <span>Eje X: Tiempo | Eje Y: Peso (kg)</span>
+          <InfoTooltip
+            content="Una línea ascendente indica progreso positivo. Las líneas planas pueden indicar mesetas, y las descendentes pueden señalar necesidad de ajustes."
+            position="top"
+          />
+        </div>
       </div>
     </div>
   );

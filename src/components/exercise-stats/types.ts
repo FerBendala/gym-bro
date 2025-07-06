@@ -37,9 +37,11 @@ export interface CalculatedStats {
 
 /**
  * Configuración de tarjeta de estadística
+ * Incluye tooltip opcional para explicar el significado de cada métrica
  */
 export interface StatConfig extends Omit<StatCardProps, 'className'> {
   id: string;
+  tooltip?: string;
 }
 
 /**
