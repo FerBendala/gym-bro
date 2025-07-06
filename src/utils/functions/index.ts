@@ -8,6 +8,7 @@ export * from './calendar-utils';
 export * from './category-analysis';
 export * from './chart-utils';
 export * from './date-filters';
+export * from './filter-utils';
 export * from './notification-utils';
 export * from './performance-metrics';
 export * from './select-utils';
@@ -18,5 +19,8 @@ export * from './tab-utils';
 export * from './time-utils';
 export * from './trends-analysis';
 export * from './url-preview-utils';
-export { validateURL } from './url-validation';
+export * from './url-validation';
+
+// Tipos
+export type { ChartDimensions, DataRange } from './chart-utils';
 

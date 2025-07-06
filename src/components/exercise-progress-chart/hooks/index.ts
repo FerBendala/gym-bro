@@ -4,3 +4,5 @@
  */
 
 export { useChartData } from './use-chart-data';
+export { useChartStatistics } from './use-chart-statistics';
+

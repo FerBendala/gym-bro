@@ -1,5 +1,5 @@
 import type { WorkoutRecord } from '../../interfaces';
-import type { ChartDimensions, DataRange } from '../../utils/functions/chart-utils';
+import type { ChartDimensions, DataRange } from '../../utils/functions';
 
 /**
  * Props principales del ExerciseProgressChart
@@ -43,7 +43,10 @@ export interface ProcessedChartData {
   exerciseData: Record<string, WorkoutRecord[]>;
   weightRange: DataRange;
   dateRange: DataRange;
-  legendItems: Array<{ label: string; color: string }>;
+  legendItems: Array<{
+    label: string;
+    color: string;
+  }>;
 }
 
 /**
@@ -52,4 +55,20 @@ export interface ProcessedChartData {
 export interface UseChartDataReturn {
   chartData: ProcessedChartData | null;
   isEmpty: boolean;
+}
+
+export interface ChartStatistics {
+  totalExercises: number;
+  totalSessions: number;
+  averageWeightIncrease: number;
+  bestProgress: {
+    exercise: string;
+    improvement: number;
+  };
+  consistencyScore: number;
+  timeRange: string;
+}
+
+export interface ChartStatisticsProps {
+  statistics: ChartStatistics;
 } 

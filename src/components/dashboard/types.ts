@@ -1,19 +1,18 @@
 import type { Exercise, WorkoutRecord } from '../../interfaces';
 
+export type DashboardTab = 'overview' | 'performance' | 'categories' | 'trends' | 'advanced';
+export type TimeFilter = 'week' | 'month' | 'all';
+export type FilterType = 'all' | 'exercise' | 'muscle-group';
+
 export interface DashboardProps {
   onClose: () => void;
 }
 
-export type TimeFilter = 'week' | 'month' | 'all';
-
-// Nuevos tipos para el sistema de tabs
-export type DashboardTab = 'overview' | 'performance' | 'categories' | 'trends' | 'advanced';
-
-export interface DashboardTabConfig {
-  id: DashboardTab;
-  label: string;
-  icon: React.ComponentType<any>;
-  description: string;
+export interface DashboardContentProps {
+  filteredRecords: WorkoutRecord[];
+  allRecords: WorkoutRecord[];
+  activeTab: DashboardTab;
+  onDeleteRecord: (recordId: string) => Promise<void>;
 }
 
 export interface DashboardHeaderProps {
@@ -23,22 +22,25 @@ export interface DashboardHeaderProps {
   onClose: () => void;
 }
 
+export interface DashboardTabNavigationProps {
+  activeTab: DashboardTab;
+  onTabChange: (tab: DashboardTab) => void;
+  timeFilterLabel: string;
+}
+
 export interface DashboardFiltersProps {
   selectedExercise: string;
+  selectedMuscleGroup: string;
+  filterType: FilterType;
   timeFilter: TimeFilter;
   exercises: Exercise[];
   isOnline: boolean;
   onExerciseChange: (exerciseId: string) => void;
+  onMuscleGroupChange: (muscleGroupId: string) => void;
+  onFilterTypeChange: (filterType: FilterType) => void;
   onTimeFilterChange: (filter: TimeFilter) => void;
 }
 
 export interface DashboardEmptyStateProps {
   isOnline: boolean;
-}
-
-export interface DashboardContentProps {
-  filteredRecords: WorkoutRecord[];
-  allRecords: WorkoutRecord[];
-  activeTab: DashboardTab;
-  onDeleteRecord?: (recordId: string) => Promise<void>;
 } 
