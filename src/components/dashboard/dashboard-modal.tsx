@@ -15,11 +15,15 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const { workoutRecords, exercises, loading, isOnline, handleDeleteRecord } = useDashboardData();
   const {
     selectedExercise,
+    selectedMuscleGroup,
+    filterType,
     timeFilter,
     activeTab,
     filteredRecords,
     timeFilterLabel,
     setSelectedExercise,
+    setSelectedMuscleGroup,
+    setFilterType,
     setTimeFilter,
     setActiveTab
   } = useDashboardFilters(workoutRecords);
@@ -55,10 +59,14 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
           <div className="p-6 space-y-6 pb-16 sm:pb-20">
             <DashboardFilters
               selectedExercise={selectedExercise}
+              selectedMuscleGroup={selectedMuscleGroup}
+              filterType={filterType}
               timeFilter={timeFilter}
               exercises={exercises}
               isOnline={isOnline}
               onExerciseChange={setSelectedExercise}
+              onMuscleGroupChange={setSelectedMuscleGroup}
+              onFilterTypeChange={setFilterType}
               onTimeFilterChange={setTimeFilter}
             />
 
