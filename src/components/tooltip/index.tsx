@@ -26,50 +26,42 @@ export const Tooltip: React.FC<TooltipProps> = ({
   className
 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [actualPosition, setActualPosition] = useState(position);
+  const [finalPosition, setFinalPosition] = useState(position);
   const timeoutRef = useRef<NodeJS.Timeout>();
-  const tooltipRef = useRef<HTMLDivElement>(null);
   const triggerRef = useRef<HTMLDivElement>(null);
 
-  // Calcular posición óptima basada en el espacio disponible
-  const calculatePosition = () => {
-    if (!tooltipRef.current || !triggerRef.current) return;
+  // Calcular posición óptima basándose solo en el trigger y viewport
+  const calculateOptimalPosition = (): 'top' | 'bottom' | 'left' | 'right' => {
+    if (!triggerRef.current) return position;
 
-    const tooltip = tooltipRef.current;
-    const trigger = triggerRef.current;
-    const rect = trigger.getBoundingClientRect();
-    const tooltipRect = tooltip.getBoundingClientRect();
-
+    const triggerRect = triggerRef.current.getBoundingClientRect();
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
 
-    let newPosition = position;
+    // Dimensiones estimadas del tooltip (más conservadoras)
+    const tooltipWidth = 320;
+    const tooltipHeight = 120; // Más generoso para contenido largo
+    const margin = 20;
 
-    // Verificar si hay espacio suficiente en la posición preferida
+    // Calcular espacio disponible en cada dirección
+    const spaceTop = triggerRect.top;
+    const spaceBottom = viewportHeight - triggerRect.bottom;
+    const spaceLeft = triggerRect.left;
+    const spaceRight = viewportWidth - triggerRect.right;
+
+    // Determinar la mejor posición basada en el espacio disponible
     switch (position) {
       case 'top':
-        if (rect.top - tooltipRect.height < 10) {
-          newPosition = 'bottom';
-        }
-        break;
+        return spaceTop >= tooltipHeight + margin ? 'top' : 'bottom';
       case 'bottom':
-        if (rect.bottom + tooltipRect.height > viewportHeight - 10) {
-          newPosition = 'top';
-        }
-        break;
+        return spaceBottom >= tooltipHeight + margin ? 'bottom' : 'top';
       case 'left':
-        if (rect.left - tooltipRect.width < 10) {
-          newPosition = 'right';
-        }
-        break;
+        return spaceLeft >= tooltipWidth + margin ? 'left' : 'right';
       case 'right':
-        if (rect.right + tooltipRect.width > viewportWidth - 10) {
-          newPosition = 'left';
-        }
-        break;
+        return spaceRight >= tooltipWidth + margin ? 'right' : 'left';
+      default:
+        return position;
     }
-
-    setActualPosition(newPosition);
   };
 
   const showTooltip = () => {
@@ -78,9 +70,10 @@ export const Tooltip: React.FC<TooltipProps> = ({
     }
 
     timeoutRef.current = setTimeout(() => {
+      // Calcular posición inmediatamente antes de mostrar
+      const optimalPosition = calculateOptimalPosition();
+      setFinalPosition(optimalPosition);
       setIsVisible(true);
-      // Calcular posición después de que el tooltip sea visible
-      setTimeout(calculatePosition, 0);
     }, delay);
   };
 
@@ -156,13 +149,12 @@ export const Tooltip: React.FC<TooltipProps> = ({
       {/* Tooltip */}
       {isVisible && (
         <div
-          ref={tooltipRef}
           className={cn(
             'absolute z-50 px-4 py-3 text-sm text-white rounded-lg shadow-lg pointer-events-none',
             'bg-gray-800 border border-gray-700',
             'backdrop-blur-sm',
             'animate-tooltip',
-            positionClasses[actualPosition]
+            positionClasses[finalPosition]
           )}
           style={{
             maxWidth: '320px',
@@ -177,7 +169,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
           <div
             className={cn(
               'absolute w-0 h-0 border-4',
-              arrowClasses[actualPosition]
+              arrowClasses[finalPosition]
             )}
           />
         </div>
