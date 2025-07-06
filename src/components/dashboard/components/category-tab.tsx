@@ -5,6 +5,7 @@ import { formatNumber } from '../../../utils/functions';
 import { calculateCategoryAnalysis } from '../../../utils/functions/category-analysis';
 import { Card, CardContent, CardHeader } from '../../card';
 import { StatCard } from '../../stat-card';
+import { InfoTooltip } from '../../tooltip';
 
 interface CategoryTabProps {
   records: WorkoutRecord[];
@@ -38,24 +39,32 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
           value={`${analysis.balanceScore}%`}
           icon={Activity}
           variant={analysis.balanceScore >= 80 ? 'success' : analysis.balanceScore >= 60 ? 'warning' : 'danger'}
+          tooltip="Puntuación que indica qué tan equilibrado está tu entrenamiento entre diferentes grupos musculares. 80%+ es excelente, 60-79% es bueno, <60% necesita mejoras."
+          tooltipPosition="top"
         />
         <StatCard
           title="Categorías Entrenadas"
           value={analysis.categoryMetrics.length.toString()}
           icon={Target}
           variant="primary"
+          tooltip="Número total de categorías musculares diferentes que has entrenado. Más variedad indica un entrenamiento más completo."
+          tooltipPosition="top"
         />
         <StatCard
           title="Categoría Dominante"
           value={analysis.dominantCategory || 'N/A'}
           icon={BarChart}
           variant="indigo"
+          tooltip="El grupo muscular al que dedicas más tiempo y volumen de entrenamiento. Considera equilibrar con otros grupos."
+          tooltipPosition="top"
         />
         <StatCard
           title="Menos Entrenada"
           value={analysis.leastTrainedCategory || 'N/A'}
           icon={XCircle}
           variant="danger"
+          tooltip="El grupo muscular que menos entrenas. Considera aumentar el volumen para lograr un desarrollo más equilibrado."
+          tooltipPosition="top"
         />
       </div>
 
@@ -66,6 +75,11 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <BarChart className="w-5 h-5 mr-2" />
               Métricas por Categoría
+              <InfoTooltip
+                content="Desglose detallado de tu entrenamiento por grupo muscular. Muestra volumen total, frecuencia semanal y porcentaje del entrenamiento total."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -108,6 +122,11 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <CheckCircle className="w-5 h-5 mr-2" />
               Balance Muscular
+              <InfoTooltip
+                content="Análisis de equilibrio entre grupos musculares. Un entrenamiento balanceado previene lesiones y mejora el rendimiento general."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -150,6 +169,11 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <Activity className="w-5 h-5 mr-2" />
               Distribución de Volumen
+              <InfoTooltip
+                content="Representación visual de cómo se distribuye tu volumen de entrenamiento entre categorías. Las barras más largas indican mayor enfoque."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -186,13 +210,27 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
                     <p className="text-lg font-bold text-white">
                       {analysis.muscleBalance.filter(b => b.isBalanced).length}
                     </p>
-                    <p className="text-sm text-gray-400">Categorías balanceadas</p>
+                    <div className="text-sm text-gray-400 flex items-center justify-center">
+                      <span>Categorías balanceadas</span>
+                      <InfoTooltip
+                        content="Grupos musculares que tienes bien equilibrados en tu rutina de entrenamiento."
+                        position="top"
+                        className="ml-1"
+                      />
+                    </div>
                   </div>
                   <div>
                     <p className="text-lg font-bold text-white">
                       {analysis.muscleBalance.filter(b => !b.isBalanced && b.volume > 0).length}
                     </p>
-                    <p className="text-sm text-gray-400">Requieren ajuste</p>
+                    <div className="text-sm text-gray-400 flex items-center justify-center">
+                      <span>Requieren ajuste</span>
+                      <InfoTooltip
+                        content="Grupos musculares que necesitan más o menos volumen para lograr un entrenamiento equilibrado."
+                        position="top"
+                        className="ml-1"
+                      />
+                    </div>
                   </div>
                 </div>
               </div>

@@ -7,6 +7,7 @@ import type { AdditionalStatsProps } from '../types';
 /**
  * Estadísticas adicionales del ExerciseStats
  * Muestra información complementaria como días entrenados, último entrenamiento y ejercicio favorito
+ * Incluye tooltips explicativos para cada métrica
  */
 export const AdditionalStats: React.FC<AdditionalStatsProps> = ({ stats }) => {
   return (
@@ -16,6 +17,8 @@ export const AdditionalStats: React.FC<AdditionalStatsProps> = ({ stats }) => {
         value={stats.workoutDays.toString()}
         icon={Calendar}
         variant="purple"
+        tooltip="Número total de días únicos en los que has entrenado este ejercicio"
+        tooltipPosition="top"
       />
 
       <StatCard
@@ -23,6 +26,8 @@ export const AdditionalStats: React.FC<AdditionalStatsProps> = ({ stats }) => {
         value={getDaysAgo(stats.lastWorkout) || 'N/A'}
         icon={Calendar}
         variant="indigo"
+        tooltip="Tiempo transcurrido desde la última vez que entrenaste este ejercicio"
+        tooltipPosition="top"
       />
 
       <StatCard
@@ -30,6 +35,8 @@ export const AdditionalStats: React.FC<AdditionalStatsProps> = ({ stats }) => {
         value={stats.mostFrequentExercise || 'N/A'}
         icon={Target}
         variant="pink"
+        tooltip="Ejercicio que has realizado con mayor frecuencia en tus entrenamientos"
+        tooltipPosition="top"
       />
     </div>
   );

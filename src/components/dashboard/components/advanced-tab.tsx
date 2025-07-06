@@ -5,6 +5,7 @@ import { formatNumber } from '../../../utils/functions';
 import { calculateAdvancedAnalysis } from '../../../utils/functions/advanced-analysis';
 import { Card, CardContent, CardHeader } from '../../card';
 import { StatCard } from '../../stat-card';
+import { InfoTooltip } from '../../tooltip';
 
 interface AdvancedTabProps {
   records: WorkoutRecord[];
@@ -39,6 +40,8 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
           icon={Clock}
           variant={analysis.trainingEfficiency.timeEfficiencyScore >= 70 ? 'success' :
             analysis.trainingEfficiency.timeEfficiencyScore >= 50 ? 'warning' : 'danger'}
+          tooltip="Mide qué tan eficientemente utilizas tu tiempo de entrenamiento. 70%+ es excelente, 50-69% es bueno, <50% necesita optimización."
+          tooltipPosition="top"
         />
         <StatCard
           title="Índice de Fatiga"
@@ -46,6 +49,8 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
           icon={AlertTriangle}
           variant={analysis.fatigueAnalysis.fatigueIndex <= 30 ? 'success' :
             analysis.fatigueAnalysis.fatigueIndex <= 60 ? 'warning' : 'danger'}
+          tooltip="Indica tu nivel de fatiga acumulada. ≤30% es óptimo, 31-60% requiere atención, >60% sugiere descanso inmediato."
+          tooltipPosition="top"
         />
         <StatCard
           title="Intensidad General"
@@ -53,6 +58,8 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
           icon={Zap}
           variant={analysis.intensityMetrics.overallIntensity === 'Óptima' ? 'success' :
             analysis.intensityMetrics.overallIntensity === 'Alta' ? 'warning' : 'primary'}
+          tooltip="Evaluación de la intensidad general de tus entrenamientos. 'Óptima' es ideal para progreso sostenible, 'Alta' requiere monitoreo."
+          tooltipPosition="top"
         />
         <StatCard
           title="Riesgo Meseta"
@@ -60,6 +67,8 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
           icon={TrendingUp}
           variant={analysis.progressPrediction.plateauRisk <= 30 ? 'success' :
             analysis.progressPrediction.plateauRisk <= 60 ? 'warning' : 'danger'}
+          tooltip="Probabilidad de entrar en una meseta de progreso. ≤30% es bajo riesgo, 31-60% moderado, >60% alto riesgo de estancamiento."
+          tooltipPosition="top"
         />
       </div>
 
@@ -70,6 +79,11 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <BarChart className="w-5 h-5 mr-2" />
               Densidad de Entrenamiento
+              <InfoTooltip
+                content="Análisis de la concentración e intensidad de tus entrenamientos por período. Te ayuda a identificar patrones de carga de trabajo."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -89,8 +103,8 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                   </div>
                   <div className="text-right">
                     <p className={`text-sm font-medium ${density.intensityLevel === 'Muy Alta' ? 'text-red-400' :
-                        density.intensityLevel === 'Alta' ? 'text-yellow-400' :
-                          density.intensityLevel === 'Media' ? 'text-green-400' : 'text-gray-400'
+                      density.intensityLevel === 'Alta' ? 'text-yellow-400' :
+                        density.intensityLevel === 'Media' ? 'text-green-400' : 'text-gray-400'
                       }`}>
                       {density.intensityLevel}
                     </p>
@@ -110,6 +124,11 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <AlertTriangle className="w-5 h-5 mr-2" />
               Análisis de Fatiga
+              <InfoTooltip
+                content="Evaluación de tu estado de fatiga y riesgo de sobreentrenamiento. Fundamental para prevenir lesiones y optimizar recuperación."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -119,15 +138,29 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                   <p className="text-2xl font-bold text-white">
                     {analysis.fatigueAnalysis.recoveryDays}
                   </p>
-                  <p className="text-sm text-gray-400">Días descanso</p>
+                  <div className="text-sm text-gray-400 flex items-center justify-center">
+                    <span>Días descanso</span>
+                    <InfoTooltip
+                      content="Días promedio de descanso entre entrenamientos intensos. Importante para la recuperación muscular."
+                      position="top"
+                      className="ml-1"
+                    />
+                  </div>
                 </div>
                 <div className="text-center p-3 bg-gray-800 rounded-lg">
                   <p className={`text-2xl font-bold ${analysis.fatigueAnalysis.overreachingRisk === 'Bajo' ? 'text-green-400' :
-                      analysis.fatigueAnalysis.overreachingRisk === 'Medio' ? 'text-yellow-400' : 'text-red-400'
+                    analysis.fatigueAnalysis.overreachingRisk === 'Medio' ? 'text-yellow-400' : 'text-red-400'
                     }`}>
                     {analysis.fatigueAnalysis.overreachingRisk}
                   </p>
-                  <p className="text-sm text-gray-400">Riesgo sobreentrenamiento</p>
+                  <div className="text-sm text-gray-400 flex items-center justify-center">
+                    <span>Riesgo sobreentrenamiento</span>
+                    <InfoTooltip
+                      content="Evaluación del riesgo de entrenar más allá de tu capacidad de recuperación. Alto riesgo requiere descanso inmediato."
+                      position="top"
+                      className="ml-1"
+                    />
+                  </div>
                 </div>
               </div>
 
@@ -155,6 +188,11 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <TrendingUp className="w-5 h-5 mr-2" />
               Comparación Temporal
+              <InfoTooltip
+                content="Comparación de tu rendimiento entre diferentes períodos de tiempo. Te ayuda a identificar tendencias de mejora o declive."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -169,7 +207,7 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                       {period.periodName}
                     </h4>
                     <p className={`text-sm font-medium ${period.improvement > 0 ? 'text-green-400' :
-                        period.improvement < 0 ? 'text-red-400' : 'text-gray-400'
+                      period.improvement < 0 ? 'text-red-400' : 'text-gray-400'
                       }`}>
                       {period.improvement > 0 ? '+' : ''}{period.improvement}%
                     </p>
@@ -194,6 +232,11 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <Brain className="w-5 h-5 mr-2" />
               Predicciones
+              <InfoTooltip
+                content="Proyecciones basadas en tus patrones de entrenamiento actuales. Útil para planificar objetivos y expectativas realistas."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -203,20 +246,40 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                   <p className="text-lg font-bold text-blue-400">
                     {analysis.progressPrediction.nextWeekWeight}kg
                   </p>
-                  <p className="text-xs text-gray-400">Peso proyectado</p>
+                  <div className="text-xs text-gray-400 flex items-center justify-center">
+                    <span>Peso proyectado</span>
+                    <InfoTooltip
+                      content="Peso estimado que podrías manejar la próxima semana basado en tu progresión actual."
+                      position="top"
+                      className="ml-1"
+                    />
+                  </div>
                 </div>
                 <div className="text-center p-3 bg-gray-800 rounded-lg">
                   <p className="text-lg font-bold text-green-400">
                     {formatNumber(analysis.progressPrediction.nextWeekVolume)}
                   </p>
-                  <p className="text-xs text-gray-400">Volumen proyectado</p>
+                  <div className="text-xs text-gray-400 flex items-center justify-center">
+                    <span>Volumen proyectado</span>
+                    <InfoTooltip
+                      content="Volumen total estimado para la próxima semana basado en tu tendencia actual."
+                      position="top"
+                      className="ml-1"
+                    />
+                  </div>
                 </div>
               </div>
 
               <div className="p-3 bg-purple-900/20 border border-purple-500/30 rounded-lg">
-                <p className="text-sm text-purple-400 font-medium mb-1">
-                  Próximo PR predicho:
-                </p>
+                <div className="flex items-center space-x-2 mb-1">
+                  <p className="text-sm text-purple-400 font-medium">
+                    Próximo PR predicho:
+                  </p>
+                  <InfoTooltip
+                    content="Predicción de tu próximo récord personal basado en análisis de progresión y patrones de entrenamiento."
+                    position="top"
+                  />
+                </div>
                 <p className="text-lg font-bold text-white">
                   {analysis.progressPrediction.predictedPR.weight}kg
                 </p>
@@ -229,7 +292,14 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                 <p className="text-lg font-bold text-yellow-400">
                   {analysis.progressPrediction.monthlyGrowthRate > 0 ? '+' : ''}{analysis.progressPrediction.monthlyGrowthRate}kg
                 </p>
-                <p className="text-xs text-gray-400">Crecimiento mensual</p>
+                <div className="text-xs text-gray-400 flex items-center justify-center">
+                  <span>Crecimiento mensual</span>
+                  <InfoTooltip
+                    content="Tasa de crecimiento promedio en peso por mes basada en tu historial de entrenamientos."
+                    position="top"
+                    className="ml-1"
+                  />
+                </div>
               </div>
             </div>
           </CardContent>
@@ -241,6 +311,11 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <Zap className="w-5 h-5 mr-2" />
               Análisis de Intensidad
+              <InfoTooltip
+                content="Evaluación detallada de la intensidad en diferentes aspectos de tu entrenamiento. Clave para optimizar el estímulo de crecimiento."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -248,7 +323,13 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
               {/* Gráfico de barras de intensidad */}
               <div className="grid grid-cols-3 gap-4">
                 <div className="text-center">
-                  <p className="text-sm text-gray-400 mb-2">Intensidad Peso</p>
+                  <div className="flex items-center justify-center space-x-1 mb-2">
+                    <p className="text-sm text-gray-400">Intensidad Peso</p>
+                    <InfoTooltip
+                      content="Porcentaje de tu peso máximo que utilizas en promedio. Mayor intensidad = mayor estímulo de fuerza."
+                      position="top"
+                    />
+                  </div>
                   <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                     <div
                       className="bg-blue-600 h-2 rounded-full transition-all duration-300"
@@ -261,7 +342,13 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                 </div>
 
                 <div className="text-center">
-                  <p className="text-sm text-gray-400 mb-2">Intensidad Volumen</p>
+                  <div className="flex items-center justify-center space-x-1 mb-2">
+                    <p className="text-sm text-gray-400">Intensidad Volumen</p>
+                    <InfoTooltip
+                      content="Intensidad basada en el volumen total de trabajo. Mayor volumen = mayor estímulo de hipertrofia."
+                      position="top"
+                    />
+                  </div>
                   <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                     <div
                       className="bg-green-600 h-2 rounded-full transition-all duration-300"
@@ -274,7 +361,13 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                 </div>
 
                 <div className="text-center">
-                  <p className="text-sm text-gray-400 mb-2">Intensidad Frecuencia</p>
+                  <div className="flex items-center justify-center space-x-1 mb-2">
+                    <p className="text-sm text-gray-400">Intensidad Frecuencia</p>
+                    <InfoTooltip
+                      content="Intensidad basada en la frecuencia de entrenamientos. Mayor frecuencia = mayor estímulo de adaptación."
+                      position="top"
+                    />
+                  </div>
                   <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
                     <div
                       className="bg-yellow-600 h-2 rounded-full transition-all duration-300"
@@ -291,9 +384,15 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
               <div className="pt-4 border-t border-gray-700">
                 <div className="flex items-center justify-between">
                   <div>
-                    <h4 className="text-sm font-medium text-gray-300">
-                      Rango Óptimo de Carga
-                    </h4>
+                    <div className="flex items-center space-x-2">
+                      <h4 className="text-sm font-medium text-gray-300">
+                        Rango Óptimo de Carga
+                      </h4>
+                      <InfoTooltip
+                        content="Rango de peso recomendado para maximizar el progreso basado en tu historial y capacidades actuales."
+                        position="top"
+                      />
+                    </div>
                     <p className="text-xs text-gray-400">
                       Basado en historial de entrenamientos
                     </p>
@@ -313,6 +412,11 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <Target className="w-5 h-5 mr-2" />
               Indicadores de Rendimiento
+              <InfoTooltip
+                content="Señales que indican que estás alcanzando tu máximo potencial de rendimiento en diferentes aspectos del entrenamiento."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
@@ -342,6 +446,11 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
             <h3 className="text-lg font-semibold text-white flex items-center">
               <Brain className="w-5 h-5 mr-2" />
               Sugerencias de Optimización
+              <InfoTooltip
+                content="Recomendaciones personalizadas basadas en análisis de tus datos para mejorar tu entrenamiento y resultados."
+                position="top"
+                className="ml-2"
+              />
             </h3>
           </CardHeader>
           <CardContent>
