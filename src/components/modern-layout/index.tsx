@@ -131,6 +131,12 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
     }
   };
 
+  // Cerrar menú al hacer click fuera
+  const handleOverlayClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowMoreMenu(false);
+  };
+
   // Función para renderizar la navegación según el tipo
   const renderNavigation = () => {
     // Por defecto usar el diseño compacto
@@ -159,8 +165,8 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
             {/* Overlay para cerrar el menú */}
             {showMoreMenu && (
               <div
-                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30"
-                onClick={() => setShowMoreMenu(false)}
+                className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30"
+                onClick={handleOverlayClick}
               />
             )}
 
@@ -173,7 +179,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
               <div className={cn(
                 MODERN_THEME.navigation.moreMenu.container,
                 'z-40',
-                MODERN_THEME.animations.slide.up
+                MODERN_THEME.animations.dropDown.in
               )}>
                 <div className={MODERN_THEME.navigation.moreMenu.grid}>
                   {moreMenuItems.map((item) => renderNavItemMore(item))}
@@ -303,16 +309,21 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
       >
         <div className="relative">
           <Icon className={cn(
-            'w-5 h-5 mb-1',
+            'w-5 h-5',
             isActive ? 'text-blue-400' : 'text-gray-400'
           )} />
           {item.badge && item.badge > 0 && (
-            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-              {item.badge > 99 ? '99+' : item.badge}
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+              {item.badge > 9 ? '9+' : item.badge}
             </span>
           )}
         </div>
-        <span className="text-xs">{item.label}</span>
+        <span className={cn(
+          'text-sm font-medium',
+          isActive ? 'text-blue-400' : 'text-gray-300'
+        )}>
+          {item.label}
+        </span>
       </button>
     );
   };
@@ -381,7 +392,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
       {/* Main Content */}
       <main className={cn(
-        'min-h-max py-8 pb-24 grow', // Espaciado ajustado para menú sticky
+        'min-h-max py-8 grow', // Espaciado ajustado para menú sticky
         MODERN_THEME.layout.container.base,
         MODERN_THEME.responsive.spacing.section
       )}>
