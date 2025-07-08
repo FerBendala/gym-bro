@@ -10,6 +10,7 @@ import { ModernHome } from './pages/home';
 import { ModernProgress } from './pages/progress';
 import { ModernSettings } from './pages/settings';
 import { ModernStats } from './pages/stats';
+import { WorkoutHistory } from './pages/workout-history';
 
 const ModernAppContent = () => {
   const { activeTab, navigateTo, goBack, canGoBack } = useModernNavigation('home');
@@ -85,6 +86,11 @@ const ModernAppContent = () => {
           title: 'Configuración',
           subtitle: 'Ejercicios y preferencias'
         };
+      case 'history':
+        return {
+          title: 'Historial de Entrenamientos',
+          subtitle: 'Resumen de tus entrenamientos'
+        };
       default:
         return { title: 'Gym Tracker' };
     }
@@ -111,6 +117,8 @@ const ModernAppContent = () => {
         return <ModernStats />;
       case 'settings':
         return <ModernSettings />;
+      case 'history':
+        return <WorkoutHistory />;
       default:
         return (
           <ModernHome

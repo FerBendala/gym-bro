@@ -10,8 +10,6 @@ export interface DashboardProps {
 
 export interface DashboardContentProps {
   filteredRecords: WorkoutRecord[];
-  allRecords: WorkoutRecord[];
-  activeTab: DashboardTab;
   onDeleteRecord: (recordId: string) => Promise<void>;
 }
 

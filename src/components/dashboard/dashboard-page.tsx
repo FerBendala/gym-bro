@@ -73,8 +73,6 @@ export const DashboardPage: React.FC = () => {
       ) : (
         <DashboardContent
           filteredRecords={filteredRecords}
-          allRecords={workoutRecords}
-          activeTab={activeTab}
           onDeleteRecord={handleDeleteRecord}
         />
       )}

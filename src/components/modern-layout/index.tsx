@@ -1,10 +1,10 @@
-import { BarChart3, Calendar, Dumbbell, Home, Settings, TrendingUp } from 'lucide-react';
+import { BarChart3, Calendar, ClipboardList, Dumbbell, Home, Settings, TrendingUp } from 'lucide-react';
 import React, { useState } from 'react';
 import { MODERN_THEME } from '../../constants/modern-theme';
 import { cn } from '../../utils/functions/style-utils';
 
 // Tipos para la navegación
-export type ModernNavItem = 'home' | 'progress' | 'calendar' | 'stats' | 'settings';
+export type ModernNavItem = 'home' | 'progress' | 'calendar' | 'stats' | 'history' | 'settings';
 
 interface ModernLayoutProps {
   children: React.ReactNode;
@@ -44,6 +44,11 @@ const navigationItems: NavigationItem[] = [
     id: 'stats',
     label: 'Estadísticas',
     icon: BarChart3
+  },
+  {
+    id: 'history',
+    label: 'Historial',
+    icon: ClipboardList
   },
   {
     id: 'settings',

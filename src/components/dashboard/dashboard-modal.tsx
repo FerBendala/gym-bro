@@ -75,8 +75,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             ) : (
               <DashboardContent
                 filteredRecords={filteredRecords}
-                allRecords={workoutRecords}
-                activeTab={activeTab}
                 onDeleteRecord={handleDeleteRecord}
               />
             )}
