@@ -1,8 +1,15 @@
 import type { Exercise, WorkoutRecord } from '../../interfaces';
 
-export type DashboardTab = 'overview' | 'performance' | 'categories' | 'trends' | 'advanced';
+export type DashboardTab = 'overview' | 'categories' | 'trends' | 'advanced';
 export type TimeFilter = 'week' | 'month' | 'all';
 export type FilterType = 'all' | 'exercise' | 'muscle-group';
+
+export interface DashboardTabConfig {
+  id: DashboardTab;
+  label: string;
+  icon: any;
+  description: string;
+}
 
 export interface DashboardProps {
   onClose: () => void;

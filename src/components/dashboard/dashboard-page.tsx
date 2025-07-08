@@ -8,7 +8,6 @@ import {
   DashboardEmptyState,
   DashboardFilters,
   DashboardTabNavigation,
-  PerformanceTab,
   TrendsTab
 } from './components';
 import { useDashboardData, useDashboardFilters } from './hooks';
@@ -57,8 +56,6 @@ export const DashboardPage: React.FC = () => {
             onDeleteRecord={handleDeleteRecord}
           />
         );
-      case 'performance':
-        return <PerformanceTab records={filteredRecords} />;
       case 'categories':
         return <CategoryTab records={filteredRecords} />;
       case 'trends':

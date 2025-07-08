@@ -1,4 +1,4 @@
-import { Activity, BarChart3, Target, TrendingUp, Zap } from 'lucide-react';
+import { Activity, BarChart3, Target, Zap } from 'lucide-react';
 import type { DashboardTabConfig } from './types';
 
 /**
@@ -11,12 +11,6 @@ export const DASHBOARD_TABS: DashboardTabConfig[] = [
     label: 'Resumen',
     icon: BarChart3,
     description: 'Vista general de estadísticas y progreso'
-  },
-  {
-    id: 'performance',
-    label: 'Rendimiento',
-    icon: TrendingUp,
-    description: 'Análisis de progreso, PRs y consistencia'
   },
   {
     id: 'categories',

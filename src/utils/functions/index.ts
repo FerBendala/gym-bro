@@ -10,7 +10,6 @@ export * from './chart-utils';
 export * from './date-filters';
 export * from './filter-utils';
 export * from './notification-utils';
-export * from './performance-metrics';
 export * from './select-utils';
 export * from './stat-card-utils';
 export * from './stats-utils';
