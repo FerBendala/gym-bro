@@ -1,4 +1,4 @@
-import { AlertTriangle, BarChart, Brain, Clock, Target, TrendingUp, Zap } from 'lucide-react';
+import { Activity, AlertTriangle, ArrowDown, ArrowUp, Award, BarChart, Brain, Calendar, CheckCircle, Clock, Lightbulb, Shield, Target, TrendingUp, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
 import { formatNumber } from '../../../utils/functions';
@@ -13,6 +13,256 @@ interface AdvancedTabProps {
 
 export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
   const analysis = useMemo(() => calculateAdvancedAnalysis(records), [records]);
+
+  // Generar indicadores de rendimiento mejorados
+  const enhancedPerformanceIndicators = useMemo(() => {
+    const indicators: Array<{
+      type: 'excellent' | 'good' | 'warning' | 'critical';
+      icon: React.ComponentType<{ className?: string }>;
+      title: string;
+      description: string;
+      value?: string;
+      progress?: number;
+    }> = [];
+
+    // Análisis de consistencia
+    const weeklyFrequency = records.slice(-7).length;
+    if (weeklyFrequency >= 4) {
+      indicators.push({
+        type: 'excellent',
+        icon: Calendar,
+        title: 'Consistencia Excelente',
+        description: `${weeklyFrequency} entrenamientos esta semana - rutina muy sólida`,
+        value: `${weeklyFrequency}/7 días`,
+        progress: (weeklyFrequency / 7) * 100
+      });
+    } else if (weeklyFrequency >= 3) {
+      indicators.push({
+        type: 'good',
+        icon: Calendar,
+        title: 'Buena Consistencia',
+        description: `${weeklyFrequency} entrenamientos esta semana - mantén el ritmo`,
+        value: `${weeklyFrequency}/7 días`,
+        progress: (weeklyFrequency / 7) * 100
+      });
+    }
+
+    // Análisis de progreso
+    const recentComparison = analysis.periodComparisons.find(p => p.periodName === 'Último mes');
+    if (recentComparison && recentComparison.improvement > 10) {
+      indicators.push({
+        type: 'excellent',
+        icon: TrendingUp,
+        title: 'Progreso Sobresaliente',
+        description: `Mejora del ${recentComparison.improvement}% en el último mes`,
+        value: `+${recentComparison.improvement}%`,
+        progress: Math.min(100, recentComparison.improvement * 2)
+      });
+    } else if (recentComparison && recentComparison.improvement > 0) {
+      indicators.push({
+        type: 'good',
+        icon: ArrowUp,
+        title: 'Progreso Positivo',
+        description: `Mejora del ${recentComparison.improvement}% en el último mes`,
+        value: `+${recentComparison.improvement}%`,
+        progress: recentComparison.improvement * 5
+      });
+    }
+
+    // Análisis de intensidad
+    if (analysis.intensityMetrics.overallIntensity === 'Óptima') {
+      indicators.push({
+        type: 'excellent',
+        icon: Zap,
+        title: 'Intensidad Perfecta',
+        description: 'Tu intensidad está en el rango óptimo para progreso',
+        value: analysis.intensityMetrics.averageIntensity + '%',
+        progress: analysis.intensityMetrics.averageIntensity
+      });
+    } else if (analysis.intensityMetrics.overallIntensity === 'Alta') {
+      indicators.push({
+        type: 'warning',
+        icon: AlertTriangle,
+        title: 'Intensidad Elevada',
+        description: 'Considera moderar la intensidad para evitar sobrecarga',
+        value: analysis.intensityMetrics.averageIntensity + '%',
+        progress: analysis.intensityMetrics.averageIntensity
+      });
+    }
+
+    // Análisis de fatiga
+    if (analysis.fatigueAnalysis.fatigueIndex <= 30) {
+      indicators.push({
+        type: 'excellent',
+        icon: Shield,
+        title: 'Excelente Recuperación',
+        description: 'Niveles óptimos de fatiga y recuperación',
+        value: `${analysis.fatigueAnalysis.fatigueIndex}%`,
+        progress: 100 - analysis.fatigueAnalysis.fatigueIndex
+      });
+    } else if (analysis.fatigueAnalysis.fatigueIndex <= 60) {
+      indicators.push({
+        type: 'good',
+        icon: Activity,
+        title: 'Recuperación Adecuada',
+        description: 'Niveles de fatiga controlados',
+        value: `${analysis.fatigueAnalysis.fatigueIndex}%`,
+        progress: 100 - analysis.fatigueAnalysis.fatigueIndex
+      });
+    } else {
+      indicators.push({
+        type: 'critical',
+        icon: AlertTriangle,
+        title: 'Fatiga Elevada',
+        description: 'Considera aumentar días de descanso',
+        value: `${analysis.fatigueAnalysis.fatigueIndex}%`,
+        progress: 100 - analysis.fatigueAnalysis.fatigueIndex
+      });
+    }
+
+    // Análisis de eficiencia
+    if (analysis.trainingEfficiency.timeEfficiencyScore >= 70) {
+      indicators.push({
+        type: 'excellent',
+        icon: Clock,
+        title: 'Alta Eficiencia',
+        description: 'Excelente aprovechamiento del tiempo de entrenamiento',
+        value: `${analysis.trainingEfficiency.timeEfficiencyScore}%`,
+        progress: analysis.trainingEfficiency.timeEfficiencyScore
+      });
+    }
+
+    // Análisis de volumen
+    const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+    if (totalVolume > 50000) {
+      indicators.push({
+        type: 'excellent',
+        icon: Award,
+        title: 'Alto Volumen Trabajado',
+        description: `${formatNumber(totalVolume)}kg de volumen total acumulado`,
+        value: formatNumber(totalVolume) + 'kg'
+      });
+    }
+
+    return indicators;
+  }, [records, analysis]);
+
+  // Generar sugerencias de optimización categorizadas
+  const categorizedSuggestions = useMemo(() => {
+    const suggestions: Array<{
+      category: 'intensity' | 'volume' | 'recovery' | 'frequency' | 'technique' | 'planning';
+      priority: 'high' | 'medium' | 'low';
+      icon: React.ComponentType<{ className?: string }>;
+      title: string;
+      description: string;
+      action: string;
+    }> = [];
+
+    // Sugerencias de intensidad
+    if (analysis.intensityMetrics.averageIntensity < 60) {
+      suggestions.push({
+        category: 'intensity',
+        priority: 'high',
+        icon: ArrowUp,
+        title: 'Aumentar Intensidad',
+        description: `Tu intensidad promedio es del ${analysis.intensityMetrics.averageIntensity}%, por debajo del rango óptimo`,
+        action: 'Incrementa los pesos gradualmente en un 2.5-5% cada semana'
+      });
+    } else if (analysis.intensityMetrics.averageIntensity > 85) {
+      suggestions.push({
+        category: 'intensity',
+        priority: 'medium',
+        icon: ArrowDown,
+        title: 'Moderar Intensidad',
+        description: `Intensidad muy alta (${analysis.intensityMetrics.averageIntensity}%), riesgo de fatiga`,
+        action: 'Considera una semana de descarga con pesos 20% menores'
+      });
+    }
+
+    // Sugerencias de volumen
+    if (analysis.intensityMetrics.volumeIntensity < 50) {
+      suggestions.push({
+        category: 'volume',
+        priority: 'medium',
+        icon: BarChart,
+        title: 'Incrementar Volumen',
+        description: `Volumen actual por debajo del potencial (${analysis.intensityMetrics.volumeIntensity}%)`,
+        action: 'Añade 1-2 series adicionales a tus ejercicios principales'
+      });
+    }
+
+    // Sugerencias de frecuencia
+    const weeklyFrequency = records.slice(-7).length;
+    if (weeklyFrequency < 3) {
+      suggestions.push({
+        category: 'frequency',
+        priority: 'high',
+        icon: Calendar,
+        title: 'Aumentar Frecuencia',
+        description: `Solo ${weeklyFrequency} entrenamientos esta semana, recomendado 3-5`,
+        action: 'Programa al menos 3 sesiones semanales para progreso óptimo'
+      });
+    } else if (weeklyFrequency > 6) {
+      suggestions.push({
+        category: 'frequency',
+        priority: 'medium',
+        icon: Shield,
+        title: 'Moderar Frecuencia',
+        description: `${weeklyFrequency} entrenamientos pueden ser excesivos`,
+        action: 'Incluye al menos 1-2 días de descanso completo por semana'
+      });
+    }
+
+    // Sugerencias de recuperación
+    if (analysis.fatigueAnalysis.fatigueIndex > 60) {
+      suggestions.push({
+        category: 'recovery',
+        priority: 'high',
+        icon: AlertTriangle,
+        title: 'Priorizar Recuperación',
+        description: `Índice de fatiga elevado (${analysis.fatigueAnalysis.fatigueIndex}%)`,
+        action: analysis.fatigueAnalysis.restRecommendation
+      });
+    } else if (analysis.fatigueAnalysis.recoveryDays > 3) {
+      suggestions.push({
+        category: 'recovery',
+        priority: 'low',
+        icon: Activity,
+        title: 'Retomar Gradualmente',
+        description: `${analysis.fatigueAnalysis.recoveryDays} días sin entrenar`,
+        action: 'Comienza con 70-80% de tu intensidad habitual'
+      });
+    }
+
+    // Sugerencias de planificación
+    if (analysis.progressPrediction.plateauRisk > 60) {
+      suggestions.push({
+        category: 'planning',
+        priority: 'high',
+        icon: Target,
+        title: 'Prevenir Meseta',
+        description: `Alto riesgo de estancamiento (${analysis.progressPrediction.plateauRisk}%)`,
+        action: 'Varía ejercicios, rangos de repeticiones o esquemas de series'
+      });
+    }
+
+    // Sugerencias de técnica (basadas en eficiencia)
+    if (analysis.trainingEfficiency.timeEfficiencyScore < 50) {
+      suggestions.push({
+        category: 'technique',
+        priority: 'medium',
+        icon: Lightbulb,
+        title: 'Optimizar Eficiencia',
+        description: `Eficiencia temporal baja (${analysis.trainingEfficiency.timeEfficiencyScore}%)`,
+        action: 'Reduce descansos entre series o aumenta peso por ejercicio'
+      });
+    }
+
+    return suggestions.sort((a, b) => {
+      const priorityOrder = { high: 3, medium: 2, low: 1 };
+      return priorityOrder[b.priority] - priorityOrder[a.priority];
+    });
+  }, [records, analysis]);
 
   if (records.length === 0) {
     return (
@@ -406,14 +656,14 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
           </CardContent>
         </Card>
 
-        {/* Indicadores de rendimiento pico */}
+        {/* Indicadores de rendimiento mejorados */}
         <Card>
           <CardHeader>
             <h3 className="text-lg font-semibold text-white flex items-center">
               <Target className="w-5 h-5 mr-2" />
               Indicadores de Rendimiento
               <InfoTooltip
-                content="Señales que indican que estás alcanzando tu máximo potencial de rendimiento en diferentes aspectos del entrenamiento."
+                content="Análisis detallado de tu rendimiento actual con métricas específicas y progreso medible."
                 position="top"
                 className="ml-2"
               />
@@ -421,33 +671,71 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {analysis.peakPerformanceIndicators.length > 0 ? (
-                analysis.peakPerformanceIndicators.map((indicator, index) => (
-                  <div
-                    key={index}
-                    className="flex items-center p-3 bg-green-900/20 border border-green-500/30 rounded-lg"
-                  >
-                    <Target className="w-4 h-4 text-green-400 mr-2 flex-shrink-0" />
-                    <p className="text-sm text-green-400">{indicator}</p>
-                  </div>
-                ))
+              {enhancedPerformanceIndicators.length > 0 ? (
+                enhancedPerformanceIndicators.map((indicator, index) => {
+                  const getIndicatorStyles = (type: string) => {
+                    switch (type) {
+                      case 'excellent':
+                        return 'bg-green-900/20 border-green-500/30 text-green-400';
+                      case 'good':
+                        return 'bg-blue-900/20 border-blue-500/30 text-blue-400';
+                      case 'warning':
+                        return 'bg-yellow-900/20 border-yellow-500/30 text-yellow-400';
+                      case 'critical':
+                        return 'bg-red-900/20 border-red-500/30 text-red-400';
+                      default:
+                        return 'bg-gray-900/20 border-gray-500/30 text-gray-400';
+                    }
+                  };
+
+                  return (
+                    <div
+                      key={index}
+                      className={`p-4 border rounded-lg ${getIndicatorStyles(indicator.type)}`}
+                    >
+                      <div className="flex items-start space-x-3">
+                        <indicator.icon className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <h4 className="font-medium text-sm">{indicator.title}</h4>
+                            {indicator.value && (
+                              <span className="text-sm font-bold">{indicator.value}</span>
+                            )}
+                          </div>
+                          <p className="text-xs opacity-90 mb-2">{indicator.description}</p>
+                          {indicator.progress !== undefined && (
+                            <div className="w-full bg-gray-700 rounded-full h-2">
+                              <div
+                                className={`h-2 rounded-full transition-all duration-500 ${indicator.type === 'excellent' ? 'bg-green-500' :
+                                  indicator.type === 'good' ? 'bg-blue-500' :
+                                    indicator.type === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
+                                  }`}
+                                style={{ width: `${Math.min(100, indicator.progress)}%` }}
+                              />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
               ) : (
                 <p className="text-gray-400 text-center py-4">
-                  Continúa entrenando para alcanzar indicadores de rendimiento pico
+                  Continúa entrenando para desarrollar indicadores de rendimiento
                 </p>
               )}
             </div>
           </CardContent>
         </Card>
 
-        {/* Sugerencias de optimización */}
+        {/* Sugerencias de optimización mejoradas */}
         <Card>
           <CardHeader>
             <h3 className="text-lg font-semibold text-white flex items-center">
               <Brain className="w-5 h-5 mr-2" />
               Sugerencias de Optimización
               <InfoTooltip
-                content="Recomendaciones personalizadas basadas en análisis de tus datos para mejorar tu entrenamiento y resultados."
+                content="Recomendaciones personalizadas y priorizadas basadas en análisis detallado de tus datos de entrenamiento."
                 position="top"
                 className="ml-2"
               />
@@ -455,15 +743,72 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {analysis.optimizationSuggestions.slice(0, 5).map((suggestion, index) => (
-                <div
-                  key={index}
-                  className="flex items-start p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg"
-                >
-                  <Brain className="w-4 h-4 text-blue-400 mr-2 mt-0.5 flex-shrink-0" />
-                  <p className="text-sm text-blue-400">{suggestion}</p>
+              {categorizedSuggestions.length > 0 ? (
+                categorizedSuggestions.map((suggestion, index) => {
+                  const getCategoryStyles = (category: string) => {
+                    switch (category) {
+                      case 'intensity':
+                        return 'bg-red-900/20 border-red-500/30 text-red-400';
+                      case 'volume':
+                        return 'bg-blue-900/20 border-blue-500/30 text-blue-400';
+                      case 'recovery':
+                        return 'bg-green-900/20 border-green-500/30 text-green-400';
+                      case 'frequency':
+                        return 'bg-purple-900/20 border-purple-500/30 text-purple-400';
+                      case 'technique':
+                        return 'bg-yellow-900/20 border-yellow-500/30 text-yellow-400';
+                      case 'planning':
+                        return 'bg-indigo-900/20 border-indigo-500/30 text-indigo-400';
+                      default:
+                        return 'bg-gray-900/20 border-gray-500/30 text-gray-400';
+                    }
+                  };
+
+                  const getPriorityBadge = (priority: string) => {
+                    switch (priority) {
+                      case 'high':
+                        return 'bg-red-600 text-white';
+                      case 'medium':
+                        return 'bg-yellow-600 text-white';
+                      case 'low':
+                        return 'bg-gray-600 text-white';
+                      default:
+                        return 'bg-gray-600 text-white';
+                    }
+                  };
+
+                  return (
+                    <div
+                      key={index}
+                      className={`p-4 border rounded-lg ${getCategoryStyles(suggestion.category)}`}
+                    >
+                      <div className="flex items-start space-x-3">
+                        <suggestion.icon className="w-5 h-5 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-2">
+                            <h4 className="font-medium text-sm">{suggestion.title}</h4>
+                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${getPriorityBadge(suggestion.priority)}`}>
+                              {suggestion.priority === 'high' ? 'ALTA' :
+                                suggestion.priority === 'medium' ? 'MEDIA' : 'BAJA'}
+                            </span>
+                          </div>
+                          <p className="text-xs opacity-90 mb-2">{suggestion.description}</p>
+                          <div className="flex items-start space-x-2">
+                            <CheckCircle className="w-4 h-4 mt-0.5 flex-shrink-0 opacity-70" />
+                            <p className="text-xs font-medium">{suggestion.action}</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              ) : (
+                <div className="text-center py-4">
+                  <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-2" />
+                  <p className="text-green-400 font-medium">¡Excelente trabajo!</p>
+                  <p className="text-gray-400 text-sm">Tu entrenamiento está bien optimizado</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
