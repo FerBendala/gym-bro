@@ -1,5 +1,5 @@
 import { BarChart3, Calendar, ClipboardList, Dumbbell, Home, MoreHorizontal, Settings, TrendingUp } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MODERN_THEME } from '../../constants/modern-theme';
 import { cn } from '../../utils/functions/style-utils';
 
@@ -120,6 +120,24 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 }) => {
   const [isNavigationVisible, setIsNavigationVisible] = useState(true);
   const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Cerrar menú al hacer click fuera
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMoreMenu(false);
+      }
+    };
+
+    if (showMoreMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMoreMenu]);
 
   // Función para manejar el cambio de tab
   const handleTabChange = (tab: ModernNavItem) => {
@@ -155,7 +173,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
       default: // 'grid' y 'compact' - usar diseño compacto
         return (
-          <div className="relative">
+          <div className="relative" ref={menuRef}>
             <div className={MODERN_THEME.navigation.bottomNavCompact.grid}>
               {items.map((item) => renderNavItemCompact(item))}
             </div>
