@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { migrateExercisesToMultipleCategories } from '../../api/database';
-import { ModernLayout, useModernNavigation } from '../../components/modern-ui';
+import { ModernLayout, NavigationType, useModernNavigation } from '../../components/modern-ui';
 import { Notification } from '../../components/notification';
 import { NotificationProvider, useNotification } from '../../context/notification-context';
 import type { DayOfWeek } from '../../interfaces';
@@ -16,6 +16,7 @@ const ModernAppContent = () => {
   const { activeTab, navigateTo, goBack, canGoBack } = useModernNavigation('home');
   const [activeDay, setActiveDay] = useState<DayOfWeek>('lunes');
   const [showAdmin, setShowAdmin] = useState(false);
+  const [navigationType, setNavigationType] = useState<NavigationType>('compact');
   const { showNotification } = useNotification();
 
   // Ejecutar migración al cargar la aplicación
@@ -138,6 +139,7 @@ const ModernAppContent = () => {
       subtitle={pageInfo.subtitle}
       showBackButton={canGoBack}
       onBackClick={goBack}
+      navigationType={navigationType}
     >
       {renderContent()}
 

@@ -1,4 +1,4 @@
-import { BarChart3, Calendar, Edit, Filter, Search, Trash2, TrendingDown, TrendingUp, User } from 'lucide-react';
+import { Calendar, Edit, Filter, Search, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { deleteWorkoutRecord, getExercises, getWorkoutRecords, updateWorkoutRecord } from '../../../api/database';
 import { Button } from '../../../components/button';
@@ -306,9 +306,8 @@ export const WorkoutHistory: React.FC = () => {
             {/* Filtros organizados */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
               {/* Filtro por ejercicio */}
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <label className="text-sm font-medium text-gray-300 flex items-center">
-                  <User className="w-4 h-4 mr-2 text-blue-400" />
                   Ejercicio
                 </label>
                 <Select
@@ -323,9 +322,8 @@ export const WorkoutHistory: React.FC = () => {
               </div>
 
               {/* Filtro por categoría */}
-              <div className="space-y-2">
+              <div className="space-y-1">
                 <label className="text-sm font-medium text-gray-300 flex items-center">
-                  <BarChart3 className="w-4 h-4 mr-2 text-green-400" />
                   Categoría
                 </label>
                 <Select
@@ -341,11 +339,8 @@ export const WorkoutHistory: React.FC = () => {
 
               {/* Fecha desde */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300 flex items-center">
-                  <Calendar className="w-4 h-4 mr-2 text-yellow-400" />
-                  Desde
-                </label>
                 <DatePicker
+                  label="Desde"
                   value={dateFrom}
                   onChange={setDateFrom}
                   className="bg-gray-800/50 border-gray-600 focus:border-yellow-500"
@@ -354,11 +349,8 @@ export const WorkoutHistory: React.FC = () => {
 
               {/* Fecha hasta */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-gray-300 flex items-center">
-                  <Calendar className="w-4 h-4 mr-2 text-orange-400" />
-                  Hasta
-                </label>
                 <DatePicker
+                  label="Hasta"
                   value={dateTo}
                   onChange={setDateTo}
                   className="bg-gray-800/50 border-gray-600 focus:border-orange-500"

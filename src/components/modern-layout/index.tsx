@@ -1,10 +1,11 @@
-import { BarChart3, Calendar, ClipboardList, Dumbbell, Home, Settings, TrendingUp } from 'lucide-react';
+import { BarChart3, Calendar, ClipboardList, Dumbbell, Home, MoreHorizontal, Settings, TrendingUp } from 'lucide-react';
 import React, { useState } from 'react';
 import { MODERN_THEME } from '../../constants/modern-theme';
 import { cn } from '../../utils/functions/style-utils';
 
 // Tipos para la navegación
-export type ModernNavItem = 'home' | 'progress' | 'calendar' | 'stats' | 'history' | 'settings';
+export type ModernNavItem = 'home' | 'progress' | 'calendar' | 'stats' | 'history' | 'settings' | 'more';
+export type NavigationType = 'grid' | 'horizontal' | 'compact' | 'iconsOnly';
 
 interface ModernLayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,7 @@ interface ModernLayoutProps {
   headerActions?: React.ReactNode;
   showBackButton?: boolean;
   onBackClick?: () => void;
+  navigationType?: NavigationType;
 }
 
 interface NavigationItem {
@@ -24,6 +26,7 @@ interface NavigationItem {
   badge?: number;
 }
 
+// Elementos principales de navegación
 const navigationItems: NavigationItem[] = [
   {
     id: 'home',
@@ -52,7 +55,50 @@ const navigationItems: NavigationItem[] = [
   },
   {
     id: 'settings',
-    label: 'Configurar',
+    label: 'Configuración',
+    icon: Settings
+  }
+];
+
+// Elementos principales para el menú compacto (solo 3 + más)
+const compactNavigationItems: NavigationItem[] = [
+  {
+    id: 'home',
+    label: 'Inicio',
+    icon: Home
+  },
+  {
+    id: 'progress',
+    label: 'Progreso',
+    icon: TrendingUp
+  },
+  {
+    id: 'calendar',
+    label: 'Calendario',
+    icon: Calendar
+  },
+  {
+    id: 'more',
+    label: 'Más',
+    icon: MoreHorizontal
+  }
+];
+
+// Elementos del menú "más"
+const moreMenuItems: NavigationItem[] = [
+  {
+    id: 'stats',
+    label: 'Estadísticas',
+    icon: BarChart3
+  },
+  {
+    id: 'history',
+    label: 'Historial',
+    icon: ClipboardList
+  },
+  {
+    id: 'settings',
+    label: 'Configuración',
     icon: Settings
   }
 ];
@@ -69,9 +115,207 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   subtitle,
   headerActions,
   showBackButton = false,
-  onBackClick
+  onBackClick,
+  navigationType = 'grid'
 }) => {
   const [isNavigationVisible, setIsNavigationVisible] = useState(true);
+  const [showMoreMenu, setShowMoreMenu] = useState(false);
+
+  // Función para manejar el cambio de tab
+  const handleTabChange = (tab: ModernNavItem) => {
+    if (tab === 'more') {
+      setShowMoreMenu(!showMoreMenu);
+    } else {
+      setShowMoreMenu(false);
+      onTabChange(tab);
+    }
+  };
+
+  // Función para renderizar la navegación según el tipo
+  const renderNavigation = () => {
+    // Por defecto usar el diseño compacto
+    const items = compactNavigationItems;
+
+    switch (navigationType) {
+      case 'horizontal':
+        return (
+          <div className={MODERN_THEME.navigation.bottomNavHorizontal.scrollContainer}>
+            <div className={MODERN_THEME.navigation.bottomNavHorizontal.grid}>
+              {navigationItems.map((item) => renderNavItem(item, MODERN_THEME.navigation.bottomNavHorizontal))}
+            </div>
+          </div>
+        );
+
+      case 'iconsOnly':
+        return (
+          <div className={MODERN_THEME.navigation.bottomNavIconsOnly.grid}>
+            {navigationItems.map((item) => renderNavItemIconOnly(item))}
+          </div>
+        );
+
+      default: // 'grid' y 'compact' - usar diseño compacto
+        return (
+          <div className="relative">
+            {/* Overlay para cerrar el menú */}
+            {showMoreMenu && (
+              <div
+                className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30"
+                onClick={() => setShowMoreMenu(false)}
+              />
+            )}
+
+            <div className={MODERN_THEME.navigation.bottomNavCompact.grid}>
+              {items.map((item) => renderNavItemCompact(item))}
+            </div>
+
+            {/* Menú "más" desplegable */}
+            {showMoreMenu && (
+              <div className={cn(
+                MODERN_THEME.navigation.moreMenu.container,
+                'z-40',
+                MODERN_THEME.animations.slide.up
+              )}>
+                <div className={MODERN_THEME.navigation.moreMenu.grid}>
+                  {moreMenuItems.map((item) => renderNavItemMore(item))}
+                </div>
+              </div>
+            )}
+          </div>
+        );
+    }
+  };
+
+  // Renderizar item de navegación estándar
+  const renderNavItem = (item: NavigationItem, navConfig: { item: string; active: string; inactive: string }) => {
+    const Icon = item.icon;
+    const isActive = activeTab === item.id;
+
+    return (
+      <button
+        key={item.id}
+        onClick={() => handleTabChange(item.id)}
+        className={cn(
+          navConfig.item,
+          isActive ? navConfig.active : navConfig.inactive,
+          MODERN_THEME.touch.tap,
+          MODERN_THEME.accessibility.focusRing
+        )}
+        aria-label={`Ir a ${item.label}`}
+      >
+        <div className="relative">
+          <Icon className={cn(
+            'w-5 h-5 mb-1',
+            isActive ? 'text-blue-400' : 'text-gray-400'
+          )} />
+          {item.badge && item.badge > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {item.badge > 99 ? '99+' : item.badge}
+            </span>
+          )}
+        </div>
+        <span className="text-xs">{item.label}</span>
+      </button>
+    );
+  };
+
+  // Renderizar item solo con icono
+  const renderNavItemIconOnly = (item: NavigationItem) => {
+    const Icon = item.icon;
+    const isActive = activeTab === item.id;
+
+    return (
+      <button
+        key={item.id}
+        onClick={() => handleTabChange(item.id)}
+        className={cn(
+          MODERN_THEME.navigation.bottomNavIconsOnly.item,
+          isActive ? MODERN_THEME.navigation.bottomNavIconsOnly.active : MODERN_THEME.navigation.bottomNavIconsOnly.inactive,
+          MODERN_THEME.touch.tap,
+          MODERN_THEME.accessibility.focusRing
+        )}
+        aria-label={`Ir a ${item.label}`}
+        title={item.label}
+      >
+        <div className="relative">
+          <Icon className={cn(
+            'w-6 h-6',
+            isActive ? 'text-blue-400' : 'text-gray-400'
+          )} />
+          {item.badge && item.badge > 0 && (
+            <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+              {item.badge > 9 ? '9+' : item.badge}
+            </span>
+          )}
+        </div>
+      </button>
+    );
+  };
+
+  // Renderizar item en el diseño compacto
+  const renderNavItemCompact = (item: NavigationItem) => {
+    const Icon = item.icon;
+    const isActive = activeTab === item.id;
+
+    return (
+      <button
+        key={item.id}
+        onClick={() => handleTabChange(item.id)}
+        className={cn(
+          MODERN_THEME.navigation.bottomNavCompact.item,
+          isActive ? MODERN_THEME.navigation.bottomNavCompact.active : MODERN_THEME.navigation.bottomNavCompact.inactive,
+          MODERN_THEME.touch.tap,
+          MODERN_THEME.accessibility.focusRing
+        )}
+        aria-label={`Ir a ${item.label}`}
+        title={item.label}
+      >
+        <div className="relative">
+          <Icon className={cn(
+            'w-6 h-6',
+            isActive ? 'text-blue-400' : 'text-gray-400'
+          )} />
+          {item.badge && item.badge > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {item.badge > 99 ? '99+' : item.badge}
+            </span>
+          )}
+        </div>
+      </button>
+    );
+  };
+
+  // Renderizar item en el menú "más"
+  const renderNavItemMore = (item: NavigationItem) => {
+    const Icon = item.icon;
+    const isActive = activeTab === item.id;
+
+    return (
+      <button
+        key={item.id}
+        onClick={() => handleTabChange(item.id)}
+        className={cn(
+          MODERN_THEME.navigation.moreMenu.item,
+          isActive ? MODERN_THEME.navigation.moreMenu.active : MODERN_THEME.navigation.moreMenu.inactive,
+          MODERN_THEME.touch.tap,
+          MODERN_THEME.accessibility.focusRing
+        )}
+        aria-label={`Ir a ${item.label}`}
+      >
+        <div className="relative">
+          <Icon className={cn(
+            'w-5 h-5 mb-1',
+            isActive ? 'text-blue-400' : 'text-gray-400'
+          )} />
+          {item.badge && item.badge > 0 && (
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+              {item.badge > 99 ? '99+' : item.badge}
+            </span>
+          )}
+        </div>
+        <span className="text-xs">{item.label}</span>
+      </button>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 relative flex flex-col">
@@ -137,7 +381,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
       {/* Main Content */}
       <main className={cn(
-        'min-h-max py-8 grow', // Espacio para header y bottom nav
+        'min-h-max py-8 pb-24 grow', // Espaciado ajustado para menú sticky
         MODERN_THEME.layout.container.base,
         MODERN_THEME.responsive.spacing.section
       )}>
@@ -151,44 +395,11 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
 
       {/* Bottom Navigation */}
       <nav className={cn(
-        MODERN_THEME.navigation.bottomNav.container,
+        MODERN_THEME.navigation.bottomNavCompact.container,
         isNavigationVisible ? 'translate-y-0' : 'translate-y-full',
         MODERN_THEME.animations.transition.normal
       )}>
-        <div className={MODERN_THEME.navigation.bottomNav.grid}>
-          {navigationItems.map((item) => {
-            const Icon = item.icon;
-            const isActive = activeTab === item.id;
-
-            return (
-              <button
-                key={item.id}
-                onClick={() => onTabChange(item.id)}
-                className={cn(
-                  MODERN_THEME.navigation.bottomNav.item,
-                  isActive
-                    ? MODERN_THEME.navigation.bottomNav.active
-                    : MODERN_THEME.navigation.bottomNav.inactive,
-                  MODERN_THEME.touch.tap,
-                  MODERN_THEME.accessibility.focusRing
-                )}
-                aria-label={`Ir a ${item.label}`}
-              >
-                <div className="relative">
-                  <Icon className={cn(
-                    'w-5 h-5 mb-1',
-                    isActive ? 'text-blue-400' : 'text-gray-400'
-                  )} />
-                  {item.badge && item.badge > 0 && (
-                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                      {item.badge > 99 ? '99+' : item.badge}
-                    </span>
-                  )}
-                </div>
-              </button>
-            );
-          })}
-        </div>
+        {renderNavigation()}
       </nav>
 
       {/* Overlay para modales */}

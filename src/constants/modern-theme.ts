@@ -260,8 +260,45 @@ export const MODERN_TOUCH = {
 export const MODERN_NAVIGATION = {
   bottomNav: {
     container: 'sticky bottom-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-700/50 px-4 py-2 safe-bottom z-40',
-    grid: 'grid grid-cols-5 gap-1',
+    grid: 'grid grid-cols-6 gap-1',
     item: 'flex flex-col items-center justify-center py-2 px-1 rounded-lg transition-all duration-200 min-h-[48px]',
+    active: 'bg-blue-600/20 text-blue-400',
+    inactive: 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50'
+  },
+
+  // Navegación compacta con iconos y bordes redondeados
+  bottomNavCompact: {
+    container: 'sticky bottom-4 mx-4 bg-gray-900/80 backdrop-blur-md border border-gray-700/50 rounded-[2rem] shadow-2xl z-40',
+    grid: 'grid grid-cols-4 gap-2 p-4',
+    item: 'flex items-center justify-center p-3 rounded-[1.5rem] transition-all duration-200 min-h-[52px] relative',
+    active: 'bg-blue-600/20 text-blue-400 shadow-lg',
+    inactive: 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50'
+  },
+
+  // Menú "más" desplegable
+  moreMenu: {
+    container: 'absolute bottom-full left-0 right-0 mb-3 bg-gray-900/80 backdrop-blur-md border border-gray-700/50 rounded-[2rem] shadow-2xl p-4',
+    grid: 'grid grid-cols-2 gap-3',
+    item: 'flex flex-col items-center justify-center p-3 rounded-[1.5rem] transition-all duration-200 min-h-[60px]',
+    active: 'bg-blue-600/20 text-blue-400',
+    inactive: 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50'
+  },
+
+  // Navegación horizontal alternativa
+  bottomNavHorizontal: {
+    container: 'sticky bottom-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-700/50 px-2 py-2 safe-bottom z-40',
+    scrollContainer: 'overflow-x-auto scrollbar-hide',
+    grid: 'flex space-x-2 min-w-max px-2',
+    item: 'flex flex-col items-center justify-center py-2 px-3 rounded-lg transition-all duration-200 min-h-[48px] min-w-[60px]',
+    active: 'bg-blue-600/20 text-blue-400',
+    inactive: 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50'
+  },
+
+  // Navegación solo iconos
+  bottomNavIconsOnly: {
+    container: 'sticky bottom-0 bg-gray-900/95 backdrop-blur-md border-t border-gray-700/50 px-4 py-3 safe-bottom z-40',
+    grid: 'grid grid-cols-6 gap-2',
+    item: 'flex items-center justify-center p-2 rounded-lg transition-all duration-200 min-h-[44px]',
     active: 'bg-blue-600/20 text-blue-400',
     inactive: 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50'
   },
