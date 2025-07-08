@@ -5,6 +5,7 @@ import { formatNumber } from '../../utils/functions';
 import { Button } from '../button';
 import { Card, CardContent, CardHeader } from '../card';
 import { InfoTooltip } from '../tooltip';
+import { MuscleBalanceSummary } from './muscle-balance-summary';
 import type { ExerciseAnalyticsProps } from './types';
 
 /**
@@ -347,80 +348,13 @@ export const ExerciseAnalytics: React.FC<ExerciseAnalyticsProps> = ({ records })
         </CardContent>
       </Card>
 
-      {/* Resumen de categorías */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-white flex items-center">
-            <TrendingUp className="w-5 h-5 mr-2" />
-            Resumen por Categorías
-            {selectedCategory !== 'all' && (
-              <span className="ml-2 text-sm font-normal text-gray-400">
-                (filtrado por {categoriesWithCount.find(cat => cat.id === selectedCategory)?.name})
-              </span>
-            )}
-            <InfoTooltip
-              content="Distribución del volumen de entrenamiento entre diferentes grupos musculares. Para ejercicios con múltiples categorías, el volumen se distribuye proporcionalmente."
-              position="top"
-              className="ml-2"
-            />
-          </h3>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {Object.entries(
-              (selectedCategory === 'all' ? exerciseAnalysis : allExercises).reduce((acc, exercise) => {
-                // Para ejercicios con múltiples categorías, distribuir proporcionalmente
-                const categoriesCount = exercise.categories.length;
-                const volumePerCategory = exercise.totalVolume / categoriesCount;
-                const exercisePerCategory = 1 / categoriesCount;
-
-                exercise.categories.forEach(category => {
-                  if (!acc[category]) {
-                    acc[category] = { volume: 0, exercises: 0 };
-                  }
-                  acc[category].volume += volumePerCategory;
-                  acc[category].exercises += exercisePerCategory;
-                });
-
-                return acc;
-              }, {} as Record<string, { volume: number; exercises: number }>)
-            )
-              .sort(([, a], [, b]) => b.volume - a.volume)
-              .map(([category, data]) => {
-                const totalVolume = (selectedCategory === 'all' ? exerciseAnalysis : allExercises).reduce((sum, ex) => sum + ex.totalVolume, 0);
-                const percentage = totalVolume > 0 ? (data.volume / totalVolume) * 100 : 0;
-
-                return (
-                  <div key={category} className="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg">
-                    <div className="flex-1">
-                      <h4 className="font-medium text-white">{category}</h4>
-                      <p className="text-sm text-gray-400">
-                        {data.exercises === Math.floor(data.exercises) ?
-                          `${Math.floor(data.exercises)} ejercicio${Math.floor(data.exercises) !== 1 ? 's' : ''}` :
-                          `${data.exercises.toFixed(1)} ejercicios (compartidos)`
-                        }
-                      </p>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-bold text-blue-400">
-                        {formatNumber(data.volume)} kg
-                      </p>
-                      <p className="text-xs text-gray-400">{percentage.toFixed(1)}%</p>
-                    </div>
-                    <div className="w-24 ml-4">
-                      <div className="w-full bg-gray-700 rounded-full h-2">
-                        <div
-                          className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                          style={{ width: `${percentage}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                );
-              })}
-          </div>
-        </CardContent>
-      </Card>
+      {/* Resumen de Balance Muscular Mejorado */}
+      <MuscleBalanceSummary
+        records={selectedCategory === 'all' ? records : records.filter(record =>
+          record.exercise?.categories?.includes(selectedCategory)
+        )}
+        selectedCategory={selectedCategory}
+      />
     </div>
   );
 }; 

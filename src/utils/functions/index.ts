@@ -35,3 +35,15 @@ export {
   getLastWeekRecords, getThisWeekRecords
 } from './advanced-analysis';
 
+// Re-exportar funciones avanzadas de análisis de fuerza
+export {
+  calculateAdvancedStrengthAnalysis,
+  calculateEnhanced1RMPrediction
+} from './stats-utils';
+
+// Re-exportar tipos de análisis de fuerza
+export type {
+  AdvancedStrengthAnalysis,
+  Enhanced1RMPrediction
+} from './stats-utils';
+
