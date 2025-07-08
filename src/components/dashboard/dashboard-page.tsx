@@ -2,10 +2,14 @@ import React from 'react';
 import { LoadingSpinner } from '../loading-spinner';
 import { OfflineWarning } from '../offline-warning';
 import {
+  AdvancedTab,
+  CategoryTab,
   DashboardContent,
   DashboardEmptyState,
   DashboardFilters,
-  DashboardTabNavigation
+  DashboardTabNavigation,
+  PerformanceTab,
+  TrendsTab
 } from './components';
 import { useDashboardData, useDashboardFilters } from './hooks';
 
@@ -39,6 +43,38 @@ export const DashboardPage: React.FC = () => {
     );
   }
 
+  // Renderizar contenido según el tab activo
+  const renderTabContent = () => {
+    if (filteredRecords.length === 0) {
+      return <DashboardEmptyState isOnline={isOnline} />;
+    }
+
+    switch (activeTab) {
+      case 'overview':
+        return (
+          <DashboardContent
+            filteredRecords={filteredRecords}
+            onDeleteRecord={handleDeleteRecord}
+          />
+        );
+      case 'performance':
+        return <PerformanceTab records={filteredRecords} />;
+      case 'categories':
+        return <CategoryTab records={filteredRecords} />;
+      case 'trends':
+        return <TrendsTab records={filteredRecords} />;
+      case 'advanced':
+        return <AdvancedTab records={filteredRecords} />;
+      default:
+        return (
+          <DashboardContent
+            filteredRecords={filteredRecords}
+            onDeleteRecord={handleDeleteRecord}
+          />
+        );
+    }
+  };
+
   return (
     <div className="space-y-6">
       {/* Warning de conexión */}
@@ -68,14 +104,7 @@ export const DashboardPage: React.FC = () => {
       />
 
       {/* Contenido principal */}
-      {filteredRecords.length === 0 ? (
-        <DashboardEmptyState isOnline={isOnline} />
-      ) : (
-        <DashboardContent
-          filteredRecords={filteredRecords}
-          onDeleteRecord={handleDeleteRecord}
-        />
-      )}
+      {renderTabContent()}
     </div>
   );
 }; 

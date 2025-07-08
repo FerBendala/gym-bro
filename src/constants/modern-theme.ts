@@ -268,7 +268,7 @@ export const MODERN_NAVIGATION = {
 
   // Navegación compacta con iconos y bordes redondeados
   bottomNavCompact: {
-    container: 'sticky bottom-4 mx-4 bg-gray-900/80 backdrop-blur-md border border-gray-700/50 rounded-[2rem] shadow-2xl z-40',
+    container: 'sticky bottom-4 mx-6 bg-gray-900/80 backdrop-blur-md border border-gray-700/50 rounded-[2rem] shadow-2xl z-40',
     grid: 'grid grid-cols-4 gap-2 p-4',
     item: 'flex items-center justify-center p-3 rounded-[1.5rem] transition-all duration-200 min-h-[52px] relative',
     active: 'bg-blue-600/20 text-blue-400 shadow-lg',
