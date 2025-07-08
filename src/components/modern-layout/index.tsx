@@ -131,12 +131,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
     }
   };
 
-  // Cerrar menú al hacer click fuera
-  const handleOverlayClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowMoreMenu(false);
-  };
-
   // Función para renderizar la navegación según el tipo
   const renderNavigation = () => {
     // Por defecto usar el diseño compacto
@@ -162,14 +156,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
       default: // 'grid' y 'compact' - usar diseño compacto
         return (
           <div className="relative">
-            {/* Overlay para cerrar el menú */}
-            {showMoreMenu && (
-              <div
-                className="fixed inset-0 bg-black/30 backdrop-blur-sm z-30"
-                onClick={handleOverlayClick}
-              />
-            )}
-
             <div className={MODERN_THEME.navigation.bottomNavCompact.grid}>
               {items.map((item) => renderNavItemCompact(item))}
             </div>
