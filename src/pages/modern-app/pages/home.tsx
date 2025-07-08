@@ -62,7 +62,7 @@ export const ModernHome: React.FC<ModernHomeProps> = ({
 
             {showDaySelector && (
               <div className={cn(
-                'absolute top-full right-0 mt-2 bg-gray-900/95 backdrop-blur-md border border-gray-700/50 rounded-xl shadow-2xl z-50 min-w-[200px]',
+                'absolute top-full right-0 mt-2 bg-gray-900/95 backdrop-blur-md border border-gray-700/50 rounded-xl shadow-2xl z-[55] min-w-[200px]',
                 MODERN_THEME.animations.slide.down
               )}>
                 <div className="p-2">

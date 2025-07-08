@@ -24,3 +24,10 @@ export * from './url-validation';
 // Tipos
 export type { ChartDimensions, DataRange } from './chart-utils';
 
+// Re-exportar funciones específicas de stats-utils para compatibilidad
+export {
+  calculateAverageStrengthIndex, calculateEstimated1RM,
+  calculateStrengthIndex,
+  calculateStrengthProgress
+} from './stats-utils';
+

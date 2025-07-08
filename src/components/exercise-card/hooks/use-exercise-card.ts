@@ -13,7 +13,7 @@ export const useExerciseCard = (
   exerciseObj?: Exercise,
   workoutRecords?: WorkoutRecord[]
 ): UseExerciseCardReturn & { lastRecord: WorkoutRecord | null, loadingLast: boolean } => {
-  const [showForm, setShowForm] = useState(false);
+  const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [lastRecord, setLastRecord] = useState<WorkoutRecord | null>(null);
@@ -55,16 +55,16 @@ export const useExerciseCard = (
     setLoadingLast(false);
   };
 
-  const toggleForm = () => {
-    setShowForm(!showForm);
-    if (showForm) {
+  const toggleModal = () => {
+    setShowModal(!showModal);
+    if (showModal) {
       formMethods.reset();
       advancedFormMethods.reset();
     }
   };
 
-  const resetForm = () => {
-    setShowForm(false);
+  const resetModal = () => {
+    setShowModal(false);
     formMethods.reset();
     advancedFormMethods.reset();
   };
@@ -77,7 +77,7 @@ export const useExerciseCard = (
     setLoading(true);
     try {
       await onRecord(assignmentId, data);
-      resetForm();
+      resetModal();
       // Volver a consultar el último registro tras guardar
       fetchLastRecord();
     } catch (error) {
@@ -88,20 +88,20 @@ export const useExerciseCard = (
     }
   };
 
-  // Obtener el último registro del ejercicio al abrir el formulario o cuando cambian los registros
+  // Obtener el último registro del ejercicio al abrir el modal o cuando cambian los registros
   useEffect(() => {
     fetchLastRecord();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exerciseId, showForm, workoutRecords]);
+  }, [exerciseId, showModal, workoutRecords]);
 
   return {
-    showForm,
+    showModal,
     loading,
     showPreview,
-    toggleForm,
+    toggleModal,
     setShowPreview,
     handleSubmit,
-    resetForm,
+    resetModal,
     formMethods,
     advancedFormMethods,
     lastRecord,

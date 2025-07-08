@@ -65,7 +65,7 @@ export const ChartStatistics: React.FC<ChartStatisticsProps> = ({
             <p className="text-sm text-gray-400">Progreso promedio</p>
           </div>
           <InfoTooltip
-            content="Incremento promedio de peso por ejercicio desde el primer al último registro."
+            content="Incremento promedio de fuerza estimada (1RM) por ejercicio, considerando peso y repeticiones."
             position="left"
           />
         </div>
@@ -83,7 +83,7 @@ export const ChartStatistics: React.FC<ChartStatisticsProps> = ({
             </p>
           </div>
           <InfoTooltip
-            content={`Tu mejor progreso es en ${bestProgress.exercise} con un incremento de ${bestProgress.improvement.toFixed(1)}kg.`}
+            content={`Tu mejor progreso es en ${bestProgress.exercise} con un incremento de ${bestProgress.improvement.toFixed(1)}kg de fuerza estimada (1RM).`}
             position="left"
           />
         </div>

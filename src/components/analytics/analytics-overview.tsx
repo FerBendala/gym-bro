@@ -58,16 +58,23 @@ export const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ records })
       r.date.getTime() >= lastDate.getTime() - oneWeekMs
     );
 
-    const firstWeekAvgWeight = firstWeekRecords.length > 0
-      ? firstWeekRecords.reduce((sum, r) => sum + r.weight, 0) / firstWeekRecords.length
+    // Calcular progreso usando 1RM estimado para mayor precisión
+    const firstWeekAvg1RM = firstWeekRecords.length > 0
+      ? firstWeekRecords.reduce((sum, r) => {
+        const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+        return sum + oneRM;
+      }, 0) / firstWeekRecords.length
       : 0;
-    const lastWeekAvgWeight = lastWeekRecords.length > 0
-      ? lastWeekRecords.reduce((sum, r) => sum + r.weight, 0) / lastWeekRecords.length
+    const lastWeekAvg1RM = lastWeekRecords.length > 0
+      ? lastWeekRecords.reduce((sum, r) => {
+        const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+        return sum + oneRM;
+      }, 0) / lastWeekRecords.length
       : 0;
 
-    const weightProgress = lastWeekAvgWeight - firstWeekAvgWeight;
-    const weightProgressPercent = firstWeekAvgWeight > 0
-      ? (weightProgress / firstWeekAvgWeight) * 100
+    const weightProgress = lastWeekAvg1RM - firstWeekAvg1RM;
+    const weightProgressPercent = firstWeekAvg1RM > 0
+      ? (weightProgress / firstWeekAvg1RM) * 100
       : 0;
 
     return [
@@ -103,12 +110,12 @@ export const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ records })
       },
       {
         id: 'average-weight',
-        name: 'Peso Promedio',
+        name: 'Fuerza Promedio',
         value: averageWeight,
         unit: 'kg',
         trend: weightProgress > 0 ? 'up' : weightProgress < 0 ? 'down' : 'stable',
         trendValue: weightProgressPercent,
-        description: 'Peso promedio utilizado en todos los ejercicios',
+        description: 'Progreso de fuerza considerando peso y repeticiones',
         color: 'yellow'
       },
       {

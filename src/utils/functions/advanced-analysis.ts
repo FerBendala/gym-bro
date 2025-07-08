@@ -275,6 +275,12 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
       const totalVolume = periodRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
       const avgWeight = periodRecords.reduce((sum, r) => sum + r.weight, 0) / periodRecords.length;
 
+      // Calcular promedio de 1RM estimado para mejor comparación de fuerza
+      const avg1RM = periodRecords.reduce((sum, r) => {
+        const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+        return sum + oneRM;
+      }, 0) / periodRecords.length;
+
       // Comparar con período anterior del mismo tamaño
       const prevStartDate = subDays(startDate, period.days);
       const prevRecords = records.filter(r => {
@@ -288,10 +294,13 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
 
       if (prevRecords.length > 0) {
         const prevVolume = prevRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-        const prevAvgWeight = prevRecords.reduce((sum, r) => sum + r.weight, 0) / prevRecords.length;
+        const prevAvg1RM = prevRecords.reduce((sum, r) => {
+          const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+          return sum + oneRM;
+        }, 0) / prevRecords.length;
 
         volumeChange = prevVolume > 0 ? ((totalVolume - prevVolume) / prevVolume) * 100 : 0;
-        strengthChange = prevAvgWeight > 0 ? ((avgWeight - prevAvgWeight) / prevAvgWeight) * 100 : 0;
+        strengthChange = prevAvg1RM > 0 ? ((avg1RM - prevAvg1RM) / prevAvg1RM) * 100 : 0;
         improvement = (volumeChange + strengthChange) / 2;
       }
 
@@ -338,8 +347,12 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
 
     if (weekRecords.length > 0) {
       const volume = weekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-      const avgWeight = weekRecords.reduce((sum, r) => sum + r.weight, 0) / weekRecords.length;
-      weeklyData.push({ volume, weight: avgWeight });
+      // Usar 1RM promedio estimado en lugar de peso promedio para mejor predicción
+      const avg1RM = weekRecords.reduce((sum, r) => {
+        const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+        return sum + oneRM;
+      }, 0) / weekRecords.length;
+      weeklyData.push({ volume, weight: avg1RM });
     }
   }
 
@@ -366,9 +379,9 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
   // Tasa de crecimiento mensual
   const monthlyGrowthRate = weightTrend * 4; // 4 semanas por mes
 
-  // Predicción de PR
-  const currentMax = Math.max(...records.map(r => r.weight));
-  const predictedPRWeight = currentMax + (weightTrend * 2); // 2 semanas de progreso
+  // Predicción de PR usando 1RM estimado máximo
+  const current1RMMax = Math.max(...records.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30)));
+  const predictedPRWeight = current1RMMax + (weightTrend * 2); // 2 semanas de progreso
   const confidence = Math.min(95, Math.max(10, 70 - Math.abs(weeklyData.length - 6) * 10));
 
   // Riesgo de meseta

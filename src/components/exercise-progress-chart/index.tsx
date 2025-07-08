@@ -39,8 +39,8 @@ export const ExerciseProgressChart: React.FC<ExerciseProgressChartProps> = ({ re
             <TrendingUp className="w-5 h-5 text-blue-400" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-white">Progreso de Peso</h3>
-            <p className="text-sm text-gray-400">Evolución temporal de tus ejercicios</p>
+            <h3 className="text-lg font-semibold text-white">Progreso de Fuerza</h3>
+            <p className="text-sm text-gray-400">Evolución considerando peso y repeticiones (1RM estimado)</p>
           </div>
         </div>
 
@@ -83,7 +83,7 @@ export const ExerciseProgressChart: React.FC<ExerciseProgressChartProps> = ({ re
         <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-700">
           <ChartLegend items={legendItems} />
           <InfoTooltip
-            content="Cada línea representa un ejercicio diferente. Los puntos muestran el peso máximo utilizado en cada fecha de entrenamiento. Pasa el cursor sobre los puntos para ver detalles."
+            content="Cada línea muestra el progreso de fuerza estimada (1RM) por ejercicio, considerando tanto el peso como las repeticiones. Pasa el cursor sobre los puntos para ver detalles."
             position="left"
           />
         </div>
@@ -92,19 +92,19 @@ export const ExerciseProgressChart: React.FC<ExerciseProgressChartProps> = ({ re
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-gray-400">
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <span>Líneas ascendentes = Progreso positivo</span>
+            <span>Líneas ascendentes = Mejora en fuerza</span>
           </div>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-            <span>Áreas sombreadas = Volumen de entrenamiento</span>
+            <span>Considera peso × repeticiones</span>
           </div>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span>Puntos más grandes = Sesiones recientes</span>
+            <span>1RM = Fórmula de Epley</span>
           </div>
           <div className="flex items-center space-x-2">
             <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-            <span>Hover para detalles de cada punto</span>
+            <span>Hover para ver peso real + estimado</span>
           </div>
         </div>
       </div>

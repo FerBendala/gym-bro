@@ -4,7 +4,7 @@ import type { WorkoutRecord } from '../../interfaces';
 import { Card, CardContent } from '../card';
 import { OfflineWarning } from '../offline-warning';
 import { URLPreview } from '../url-preview';
-import { ExerciseCardForm, ExerciseCardHeader } from './components';
+import { ExerciseCardHeader, ExerciseModal } from './components';
 import { LastWorkoutSummary } from './components/last-workout-summary';
 import { useExerciseCard } from './hooks';
 import type { ExerciseCardProps } from './types';
@@ -19,13 +19,13 @@ interface ExerciseCardWithRecordsProps extends ExerciseCardProps {
 
 export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignment, onRecord, disabled = false, isTrainedToday = false, workoutRecords }) => {
   const {
-    showForm,
+    showModal,
     loading,
     showPreview,
-    toggleForm,
+    toggleModal,
     setShowPreview,
     handleSubmit,
-    resetForm,
+    resetModal,
     formMethods,
     advancedFormMethods,
     lastRecord,
@@ -42,8 +42,7 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignmen
           <ExerciseCardHeader
             assignment={assignment}
             disabled={disabled}
-            showForm={showForm}
-            onToggleForm={toggleForm}
+            onToggleModal={toggleModal}
             onShowPreview={() => setShowPreview(true)}
           />
 
@@ -72,19 +71,20 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignmen
 
           {/* Resumen del último entrenamiento */}
           <LastWorkoutSummary record={lastRecord} />
-
-          {/* Formulario modular */}
-          {showForm && !disabled && (
-            <ExerciseCardForm
-              loading={loading}
-              onSubmit={onSubmitForm}
-              onCancel={resetForm}
-              formMethods={formMethods}
-              advancedFormMethods={advancedFormMethods}
-            />
-          )}
         </CardContent>
-      </Card >
+      </Card>
+
+      {/* Modal para registro de entrenamiento */}
+      <ExerciseModal
+        isOpen={showModal}
+        onClose={resetModal}
+        assignment={assignment}
+        loading={loading}
+        onSubmit={onSubmitForm}
+        formMethods={formMethods}
+        advancedFormMethods={advancedFormMethods}
+        lastRecord={lastRecord}
+      />
 
       {/* Modal de vista previa completa */}
       {

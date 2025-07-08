@@ -22,6 +22,7 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
       const weekKey = weekStart.toISOString().split('T')[0];
 
       const volume = record.weight * record.reps * record.sets;
+      const estimated1RM = record.weight * (1 + Math.min(record.reps, 20) / 30);
 
       if (!weeklyData.has(weekKey)) {
         weeklyData.set(weekKey, { totalVolume: 0, avgWeight: 0, workouts: 0 });
@@ -29,7 +30,8 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
 
       const week = weeklyData.get(weekKey)!;
       week.totalVolume += volume;
-      week.avgWeight = (week.avgWeight * week.workouts + record.weight) / (week.workouts + 1);
+      // Usar 1RM estimado para el promedio de fuerza
+      week.avgWeight = (week.avgWeight * week.workouts + estimated1RM) / (week.workouts + 1);
       week.workouts += 1;
     });
 
@@ -39,7 +41,7 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
         date: new Date(weekKey),
         value: data.totalVolume,
         label: `${formatNumber(data.totalVolume)} kg`,
-        details: `${data.workouts} entrenamientos • Peso promedio: ${formatNumber(data.avgWeight)} kg`
+        details: `${data.workouts} entrenamientos • Fuerza promedio: ${formatNumber(data.avgWeight)} kg (1RM est.)`
       }))
       .sort((a, b) => a.date.getTime() - b.date.getTime());
   }, [records]);

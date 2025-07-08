@@ -233,6 +233,66 @@ export const calculateProgress = (oldValue: number, newValue: number): number =>
 };
 
 /**
+ * Calcula el 1RM estimado usando la fórmula de Epley
+ * 1RM = peso × (1 + repeticiones/30)
+ */
+export const calculateEstimated1RM = (weight: number, reps: number): number => {
+  if (weight === 0 || reps === 0) return 0;
+  // Limitar repeticiones a máximo 20 para evitar estimaciones irreales
+  const adjustedReps = Math.min(reps, 20);
+  return weight * (1 + adjustedReps / 30);
+};
+
+/**
+ * Calcula el índice de fuerza considerando peso, repeticiones y series
+ * Combina 1RM estimado con el volumen total
+ */
+export const calculateStrengthIndex = (record: WorkoutRecord): number => {
+  const oneRM = calculateEstimated1RM(record.weight, record.reps);
+  const volume = calculateWorkoutVolume(record);
+
+  // Combinar 1RM (70%) con volumen relativo (30%)
+  // El volumen se normaliza dividiendo por series para evitar sesgo por número de series
+  const normalizedVolume = volume / record.sets;
+  return (oneRM * 0.7) + (normalizedVolume * 0.3);
+};
+
+/**
+ * Calcula el progreso de fuerza considerando peso y repeticiones
+ * Compara los índices de fuerza entre el primer y último registro
+ */
+export const calculateStrengthProgress = (firstRecord: WorkoutRecord, lastRecord: WorkoutRecord): {
+  weightProgress: number;
+  strengthProgress: number;
+  oneRMProgress: number;
+} => {
+  const weightProgress = calculateProgress(firstRecord.weight, lastRecord.weight);
+
+  const firstStrengthIndex = calculateStrengthIndex(firstRecord);
+  const lastStrengthIndex = calculateStrengthIndex(lastRecord);
+  const strengthProgress = calculateProgress(firstStrengthIndex, lastStrengthIndex);
+
+  const first1RM = calculateEstimated1RM(firstRecord.weight, firstRecord.reps);
+  const last1RM = calculateEstimated1RM(lastRecord.weight, lastRecord.reps);
+  const oneRMProgress = calculateProgress(first1RM, last1RM);
+
+  return {
+    weightProgress,
+    strengthProgress,
+    oneRMProgress
+  };
+};
+
+/**
+ * Calcula el promedio de índices de fuerza para una lista de registros
+ */
+export const calculateAverageStrengthIndex = (records: WorkoutRecord[]): number => {
+  if (records.length === 0) return 0;
+  const strengthIndices = records.map(record => calculateStrengthIndex(record));
+  return calculateAverage(strengthIndices);
+};
+
+/**
  * Formatea un número como volumen (con separadores de miles)
  */
 export const formatVolume = (volume: number): string => {

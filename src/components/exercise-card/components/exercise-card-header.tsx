@@ -9,8 +9,7 @@ import type { ExerciseCardHeaderProps } from '../types';
 export const ExerciseCardHeader: React.FC<ExerciseCardHeaderProps> = ({
   assignment,
   disabled,
-  showForm,
-  onToggleForm,
+  onToggleModal,
   onShowPreview
 }) => {
   return (
@@ -44,11 +43,11 @@ export const ExerciseCardHeader: React.FC<ExerciseCardHeaderProps> = ({
         <Button
           variant="ghost"
           size="sm"
-          onClick={onToggleForm}
+          onClick={onToggleModal}
           className="flex-shrink-0 p-1 min-w-0"
           disabled={disabled}
         >
-          <Plus className={`w-3.5 h-3.5 transition-transform ${showForm ? 'rotate-45' : ''}`} />
+          <Plus className="w-3.5 h-3.5" />
         </Button>
       </div>
     </div>

@@ -56,10 +56,11 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
 
         if (exerciseRecords.length < 2) return null;
 
-        // Crear el área bajo la línea
+        // Crear el área bajo la línea usando 1RM estimado
         const areaPath = exerciseRecords.map((record, index) => {
+          const estimated1RM = record.weight * (1 + Math.min(record.reps, 20) / 30);
           const x = getChartX(record.date.getTime(), dateRange, dimensions);
-          const y = getChartY(record.weight, weightRange, dimensions);
+          const y = getChartY(estimated1RM, weightRange, dimensions);
 
           if (index === 0) {
             const bottomY = dimensions.height - dimensions.padding;
@@ -90,8 +91,9 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
         if (exerciseRecords.length < 2) {
           // Punto único con efecto glow
           const record = exerciseRecords[0];
+          const estimated1RM = record.weight * (1 + Math.min(record.reps, 20) / 30);
           const x = getChartX(record.date.getTime(), dateRange, dimensions);
-          const y = getChartY(record.weight, weightRange, dimensions);
+          const y = getChartY(estimated1RM, weightRange, dimensions);
 
           return (
             <g key={exerciseName}>
@@ -110,10 +112,11 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
           );
         }
 
-        // Crear la línea de progreso
+        // Crear la línea de progreso usando 1RM estimado
         const pathData = exerciseRecords.map((record, index) => {
+          const estimated1RM = record.weight * (1 + Math.min(record.reps, 20) / 30);
           const x = getChartX(record.date.getTime(), dateRange, dimensions);
-          const y = getChartY(record.weight, weightRange, dimensions);
+          const y = getChartY(estimated1RM, weightRange, dimensions);
           return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
         }).join(' ');
 
@@ -146,8 +149,9 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
 
             {/* Puntos */}
             {exerciseRecords.map((record, pointIndex) => {
+              const estimated1RM = record.weight * (1 + Math.min(record.reps, 20) / 30);
               const x = getChartX(record.date.getTime(), dateRange, dimensions);
-              const y = getChartY(record.weight, weightRange, dimensions);
+              const y = getChartY(estimated1RM, weightRange, dimensions);
 
               return (
                 <g key={pointIndex}>
@@ -178,6 +182,7 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
                         data: {
                           exercise: exerciseName,
                           weight: record.weight,
+                          estimated1RM: estimated1RM,
                           date: record.date,
                           reps: record.reps,
                           sets: record.sets
@@ -199,17 +204,20 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
       {/* Tooltip flotante */}
       {hoveredPoint && (
         <foreignObject
-          x={Math.min(hoveredPoint.x - dimensions.padding, dimensions.width - 200)}
-          y={Math.max(hoveredPoint.y - 80, 10)}
-          width="200"
-          height="80"
+          x={Math.min(hoveredPoint.x - dimensions.padding, dimensions.width - 220)}
+          y={Math.max(hoveredPoint.y - 90, 10)}
+          width="220"
+          height="90"
         >
           <div className="bg-gray-900 border border-gray-600 rounded-lg p-3 shadow-lg">
             <p className="text-white font-medium text-sm truncate">
               {hoveredPoint.data.exercise}
             </p>
+            <p className="text-blue-300 text-xs font-medium">
+              1RM Estimado: {hoveredPoint.data.estimated1RM.toFixed(1)}kg
+            </p>
             <p className="text-gray-300 text-xs">
-              {hoveredPoint.data.weight}kg × {hoveredPoint.data.reps} × {hoveredPoint.data.sets}
+              Peso real: {hoveredPoint.data.weight}kg × {hoveredPoint.data.reps} × {hoveredPoint.data.sets}
             </p>
             <p className="text-gray-400 text-xs">
               {hoveredPoint.data.date.toLocaleDateString()}

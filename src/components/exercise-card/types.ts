@@ -17,8 +17,7 @@ export interface ExerciseCardProps {
 export interface ExerciseCardHeaderProps {
   assignment: ExerciseAssignment;
   disabled: boolean;
-  showForm: boolean;
-  onToggleForm: () => void;
+  onToggleModal: () => void;
   onShowPreview: () => void;
 }
 
@@ -26,7 +25,7 @@ export interface ExerciseCardHeaderProps {
  * Estado del hook use-exercise-card
  */
 export interface ExerciseCardState {
-  showForm: boolean;
+  showModal: boolean;
   loading: boolean;
   showPreview: boolean;
 }
@@ -35,10 +34,24 @@ export interface ExerciseCardState {
  * Return type del hook use-exercise-card
  */
 export interface UseExerciseCardReturn extends ExerciseCardState {
-  toggleForm: () => void;
+  toggleModal: () => void;
   setShowPreview: (show: boolean) => void;
   handleSubmit: (assignmentId: string, data: WorkoutFormData | WorkoutFormDataAdvanced, onRecord: ExerciseCardProps['onRecord']) => Promise<void>;
-  resetForm: () => void;
+  resetModal: () => void;
   formMethods: UseFormReturn<WorkoutFormData>;
   advancedFormMethods: UseFormReturn<WorkoutFormDataAdvanced>;
+}
+
+/**
+ * Props para el modal de ejercicios
+ */
+export interface ExerciseModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  assignment: ExerciseAssignment;
+  loading: boolean;
+  onSubmit: (data: WorkoutFormData | WorkoutFormDataAdvanced) => Promise<void>;
+  formMethods: UseFormReturn<WorkoutFormData>;
+  advancedFormMethods: UseFormReturn<WorkoutFormDataAdvanced>;
+  lastRecord?: import('../../interfaces').WorkoutRecord | null;
 } 

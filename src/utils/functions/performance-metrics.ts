@@ -21,8 +21,8 @@ export interface WeeklyProgress {
   week: string;
   volume: number;
   workouts: number;
-  avgWeight: number;
-  maxWeight: number;
+  avgWeight: number; // Ahora representa 1RM estimado promedio
+  maxWeight: number; // Ahora representa 1RM estimado máximo
 }
 
 /**
@@ -128,9 +128,12 @@ export const calculateWeeklyProgress = (records: WorkoutRecord[], weeksCount: nu
         sum + (record.weight * record.reps * record.sets), 0
       );
 
-      const weights = weekRecords.map(record => record.weight);
-      const avgWeight = weights.reduce((sum, weight) => sum + weight, 0) / weights.length;
-      const maxWeight = Math.max(...weights);
+      // Calcular 1RM estimado para métricas más precisas
+      const estimated1RMs = weekRecords.map(record =>
+        record.weight * (1 + Math.min(record.reps, 20) / 30)
+      );
+      const avgWeight = estimated1RMs.reduce((sum, oneRM) => sum + oneRM, 0) / estimated1RMs.length;
+      const maxWeight = Math.max(...estimated1RMs);
 
       weeks.push({
         week: format(weekStart, 'dd/MM', { locale: es }),
@@ -276,7 +279,7 @@ export const calculateVolumeTrend = (records: WorkoutRecord[]): number => {
 };
 
 /**
- * Calcula ganancia de fuerza
+ * Calcula ganancia de fuerza considerando peso y repeticiones
  */
 export const calculateStrengthGains = (records: WorkoutRecord[]): number => {
   if (records.length === 0) return 0;
@@ -296,15 +299,18 @@ export const calculateStrengthGains = (records: WorkoutRecord[]): number => {
 
   if (lastMonthRecords.length === 0 || previousMonthRecords.length === 0) return 0;
 
-  const lastMonthAvgWeight = lastMonthRecords.reduce((sum, record) =>
-    sum + record.weight, 0
-  ) / lastMonthRecords.length;
+  // Calcular promedio de índices de fuerza (considera peso y repeticiones)
+  const lastMonthAvgStrength = lastMonthRecords.reduce((sum, record) => {
+    const oneRM = record.weight * (1 + Math.min(record.reps, 20) / 30);
+    return sum + oneRM;
+  }, 0) / lastMonthRecords.length;
 
-  const previousMonthAvgWeight = previousMonthRecords.reduce((sum, record) =>
-    sum + record.weight, 0
-  ) / previousMonthRecords.length;
+  const previousMonthAvgStrength = previousMonthRecords.reduce((sum, record) => {
+    const oneRM = record.weight * (1 + Math.min(record.reps, 20) / 30);
+    return sum + oneRM;
+  }, 0) / previousMonthRecords.length;
 
-  return Math.round(((lastMonthAvgWeight - previousMonthAvgWeight) / previousMonthAvgWeight) * 100);
+  return Math.round(((lastMonthAvgStrength - previousMonthAvgStrength) / previousMonthAvgStrength) * 100);
 };
 
 /**
