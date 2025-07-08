@@ -199,13 +199,15 @@ export const calculateConsistency = (records: WorkoutRecord[]): ConsistencyAnaly
   }
   longestStreak = Math.max(longestStreak, tempStreak, currentStreak);
 
-  // Entrenamientos esta semana
+  // Entrenamientos esta semana (lunes a domingo)
   const thisWeekStart = startOfWeek(today, { locale: es });
-  const workoutsThisWeek = records.filter(record =>
-    new Date(record.date) >= thisWeekStart
-  ).length;
+  const thisWeekEnd = endOfWeek(today, { locale: es });
+  const workoutsThisWeek = records.filter(record => {
+    const recordDate = new Date(record.date);
+    return recordDate >= thisWeekStart && recordDate <= thisWeekEnd;
+  }).length;
 
-  // Entrenamientos semana pasada
+  // Entrenamientos semana pasada (lunes a domingo)
   const lastWeekStart = startOfWeek(subWeeks(today, 1), { locale: es });
   const lastWeekEnd = endOfWeek(lastWeekStart, { locale: es });
   const workoutsLastWeek = records.filter(record => {

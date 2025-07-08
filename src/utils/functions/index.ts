@@ -31,3 +31,8 @@ export {
   calculateStrengthProgress
 } from './stats-utils';
 
+// Re-exportar funciones específicas de advanced-analysis para consistencia
+export {
+  getLastWeekRecords, getThisWeekRecords
+} from './advanced-analysis';
+

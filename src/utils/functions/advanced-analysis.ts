@@ -1,4 +1,5 @@
-import { differenceInDays, endOfWeek, startOfWeek, subDays, subWeeks } from 'date-fns';
+import { differenceInDays, endOfWeek, startOfWeek, subWeeks } from 'date-fns';
+import { es } from 'date-fns/locale';
 import type { WorkoutRecord } from '../../interfaces';
 
 /**
@@ -24,7 +25,7 @@ export interface TrainingEfficiency {
 }
 
 /**
- * Interfaz para análisis de fatiga
+ * Interfaz para análisis de fatiga y recuperación
  */
 export interface FatigueAnalysis {
   fatigueIndex: number; // 0-100, donde 100 es fatiga máxima
@@ -32,6 +33,23 @@ export interface FatigueAnalysis {
   volumeDropIndicators: boolean;
   overreachingRisk: 'Bajo' | 'Medio' | 'Alto';
   restRecommendation: string;
+  // Nuevas métricas
+  fatigueLevel: 'Muy Baja' | 'Baja' | 'Moderada' | 'Alta' | 'Muy Alta';
+  recoveryRate: number; // 0-100, qué tan bien te recuperas
+  workloadTrend: 'Aumentando' | 'Estable' | 'Disminuyendo';
+  recoveryScore: number; // 0-100, score general de recuperación
+  stressFactors: {
+    volumeStress: number;
+    frequencyStress: number;
+    intensityStress: number;
+    recoveryStress: number;
+  };
+  recoveryRecommendations: string[];
+  predictedRecoveryTime: number; // Horas estimadas para recuperación completa
+  fatigueHistory: {
+    trend: 'Mejorando' | 'Estable' | 'Empeorando';
+    consistency: number; // 0-100, qué tan consistente es tu recuperación
+  };
 }
 
 /**
@@ -48,7 +66,7 @@ export interface PeriodComparison {
 }
 
 /**
- * Interfaz para predicciones
+ * Interfaz para predicción de progreso
  */
 export interface ProgressPrediction {
   nextWeekVolume: number;
@@ -56,6 +74,12 @@ export interface ProgressPrediction {
   monthlyGrowthRate: number;
   predictedPR: { weight: number; confidence: number };
   plateauRisk: number; // 0-100
+  trendAnalysis: 'mejorando' | 'estable' | 'empeorando' | 'insuficiente';
+  timeToNextPR: number; // En semanas
+  confidenceLevel: number; // 0-100
+  volumeTrend: number; // Tendencia semanal de volumen
+  strengthTrend: number; // Tendencia semanal de fuerza
+  recommendations: string[];
 }
 
 /**
@@ -84,23 +108,88 @@ export interface AdvancedAnalysis {
 }
 
 /**
+ * Obtiene registros de la semana actual (lunes a domingo)
+ */
+export const getThisWeekRecords = (records: WorkoutRecord[]): WorkoutRecord[] => {
+  const now = new Date();
+  const weekStart = startOfWeek(now, { locale: es }); // Lunes
+  const weekEnd = endOfWeek(now, { locale: es }); // Domingo
+
+  return records.filter(record => {
+    const recordDate = new Date(record.date);
+    return recordDate >= weekStart && recordDate <= weekEnd;
+  });
+};
+
+/**
+ * Obtiene registros de la semana pasada (lunes a domingo)
+ */
+export const getLastWeekRecords = (records: WorkoutRecord[]): WorkoutRecord[] => {
+  const now = new Date();
+  const lastWeekStart = startOfWeek(subWeeks(now, 1), { locale: es }); // Lunes semana pasada
+  const lastWeekEnd = endOfWeek(lastWeekStart, { locale: es }); // Domingo semana pasada
+
+  return records.filter(record => {
+    const recordDate = new Date(record.date);
+    return recordDate >= lastWeekStart && recordDate <= lastWeekEnd;
+  });
+};
+
+/**
  * Calcula densidad de entrenamiento por período
  */
 export const calculateTrainingDensity = (records: WorkoutRecord[]): TrainingDensity[] => {
   if (records.length === 0) return [];
 
+  const now = new Date();
   const periods = [
-    { name: 'Esta semana', weeks: 1 },
-    { name: 'Últimas 2 semanas', weeks: 2 },
-    { name: 'Último mes', weeks: 4 },
-    { name: 'Últimos 2 meses', weeks: 8 }
+    {
+      name: 'Esta semana',
+      getRecords: () => getThisWeekRecords(records),
+      weeks: 1
+    },
+    {
+      name: 'Últimas 2 semanas',
+      getRecords: () => {
+        const twoWeeksStart = startOfWeek(subWeeks(now, 1), { locale: es });
+        const twoWeeksEnd = endOfWeek(now, { locale: es });
+        return records.filter(r => {
+          const recordDate = new Date(r.date);
+          return recordDate >= twoWeeksStart && recordDate <= twoWeeksEnd;
+        });
+      },
+      weeks: 2
+    },
+    {
+      name: 'Último mes',
+      getRecords: () => {
+        const monthStart = startOfWeek(subWeeks(now, 3), { locale: es });
+        const monthEnd = endOfWeek(now, { locale: es });
+        return records.filter(r => {
+          const recordDate = new Date(r.date);
+          return recordDate >= monthStart && recordDate <= monthEnd;
+        });
+      },
+      weeks: 4
+    },
+    {
+      name: 'Últimos 2 meses',
+      getRecords: () => {
+        const twoMonthsStart = startOfWeek(subWeeks(now, 7), { locale: es });
+        const twoMonthsEnd = endOfWeek(now, { locale: es });
+        return records.filter(r => {
+          const recordDate = new Date(r.date);
+          return recordDate >= twoMonthsStart && recordDate <= twoMonthsEnd;
+        });
+      },
+      weeks: 8
+    }
   ];
 
   const densityData: TrainingDensity[] = [];
 
   periods.forEach(period => {
-    const cutoffDate = subDays(new Date(), period.weeks * 7);
-    const periodRecords = records.filter(r => new Date(r.date) >= cutoffDate);
+    const periodRecords = period.getRecords();
 
     if (periodRecords.length > 0) {
       const totalVolume = periodRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
@@ -200,13 +289,41 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
       recoveryDays: 0,
       volumeDropIndicators: false,
       overreachingRisk: 'Bajo',
-      restRecommendation: 'Datos insuficientes para análisis'
+      restRecommendation: 'Datos insuficientes para análisis',
+      fatigueLevel: 'Muy Baja',
+      recoveryRate: 0,
+      workloadTrend: 'Estable',
+      recoveryScore: 0,
+      stressFactors: {
+        volumeStress: 0,
+        frequencyStress: 0,
+        intensityStress: 0,
+        recoveryStress: 0
+      },
+      recoveryRecommendations: [],
+      predictedRecoveryTime: 0,
+      fatigueHistory: {
+        trend: 'Estable',
+        consistency: 0
+      }
     };
   }
 
   // Calcular tendencia de volumen (últimas 2 semanas vs anteriores)
-  const recentRecords = records.slice(-14);
-  const olderRecords = records.slice(-28, -14);
+  const now = new Date();
+  const recent2WeeksStart = startOfWeek(subWeeks(now, 1), { locale: es });
+  const recent2WeeksEnd = endOfWeek(now, { locale: es });
+  const recentRecords = records.filter(r => {
+    const recordDate = new Date(r.date);
+    return recordDate >= recent2WeeksStart && recordDate <= recent2WeeksEnd;
+  });
+
+  const older2WeeksStart = startOfWeek(subWeeks(now, 3), { locale: es });
+  const older2WeeksEnd = endOfWeek(subWeeks(now, 2), { locale: es });
+  const olderRecords = records.filter(r => {
+    const recordDate = new Date(r.date);
+    return recordDate >= older2WeeksStart && recordDate <= older2WeeksEnd;
+  });
 
   const recentVolume = recentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
   const olderVolume = olderRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
@@ -219,7 +336,8 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   const recoveryDays = differenceInDays(new Date(), lastWorkout);
 
   // Índice de fatiga basado en frecuencia y volumen
-  const weeklyFrequency = records.slice(-7).length;
+  const thisWeekRecords = getThisWeekRecords(records);
+  const weeklyFrequency = thisWeekRecords.length;
   const frequencyFactor = weeklyFrequency > 5 ? 30 : weeklyFrequency > 3 ? 15 : 0;
   const volumeFactor = volumeDropIndicators ? 25 : 0;
   const recoveryFactor = recoveryDays === 0 ? 20 : recoveryDays > 3 ? -10 : 0;
@@ -239,12 +357,86 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   else if (recoveryDays > 4) restRecommendation = 'Retomar entrenamientos gradualmente';
   else restRecommendation = 'Continuar rutina normal';
 
+  // Nuevas métricas
+  let fatigueLevel: FatigueAnalysis['fatigueLevel'];
+  if (fatigueIndex < 20) fatigueLevel = 'Muy Baja';
+  else if (fatigueIndex < 40) fatigueLevel = 'Baja';
+  else if (fatigueIndex < 60) fatigueLevel = 'Moderada';
+  else if (fatigueIndex < 80) fatigueLevel = 'Alta';
+  else fatigueLevel = 'Muy Alta';
+
+  const recoveryRate = Math.min(100, Math.max(0, 100 - (fatigueIndex * 0.8)));
+
+  // Calcular workload trend
+  let workloadTrend: FatigueAnalysis['workloadTrend'];
+  if (volumeChange > 10) workloadTrend = 'Aumentando';
+  else if (volumeChange < -10) workloadTrend = 'Disminuyendo';
+  else workloadTrend = 'Estable';
+
+  // Calcular recovery score basado en múltiples factores
+  const recoveryScore = Math.min(100, Math.max(0,
+    100 - (fatigueIndex * 0.6) - (recoveryDays > 2 ? (recoveryDays - 2) * 5 : 0)
+  ));
+
+  // Calcular stress factors más realistas
+  const stressFactors: FatigueAnalysis['stressFactors'] = {
+    volumeStress: Math.min(100, Math.max(0, volumeChange > 0 ? volumeChange * 2 : 0)),
+    frequencyStress: Math.min(100, Math.max(0, weeklyFrequency > 5 ? (weeklyFrequency - 5) * 20 : 0)),
+    intensityStress: Math.min(100, Math.max(0, fatigueIndex > 50 ? (fatigueIndex - 50) * 2 : 0)),
+    recoveryStress: Math.min(100, Math.max(0, recoveryDays === 0 ? 80 : recoveryDays > 3 ? 0 : (3 - recoveryDays) * 20))
+  };
+
+  // Recomendaciones de recuperación mejoradas
+  const recoveryRecommendations: string[] = [];
+
+  if (fatigueIndex > 70) {
+    recoveryRecommendations.push('Descanso completo 2-3 días');
+    recoveryRecommendations.push('Enfócate en hidratación y nutrición');
+  } else if (fatigueIndex > 50) {
+    recoveryRecommendations.push('Reducir intensidad 20-30% próxima sesión');
+    recoveryRecommendations.push('Añadir 10-15 min de estiramiento post-entrenamiento');
+  } else if (fatigueIndex > 30) {
+    recoveryRecommendations.push('Mantener intensidad pero observar signos de fatiga');
+    recoveryRecommendations.push('Priorizar sueño de calidad (7-9 horas)');
+  } else {
+    recoveryRecommendations.push('Recuperación óptima - puedes mantener o incrementar carga');
+  }
+
+  if (recoveryDays > 5) {
+    recoveryRecommendations.push('Retomar gradualmente con 60-70% de intensidad habitual');
+  } else if (recoveryDays === 0) {
+    recoveryRecommendations.push('Considera al menos 1 día de descanso por semana');
+  }
+
+  if (volumeDropIndicators) {
+    recoveryRecommendations.push('Caída de volumen detectada - evaluar factores externos');
+  }
+
+  // Tiempo estimado de recuperación más realista
+  const predictedRecoveryTime = Math.max(8, Math.min(72,
+    (fatigueIndex / 100) * 48 + (recoveryDays === 0 ? 12 : 0)
+  ));
+
+  // Análisis de historial de fatiga
+  const fatigueHistory: FatigueAnalysis['fatigueHistory'] = {
+    trend: volumeChange > 15 ? 'Empeorando' : volumeChange < -15 ? 'Mejorando' : 'Estable',
+    consistency: Math.min(100, Math.max(0, 100 - Math.abs(volumeChange)))
+  };
+
   return {
     fatigueIndex,
     recoveryDays,
     volumeDropIndicators,
     overreachingRisk,
-    restRecommendation
+    restRecommendation,
+    fatigueLevel,
+    recoveryRate,
+    workloadTrend,
+    recoveryScore,
+    stressFactors,
+    recoveryRecommendations,
+    predictedRecoveryTime,
+    fatigueHistory
   };
 };
 
@@ -254,22 +446,76 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
 export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => {
   if (records.length === 0) return [];
 
+  const now = new Date();
   const periods = [
-    { name: 'Esta semana', days: 7 },
-    { name: 'Últimas 2 semanas', days: 14 },
-    { name: 'Último mes', days: 30 },
-    { name: 'Últimos 3 meses', days: 90 }
+    {
+      name: 'Esta semana',
+      getRecords: () => getThisWeekRecords(records),
+      getPrevRecords: () => getLastWeekRecords(records)
+    },
+    {
+      name: 'Últimas 2 semanas',
+      getRecords: () => {
+        const twoWeeksStart = startOfWeek(subWeeks(now, 1), { locale: es });
+        const twoWeeksEnd = endOfWeek(now, { locale: es });
+        return records.filter(r => {
+          const recordDate = new Date(r.date);
+          return recordDate >= twoWeeksStart && recordDate <= twoWeeksEnd;
+        });
+      },
+      getPrevRecords: () => {
+        const prevTwoWeeksStart = startOfWeek(subWeeks(now, 3), { locale: es });
+        const prevTwoWeeksEnd = endOfWeek(subWeeks(now, 2), { locale: es });
+        return records.filter(r => {
+          const recordDate = new Date(r.date);
+          return recordDate >= prevTwoWeeksStart && recordDate <= prevTwoWeeksEnd;
+        });
+      }
+    },
+    {
+      name: 'Último mes',
+      getRecords: () => {
+        const monthStart = startOfWeek(subWeeks(now, 3), { locale: es });
+        const monthEnd = endOfWeek(now, { locale: es });
+        return records.filter(r => {
+          const recordDate = new Date(r.date);
+          return recordDate >= monthStart && recordDate <= monthEnd;
+        });
+      },
+      getPrevRecords: () => {
+        const prevMonthStart = startOfWeek(subWeeks(now, 7), { locale: es });
+        const prevMonthEnd = endOfWeek(subWeeks(now, 4), { locale: es });
+        return records.filter(r => {
+          const recordDate = new Date(r.date);
+          return recordDate >= prevMonthStart && recordDate <= prevMonthEnd;
+        });
+      }
+    },
+    {
+      name: 'Últimos 3 meses',
+      getRecords: () => {
+        const threeMonthsStart = startOfWeek(subWeeks(now, 11), { locale: es });
+        const threeMonthsEnd = endOfWeek(now, { locale: es });
+        return records.filter(r => {
+          const recordDate = new Date(r.date);
+          return recordDate >= threeMonthsStart && recordDate <= threeMonthsEnd;
+        });
+      },
+      getPrevRecords: () => {
+        const prevThreeMonthsStart = startOfWeek(subWeeks(now, 23), { locale: es });
+        const prevThreeMonthsEnd = endOfWeek(subWeeks(now, 12), { locale: es });
+        return records.filter(r => {
+          const recordDate = new Date(r.date);
+          return recordDate >= prevThreeMonthsStart && recordDate <= prevThreeMonthsEnd;
+        });
+      }
+    }
   ];
 
   const comparisons: PeriodComparison[] = [];
 
   periods.forEach((period) => {
-    const endDate = new Date();
-    const startDate = subDays(endDate, period.days);
-    const periodRecords = records.filter(r => {
-      const recordDate = new Date(r.date);
-      return recordDate >= startDate && recordDate <= endDate;
-    });
+    const periodRecords = period.getRecords();
 
     if (periodRecords.length > 0) {
       const totalVolume = periodRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
@@ -282,11 +528,7 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
       }, 0) / periodRecords.length;
 
       // Comparar con período anterior del mismo tamaño
-      const prevStartDate = subDays(startDate, period.days);
-      const prevRecords = records.filter(r => {
-        const recordDate = new Date(r.date);
-        return recordDate >= prevStartDate && recordDate < startDate;
-      });
+      const prevRecords = period.getPrevRecords();
 
       let improvement = 0;
       let volumeChange = 0;
@@ -320,7 +562,7 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
 };
 
 /**
- * Predice progreso futuro
+ * Predice progreso futuro con análisis mejorado
  */
 export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction => {
   if (records.length < 10) {
@@ -329,17 +571,24 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
       nextWeekWeight: 0,
       monthlyGrowthRate: 0,
       predictedPR: { weight: 0, confidence: 0 },
-      plateauRisk: 0
+      plateauRisk: 0,
+      trendAnalysis: 'insuficiente',
+      timeToNextPR: 0,
+      confidenceLevel: 0,
+      volumeTrend: 0,
+      strengthTrend: 0,
+      recommendations: ['Necesitas al menos 10 registros para predicciones precisas']
     };
   }
 
-  // Análisis de tendencia basado en últimas 8 semanas
-  const recentWeeks = 8;
-  const weeklyData: { volume: number; weight: number }[] = [];
+  const now = new Date();
+  const recentWeeks = Math.min(12, Math.floor(records.length / 3)); // Entre 3-12 semanas
+  const weeklyData: { volume: number; weight: number; date: Date }[] = [];
 
+  // Recopilar datos por semana con fechas
   for (let i = 0; i < recentWeeks; i++) {
-    const weekStart = startOfWeek(subWeeks(new Date(), i));
-    const weekEnd = endOfWeek(weekStart);
+    const weekStart = startOfWeek(subWeeks(now, i), { locale: es });
+    const weekEnd = endOfWeek(weekStart, { locale: es });
     const weekRecords = records.filter(r => {
       const recordDate = new Date(r.date);
       return recordDate >= weekStart && recordDate <= weekEnd;
@@ -347,47 +596,122 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
 
     if (weekRecords.length > 0) {
       const volume = weekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-      // Usar 1RM promedio estimado en lugar de peso promedio para mejor predicción
       const avg1RM = weekRecords.reduce((sum, r) => {
         const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
         return sum + oneRM;
       }, 0) / weekRecords.length;
-      weeklyData.push({ volume, weight: avg1RM });
+
+      weeklyData.push({ volume, weight: avg1RM, date: weekStart });
     }
   }
 
-  if (weeklyData.length < 3) {
+  if (weeklyData.length < 4) {
     return {
       nextWeekVolume: 0,
       nextWeekWeight: 0,
       monthlyGrowthRate: 0,
       predictedPR: { weight: 0, confidence: 0 },
-      plateauRisk: 50
+      plateauRisk: 50,
+      trendAnalysis: 'insuficiente',
+      timeToNextPR: 0,
+      confidenceLevel: 0,
+      volumeTrend: 0,
+      strengthTrend: 0,
+      recommendations: ['Necesitas más datos históricos para predicciones precisas']
     };
   }
 
-  // Calcular tendencias lineales simples
-  const volumeTrend = weeklyData.length > 1 ?
-    (weeklyData[0].volume - weeklyData[weeklyData.length - 1].volume) / weeklyData.length : 0;
-  const weightTrend = weeklyData.length > 1 ?
-    (weeklyData[0].weight - weeklyData[weeklyData.length - 1].weight) / weeklyData.length : 0;
+  // Ordenar por fecha (más reciente primero)
+  weeklyData.sort((a, b) => b.date.getTime() - a.date.getTime());
 
-  // Predicciones para próxima semana
-  const nextWeekVolume = weeklyData[0].volume + volumeTrend;
-  const nextWeekWeight = weeklyData[0].weight + weightTrend;
+  // Calcular tendencias usando regresión lineal simple
+  const calculateTrend = (values: number[]): number => {
+    if (values.length < 2) return 0;
 
-  // Tasa de crecimiento mensual
-  const monthlyGrowthRate = weightTrend * 4; // 4 semanas por mes
+    const n = values.length;
+    const xSum = values.reduce((sum, _, i) => sum + i, 0);
+    const ySum = values.reduce((sum, val) => sum + val, 0);
+    const xxSum = values.reduce((sum, _, i) => sum + i * i, 0);
+    const xySum = values.reduce((sum, val, i) => sum + i * val, 0);
 
-  // Predicción de PR usando 1RM estimado máximo
+    const slope = (n * xySum - xSum * ySum) / (n * xxSum - xSum * xSum);
+    return slope;
+  };
+
+  const volumeValues = weeklyData.map(d => d.volume);
+  const weightValues = weeklyData.map(d => d.weight);
+
+  const volumeTrend = calculateTrend(volumeValues);
+  const strengthTrend = calculateTrend(weightValues);
+
+  // Predicciones para próxima semana con validación
+  const currentVolume = volumeValues[0] || 0;
+  const currentWeight = weightValues[0] || 0;
+
+  const nextWeekVolume = Math.max(0, currentVolume + volumeTrend);
+  const nextWeekWeight = Math.max(0, currentWeight + strengthTrend);
+
+  // Tasa de crecimiento mensual más realista
+  const monthlyGrowthRate = strengthTrend * 4; // 4 semanas por mes
+
+  // Análisis de tendencia
+  let trendAnalysis: 'mejorando' | 'estable' | 'empeorando' | 'insuficiente';
+  const combinedTrend = (volumeTrend + strengthTrend) / 2;
+
+  if (combinedTrend > 2) trendAnalysis = 'mejorando';
+  else if (combinedTrend < -2) trendAnalysis = 'empeorando';
+  else trendAnalysis = 'estable';
+
+  // Predicción de PR mejorada
   const current1RMMax = Math.max(...records.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30)));
-  const predictedPRWeight = current1RMMax + (weightTrend * 2); // 2 semanas de progreso
-  const confidence = Math.min(95, Math.max(10, 70 - Math.abs(weeklyData.length - 6) * 10));
+  const predictedPRWeight = Math.max(current1RMMax, currentWeight + (strengthTrend * 3)); // 3 semanas de progreso
 
-  // Riesgo de meseta
-  const weightVariation = weeklyData.map(w => w.weight);
-  const variance = weightVariation.reduce((sum, w) => sum + Math.pow(w - weeklyData[0].weight, 2), 0) / weightVariation.length;
-  const plateauRisk = variance < 1 ? 80 : variance < 5 ? 40 : 20;
+  // Tiempo estimado hasta próximo PR (en semanas)
+  const prThreshold = current1RMMax * 1.025; // 2.5% de mejora mínima
+  const timeToNextPR = strengthTrend > 0 ?
+    Math.ceil((prThreshold - currentWeight) / strengthTrend) : 0;
+
+  // Nivel de confianza basado en consistencia de datos
+  const weightVariance = weightValues.reduce((sum, w) => sum + Math.pow(w - currentWeight, 2), 0) / weightValues.length;
+  const volumeVariance = volumeValues.reduce((sum, v) => sum + Math.pow(v - currentVolume, 2), 0) / volumeValues.length;
+
+  const dataConsistency = Math.max(0, Math.min(100, 100 - (weightVariance + volumeVariance) / 200));
+  const trendStrength = Math.min(100, Math.abs(combinedTrend) * 10);
+  const confidenceLevel = Math.round((dataConsistency * 0.6) + (trendStrength * 0.4));
+
+  const prConfidence = Math.min(95, Math.max(15, confidenceLevel - Math.min(timeToNextPR, 8) * 5));
+
+  // Riesgo de meseta mejorado
+  const recentVariance = weightValues.slice(0, 4).reduce((sum, w) => sum + Math.pow(w - weightValues[0], 2), 0) / 4;
+  const plateauRisk = recentVariance < 2 ? 85 :
+    recentVariance < 8 ? 45 :
+      recentVariance < 20 ? 25 : 10;
+
+  // Recomendaciones personalizadas
+  const recommendations: string[] = [];
+
+  if (trendAnalysis === 'mejorando') {
+    recommendations.push('Mantén la consistencia actual - estás progresando bien');
+    if (plateauRisk > 60) {
+      recommendations.push('Considera variar los estímulos para evitar meseta');
+    }
+  } else if (trendAnalysis === 'empeorando') {
+    recommendations.push('Evalúa factores: descanso, nutrición, estrés');
+    recommendations.push('Considera una semana de descarga activa');
+  } else if (trendAnalysis === 'estable') {
+    recommendations.push('Introduce variaciones en intensidad o volumen');
+    recommendations.push('Revisa tu programación para estimular nuevo crecimiento');
+  }
+
+  if (timeToNextPR > 8) {
+    recommendations.push('Enfócate en mejoras graduales y consistencia');
+  } else if (timeToNextPR > 0 && timeToNextPR <= 4) {
+    recommendations.push('Próximo PR cerca - mantén intensidad alta');
+  }
+
+  if (plateauRisk > 70) {
+    recommendations.push('Alto riesgo de meseta - varía ejercicios o metodología');
+  }
 
   return {
     nextWeekVolume: Math.round(nextWeekVolume),
@@ -395,9 +719,15 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
     monthlyGrowthRate: Math.round(monthlyGrowthRate * 100) / 100,
     predictedPR: {
       weight: Math.round(predictedPRWeight * 100) / 100,
-      confidence: Math.round(confidence)
+      confidence: Math.round(prConfidence)
     },
-    plateauRisk: Math.round(plateauRisk)
+    plateauRisk: Math.round(plateauRisk),
+    trendAnalysis,
+    timeToNextPR: Math.max(0, timeToNextPR),
+    confidenceLevel: Math.round(confidenceLevel),
+    volumeTrend: Math.round(volumeTrend),
+    strengthTrend: Math.round(strengthTrend * 100) / 100,
+    recommendations
   };
 };
 
@@ -415,34 +745,89 @@ export const analyzeIntensityMetrics = (records: WorkoutRecord[]): IntensityMetr
     };
   }
 
-  const maxWeight = Math.max(...records.map(r => r.weight));
-  const avgWeight = records.reduce((sum, r) => sum + r.weight, 0) / records.length;
-  const averageIntensity = maxWeight > 0 ? (avgWeight / maxWeight) * 100 : 0;
+  // Calcular intensidad de peso de forma más realista
+  const weights = records.map(r => r.weight);
+  const maxWeight = Math.max(...weights);
+  const avgWeight = weights.reduce((sum, w) => sum + w, 0) / weights.length;
 
-  // Estimación de capacidad de volumen basada en peso máximo
-  const estimatedMaxVolume = maxWeight * 10 * 5; // Estimación: peso_max × 10_reps × 5_series
-  const actualVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / records.length;
-  const volumeIntensity = (actualVolume / estimatedMaxVolume) * 100;
+  // Usar percentil 80 como referencia en lugar del máximo absoluto
+  const sortedWeights = weights.sort((a, b) => b - a);
+  const percentile80Weight = sortedWeights[Math.floor(sortedWeights.length * 0.2)];
+  const averageIntensity = percentile80Weight > 0 ? (avgWeight / percentile80Weight) * 100 : 0;
 
-  // Frecuencia vs recomendada (3-4 sesiones por semana)
-  const weeklyFrequency = records.slice(-7).length;
-  const frequencyIntensity = (weeklyFrequency / 4) * 100;
+  // Calcular intensidad de volumen basada en métricas más realistas
+  const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const avgVolumePerWorkout = totalVolume / records.length;
 
-  // Intensidad general
-  const overallScore = (averageIntensity + volumeIntensity + frequencyIntensity) / 3;
+  // Clasificar volumen por sesión de forma más realista
+  // Basado en estándares típicos de entrenamiento
+  const volumeIntensity = Math.min(100, Math.max(0, (avgVolumePerWorkout / 800) * 100));
+
+  // Calcular intensidad de frecuencia de forma más equilibrada
+  const thisWeekRecords = getThisWeekRecords(records);
+  const weeklyFrequency = thisWeekRecords.length;
+
+  // Escala más realista: 3-5 sesiones por semana es óptimo
+  let frequencyIntensity = 0;
+  if (weeklyFrequency <= 1) {
+    frequencyIntensity = 20;
+  } else if (weeklyFrequency <= 2) {
+    frequencyIntensity = 40;
+  } else if (weeklyFrequency <= 3) {
+    frequencyIntensity = 70;
+  } else if (weeklyFrequency <= 4) {
+    frequencyIntensity = 90;
+  } else if (weeklyFrequency <= 5) {
+    frequencyIntensity = 100;
+  } else if (weeklyFrequency <= 6) {
+    frequencyIntensity = 85; // Ligeramente menor porque puede ser excesivo
+  } else {
+    frequencyIntensity = 70; // Demasiado frecuente
+  }
+
+  // Calcular intensidad general con pesos más balanceados
+  const overallScore = (averageIntensity * 0.4) + (volumeIntensity * 0.35) + (frequencyIntensity * 0.25);
+
   let overallIntensity: IntensityMetrics['overallIntensity'];
-  if (overallScore > 90) overallIntensity = 'Excesiva';
-  else if (overallScore > 70) overallIntensity = 'Alta';
-  else if (overallScore > 40) overallIntensity = 'Óptima';
+  if (overallScore >= 85) overallIntensity = 'Excesiva';
+  else if (overallScore >= 70) overallIntensity = 'Alta';
+  else if (overallScore >= 50) overallIntensity = 'Óptima';
   else overallIntensity = 'Baja';
 
-  // Recomendaciones
+  // Recomendaciones mejoradas basadas en análisis detallado
   const recommendations: string[] = [];
-  if (averageIntensity < 60) recommendations.push('Incrementar pesos gradualmente');
-  if (volumeIntensity < 50) recommendations.push('Aumentar volumen por sesión');
-  if (frequencyIntensity < 75) recommendations.push('Incrementar frecuencia de entrenamiento');
-  if (overallScore > 90) recommendations.push('Considerar semana de descarga');
-  if (recommendations.length === 0) recommendations.push('Mantener intensidad actual');
+
+  // Recomendaciones para intensidad de peso
+  if (averageIntensity < 50) {
+    recommendations.push('Incrementar pesos gradualmente (5-10% cada 2 semanas)');
+  } else if (averageIntensity > 90) {
+    recommendations.push('Considerar trabajar con rangos de repeticiones más altos');
+  }
+
+  // Recomendaciones para volumen
+  if (volumeIntensity < 40) {
+    recommendations.push('Aumentar volumen por sesión (más series o ejercicios)');
+  } else if (volumeIntensity > 90) {
+    recommendations.push('Considerar reducir volumen para mejorar recuperación');
+  }
+
+  // Recomendaciones para frecuencia
+  if (weeklyFrequency < 3) {
+    recommendations.push('Incrementar frecuencia a 3-4 sesiones semanales');
+  } else if (weeklyFrequency > 6) {
+    recommendations.push('Reducir frecuencia e incluir más días de descanso');
+  }
+
+  // Recomendaciones específicas para intensidad general
+  if (overallScore < 50) {
+    recommendations.push('Planificar progresión sistemática en peso y volumen');
+  } else if (overallScore > 90) {
+    recommendations.push('Implementar semana de descarga cada 4-6 semanas');
+  }
+
+  if (recommendations.length === 0) {
+    recommendations.push('Mantener intensidad actual - está en rango óptimo');
+  }
 
   return {
     averageIntensity: Math.round(averageIntensity),
