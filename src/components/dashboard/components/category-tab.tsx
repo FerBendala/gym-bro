@@ -1,4 +1,20 @@
-import { Activity, BarChart, CheckCircle, Target, XCircle } from 'lucide-react';
+import {
+  Activity,
+  AlertCircle,
+  Award,
+  BarChart,
+  Calendar,
+  CheckCircle,
+  Dumbbell,
+  Minus,
+  Target,
+  Timer,
+  TrendingDown,
+  TrendingUp,
+  Weight,
+  XCircle,
+  Zap
+} from 'lucide-react';
 import React, { useMemo } from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
 import { formatNumber } from '../../../utils/functions';
@@ -85,27 +101,12 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
           <CardContent>
             <div className="space-y-4">
               {analysis.categoryMetrics.map((metric) => {
-                const getTrendColor = (trend: string) => {
-                  switch (trend) {
-                    case 'improving': return 'text-green-400';
-                    case 'declining': return 'text-red-400';
-                    default: return 'text-gray-400';
-                  }
-                };
-
+                // Helper functions para colores y iconos
                 const getTrendIcon = (trend: string) => {
                   switch (trend) {
-                    case 'improving': return '📈';
-                    case 'declining': return '📉';
-                    default: return '➡️';
-                  }
-                };
-
-                const getStrengthEmoji = (level: string) => {
-                  switch (level) {
-                    case 'advanced': return '🏆';
-                    case 'intermediate': return '💪';
-                    default: return '🌱';
+                    case 'improving': return <TrendingUp className="w-4 h-4 text-green-400" />;
+                    case 'declining': return <TrendingDown className="w-4 h-4 text-red-400" />;
+                    default: return <Minus className="w-4 h-4 text-gray-400" />;
                   }
                 };
 
@@ -115,208 +116,296 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
                   return 'text-gray-400';
                 };
 
+                const getScoreColor = (score: number) => {
+                  if (score >= 80) return 'text-green-400';
+                  if (score >= 60) return 'text-yellow-400';
+                  if (score >= 40) return 'text-orange-400';
+                  return 'text-red-400';
+                };
+
+                const getDaysColor = (days: number) => {
+                  if (days <= 3) return 'text-green-400';
+                  if (days <= 7) return 'text-yellow-400';
+                  if (days <= 14) return 'text-orange-400';
+                  return 'text-red-400';
+                };
+
                 return (
                   <div
                     key={metric.category}
-                    className="p-4 bg-gray-800 rounded-lg border border-gray-700"
+                    className="p-4 bg-gray-800/50 backdrop-blur rounded-xl border border-gray-700/50 hover:border-gray-600/50 transition-all"
                   >
-                    {/* Header mejorado */}
-                    <div className="flex items-center justify-between mb-4">
-                      <div className="flex items-center space-x-3">
-                        <h4 className="font-medium text-white text-lg">
+                    {/* Header compacto y mejorado */}
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center gap-2">
+                        <h4 className="font-semibold text-white text-base">
                           {metric.category}
                         </h4>
-                        <span className="text-sm">
-                          {getStrengthEmoji(metric.strengthLevel)}
-                        </span>
-                        <span className={`flex items-center space-x-1 text-sm ${getTrendColor(metric.trend)}`}>
-                          <span>{getTrendIcon(metric.trend)}</span>
-                          <span className="capitalize">{metric.trend}</span>
-                        </span>
+                        <div className="flex items-center gap-1">
+                          {getTrendIcon(metric.trend)}
+                          <InfoTooltip
+                            content={`Tendencia: ${metric.trend === 'improving' ? 'Mejorando' : metric.trend === 'declining' ? 'Declinando' : 'Estable'}`}
+                            position="top"
+                          />
+                        </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm font-medium text-blue-400">
+                        <p className="text-sm font-semibold text-blue-400">
                           {formatNumber(metric.totalVolume)} kg
                         </p>
                         <p className="text-xs text-gray-500">
-                          {metric.percentage}% del total
+                          {metric.percentage.toFixed(1)}% del total
                         </p>
                       </div>
                     </div>
 
-                    {/* Métricas principales */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                      <div className="text-center">
-                        <p className="text-xs text-gray-400">Entrenamientos</p>
-                        <p className="text-sm font-medium text-white">
+                    {/* Métricas principales en diseño compacto */}
+                    <div className="grid grid-cols-4 gap-2 mb-3">
+                      <div className="bg-gray-900/50 rounded-lg p-2 text-center">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <Dumbbell className="w-3 h-3 text-gray-400" />
+                          <InfoTooltip
+                            content="Número total de sesiones de entrenamiento"
+                            position="top"
+                            className="text-xs"
+                          />
+                        </div>
+                        <p className="text-sm font-semibold text-white">
                           {metric.workouts}
                         </p>
+                        <p className="text-xs text-gray-500">sesiones</p>
                       </div>
-                      <div className="text-center">
-                        <p className="text-xs text-gray-400">Frecuencia</p>
-                        <p className="text-sm font-medium text-white">
-                          {metric.avgWorkoutsPerWeek.toFixed(1)}/sem
+
+                      <div className="bg-gray-900/50 rounded-lg p-2 text-center">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <Calendar className="w-3 h-3 text-gray-400" />
+                          <InfoTooltip
+                            content="Frecuencia promedio de entrenamiento por semana"
+                            position="top"
+                            className="text-xs"
+                          />
+                        </div>
+                        <p className="text-sm font-semibold text-white">
+                          {metric.avgWorkoutsPerWeek.toFixed(1)}
                         </p>
+                        <p className="text-xs text-gray-500">/semana</p>
                       </div>
-                      <div className="text-center">
-                        <p className="text-xs text-gray-400">PRs</p>
-                        <p className="text-sm font-medium text-purple-400">
+
+                      <div className="bg-gray-900/50 rounded-lg p-2 text-center">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <Award className="w-3 h-3 text-gray-400" />
+                          <InfoTooltip
+                            content="Récords personales alcanzados"
+                            position="top"
+                            className="text-xs"
+                          />
+                        </div>
+                        <p className="text-sm font-semibold text-purple-400">
                           {metric.personalRecords}
                         </p>
+                        <p className="text-xs text-gray-500">PRs</p>
                       </div>
-                      <div className="text-center">
-                        <p className="text-xs text-gray-400">1RM Est.</p>
-                        <p className="text-sm font-medium text-orange-400">
-                          {metric.estimatedOneRM}kg
+
+                      <div className="bg-gray-900/50 rounded-lg p-2 text-center">
+                        <div className="flex items-center justify-center gap-1 mb-1">
+                          <Weight className="w-3 h-3 text-gray-400" />
+                          <InfoTooltip
+                            content="Estimación de tu repetición máxima (1RM)"
+                            position="top"
+                            className="text-xs"
+                          />
+                        </div>
+                        <p className="text-sm font-semibold text-orange-400">
+                          {metric.estimatedOneRM}
                         </p>
+                        <p className="text-xs text-gray-500">kg 1RM</p>
                       </div>
                     </div>
 
-                    {/* Rango de pesos */}
-                    <div className="mb-4">
-                      <div className="flex justify-between text-xs text-gray-400 mb-1">
-                        <span>Min: {metric.minWeight}kg</span>
-                        <span>Avg: {metric.avgWeight}kg</span>
-                        <span>Max: {metric.maxWeight}kg</span>
+                    {/* Barra de rango de pesos mejorada */}
+                    <div className="mb-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-gray-400 flex items-center gap-1">
+                          Rango de peso
+                          <InfoTooltip
+                            content="Muestra el peso mínimo, promedio y máximo utilizado"
+                            position="top"
+                            className="text-xs"
+                          />
+                        </span>
+                        <span className="text-xs text-gray-300">
+                          {metric.minWeight} - {metric.avgWeight.toFixed(0)} - {metric.maxWeight} kg
+                        </span>
                       </div>
-                      <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div className="relative w-full bg-gray-700/50 rounded-full h-2">
                         <div
-                          className="bg-blue-500 h-2 rounded-full"
+                          className="absolute bg-blue-500/30 h-2 rounded-full"
                           style={{
-                            width: `${metric.maxWeight > 0 ? (metric.avgWeight / metric.maxWeight) * 100 : 0}%`
+                            left: `${(metric.minWeight / metric.maxWeight) * 100}%`,
+                            width: `${((metric.avgWeight - metric.minWeight) / metric.maxWeight) * 100}%`
+                          }}
+                        />
+                        <div
+                          className="absolute bg-blue-500 h-2 w-2 rounded-full -mt-0"
+                          style={{
+                            left: `${(metric.avgWeight / metric.maxWeight) * 100}%`,
+                            marginLeft: '-4px'
                           }}
                         />
                       </div>
                     </div>
 
-                    {/* Métricas de rendimiento */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-                      <div className="text-center">
-                        <p className="text-xs text-gray-400">Intensidad</p>
-                        <p className="text-sm font-medium text-white">
-                          {metric.intensityScore}%
-                        </p>
+                    {/* Indicadores de rendimiento visuales */}
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                      <div className="bg-gray-900/30 rounded-lg p-2">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-gray-400 flex items-center gap-1">
+                            Intensidad
+                            <InfoTooltip
+                              content="Porcentaje del peso promedio vs peso máximo"
+                              position="top"
+                              className="text-xs"
+                            />
+                          </span>
+                          <span className={`text-xs font-medium ${getScoreColor(metric.intensityScore)}`}>
+                            {metric.intensityScore}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-700/50 rounded-full h-1.5">
+                          <div
+                            className={`h-1.5 rounded-full transition-all ${metric.intensityScore >= 80 ? 'bg-green-500' :
+                                metric.intensityScore >= 60 ? 'bg-yellow-500' :
+                                  metric.intensityScore >= 40 ? 'bg-orange-500' : 'bg-red-500'
+                              }`}
+                            style={{ width: `${metric.intensityScore}%` }}
+                          />
+                        </div>
                       </div>
-                      <div className="text-center">
-                        <p className="text-xs text-gray-400">Eficiencia</p>
-                        <p className="text-sm font-medium text-white">
-                          {metric.efficiencyScore}%
-                        </p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs text-gray-400">Consistencia</p>
-                        <p className="text-sm font-medium text-white">
-                          {metric.consistencyScore}%
-                        </p>
-                      </div>
-                      <div className="text-center">
-                        <p className="text-xs text-gray-400">Días sin actividad</p>
-                        <p className={`text-sm font-medium ${metric.daysSinceLastWorkout > 7 ? 'text-red-400' : 'text-green-400'}`}>
-                          {metric.daysSinceLastWorkout}
-                        </p>
+
+                      <div className="bg-gray-900/30 rounded-lg p-2">
+                        <div className="flex items-center justify-between mb-1">
+                          <span className="text-xs text-gray-400 flex items-center gap-1">
+                            Consistencia
+                            <InfoTooltip
+                              content="Regularidad en la frecuencia de entrenamiento"
+                              position="top"
+                              className="text-xs"
+                            />
+                          </span>
+                          <span className={`text-xs font-medium ${getScoreColor(metric.consistencyScore)}`}>
+                            {metric.consistencyScore}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-700/50 rounded-full h-1.5">
+                          <div
+                            className={`h-1.5 rounded-full transition-all ${metric.consistencyScore >= 80 ? 'bg-green-500' :
+                                metric.consistencyScore >= 60 ? 'bg-yellow-500' :
+                                  metric.consistencyScore >= 40 ? 'bg-orange-500' : 'bg-red-500'
+                              }`}
+                            style={{ width: `${metric.consistencyScore}%` }}
+                          />
+                        </div>
                       </div>
                     </div>
 
-                    {/* Progresión */}
-                    <div className="mb-4">
-                      <p className="text-xs text-gray-400 mb-2">Progresión</p>
-                      <div className="grid grid-cols-2 gap-3">
+                    {/* Progresión y último entrenamiento */}
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                      <div className="bg-gray-900/30 rounded-lg p-2">
+                        <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
+                          <TrendingUp className="w-3 h-3" />
+                          Progresión
+                        </p>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-400">Peso:</span>
-                          <span className={`text-sm font-medium ${getProgressionColor(metric.weightProgression)}`}>
+                          <span className="text-xs text-gray-500">Peso:</span>
+                          <span className={`text-xs font-medium ${getProgressionColor(metric.weightProgression)}`}>
                             {metric.weightProgression > 0 ? '+' : ''}{metric.weightProgression}%
                           </span>
                         </div>
                         <div className="flex items-center justify-between">
-                          <span className="text-xs text-gray-400">Volumen:</span>
-                          <span className={`text-sm font-medium ${getProgressionColor(metric.volumeProgression)}`}>
+                          <span className="text-xs text-gray-500">Volumen:</span>
+                          <span className={`text-xs font-medium ${getProgressionColor(metric.volumeProgression)}`}>
                             {metric.volumeProgression > 0 ? '+' : ''}{metric.volumeProgression}%
                           </span>
                         </div>
                       </div>
+
+                      <div className="bg-gray-900/30 rounded-lg p-2">
+                        <p className="text-xs text-gray-400 mb-1 flex items-center gap-1">
+                          <Timer className="w-3 h-3" />
+                          Último entreno
+                        </p>
+                        <p className={`text-sm font-medium ${getDaysColor(metric.daysSinceLastWorkout)}`}>
+                          {metric.daysSinceLastWorkout === 0 ? 'Hoy' :
+                            metric.daysSinceLastWorkout === 1 ? 'Ayer' :
+                              `Hace ${metric.daysSinceLastWorkout} días`}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* Distribución temporal */}
-                    <div className="mb-4">
-                      <p className="text-xs text-gray-400 mb-2">Distribución temporal</p>
+                    {/* Distribución temporal compacta */}
+                    <div className="bg-gray-900/30 rounded-lg p-2 mb-3">
+                      <p className="text-xs text-gray-400 mb-2 flex items-center gap-1">
+                        <BarChart className="w-3 h-3" />
+                        Distribución de volumen
+                      </p>
                       <div className="grid grid-cols-2 gap-3">
-                        <div>
-                          <div className="flex justify-between text-xs">
-                            <span className="text-gray-400">Esta semana:</span>
-                            <span className="text-white">{formatNumber(metric.volumeDistribution.thisWeek)}kg</span>
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-500">Esta semana</span>
+                            <span className="text-xs font-medium text-blue-400">
+                              {formatNumber(metric.volumeDistribution.thisWeek)}kg
+                            </span>
                           </div>
-                          <div className="flex justify-between text-xs">
-                            <span className="text-gray-400">Semana pasada:</span>
-                            <span className="text-white">{formatNumber(metric.volumeDistribution.lastWeek)}kg</span>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-500">Semana pasada</span>
+                            <span className="text-xs font-medium text-gray-300">
+                              {formatNumber(metric.volumeDistribution.lastWeek)}kg
+                            </span>
                           </div>
                         </div>
-                        <div>
-                          <div className="flex justify-between text-xs">
-                            <span className="text-gray-400">Este mes:</span>
-                            <span className="text-white">{formatNumber(metric.volumeDistribution.thisMonth)}kg</span>
+                        <div className="space-y-1">
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-500">Este mes</span>
+                            <span className="text-xs font-medium text-blue-400">
+                              {formatNumber(metric.volumeDistribution.thisMonth)}kg
+                            </span>
                           </div>
-                          <div className="flex justify-between text-xs">
-                            <span className="text-gray-400">Mes pasado:</span>
-                            <span className="text-white">{formatNumber(metric.volumeDistribution.lastMonth)}kg</span>
+                          <div className="flex justify-between items-center">
+                            <span className="text-xs text-gray-500">Mes pasado</span>
+                            <span className="text-xs font-medium text-gray-300">
+                              {formatNumber(metric.volumeDistribution.lastMonth)}kg
+                            </span>
                           </div>
                         </div>
                       </div>
                     </div>
 
-                    {/* Mejor sesión */}
-                    <div className="mb-4">
-                      <p className="text-xs text-gray-400 mb-2">Mejor sesión</p>
-                      <div className="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
-                        <div>
-                          <p className="text-sm text-white">
-                            {metric.performanceMetrics.bestSession.date.toLocaleDateString()}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            {formatNumber(metric.performanceMetrics.bestSession.volume)}kg • {metric.performanceMetrics.bestSession.maxWeight}kg máx
-                          </p>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xs text-gray-400">Avg por sesión</p>
-                          <p className="text-sm text-white">
-                            {formatNumber(metric.performanceMetrics.averageSessionVolume)}kg
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Recomendaciones */}
-                    {metric.recommendations.length > 0 && (
-                      <div className="mb-3">
-                        <p className="text-xs text-gray-400 mb-2">Recomendaciones</p>
-                        <div className="space-y-1">
-                          {metric.recommendations.slice(0, 2).map((rec, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center space-x-2 text-xs"
-                            >
-                              <span className="text-blue-400">•</span>
-                              <span className="text-gray-300">{rec}</span>
+                    {/* Alerta visual para advertencias o recomendaciones */}
+                    {(metric.warnings.length > 0 || metric.recommendations.length > 0) && (
+                      <div className="space-y-2">
+                        {metric.warnings.length > 0 && (
+                          <div className="bg-red-900/20 border border-red-700/30 rounded-lg p-2">
+                            <div className="flex items-start gap-2">
+                              <AlertCircle className="w-4 h-4 text-red-400 mt-0.5" />
+                              <div className="flex-1">
+                                <p className="text-xs font-medium text-red-400 mb-1">Atención</p>
+                                <p className="text-xs text-red-300/90">{metric.warnings[0]}</p>
+                              </div>
                             </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
+                          </div>
+                        )}
 
-                    {/* Advertencias */}
-                    {metric.warnings.length > 0 && (
-                      <div>
-                        <p className="text-xs text-gray-400 mb-2">Advertencias</p>
-                        <div className="space-y-1">
-                          {metric.warnings.slice(0, 2).map((warning, index) => (
-                            <div
-                              key={index}
-                              className="flex items-center space-x-2 text-xs"
-                            >
-                              <span className="text-red-400">⚠️</span>
-                              <span className="text-red-300">{warning}</span>
+                        {metric.recommendations.length > 0 && metric.warnings.length === 0 && (
+                          <div className="bg-blue-900/20 border border-blue-700/30 rounded-lg p-2">
+                            <div className="flex items-start gap-2">
+                              <Zap className="w-4 h-4 text-blue-400 mt-0.5" />
+                              <div className="flex-1">
+                                <p className="text-xs font-medium text-blue-400 mb-1">Recomendación</p>
+                                <p className="text-xs text-blue-300/90">{metric.recommendations[0]}</p>
+                              </div>
                             </div>
-                          ))}
-                        </div>
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>

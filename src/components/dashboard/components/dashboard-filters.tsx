@@ -127,15 +127,6 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
           </div>
         </div>
       )}
-
-      {/* Mensaje informativo cuando no se muestra el filtro de tiempo */}
-      {!showTimeFilter && (
-        <div className="p-3 bg-gray-800 border border-gray-700 rounded-lg">
-          <p className="text-sm text-gray-400">
-            ℹ️ Las métricas por categoría muestran automáticamente todos los períodos de tiempo (semana actual, semana pasada, mes actual y mes pasado).
-          </p>
-        </div>
-      )}
     </div>
   );
 }; 
