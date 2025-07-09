@@ -1,4 +1,4 @@
-import { endOfWeek, startOfWeek, subWeeks } from 'date-fns';
+import { endOfMonth, endOfWeek, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { EXERCISE_CATEGORIES } from '../../constants/exercise-categories';
 import type { WorkoutRecord } from '../../interfaces';
@@ -271,9 +271,12 @@ const calculateVolumeDistribution = (categoryRecords: WorkoutRecord[], allRecord
   const lastWeekStart = startOfWeek(subWeeks(now, 1), { locale: es });
   const lastWeekEnd = endOfWeek(subWeeks(now, 1), { locale: es });
 
-  // Para meses usamos cálculo aproximado (30 días)
-  const thisMonthStart = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
-  const lastMonthStart = new Date(now.getTime() - (60 * 24 * 60 * 60 * 1000));
+  // Usar funciones de date-fns para meses reales del calendario
+  const thisMonthStart = startOfMonth(now);
+  const thisMonthEnd = endOfMonth(now);
+
+  const lastMonthStart = startOfMonth(subMonths(now, 1));
+  const lastMonthEnd = endOfMonth(subMonths(now, 1));
 
   const thisWeekRecords = categoryRecords.filter(r => {
     const date = new Date(r.date);
@@ -285,10 +288,14 @@ const calculateVolumeDistribution = (categoryRecords: WorkoutRecord[], allRecord
     return date >= lastWeekStart && date <= lastWeekEnd;
   });
 
-  const thisMonthRecords = categoryRecords.filter(r => new Date(r.date) >= thisMonthStart);
+  const thisMonthRecords = categoryRecords.filter(r => {
+    const date = new Date(r.date);
+    return date >= thisMonthStart && date <= thisMonthEnd;
+  });
+
   const lastMonthRecords = categoryRecords.filter(r => {
     const date = new Date(r.date);
-    return date >= lastMonthStart && date < thisMonthStart;
+    return date >= lastMonthStart && date <= lastMonthEnd;
   });
 
   return {
