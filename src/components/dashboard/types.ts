@@ -1,6 +1,6 @@
 import type { Exercise } from '../../interfaces';
 
-export type DashboardTab = 'categories' | 'trends' | 'advanced';
+export type DashboardTab = 'categories' | 'balance' | 'trends' | 'advanced';
 export type TimeFilter = 'week' | 'month' | 'all';
 export type FilterType = 'all' | 'exercise' | 'muscle-group';
 

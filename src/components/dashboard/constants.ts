@@ -1,4 +1,4 @@
-import { Activity, Target, Zap } from 'lucide-react';
+import { Activity, Scale, Target, Zap } from 'lucide-react';
 import type { DashboardTabConfig } from './types';
 
 /**
@@ -10,7 +10,13 @@ export const DASHBOARD_TABS: DashboardTabConfig[] = [
     id: 'categories',
     label: 'Por Categoría',
     icon: Target,
-    description: 'Análisis por grupos musculares y balance'
+    description: 'Análisis detallado por grupos musculares'
+  },
+  {
+    id: 'balance',
+    label: 'Balance Muscular',
+    icon: Scale,
+    description: 'Equilibrio y simetría entre grupos musculares'
   },
   {
     id: 'trends',

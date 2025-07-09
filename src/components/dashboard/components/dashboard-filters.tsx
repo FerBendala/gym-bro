@@ -20,8 +20,8 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
   const exerciseGroups = createExerciseFilterOptions(exercises);
   const muscleGroupOptions = createMuscleGroupFilterOptions();
 
-  // No mostrar filtro de tiempo en el tab de categorías
-  const showTimeFilter = activeTab !== 'categories';
+  // No mostrar filtro de tiempo en los tabs de categorías y balance
+  const showTimeFilter = activeTab !== 'categories' && activeTab !== 'balance';
 
   return (
     <div className="space-y-4">
@@ -107,25 +107,6 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
           groups={muscleGroupOptions}
           disabled={!isOnline}
         />
-      )}
-
-      {/* Información del filtro activo */}
-      {filterType !== 'all' && (
-        <div className="p-3 bg-blue-900/20 border border-blue-700/50 rounded-lg">
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-            <p className="text-sm text-blue-300">
-              {filterType === 'exercise' && selectedExercise !== 'all' && (
-                <>Mostrando datos para: <strong>{exercises.find(ex => ex.id === selectedExercise)?.name || 'Ejercicio seleccionado'}</strong></>
-              )}
-              {filterType === 'muscle-group' && selectedMuscleGroup !== 'all' && (
-                <>Mostrando datos para grupo: <strong>{createMuscleGroupFilterOptions()
-                  .flatMap(group => group.options)
-                  .find(option => option.value === selectedMuscleGroup)?.label.replace(/^[^\s]+ /, '') || 'Grupo seleccionado'}</strong></>
-              )}
-            </p>
-          </div>
-        </div>
       )}
     </div>
   );

@@ -4,6 +4,7 @@ import { LoadingSpinner } from '../loading-spinner';
 import { OfflineWarning } from '../offline-warning';
 import {
   AdvancedTab,
+  BalanceTab,
   CategoryTab,
   DashboardEmptyState,
   DashboardFilters,
@@ -81,6 +82,9 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                   case 'categories':
                     // CategoryTab necesita TODOS los records para calcular métricas correctamente
                     return <CategoryTab records={workoutRecords} />;
+                  case 'balance':
+                    // BalanceTab también necesita todos los records
+                    return <BalanceTab records={workoutRecords} />;
                   case 'trends':
                     return <TrendsTab records={filteredRecords} />;
                   case 'advanced':

@@ -4,6 +4,7 @@
  */
 
 export { AdvancedTab } from './advanced-tab';
+export { BalanceTab } from './balance-tab';
 export { CategoryTab } from './category-tab';
 export { DashboardEmptyState } from './dashboard-empty-state';
 export { DashboardFilters } from './dashboard-filters';
