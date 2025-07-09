@@ -82,6 +82,7 @@ export const DashboardPage: React.FC = () => {
         timeFilter={timeFilter}
         exercises={exercises}
         isOnline={isOnline}
+        activeTab={activeTab}
         onExerciseChange={setSelectedExercise}
         onMuscleGroupChange={setSelectedMuscleGroup}
         onFilterTypeChange={setFilterType}

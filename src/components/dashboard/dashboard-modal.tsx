@@ -66,6 +66,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
               timeFilter={timeFilter}
               exercises={exercises}
               isOnline={isOnline}
+              activeTab={activeTab}
               onExerciseChange={setSelectedExercise}
               onMuscleGroupChange={setSelectedMuscleGroup}
               onFilterTypeChange={setFilterType}

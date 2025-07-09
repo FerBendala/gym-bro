@@ -11,6 +11,7 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
   timeFilter,
   exercises,
   isOnline,
+  activeTab,
   onExerciseChange,
   onMuscleGroupChange,
   onFilterTypeChange,
@@ -19,11 +20,14 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
   const exerciseGroups = createExerciseFilterOptions(exercises);
   const muscleGroupOptions = createMuscleGroupFilterOptions();
 
+  // No mostrar filtro de tiempo en el tab de categorías
+  const showTimeFilter = activeTab !== 'categories';
+
   return (
     <div className="space-y-4">
       {/* Selector de tipo de filtro */}
       <div className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1">
+        <div className={showTimeFilter ? "flex-1" : "w-full"}>
           <label className="block text-sm font-medium text-gray-300 mb-2">
             Tipo de filtro
           </label>
@@ -31,8 +35,8 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
             <button
               onClick={() => onFilterTypeChange('all')}
               className={`flex items-center justify-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filterType === 'all'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
                 }`}
               disabled={!isOnline}
             >
@@ -43,8 +47,8 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
             <button
               onClick={() => onFilterTypeChange('exercise')}
               className={`flex items-center justify-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filterType === 'exercise'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
                 }`}
               disabled={!isOnline}
             >
@@ -55,8 +59,8 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
             <button
               onClick={() => onFilterTypeChange('muscle-group')}
               className={`flex items-center justify-center space-x-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${filterType === 'muscle-group'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
                 }`}
               disabled={!isOnline}
             >
@@ -67,19 +71,21 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
         </div>
 
         {/* Selector de período */}
-        <div className="flex-1">
-          <Select
-            label="Período"
-            value={timeFilter}
-            onChange={(e) => onTimeFilterChange(e.target.value as any)}
-            options={[
-              { value: 'week', label: 'Esta semana' },
-              { value: 'month', label: 'Este mes' },
-              { value: 'all', label: 'Todo el tiempo' }
-            ]}
-            disabled={!isOnline}
-          />
-        </div>
+        {showTimeFilter && (
+          <div className="flex-1">
+            <Select
+              label="Período"
+              value={timeFilter}
+              onChange={(e) => onTimeFilterChange(e.target.value as any)}
+              options={[
+                { value: 'week', label: 'Esta semana' },
+                { value: 'month', label: 'Este mes' },
+                { value: 'all', label: 'Todo el tiempo' }
+              ]}
+              disabled={!isOnline}
+            />
+          </div>
+        )}
       </div>
 
       {/* Selectores específicos según el tipo de filtro */}
@@ -119,6 +125,15 @@ export const DashboardFilters: React.FC<DashboardFiltersProps> = ({
               )}
             </p>
           </div>
+        </div>
+      )}
+
+      {/* Mensaje informativo cuando no se muestra el filtro de tiempo */}
+      {!showTimeFilter && (
+        <div className="p-3 bg-gray-800 border border-gray-700 rounded-lg">
+          <p className="text-sm text-gray-400">
+            ℹ️ Las métricas por categoría muestran automáticamente todos los períodos de tiempo (semana actual, semana pasada, mes actual y mes pasado).
+          </p>
         </div>
       )}
     </div>

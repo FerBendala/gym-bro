@@ -35,6 +35,7 @@ export interface DashboardFiltersProps {
   timeFilter: TimeFilter;
   exercises: Exercise[];
   isOnline: boolean;
+  activeTab?: DashboardTab; // Agregado para controlar visibilidad del filtro de tiempo
   onExerciseChange: (exerciseId: string) => void;
   onMuscleGroupChange: (muscleGroupId: string) => void;
   onFilterTypeChange: (filterType: FilterType) => void;
