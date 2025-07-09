@@ -1,3 +1,5 @@
+import { startOfWeek } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { Calendar, TrendingUp } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { formatNumber } from '../../utils/functions';
@@ -12,13 +14,13 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
   const timelineData = useMemo((): TimelinePoint[] => {
     if (records.length === 0) return [];
 
-    // Agrupar por semanas
+    // Agrupar por semanas usando date-fns con locale español (lunes a domingo)
     const weeklyData = new Map<string, { totalVolume: number; avgWeight: number; workouts: number }>();
 
     records.forEach(record => {
       const date = new Date(record.date);
-      const weekStart = new Date(date);
-      weekStart.setDate(date.getDate() - date.getDay()); // Inicio de semana (domingo)
+      // Usar startOfWeek con locale español para consistencia con el resto del código
+      const weekStart = startOfWeek(date, { locale: es }); // Lunes como inicio de semana
       const weekKey = weekStart.toISOString().split('T')[0];
 
       const volume = record.weight * record.reps * record.sets;

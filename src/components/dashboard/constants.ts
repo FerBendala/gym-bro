@@ -1,4 +1,4 @@
-import { Activity, BarChart3, Target, Zap } from 'lucide-react';
+import { Activity, Target, Zap } from 'lucide-react';
 import type { DashboardTabConfig } from './types';
 
 /**
@@ -6,12 +6,6 @@ import type { DashboardTabConfig } from './types';
  * Define las pestañas disponibles y sus metadatos
  */
 export const DASHBOARD_TABS: DashboardTabConfig[] = [
-  {
-    id: 'overview',
-    label: 'Resumen',
-    icon: BarChart3,
-    description: 'Vista general de estadísticas y progreso'
-  },
   {
     id: 'categories',
     label: 'Por Categoría',
@@ -35,4 +29,4 @@ export const DASHBOARD_TABS: DashboardTabConfig[] = [
 /**
  * Tab por defecto al abrir el dashboard
  */
-export const DEFAULT_DASHBOARD_TAB: DashboardTabConfig['id'] = 'overview'; 
+export const DEFAULT_DASHBOARD_TAB: DashboardTabConfig['id'] = 'categories'; 

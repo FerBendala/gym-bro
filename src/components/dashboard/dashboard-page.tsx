@@ -4,7 +4,6 @@ import { OfflineWarning } from '../offline-warning';
 import {
   AdvancedTab,
   CategoryTab,
-  DashboardContent,
   DashboardEmptyState,
   DashboardFilters,
   DashboardTabNavigation,
@@ -49,13 +48,6 @@ export const DashboardPage: React.FC = () => {
     }
 
     switch (activeTab) {
-      case 'overview':
-        return (
-          <DashboardContent
-            filteredRecords={filteredRecords}
-            onDeleteRecord={handleDeleteRecord}
-          />
-        );
       case 'categories':
         return <CategoryTab records={filteredRecords} />;
       case 'trends':
@@ -63,12 +55,7 @@ export const DashboardPage: React.FC = () => {
       case 'advanced':
         return <AdvancedTab records={filteredRecords} />;
       default:
-        return (
-          <DashboardContent
-            filteredRecords={filteredRecords}
-            onDeleteRecord={handleDeleteRecord}
-          />
-        );
+        return <CategoryTab records={filteredRecords} />;
     }
   };
 

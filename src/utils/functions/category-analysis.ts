@@ -1,5 +1,24 @@
+import { endOfWeek, startOfWeek, subWeeks } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { EXERCISE_CATEGORIES } from '../../constants/exercise-categories';
 import type { WorkoutRecord } from '../../interfaces';
+
+/**
+ * Obtiene la fecha "actual" basada en los datos reales del usuario
+ * En lugar de usar new Date() que puede estar en un año diferente
+ */
+const getCurrentDateFromRecords = (records: WorkoutRecord[]): Date => {
+  if (records.length === 0) {
+    return new Date(); // Fallback a fecha del sistema si no hay datos
+  }
+
+  // Usar la fecha más reciente de los entrenamientos
+  const latestDate = new Date(Math.max(...records.map(r => new Date(r.date).getTime())));
+
+  // En lugar de verificar si es "muy antigua", simplemente usar la fecha más reciente
+  // esto maneja tanto datos pasados como futuros correctamente
+  return latestDate;
+};
 
 /**
  * Interfaz para métricas por categoría avanzadas
@@ -236,23 +255,36 @@ const determineStrengthLevel = (estimatedOneRM: number, category: string): 'begi
 /**
  * Calcula la distribución de volumen temporal para una categoría
  */
-const calculateVolumeDistribution = (categoryRecords: WorkoutRecord[]): {
+const calculateVolumeDistribution = (categoryRecords: WorkoutRecord[], allRecords?: WorkoutRecord[]): {
   thisWeek: number;
   lastWeek: number;
   thisMonth: number;
   lastMonth: number;
 } => {
-  const now = new Date();
-  const thisWeekStart = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
-  const lastWeekStart = new Date(now.getTime() - (14 * 24 * 60 * 60 * 1000));
+  // Usar la fecha actual basada en los datos reales
+  const now = getCurrentDateFromRecords(allRecords || categoryRecords);
+
+  // Usar date-fns con locale español para consistencia
+  const thisWeekStart = startOfWeek(now, { locale: es });
+  const thisWeekEnd = endOfWeek(now, { locale: es });
+
+  const lastWeekStart = startOfWeek(subWeeks(now, 1), { locale: es });
+  const lastWeekEnd = endOfWeek(subWeeks(now, 1), { locale: es });
+
+  // Para meses usamos cálculo aproximado (30 días)
   const thisMonthStart = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
   const lastMonthStart = new Date(now.getTime() - (60 * 24 * 60 * 60 * 1000));
 
-  const thisWeekRecords = categoryRecords.filter(r => new Date(r.date) >= thisWeekStart);
+  const thisWeekRecords = categoryRecords.filter(r => {
+    const date = new Date(r.date);
+    return date >= thisWeekStart && date <= thisWeekEnd;
+  });
+
   const lastWeekRecords = categoryRecords.filter(r => {
     const date = new Date(r.date);
-    return date >= lastWeekStart && date < thisWeekStart;
+    return date >= lastWeekStart && date <= lastWeekEnd;
   });
+
   const thisMonthRecords = categoryRecords.filter(r => new Date(r.date) >= thisMonthStart);
   const lastMonthRecords = categoryRecords.filter(r => {
     const date = new Date(r.date);
@@ -417,6 +449,9 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
   const totalWorkouts = Object.values(workoutsByCategory).reduce((sum, count) => sum + count, 0);
   const metrics: CategoryMetrics[] = [];
 
+  // Obtener fecha actual basada en los datos reales
+  const currentDate = getCurrentDateFromRecords(records);
+
   // Calcular métricas para cada categoría
   Object.entries(recordsByCategory).forEach(([category, categoryRecords]) => {
     const workouts = workoutsByCategory[category];
@@ -458,7 +493,8 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
     const efficiencyScore = calculateEfficiencyScore(categoryRecords);
     const consistencyScore = calculateConsistencyScore(categoryRecords, avgWorkoutsPerWeek);
 
-    const daysSinceLastWorkout = Math.floor((new Date().getTime() - lastWorkout.getTime()) / (1000 * 60 * 60 * 24));
+    // Usar fecha actual basada en los datos reales en lugar de new Date()
+    const daysSinceLastWorkout = Math.floor((currentDate.getTime() - lastWorkout.getTime()) / (1000 * 60 * 60 * 24));
 
     // Determinar tendencia basada en progresión de peso y volumen
     let trend: 'improving' | 'stable' | 'declining' = 'stable';
@@ -466,7 +502,10 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
     else if (weightProgression < -5 || volumeProgression < -5) trend = 'declining';
 
     const strengthLevel = determineStrengthLevel(estimatedOneRM, category);
-    const volumeDistribution = calculateVolumeDistribution(categoryRecords);
+
+    // Pasar todos los records como segundo parámetro para cálculo correcto de fechas
+    const volumeDistribution = calculateVolumeDistribution(categoryRecords, records);
+
     const performanceMetrics = calculateCategoryPerformanceMetrics(categoryRecords);
 
     // Crear objeto base
@@ -689,18 +728,19 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[]): {
     return { trend: 'stable', consistency: 0, volatility: 0 };
   }
 
-  // Analizar volumen semanal
-  const weeklyVolumes: { week: string; volume: number }[] = [];
+  // Analizar volumen semanal usando date-fns con locale español
   const sortedRecords = [...categoryRecords].sort((a, b) =>
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-  // Agrupar por semana
+  // Agrupar por semana usando startOfWeek con locale español
   const weeklyData: Record<string, number> = {};
   sortedRecords.forEach(record => {
-    const week = new Date(record.date).toISOString().slice(0, 10); // YYYY-MM-DD
+    const recordDate = new Date(record.date);
+    const weekStart = startOfWeek(recordDate, { locale: es });
+    const weekKey = weekStart.toISOString().split('T')[0]; // YYYY-MM-DD del lunes
     const volume = record.weight * record.reps * record.sets;
-    weeklyData[week] = (weeklyData[week] || 0) + volume;
+    weeklyData[weekKey] = (weeklyData[weekKey] || 0) + volume;
   });
 
   const volumes = Object.values(weeklyData);

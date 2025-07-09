@@ -6,3 +6,4 @@ export type {
   StrengthByCategory,
   StrengthCategoryComparison
 } from './hooks/use-strength-by-category';
+

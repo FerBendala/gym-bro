@@ -3,7 +3,6 @@ import { THEME_CONTAINERS } from '../../constants';
 import { LoadingSpinner } from '../loading-spinner';
 import { OfflineWarning } from '../offline-warning';
 import {
-  DashboardContent,
   DashboardEmptyState,
   DashboardFilters,
   DashboardHeader
@@ -73,10 +72,18 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             {filteredRecords.length === 0 ? (
               <DashboardEmptyState isOnline={isOnline} />
             ) : (
-              <DashboardContent
-                filteredRecords={filteredRecords}
-                onDeleteRecord={handleDeleteRecord}
-              />
+              (() => {
+                switch (activeTab) {
+                  case 'categories':
+                    return <CategoryTab records={filteredRecords} />;
+                  case 'trends':
+                    return <TrendsTab records={filteredRecords} />;
+                  case 'advanced':
+                    return <AdvancedTab records={filteredRecords} />;
+                  default:
+                    return <CategoryTab records={filteredRecords} />;
+                }
+              })()
             )}
           </div>
         </div>

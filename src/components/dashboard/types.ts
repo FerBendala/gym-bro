@@ -1,6 +1,6 @@
-import type { Exercise, WorkoutRecord } from '../../interfaces';
+import type { Exercise } from '../../interfaces';
 
-export type DashboardTab = 'overview' | 'categories' | 'trends' | 'advanced';
+export type DashboardTab = 'categories' | 'trends' | 'advanced';
 export type TimeFilter = 'week' | 'month' | 'all';
 export type FilterType = 'all' | 'exercise' | 'muscle-group';
 
@@ -13,11 +13,6 @@ export interface DashboardTabConfig {
 
 export interface DashboardProps {
   onClose: () => void;
-}
-
-export interface DashboardContentProps {
-  filteredRecords: WorkoutRecord[];
-  onDeleteRecord: (recordId: string) => Promise<void>;
 }
 
 export interface DashboardHeaderProps {
