@@ -43,19 +43,20 @@ export const DashboardPage: React.FC = () => {
 
   // Renderizar contenido según el tab activo
   const renderTabContent = () => {
-    if (filteredRecords.length === 0) {
+    if (filteredRecords.length === 0 && workoutRecords.length === 0) {
       return <DashboardEmptyState isOnline={isOnline} />;
     }
 
     switch (activeTab) {
       case 'categories':
-        return <CategoryTab records={filteredRecords} />;
+        // CategoryTab necesita TODOS los records para calcular métricas correctamente
+        return <CategoryTab records={workoutRecords} />;
       case 'trends':
         return <TrendsTab records={filteredRecords} />;
       case 'advanced':
         return <AdvancedTab records={filteredRecords} />;
       default:
-        return <CategoryTab records={filteredRecords} />;
+        return <CategoryTab records={workoutRecords} />;
     }
   };
 

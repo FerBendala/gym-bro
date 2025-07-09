@@ -3,9 +3,12 @@ import { THEME_CONTAINERS } from '../../constants';
 import { LoadingSpinner } from '../loading-spinner';
 import { OfflineWarning } from '../offline-warning';
 import {
+  AdvancedTab,
+  CategoryTab,
   DashboardEmptyState,
   DashboardFilters,
-  DashboardHeader
+  DashboardHeader,
+  TrendsTab
 } from './components';
 import { useDashboardData, useDashboardFilters } from './hooks';
 import type { DashboardProps } from './types';
@@ -69,19 +72,20 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
               onTimeFilterChange={setTimeFilter}
             />
 
-            {filteredRecords.length === 0 ? (
+            {filteredRecords.length === 0 && workoutRecords.length === 0 ? (
               <DashboardEmptyState isOnline={isOnline} />
             ) : (
               (() => {
                 switch (activeTab) {
                   case 'categories':
-                    return <CategoryTab records={filteredRecords} />;
+                    // CategoryTab necesita TODOS los records para calcular métricas correctamente
+                    return <CategoryTab records={workoutRecords} />;
                   case 'trends':
                     return <TrendsTab records={filteredRecords} />;
                   case 'advanced':
                     return <AdvancedTab records={filteredRecords} />;
                   default:
-                    return <CategoryTab records={filteredRecords} />;
+                    return <CategoryTab records={workoutRecords} />;
                 }
               })()
             )}

@@ -34,8 +34,12 @@ export const useDashboardFilters = (workoutRecords: WorkoutRecord[]) => {
   }, [workoutRecords, selectedExercise, selectedMuscleGroup, filterType, timeFilter]);
 
   const timeFilterLabel = useMemo(() => {
-    return getTimeFilterLabel(timeFilter);
-  }, [timeFilter]);
+    // Usar la fecha más reciente de los registros como referencia
+    const referenceDate = workoutRecords.length > 0
+      ? new Date(Math.max(...workoutRecords.map(r => r.date.getTime())))
+      : new Date();
+    return getTimeFilterLabel(timeFilter, referenceDate);
+  }, [timeFilter, workoutRecords]);
 
   // Función para cambiar el tipo de filtro y resetear valores
   const handleFilterTypeChange = (newFilterType: FilterType) => {
