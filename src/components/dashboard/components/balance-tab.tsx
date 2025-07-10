@@ -97,16 +97,14 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
 
       {/* Métricas principales con diseño mejorado */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="relative">
-          <StatCard
-            title="Score de Balance"
-            value={`${safeNumber(balanceScore)}%`}
-            icon={Activity}
-            variant={balanceScore >= 80 ? 'success' : balanceScore >= 60 ? 'warning' : 'danger'}
-            tooltip="Puntuación que indica qué tan equilibrado está tu entrenamiento entre diferentes grupos musculares."
-            tooltipPosition="top"
-          />
-        </div>
+        <StatCard
+          title="Score de Balance"
+          value={`${safeNumber(balanceScore)}%`}
+          icon={Activity}
+          variant={balanceScore >= 80 ? 'success' : balanceScore >= 60 ? 'warning' : 'danger'}
+          tooltip="Puntuación que indica qué tan equilibrado está tu entrenamiento entre diferentes grupos musculares."
+          tooltipPosition="top"
+        />
 
         <StatCard
           title="Grupos en Balance"
