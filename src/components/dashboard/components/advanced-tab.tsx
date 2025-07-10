@@ -804,10 +804,10 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                         </h4>
                         <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
                           <span className={`px-2 py-1 rounded-full text-xs font-medium ${analysis.fatigueAnalysis.fatigueLevel === 'Muy Baja' ? 'bg-green-500 text-white' :
-                              analysis.fatigueAnalysis.fatigueLevel === 'Baja' ? 'bg-blue-500 text-white' :
-                                analysis.fatigueAnalysis.fatigueLevel === 'Moderada' ? 'bg-yellow-500 text-black' :
-                                  analysis.fatigueAnalysis.fatigueLevel === 'Alta' ? 'bg-orange-500 text-white' :
-                                    'bg-red-500 text-white'
+                            analysis.fatigueAnalysis.fatigueLevel === 'Baja' ? 'bg-blue-500 text-white' :
+                              analysis.fatigueAnalysis.fatigueLevel === 'Moderada' ? 'bg-yellow-500 text-black' :
+                                analysis.fatigueAnalysis.fatigueLevel === 'Alta' ? 'bg-orange-500 text-white' :
+                                  'bg-red-500 text-white'
                             }`}>
                             {analysis.fatigueAnalysis.fatigueLevel}
                           </span>
@@ -889,15 +889,7 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                         <div
                           className="bg-blue-500 h-2 rounded-full transition-all duration-300 relative"
                           style={{ width: `${safeNumber(analysis.fatigueAnalysis.recoveryRate, 0)}%` }}
-                        >
-                          {safeNumber(analysis.fatigueAnalysis.recoveryRate, 0) > 25 && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-xs font-medium text-white drop-shadow-sm">
-                                {safeNumber(analysis.fatigueAnalysis.recoveryRate, 0)}%
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                        />
                       </div>
                     </div>
 
@@ -910,15 +902,7 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                         <div
                           className="bg-green-500 h-2 rounded-full transition-all duration-300 relative"
                           style={{ width: `${safeNumber(analysis.fatigueAnalysis.recoveryScore, 0)}%` }}
-                        >
-                          {safeNumber(analysis.fatigueAnalysis.recoveryScore, 0) > 25 && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-xs font-medium text-white drop-shadow-sm">
-                                {safeNumber(analysis.fatigueAnalysis.recoveryScore, 0)}
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                        />
                       </div>
                     </div>
 
@@ -980,7 +964,7 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                         <div className="flex justify-between items-center">
                           <span className="text-xs text-gray-400">Tendencia historial:</span>
                           <span className={`text-xs font-medium ${analysis.fatigueAnalysis.fatigueHistory.trend === 'Mejorando' ? 'text-green-400' :
-                              analysis.fatigueAnalysis.fatigueHistory.trend === 'Empeorando' ? 'text-red-400' : 'text-gray-400'
+                            analysis.fatigueAnalysis.fatigueHistory.trend === 'Empeorando' ? 'text-red-400' : 'text-gray-400'
                             }`}>
                             {analysis.fatigueAnalysis.fatigueHistory.trend}
                           </span>

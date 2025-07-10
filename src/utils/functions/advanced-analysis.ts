@@ -562,10 +562,10 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
 };
 
 /**
- * Predice progreso futuro con análisis mejorado
+ * Genera predicciones básicas para usuarios nuevos (menos de 10 registros)
  */
-export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction => {
-  if (records.length < 10) {
+const generateBeginnerPredictions = (records: WorkoutRecord[]): ProgressPrediction => {
+  if (records.length === 0) {
     return {
       nextWeekVolume: 0,
       nextWeekWeight: 0,
@@ -577,8 +577,208 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
       confidenceLevel: 0,
       volumeTrend: 0,
       strengthTrend: 0,
-      recommendations: ['Necesitas al menos 10 registros para predicciones precisas']
+      recommendations: ['Comienza registrando tus entrenamientos para obtener predicciones']
     };
+  }
+
+  // Calcular métricas básicas con datos disponibles
+  const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const avgWeight = records.reduce((sum, r) => sum + r.weight, 0) / records.length;
+  const maxWeight = Math.max(...records.map(r => r.weight));
+  const avgVolume = totalVolume / records.length;
+
+  // Calcular progresión inicial si hay al menos 2 registros
+  let initialProgress = 0;
+  let trendAnalysis: 'mejorando' | 'estable' | 'empeorando' | 'insuficiente' = 'insuficiente';
+
+  if (records.length >= 2) {
+    const firstRecord = sortedRecords[0];
+    const lastRecord = sortedRecords[sortedRecords.length - 1];
+    const first1RM = firstRecord.weight * (1 + Math.min(firstRecord.reps, 20) / 30);
+    const last1RM = lastRecord.weight * (1 + Math.min(lastRecord.reps, 20) / 30);
+
+    if (first1RM > 0) {
+      initialProgress = ((last1RM - first1RM) / first1RM) * 100;
+    }
+
+    if (initialProgress > 5) trendAnalysis = 'mejorando';
+    else if (initialProgress < -5) trendAnalysis = 'empeorando';
+    else trendAnalysis = 'estable';
+  }
+
+  // Estimaciones optimistas para principiantes (progresión típica inicial)
+  const beginnerGrowthRate = records.length >= 3 ?
+    Math.max(2, Math.min(8, initialProgress * 0.5)) : 4; // 2-8% mensual típico para principiantes
+
+  const nextWeekWeight = Math.max(maxWeight, avgWeight + (beginnerGrowthRate * 0.25)); // 25% del crecimiento mensual
+  const nextWeekVolume = Math.max(avgVolume, avgVolume * 1.1); // 10% más de volumen
+
+  // Predicción de PR conservadora para principiantes
+  const current1RMMax = Math.max(...records.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30)));
+  const predictedPRWeight = Math.max(current1RMMax, current1RMMax * 1.05); // 5% mejora en PR
+
+  // Tiempo estimado para próximo PR (principiantes progresan más rápido)
+  const timeToNextPR = Math.max(2, Math.min(6, 8 - records.length)); // 2-6 semanas
+
+  // Nivel de confianza basado en datos disponibles
+  const confidenceLevel = Math.min(80, Math.max(30, 25 + (records.length * 5))); // 30-80% basado en número de registros
+
+  // Riesgo de meseta bajo para principiantes
+  const plateauRisk = Math.max(10, Math.min(40, 40 - (records.length * 3))); // 10-40%, menor con más datos
+
+  // Recomendaciones específicas para principiantes
+  const recommendations: string[] = [
+    'Como principiante, enfócate en consistencia y técnica correcta',
+    'Aumenta peso gradualmente (2.5-5kg cada 2-3 semanas)',
+    'Prioriza aprender movimientos básicos antes de cargas pesadas'
+  ];
+
+  if (records.length < 5) {
+    recommendations.push('Registra al menos 5 entrenamientos más para mejores predicciones');
+  }
+
+  if (trendAnalysis === 'mejorando') {
+    recommendations.push('¡Excelente progresión inicial! Mantén la consistencia');
+  } else if (trendAnalysis === 'estable') {
+    recommendations.push('Considera aumentar peso o repeticiones gradualmente');
+  } else if (trendAnalysis === 'empeorando') {
+    recommendations.push('Revisa técnica y asegúrate de descansar adecuadamente');
+  }
+
+  if (records.length >= 3) {
+    recommendations.push('Considera establecer rutina de 3-4 entrenamientos por semana');
+  }
+
+  return {
+    nextWeekVolume: Math.round(nextWeekVolume),
+    nextWeekWeight: Math.round(nextWeekWeight * 100) / 100,
+    monthlyGrowthRate: Math.round(beginnerGrowthRate * 100) / 100,
+    predictedPR: {
+      weight: Math.round(predictedPRWeight * 100) / 100,
+      confidence: Math.round(confidenceLevel * 0.8) // Reducir confianza para PR
+    },
+    plateauRisk: Math.round(plateauRisk),
+    trendAnalysis,
+    timeToNextPR,
+    confidenceLevel: Math.round(confidenceLevel),
+    volumeTrend: Math.round(nextWeekVolume - avgVolume),
+    strengthTrend: Math.round((nextWeekWeight - avgWeight) * 100) / 100,
+    recommendations
+  };
+};
+
+/**
+ * Genera predicciones intermedias para usuarios con 10+ registros pero menos de 4 semanas de datos
+ */
+const generateIntermediatePredictions = (records: WorkoutRecord[], weeklyData: { volume: number; weight: number; date: Date }[]): ProgressPrediction => {
+  // Calcular métricas básicas con todos los datos disponibles
+  const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const avgWeight = records.reduce((sum, r) => sum + r.weight, 0) / records.length;
+  const maxWeight = Math.max(...records.map(r => r.weight));
+  const avgVolume = totalVolume / records.length;
+
+  // Calcular progresión usando todos los registros
+  const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const firstRecord = sortedRecords[0];
+  const lastRecord = sortedRecords[sortedRecords.length - 1];
+
+  const first1RM = firstRecord.weight * (1 + Math.min(firstRecord.reps, 20) / 30);
+  const last1RM = lastRecord.weight * (1 + Math.min(lastRecord.reps, 20) / 30);
+
+  let overallProgress = 0;
+  if (first1RM > 0) {
+    overallProgress = ((last1RM - first1RM) / first1RM) * 100;
+  }
+
+  // Calcular tendencias básicas usando datos disponibles
+  let trendAnalysis: 'mejorando' | 'estable' | 'empeorando' | 'insuficiente' = 'insuficiente';
+  if (overallProgress > 3) trendAnalysis = 'mejorando';
+  else if (overallProgress < -3) trendAnalysis = 'empeorando';
+  else trendAnalysis = 'estable';
+
+  // Usar datos semanales si están disponibles, sino usar progresión general
+  let volumeTrend = 0;
+  let strengthTrend = 0;
+
+  if (weeklyData.length >= 2) {
+    const recentVolume = weeklyData[0].volume;
+    const previousVolume = weeklyData[1].volume;
+    const recentWeight = weeklyData[0].weight;
+    const previousWeight = weeklyData[1].weight;
+
+    volumeTrend = recentVolume - previousVolume;
+    strengthTrend = recentWeight - previousWeight;
+  } else {
+    // Estimación basada en progresión general
+    const daysBetween = Math.max(1, (lastRecord.date.getTime() - firstRecord.date.getTime()) / (1000 * 60 * 60 * 24));
+    const weeklyStrengthChange = overallProgress > 0 ? (overallProgress * 0.01 * avgWeight) / (daysBetween / 7) : 0;
+    strengthTrend = weeklyStrengthChange;
+    volumeTrend = avgVolume * 0.05; // 5% de crecimiento estimado
+  }
+
+  // Predicciones conservadoras
+  const nextWeekWeight = Math.max(maxWeight, avgWeight + strengthTrend);
+  const nextWeekVolume = Math.max(avgVolume, avgVolume + volumeTrend);
+  const monthlyGrowthRate = Math.max(0, strengthTrend * 4); // 4 semanas por mes
+
+  // Predicción de PR
+  const current1RMMax = Math.max(...records.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30)));
+  const predictedPRWeight = Math.max(current1RMMax, current1RMMax + (strengthTrend * 2)); // 2 semanas de progreso
+
+  // Tiempo estimado para próximo PR
+  const prThreshold = current1RMMax * 1.025; // 2.5% mejora
+  const timeToNextPR = strengthTrend > 0 ? Math.ceil((prThreshold - current1RMMax) / strengthTrend) : 4;
+
+  // Nivel de confianza basado en cantidad de datos
+  const confidenceLevel = Math.min(70, Math.max(40, 30 + (records.length * 2) + (weeklyData.length * 5)));
+
+  // Riesgo de meseta moderado
+  const plateauRisk = Math.max(20, Math.min(60, 50 - (overallProgress * 2)));
+
+  // Recomendaciones específicas para usuarios intermedios
+  const recommendations: string[] = [
+    'Continúa registrando entrenamientos para mejorar precisión de predicciones',
+    'Establece rutina consistente de 3-4 entrenamientos semanales'
+  ];
+
+  if (trendAnalysis === 'mejorando') {
+    recommendations.push('Progresión positiva detectada - mantén la consistencia');
+  } else if (trendAnalysis === 'estable') {
+    recommendations.push('Considera aumentar gradualmente peso o volumen');
+  } else if (trendAnalysis === 'empeorando') {
+    recommendations.push('Revisa técnica, descanso y nutrición');
+  }
+
+  if (records.length < 20) {
+    recommendations.push('Registra más entrenamientos para análisis más detallado');
+  }
+
+  return {
+    nextWeekVolume: Math.round(nextWeekVolume),
+    nextWeekWeight: Math.round(nextWeekWeight * 100) / 100,
+    monthlyGrowthRate: Math.round(monthlyGrowthRate * 100) / 100,
+    predictedPR: {
+      weight: Math.round(predictedPRWeight * 100) / 100,
+      confidence: Math.round(confidenceLevel * 0.7) // Reducir confianza para PR
+    },
+    plateauRisk: Math.round(plateauRisk),
+    trendAnalysis,
+    timeToNextPR: Math.max(2, Math.min(8, timeToNextPR)),
+    confidenceLevel: Math.round(confidenceLevel),
+    volumeTrend: Math.round(volumeTrend),
+    strengthTrend: Math.round(strengthTrend * 100) / 100,
+    recommendations
+  };
+};
+
+/**
+ * Predice progreso futuro con análisis mejorado
+ */
+export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction => {
+  // Manejo especial para usuarios nuevos (menos de 10 registros)
+  if (records.length < 10) {
+    return generateBeginnerPredictions(records);
   }
 
   const now = new Date();
@@ -606,19 +806,8 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
   }
 
   if (weeklyData.length < 4) {
-    return {
-      nextWeekVolume: 0,
-      nextWeekWeight: 0,
-      monthlyGrowthRate: 0,
-      predictedPR: { weight: 0, confidence: 0 },
-      plateauRisk: 50,
-      trendAnalysis: 'insuficiente',
-      timeToNextPR: 0,
-      confidenceLevel: 0,
-      volumeTrend: 0,
-      strengthTrend: 0,
-      recommendations: ['Necesitas más datos históricos para predicciones precisas']
-    };
+    // Generar predicciones básicas con datos limitados pero existentes
+    return generateIntermediatePredictions(records, weeklyData);
   }
 
   // Ordenar por fecha (más reciente primero)
