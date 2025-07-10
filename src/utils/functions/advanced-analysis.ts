@@ -602,7 +602,8 @@ const generateBeginnerPredictions = (records: WorkoutRecord[]): ProgressPredicti
       initialProgress = ((last1RM - first1RM) / first1RM) * 100;
     }
 
-    if (initialProgress > 5) trendAnalysis = 'mejorando';
+    // Lógica mejorada para principiantes - ser más optimista con pequeñas mejoras
+    if (initialProgress > 2) trendAnalysis = 'mejorando';
     else if (initialProgress < -5) trendAnalysis = 'empeorando';
     else trendAnalysis = 'estable';
   }
@@ -693,7 +694,9 @@ const generateIntermediatePredictions = (records: WorkoutRecord[], weeklyData: {
 
   // Calcular tendencias básicas usando datos disponibles
   let trendAnalysis: 'mejorando' | 'estable' | 'empeorando' | 'insuficiente' = 'insuficiente';
-  if (overallProgress > 3) trendAnalysis = 'mejorando';
+
+  // Lógica mejorada - ser más sensible a mejoras en usuarios intermedios
+  if (overallProgress > 2) trendAnalysis = 'mejorando';
   else if (overallProgress < -3) trendAnalysis = 'empeorando';
   else trendAnalysis = 'estable';
 
@@ -766,7 +769,8 @@ const generateIntermediatePredictions = (records: WorkoutRecord[], weeklyData: {
     trendAnalysis,
     timeToNextPR: Math.max(2, Math.min(8, timeToNextPR)),
     confidenceLevel: Math.round(confidenceLevel),
-    volumeTrend: Math.round(volumeTrend),
+    // Limitar volumeTrend a rangos razonables
+    volumeTrend: Math.max(-500, Math.min(500, Math.round(volumeTrend))),
     strengthTrend: Math.round(strengthTrend * 100) / 100,
     recommendations
   };
@@ -844,13 +848,27 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
   // Tasa de crecimiento mensual más realista
   const monthlyGrowthRate = strengthTrend * 4; // 4 semanas por mes
 
-  // Análisis de tendencia
+  // Análisis de tendencia mejorado - priorizar fuerza sobre volumen
   let trendAnalysis: 'mejorando' | 'estable' | 'empeorando' | 'insuficiente';
-  const combinedTrend = (volumeTrend + strengthTrend) / 2;
 
-  if (combinedTrend > 2) trendAnalysis = 'mejorando';
-  else if (combinedTrend < -2) trendAnalysis = 'empeorando';
+  // Normalizar tendencias a escalas comparables
+  const normalizedVolumeTrend = Math.abs(currentVolume) > 0 ? (volumeTrend / currentVolume) * 100 : 0; // Porcentaje de cambio
+  const normalizedStrengthTrend = Math.abs(currentWeight) > 0 ? (strengthTrend / currentWeight) * 100 : 0; // Porcentaje de cambio
+
+  // Priorizar tendencia de fuerza (70%) sobre volumen (30%)
+  const weightedTrend = (normalizedStrengthTrend * 0.7) + (normalizedVolumeTrend * 0.3);
+
+  // Clasificar basado en la tendencia ponderada
+  if (weightedTrend > 2) trendAnalysis = 'mejorando';
+  else if (weightedTrend < -2) trendAnalysis = 'empeorando';
   else trendAnalysis = 'estable';
+
+  // Si la fuerza está claramente mejorando, darle prioridad independientemente del volumen
+  if (strengthTrend > 2) {
+    trendAnalysis = 'mejorando';
+  } else if (strengthTrend < -2) {
+    trendAnalysis = 'empeorando';
+  }
 
   // Predicción de PR mejorada
   const current1RMMax = Math.max(...records.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30)));
@@ -868,7 +886,7 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
   const volumeVariance = volumeValues.reduce((sum, v) => sum + Math.pow(v - avgVolume, 2), 0) / volumeValues.length;
 
   const dataConsistency = Math.max(0, Math.min(100, 100 - (weightVariance + volumeVariance) / 200));
-  const trendStrength = Math.min(100, Math.abs(combinedTrend) * 10);
+  const trendStrength = Math.min(100, Math.abs(weightedTrend) * 10);
   const confidenceLevel = Math.round((dataConsistency * 0.6) + (trendStrength * 0.4));
 
   const prConfidence = Math.min(95, Math.max(15, confidenceLevel - Math.min(timeToNextPR, 8) * 5));
@@ -919,7 +937,8 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
     trendAnalysis,
     timeToNextPR: Math.max(0, timeToNextPR),
     confidenceLevel: Math.round(confidenceLevel),
-    volumeTrend: Math.round(volumeTrend),
+    // Limitar volumeTrend a rangos razonables para evitar valores extremos
+    volumeTrend: Math.max(-500, Math.min(500, Math.round(volumeTrend))),
     strengthTrend: Math.round(strengthTrend * 100) / 100,
     recommendations
   };
