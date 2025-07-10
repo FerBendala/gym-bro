@@ -1,4 +1,17 @@
-import { Activity, AlertTriangle, Brain, Calendar, CheckCircle, Clock, Target, TrendingUp } from 'lucide-react';
+import {
+  Activity,
+  AlertTriangle,
+  BarChart,
+  Brain,
+  Calendar,
+  CheckCircle,
+  Clock,
+  Target,
+  TrendingDown,
+  TrendingUp,
+  Trophy,
+  Zap
+} from 'lucide-react';
 import React, { useMemo } from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
 import { formatNumber } from '../../../utils/functions';
@@ -11,8 +24,46 @@ interface TrendsTabProps {
   records: WorkoutRecord[];
 }
 
+// Íconos para días de la semana
+const dayIcons: Record<string, React.FC<any>> = {
+  'Lunes': Target,
+  'Martes': Activity,
+  'Miércoles': Zap,
+  'Jueves': BarChart,
+  'Viernes': Trophy,
+  'Sábado': Calendar,
+  'Domingo': Clock
+};
+
+// Colores para días de la semana
+const dayColors: Record<string, string> = {
+  'Lunes': 'from-blue-500/80 to-cyan-500/80',
+  'Martes': 'from-green-500/80 to-emerald-500/80',
+  'Miércoles': 'from-purple-500/80 to-violet-500/80',
+  'Jueves': 'from-orange-500/80 to-amber-500/80',
+  'Viernes': 'from-red-500/80 to-pink-500/80',
+  'Sábado': 'from-indigo-500/80 to-blue-500/80',
+  'Domingo': 'from-teal-500/80 to-green-500/80'
+};
+
+// Función utilitaria para validar valores numéricos
+const safeNumber = (value: any, defaultValue: number = 0): number => {
+  if (typeof value !== 'number' || isNaN(value) || !isFinite(value)) {
+    return defaultValue;
+  }
+  return value;
+};
+
 export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
   const analysis = useMemo(() => calculateTrendsAnalysis(records), [records]);
+
+  // Calcular indicador de experiencia basado en registros
+  const experienceLevel = useMemo(() => {
+    if (records.length < 10) return 'Principiante';
+    if (records.length < 30) return 'Intermedio';
+    if (records.length < 60) return 'Avanzado';
+    return 'Experto';
+  }, [records.length]);
 
   if (records.length === 0) {
     return (
@@ -32,8 +83,28 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
 
   return (
     <div className="space-y-6">
-      {/* Hábitos principales */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Header informativo */}
+      {records.length < 20 && (
+        <Card className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 border-purple-500/30">
+          <CardContent>
+            <div className="flex items-start gap-3 p-2">
+              <Activity className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="text-sm font-medium text-purple-300 mb-1">
+                  Análisis adaptado a tu nivel ({experienceLevel})
+                </h4>
+                <p className="text-xs text-gray-400">
+                  Las tendencias se analizan según tu historial de entrenamiento.
+                  Con más datos, el análisis será más preciso.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Métricas principales con diseño mejorado */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <StatCard
           title="Día Preferido"
           value={analysis.workoutHabits.preferredDay}
@@ -60,620 +131,391 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
           tooltipPosition="top"
         />
         <StatCard
-          title="Patrón Descanso"
-          value={analysis.workoutHabits.restDayPattern}
-          icon={Activity}
-          variant="teal"
-          tooltip="Tu patrón típico de días de descanso entre entrenamientos. Importante para la recuperación muscular."
+          title="Racha Actual"
+          value={analysis.workoutHabits.workoutStreaks.current.toString()}
+          icon={Trophy}
+          variant={analysis.workoutHabits.workoutStreaks.current > 7 ? 'success' :
+            analysis.workoutHabits.workoutStreaks.current > 3 ? 'warning' : 'danger'}
+          tooltip="Tu racha actual de días consecutivos entrenando. ¡Mantén el momentum!"
+          tooltipPosition="top"
+        />
+        <StatCard
+          title="Tendencia General"
+          value={analysis.temporalEvolution.overallTrend}
+          icon={analysis.temporalEvolution.overallTrend === 'Mejorando' ? TrendingUp :
+            analysis.temporalEvolution.overallTrend === 'Declinando' ? TrendingDown : Activity}
+          variant={analysis.temporalEvolution.overallTrend === 'Mejorando' ? 'success' :
+            analysis.temporalEvolution.overallTrend === 'Declinando' ? 'danger' : 'indigo'}
+          tooltip="La tendencia general de tu progreso en las últimas semanas."
           tooltipPosition="top"
         />
       </div>
 
-      <div className="space-y-6">
-        {/* Entrenamientos por Día Mejorado */}
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-white flex items-center">
-              <Calendar className="w-5 h-5 mr-2" />
-              Análisis por Día de la Semana
-              <InfoTooltip
-                content="Análisis completo de tus patrones de entrenamiento por día, incluyendo rendimiento, tendencias, consistencia y recomendaciones personalizadas."
-                position="top"
-                className="ml-2"
-              />
-            </h3>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
+      {/* Análisis por Día de la Semana */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <Calendar className="w-5 h-5 mr-2" />
+            Análisis por Día de la Semana
+            <InfoTooltip
+              content="Análisis completo de tus patrones de entrenamiento por día, incluyendo rendimiento, tendencias y recomendaciones personalizadas."
+              position="top"
+              className="ml-2"
+            />
+          </h3>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {analysis.dayMetricsOrdered.map((day) => {
+              const Icon = dayIcons[day.dayName] || Calendar;
+              const colorGradient = dayColors[day.dayName] || 'from-gray-500/80 to-gray-600/80';
 
-              {/* Resumen visual por día */}
-              <div className="grid grid-cols-7 gap-2">
-                {analysis.dayMetricsOrdered.map((day) => (
-                  <div
-                    key={day.dayName}
-                    className="text-center p-2 bg-gray-800 rounded-lg"
-                  >
-                    <p className="text-xs font-medium text-gray-300 mb-1">
-                      {day.dayName.slice(0, 3)}
-                    </p>
-                    <div className={`w-full h-16 rounded-md mb-2 flex items-end justify-center ${day.workouts === 0 ? 'bg-gray-700' :
-                      day.performanceScore >= 70 ? 'bg-green-600' :
-                        day.performanceScore >= 50 ? 'bg-yellow-600' :
-                          'bg-red-600'
-                      }`}>
-                      <span className="text-white text-xs font-bold mb-1">
-                        {day.workouts}
-                      </span>
-                    </div>
-                    <p className="text-xs text-gray-400">
-                      {day.performanceScore}%
-                    </p>
-                  </div>
-                ))}
-              </div>
+              const getPerformanceBadge = () => {
+                if (day.performanceScore >= 80) return { text: 'Excelente', color: 'bg-green-500 text-white' };
+                if (day.performanceScore >= 60) return { text: 'Bueno', color: 'bg-blue-500 text-white' };
+                if (day.performanceScore >= 40) return { text: 'Regular', color: 'bg-yellow-500 text-black' };
+                return { text: 'Necesita Mejora', color: 'bg-red-500 text-white' };
+              };
 
-              {/* Lista detallada de días */}
-              <div className="space-y-3">
-                {analysis.dayMetricsOrdered.map((day) => (
-                  <div
-                    key={day.dayName}
-                    className="p-4 bg-gray-800 rounded-lg border-l-4 border-l-blue-500"
-                  >
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <h4 className="text-lg font-medium text-white">
+              const performanceBadge = getPerformanceBadge();
+
+              return (
+                <div
+                  key={day.dayName}
+                  className={`relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/30 hover:border-gray-600/50 transition-all duration-200`}
+                >
+                  {/* Header con ícono y estado */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                      <div className={`p-2 sm:p-3 rounded-lg bg-gradient-to-br ${colorGradient}`}>
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white truncate">
                           {day.dayName}
                         </h4>
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${day.performanceScore >= 80 ? 'bg-green-600 text-white' :
-                          day.performanceScore >= 60 ? 'bg-blue-600 text-white' :
-                            day.performanceScore >= 40 ? 'bg-yellow-600 text-white' :
-                              day.performanceScore >= 20 ? 'bg-orange-600 text-white' :
-                                'bg-red-600 text-white'
-                          }`}>
-                          Score: {day.performanceScore}
-                        </span>
-                        {day.trend !== 0 && (
-                          <span className={`px-2 py-1 rounded-full text-xs font-bold ${day.trend > 0 ? 'bg-green-600 text-white' : 'bg-red-600 text-white'
-                            }`}>
-                            {day.trend > 0 ? '+' : ''}{day.trend}%
-                          </span>
-                        )}
-                      </div>
-                      <div className="text-right">
-                        <p className="text-lg font-bold text-blue-400">
-                          {formatNumber(day.totalVolume)} kg
-                        </p>
-                        <p className="text-xs text-gray-400">
-                          {day.percentage}% del total
-                        </p>
+                        <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
+                          {day.workouts > 0 && (
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${performanceBadge.color}`}>
+                              {performanceBadge.text}
+                            </span>
+                          )}
+                          {day.trend > 0 && (
+                            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
+                          )}
+                          {day.trend < 0 && (
+                            <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
+                          )}
+                        </div>
                       </div>
                     </div>
-
-                    {day.workouts > 0 ? (
-                      <>
-                        {/* Métricas básicas */}
-                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
-                          <div className="text-center">
-                            <p className="text-xl font-bold text-white">{day.workouts}</p>
-                            <p className="text-xs text-gray-400">Entrenamientos</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-xl font-bold text-purple-400">{day.uniqueExercises}</p>
-                            <p className="text-xs text-gray-400">Ejercicios únicos</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-xl font-bold text-orange-400">{day.maxWeight}kg</p>
-                            <p className="text-xs text-gray-400">Peso máximo</p>
-                          </div>
-                          <div className="text-center">
-                            <p className="text-xl font-bold text-green-400">{day.consistency}%</p>
-                            <p className="text-xs text-gray-400">Consistencia</p>
-                          </div>
-                        </div>
-
-                        {/* Detalles adicionales */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                          <div className="space-y-1">
-                            <div className="flex justify-between">
-                              <span className="text-gray-400">Hora preferida:</span>
-                              <span className="text-gray-300">{day.mostFrequentTime || 'N/A'}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-400">Ejercicio principal:</span>
-                              <span className="text-gray-300 truncate ml-2">{day.topExercise}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-400">Peso promedio:</span>
-                              <span className="text-gray-300">{day.avgWeight}kg</span>
-                            </div>
-                          </div>
-                          <div className="space-y-1">
-                            <div className="flex justify-between">
-                              <span className="text-gray-400">Reps promedio:</span>
-                              <span className="text-gray-300">{day.avgReps}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-400">Series promedio:</span>
-                              <span className="text-gray-300">{day.avgSets}</span>
-                            </div>
-                            <div className="flex justify-between">
-                              <span className="text-gray-400">Eficiencia:</span>
-                              <span className="text-gray-300">{formatNumber(day.efficiency)} kg/sesión</span>
-                            </div>
-                          </div>
-                        </div>
-
-                        {/* Recomendaciones */}
-                        {day.recommendations.length > 0 && (
-                          <div className="mt-3 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
-                            <h5 className="text-sm text-blue-400 font-medium mb-2">
-                              Recomendaciones para {day.dayName}:
-                            </h5>
-                            <ul className="space-y-1">
-                              {day.recommendations.map((rec, index) => (
-                                <li key={index} className="text-xs text-gray-300 flex items-start">
-                                  <span className="text-blue-400 mr-2">•</span>
-                                  {rec}
-                                </li>
-                              ))}
-                            </ul>
-                          </div>
+                    <div className="text-right ml-2 sm:ml-4">
+                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">
+                        {day.workouts}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        entrenamientos
+                      </div>
+                      <div className="mt-1 sm:mt-2 flex justify-end">
+                        {day.workouts > 0 ? (
+                          <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+                        ) : (
+                          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
                         )}
-                      </>
-                    ) : (
-                      <div className="text-center py-4">
-                        <p className="text-gray-400 mb-2">Sin entrenamientos registrados</p>
-                        <div className="p-2 bg-yellow-900/20 border border-yellow-500/30 rounded-lg">
-                          <p className="text-xs text-yellow-400">
-                            Considera añadir entrenamientos en este día para equilibrar tu rutina semanal
-                          </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {day.workouts > 0 ? (
+                    <>
+                      {/* Barra de progreso de volumen */}
+                      <div className="mb-4">
+                        <div className="flex justify-between text-xs text-gray-400 mb-2">
+                          <span>Volumen: {formatNumber(day.totalVolume)} kg</span>
+                          <span className="text-gray-300">
+                            {day.percentage.toFixed(1)}% del total
+                          </span>
+                        </div>
+                        <div className="relative h-3 sm:h-4 md:h-6 bg-gray-800 rounded-full overflow-hidden">
+                          <div
+                            className={`relative h-full bg-gradient-to-r ${colorGradient} transition-all duration-300`}
+                            style={{ width: `${Math.min(100, safeNumber(day.percentage, 0))}%` }}
+                          >
+                            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                            {safeNumber(day.percentage, 0) > 15 && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-xs font-medium text-white drop-shadow-sm">
+                                  {formatNumber(day.totalVolume)} kg
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          {safeNumber(day.percentage, 0) <= 15 && safeNumber(day.percentage, 0) > 0 && (
+                            <div className="absolute top-0 left-2 h-full flex items-center">
+                              <span className="text-xs font-medium text-white drop-shadow-sm">
+                                {formatNumber(day.totalVolume)} kg
+                              </span>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    )}
-                  </div>
-                ))}
+
+                      {/* Grid de métricas responsivo */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
+                        <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                          <div className="text-xs text-gray-400 mb-1">Peso Máximo</div>
+                          <div className="text-sm sm:text-lg font-semibold text-white">
+                            {day.maxWeight} kg
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                          <div className="text-xs text-gray-400 mb-1">Ejercicios</div>
+                          <div className="text-sm sm:text-lg font-semibold text-white">
+                            {day.uniqueExercises}
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                          <div className="text-xs text-gray-400 mb-1">Consistencia</div>
+                          <div className="text-sm sm:text-lg font-semibold text-white">
+                            {day.consistency}%
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                          <div className="text-xs text-gray-400 mb-1">Eficiencia</div>
+                          <div className="text-sm sm:text-lg font-semibold text-white">
+                            {formatNumber(day.efficiency)}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Recomendaciones específicas */}
+                      {day.recommendations.length > 0 && (
+                        <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
+                          <div className="flex items-start gap-2">
+                            <Zap className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-blue-300 break-words">
+                                {day.recommendations[0]}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-4">
+                      <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-3">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-yellow-300 break-words">
+                              Sin entrenamientos registrados. Considera añadir entrenamientos en este día para equilibrar tu rutina semanal.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Evolución Temporal */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <TrendingUp className="w-5 h-5 mr-2" />
+            Evolución Temporal
+            <InfoTooltip
+              content="Análisis avanzado de tu progreso temporal con predicciones, volatilidad y comparaciones por períodos."
+              position="top"
+              className="ml-2"
+            />
+          </h3>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Métricas de tendencia general */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <TrendingUp className={`w-5 h-5 ${analysis.temporalEvolution.overallTrend === 'Mejorando' ? 'text-green-400' :
+                    analysis.temporalEvolution.overallTrend === 'Declinando' ? 'text-red-400' : 'text-gray-400'}`} />
+                </div>
+                <div className="text-sm text-gray-400 mb-1">Tendencia</div>
+                <div className={`text-lg font-semibold ${analysis.temporalEvolution.overallTrend === 'Mejorando' ? 'text-green-400' :
+                  analysis.temporalEvolution.overallTrend === 'Declinando' ? 'text-red-400' : 'text-gray-400'}`}>
+                  {analysis.temporalEvolution.overallTrend}
+                </div>
+              </div>
+
+              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Target className="w-5 h-5 text-blue-400" />
+                </div>
+                <div className="text-sm text-gray-400 mb-1">Crecimiento</div>
+                <div className="text-lg font-semibold text-blue-400">
+                  {analysis.temporalEvolution.growthRate > 0 ? '+' : ''}{analysis.temporalEvolution.growthRate}%
+                </div>
+              </div>
+
+              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Activity className={`w-5 h-5 ${analysis.temporalEvolution.volatility < 20 ? 'text-green-400' :
+                    analysis.temporalEvolution.volatility < 40 ? 'text-yellow-400' : 'text-red-400'}`} />
+                </div>
+                <div className="text-sm text-gray-400 mb-1">Volatilidad</div>
+                <div className={`text-lg font-semibold ${analysis.temporalEvolution.volatility < 20 ? 'text-green-400' :
+                  analysis.temporalEvolution.volatility < 40 ? 'text-yellow-400' : 'text-red-400'}`}>
+                  {analysis.temporalEvolution.volatility}%
+                </div>
+              </div>
+
+              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Brain className="w-5 h-5 text-purple-400" />
+                </div>
+                <div className="text-sm text-gray-400 mb-1">Confianza</div>
+                <div className="text-lg font-semibold text-purple-400">
+                  {Math.round(analysis.temporalEvolution.predictions.confidence * 100)}%
+                </div>
               </div>
             </div>
-          </CardContent>
-        </Card>
 
-
-
-        {/* Evolución Temporal Mejorada */}
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-white flex items-center">
-              <TrendingUp className="w-5 h-5 mr-2" />
-              Evolución Temporal
-              <InfoTooltip
-                content="Análisis avanzado de tu progreso temporal con predicciones, volatilidad, hitos y comparaciones por períodos."
-                position="top"
-                className="ml-2"
-              />
-            </h3>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-
-              {/* Métricas de tendencia general */}
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="p-4 bg-gray-800 rounded-lg text-center">
-                  <div className="flex items-center justify-center mb-2">
-                    <TrendingUp className={`w-6 h-6 ${analysis.temporalEvolution.overallTrend === 'Mejorando' ? 'text-green-400' :
-                      analysis.temporalEvolution.overallTrend === 'Declinando' ? 'text-red-400' :
-                        'text-gray-400'
-                      }`} />
+            {/* Predicciones */}
+            <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-blue-300 mb-3 flex items-center">
+                <Brain className="w-4 h-4 mr-2" />
+                Predicciones para la Próxima Semana
+              </h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="text-center">
+                  <div className="text-xl font-bold text-blue-400">
+                    {formatNumber(analysis.temporalEvolution.predictions.nextWeekVolume)} kg
                   </div>
-                  <p className="text-sm text-gray-400 mb-1">Tendencia General</p>
-                  <p className={`text-lg font-bold ${analysis.temporalEvolution.overallTrend === 'Mejorando' ? 'text-green-400' :
-                    analysis.temporalEvolution.overallTrend === 'Declinando' ? 'text-red-400' :
-                      'text-gray-400'
-                    }`}>
-                    {analysis.temporalEvolution.overallTrend}
-                  </p>
+                  <div className="text-xs text-gray-400">Volumen estimado</div>
                 </div>
-
-                <div className="p-4 bg-gray-800 rounded-lg text-center">
-                  <div className="flex items-center justify-center mb-2">
-                    <Target className="w-6 h-6 text-blue-400" />
+                <div className="text-center">
+                  <div className="text-xl font-bold text-blue-400">
+                    {analysis.temporalEvolution.predictions.nextWeekWorkouts}
                   </div>
-                  <p className="text-sm text-gray-400 mb-1">Crecimiento Semanal</p>
-                  <p className="text-lg font-bold text-blue-400">
-                    {analysis.temporalEvolution.growthRate > 0 ? '+' : ''}{analysis.temporalEvolution.growthRate}%
-                  </p>
+                  <div className="text-xs text-gray-400">Entrenamientos</div>
                 </div>
-
-                <div className="p-4 bg-gray-800 rounded-lg text-center">
-                  <div className="flex items-center justify-center mb-2">
-                    <Activity className={`w-6 h-6 ${analysis.temporalEvolution.volatility < 20 ? 'text-green-400' :
-                      analysis.temporalEvolution.volatility < 40 ? 'text-yellow-400' :
-                        'text-red-400'
-                      }`} />
+                <div className="text-center">
+                  <div className={`text-xl font-bold ${analysis.temporalEvolution.predictions.trend === 'Alcista' ? 'text-green-400' :
+                    analysis.temporalEvolution.predictions.trend === 'Bajista' ? 'text-red-400' : 'text-gray-400'}`}>
+                    {analysis.temporalEvolution.predictions.trend}
                   </div>
-                  <p className="text-sm text-gray-400 mb-1">Volatilidad</p>
-                  <p className={`text-lg font-bold ${analysis.temporalEvolution.volatility < 20 ? 'text-green-400' :
-                    analysis.temporalEvolution.volatility < 40 ? 'text-yellow-400' :
-                      'text-red-400'
-                    }`}>
-                    {analysis.temporalEvolution.volatility}%
-                  </p>
-                </div>
-
-                <div className="p-4 bg-gray-800 rounded-lg text-center">
-                  <div className="flex items-center justify-center mb-2">
-                    <Brain className="w-6 h-6 text-purple-400" />
-                  </div>
-                  <p className="text-sm text-gray-400 mb-1">Confianza</p>
-                  <p className="text-lg font-bold text-purple-400">
-                    {Math.round(analysis.temporalEvolution.predictions.confidence * 100)}%
-                  </p>
+                  <div className="text-xs text-gray-400">Tendencia</div>
                 </div>
               </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-              {/* Progreso semanal con más detalles */}
-              <div>
-                <h4 className="text-md font-medium text-white mb-3 flex items-center">
-                  <Calendar className="w-5 h-5 mr-2" />
-                  Progreso Semanal Detallado
+      {/* Análisis de Hábitos */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <Activity className="w-5 h-5 mr-2" />
+            Análisis de Hábitos
+            <InfoTooltip
+              content="Análisis completo de tus patrones de entrenamiento, rachas y recomendaciones personalizadas."
+              position="top"
+              className="ml-2"
+            />
+          </h3>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Métricas de hábitos */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Clock className="w-5 h-5 text-blue-400" />
+                </div>
+                <div className="text-lg font-semibold text-white">
+                  {analysis.workoutHabits.avgSessionDuration} min
+                </div>
+                <div className="text-xs text-gray-400">Duración promedio</div>
+              </div>
+
+              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Calendar className="w-5 h-5 text-purple-400" />
+                </div>
+                <div className="text-lg font-semibold text-white">
+                  {analysis.workoutHabits.weeklyFrequency}
+                </div>
+                <div className="text-xs text-gray-400">Entrenamientos/semana</div>
+              </div>
+
+              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Trophy className="w-5 h-5 text-orange-400" />
+                </div>
+                <div className="text-lg font-semibold text-white">
+                  {analysis.workoutHabits.workoutStreaks.longest}
+                </div>
+                <div className="text-xs text-gray-400">Racha más larga</div>
+              </div>
+
+              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Target className="w-5 h-5 text-green-400" />
+                </div>
+                <div className="text-lg font-semibold text-white">
+                  {analysis.workoutHabits.workoutStreaks.current}
+                </div>
+                <div className="text-xs text-gray-400">Racha actual</div>
+              </div>
+            </div>
+
+            {/* Recomendaciones */}
+            {analysis.workoutHabits.recommendations.length > 0 && (
+              <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-green-300 mb-3 flex items-center">
+                  <CheckCircle className="w-4 h-4 mr-2" />
+                  Recomendaciones Personalizadas
                 </h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                  {analysis.temporalEvolution.trends.slice(-4).map((trend) => (
-                    <div key={trend.period} className="p-3 bg-gray-800 rounded-lg">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-400">Sem. {trend.period}</span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-bold ${trend.momentum === 'Creciente' ? 'bg-green-600 text-white' :
-                          trend.momentum === 'Decreciente' ? 'bg-red-600 text-white' :
-                            'bg-gray-600 text-white'
-                          }`}>
-                          {trend.momentum}
-                        </span>
-                      </div>
-                      <p className="text-lg font-bold text-white mb-1">
-                        {formatNumber(trend.volume)} kg
-                      </p>
-                      <div className="space-y-1 text-xs">
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Entrenamientos:</span>
-                          <span className="text-gray-300">{trend.workouts}</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Peso máx:</span>
-                          <span className="text-gray-300">{trend.maxWeight}kg</span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Consistencia:</span>
-                          <span className={`${trend.consistency > 70 ? 'text-green-400' : trend.consistency > 50 ? 'text-yellow-400' : 'text-red-400'}`}>
-                            {trend.consistency}%
-                          </span>
-                        </div>
-                        <div className="flex justify-between">
-                          <span className="text-gray-400">Cambio:</span>
-                          <span className={`${trend.volumeChangePercent > 0 ? 'text-green-400' : trend.volumeChangePercent < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                            {trend.volumeChangePercent > 0 ? '+' : ''}{trend.volumeChangePercent}%
-                          </span>
-                        </div>
-                      </div>
+                <div className="space-y-2">
+                  {analysis.workoutHabits.recommendations.slice(0, 3).map((rec, index) => (
+                    <div key={index} className="flex items-start gap-2">
+                      <Zap className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-gray-300 break-words">{rec}</p>
                     </div>
                   ))}
                 </div>
               </div>
+            )}
 
-              {/* Predicciones y proyecciones */}
-              <div className="p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
-                <h4 className="text-md font-medium text-blue-400 mb-3 flex items-center">
-                  <TrendingUp className="w-5 h-5 mr-2" />
-                  Predicciones para la Próxima Semana
+            {/* Factores de riesgo */}
+            {analysis.workoutHabits.riskFactors.length > 0 && (
+              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
+                <h4 className="text-sm font-medium text-red-300 mb-3 flex items-center">
+                  <AlertTriangle className="w-4 h-4 mr-2" />
+                  Factores de Riesgo
                 </h4>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-400">
-                      {formatNumber(analysis.temporalEvolution.predictions.nextWeekVolume)} kg
-                    </p>
-                    <p className="text-sm text-gray-400">Volumen estimado</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-400">
-                      {analysis.temporalEvolution.predictions.nextWeekWorkouts}
-                    </p>
-                    <p className="text-sm text-gray-400">Entrenamientos estimados</p>
-                  </div>
-                  <div className="text-center">
-                    <p className={`text-2xl font-bold ${analysis.temporalEvolution.predictions.trend === 'Alcista' ? 'text-green-400' :
-                      analysis.temporalEvolution.predictions.trend === 'Bajista' ? 'text-red-400' :
-                        'text-gray-400'
-                      }`}>
-                      {analysis.temporalEvolution.predictions.trend}
-                    </p>
-                    <p className="text-sm text-gray-400">Tendencia proyectada</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Hitos y logros */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="p-4 bg-gray-800 rounded-lg">
-                  <h4 className="text-md font-medium text-white mb-3">Hitos Destacados</h4>
-                  <div className="space-y-2">
-                    {analysis.temporalEvolution.milestones.bestWeek && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-400">Mejor semana:</span>
-                        <span className="text-sm font-medium text-green-400">
-                          {analysis.temporalEvolution.milestones.bestWeek.period}
-                        </span>
-                      </div>
-                    )}
-                    {analysis.temporalEvolution.milestones.mostConsistentWeek && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-400">Más consistente:</span>
-                        <span className="text-sm font-medium text-blue-400">
-                          {analysis.temporalEvolution.milestones.mostConsistentWeek.period}
-                        </span>
-                      </div>
-                    )}
-                    {analysis.temporalEvolution.milestones.biggestImprovement && (
-                      <div className="flex items-center justify-between">
-                        <span className="text-sm text-gray-400">Mayor mejora:</span>
-                        <span className="text-sm font-medium text-purple-400">
-                          {analysis.temporalEvolution.milestones.biggestImprovement.period}
-                        </span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-
-                <div className="p-4 bg-gray-800 rounded-lg">
-                  <h4 className="text-md font-medium text-white mb-3">Comparación por Períodos</h4>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">Últimas 4 semanas:</span>
-                      <span className="text-sm font-medium text-white">
-                        {formatNumber(analysis.temporalEvolution.periodComparisons.last4Weeks.volume)} kg
-                      </span>
+                <div className="space-y-2">
+                  {analysis.workoutHabits.riskFactors.slice(0, 3).map((risk, index) => (
+                    <div key={index} className="flex items-start gap-2">
+                      <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                      <p className="text-sm text-gray-300 break-words">{risk}</p>
                     </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">Anteriores 4 semanas:</span>
-                      <span className="text-sm font-medium text-gray-300">
-                        {formatNumber(analysis.temporalEvolution.periodComparisons.previous4Weeks.volume)} kg
-                      </span>
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-gray-400">Mejora promedio:</span>
-                      <span className={`text-sm font-medium ${analysis.temporalEvolution.periodComparisons.improvement.volume > 0 ? 'text-green-400' :
-                        analysis.temporalEvolution.periodComparisons.improvement.volume < 0 ? 'text-red-400' :
-                          'text-gray-400'
-                        }`}>
-                        {analysis.temporalEvolution.periodComparisons.improvement.volume > 0 ? '+' : ''}
-                        {formatNumber(analysis.temporalEvolution.periodComparisons.improvement.volume)} kg
-                      </span>
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </div>
-
-              {/* Insights */}
-              {analysis.temporalEvolution.insights.length > 0 && (
-                <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
-                  <h4 className="text-sm text-green-400 font-medium mb-2 flex items-center">
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Insights Temporales
-                  </h4>
-                  <ul className="space-y-1">
-                    {analysis.temporalEvolution.insights.map((insight, index) => (
-                      <li key={index} className="text-xs text-gray-300 flex items-start">
-                        <span className="text-green-400 mr-2">•</span>
-                        {insight}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Advertencias */}
-              {analysis.temporalEvolution.warnings.length > 0 && (
-                <div className="p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
-                  <h4 className="text-sm text-red-400 font-medium mb-2 flex items-center">
-                    <AlertTriangle className="w-4 h-4 mr-2" />
-                    Advertencias Temporales
-                  </h4>
-                  <ul className="space-y-1">
-                    {analysis.temporalEvolution.warnings.map((warning, index) => (
-                      <li key={index} className="text-xs text-gray-300 flex items-start">
-                        <span className="text-red-400 mr-2">⚠</span>
-                        {warning}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Análisis de Hábitos Mejorado */}
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-white flex items-center">
-              <Activity className="w-5 h-5 mr-2" />
-              Análisis de Hábitos
-              <InfoTooltip
-                content="Análisis completo de tus patrones de entrenamiento, rachas, motivación y recomendaciones personalizadas para mejorar tus hábitos."
-                position="top"
-                className="ml-2"
-              />
-            </h3>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-6">
-
-              {/* Métricas principales */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="text-center p-3 bg-gray-800 rounded-lg">
-                  <Clock className="w-6 h-6 text-blue-400 mx-auto mb-2" />
-                  <p className="text-lg font-bold text-white">
-                    {analysis.workoutHabits.avgSessionDuration}min
-                  </p>
-                  <p className="text-xs text-gray-400">Duración promedio</p>
-                </div>
-
-                <div className="text-center p-3 bg-gray-800 rounded-lg">
-                  <TrendingUp className="w-6 h-6 text-green-400 mx-auto mb-2" />
-                  <p className="text-lg font-bold text-white">
-                    {analysis.workoutHabits.consistencyScore}%
-                  </p>
-                  <p className="text-xs text-gray-400">Consistencia</p>
-                </div>
-
-                <div className="text-center p-3 bg-gray-800 rounded-lg">
-                  <Calendar className="w-6 h-6 text-purple-400 mx-auto mb-2" />
-                  <p className="text-lg font-bold text-white">
-                    {analysis.workoutHabits.weeklyFrequency}
-                  </p>
-                  <p className="text-xs text-gray-400">Entrenamientos/semana</p>
-                </div>
-
-                <div className="text-center p-3 bg-gray-800 rounded-lg">
-                  <Activity className="w-6 h-6 text-orange-400 mx-auto mb-2" />
-                  <p className="text-lg font-bold text-white">
-                    {analysis.workoutHabits.workoutStreaks.longest}
-                  </p>
-                  <p className="text-xs text-gray-400">Racha más larga</p>
-                </div>
-              </div>
-
-              {/* Análisis de hábitos */}
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="p-4 bg-gray-800 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-medium text-gray-300">Fuerza del Hábito</h4>
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${analysis.workoutHabits.habitStrength === 'Muy Fuerte' ? 'bg-green-600 text-white' :
-                      analysis.workoutHabits.habitStrength === 'Fuerte' ? 'bg-blue-600 text-white' :
-                        analysis.workoutHabits.habitStrength === 'Moderado' ? 'bg-yellow-600 text-white' :
-                          analysis.workoutHabits.habitStrength === 'Débil' ? 'bg-orange-600 text-white' :
-                            'bg-red-600 text-white'
-                      }`}>
-                      {analysis.workoutHabits.habitStrength}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-400">Evaluación general de tus hábitos</p>
-                </div>
-
-                <div className="p-4 bg-gray-800 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-medium text-gray-300">Flexibilidad</h4>
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${analysis.workoutHabits.scheduleFlexibility === 'Muy Flexible' ? 'bg-green-600 text-white' :
-                      analysis.workoutHabits.scheduleFlexibility === 'Flexible' ? 'bg-blue-600 text-white' :
-                        analysis.workoutHabits.scheduleFlexibility === 'Rígido' ? 'bg-yellow-600 text-white' :
-                          'bg-red-600 text-white'
-                      }`}>
-                      {analysis.workoutHabits.scheduleFlexibility}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-400">Adaptabilidad de horarios</p>
-                </div>
-
-                <div className="p-4 bg-gray-800 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-medium text-gray-300">Motivación</h4>
-                    <span className={`px-2 py-1 rounded-full text-xs font-bold ${analysis.workoutHabits.motivationPattern === 'Creciente' ? 'bg-green-600 text-white' :
-                      analysis.workoutHabits.motivationPattern === 'Estable' ? 'bg-blue-600 text-white' :
-                        analysis.workoutHabits.motivationPattern === 'Decreciente' ? 'bg-red-600 text-white' :
-                          'bg-yellow-600 text-white'
-                      }`}>
-                      {analysis.workoutHabits.motivationPattern}
-                    </span>
-                  </div>
-                  <p className="text-xs text-gray-400">Patrón de motivación reciente</p>
-                </div>
-              </div>
-
-              {/* Rachas de entrenamiento */}
-              <div className="p-4 bg-gray-800 rounded-lg">
-                <h4 className="text-md font-medium text-white mb-3 flex items-center">
-                  <Target className="w-5 h-5 mr-2" />
-                  Rachas de Entrenamiento
-                </h4>
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="text-center">
-                    <p className={`text-2xl font-bold ${analysis.workoutHabits.workoutStreaks.current > 0 ? 'text-green-400' : 'text-gray-400'
-                      }`}>
-                      {analysis.workoutHabits.workoutStreaks.current}
-                    </p>
-                    <p className="text-xs text-gray-400">Racha actual</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-blue-400">
-                      {analysis.workoutHabits.workoutStreaks.longest}
-                    </p>
-                    <p className="text-xs text-gray-400">Racha más larga</p>
-                  </div>
-                  <div className="text-center">
-                    <p className="text-2xl font-bold text-purple-400">
-                      {analysis.workoutHabits.workoutStreaks.average}
-                    </p>
-                    <p className="text-xs text-gray-400">Promedio de rachas</p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Insights de comportamiento */}
-              {analysis.workoutHabits.behaviorInsights.length > 0 && (
-                <div className="p-4 bg-blue-900/20 border border-blue-500/30 rounded-lg">
-                  <h4 className="text-sm text-blue-400 font-medium mb-2 flex items-center">
-                    <Brain className="w-4 h-4 mr-2" />
-                    Insights de Comportamiento
-                  </h4>
-                  <ul className="space-y-1">
-                    {analysis.workoutHabits.behaviorInsights.map((insight, index) => (
-                      <li key={index} className="text-xs text-gray-300 flex items-start">
-                        <span className="text-blue-400 mr-2">•</span>
-                        {insight}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Recomendaciones */}
-              {analysis.workoutHabits.recommendations.length > 0 && (
-                <div className="p-4 bg-green-900/20 border border-green-500/30 rounded-lg">
-                  <h4 className="text-sm text-green-400 font-medium mb-2 flex items-center">
-                    <CheckCircle className="w-4 h-4 mr-2" />
-                    Recomendaciones Personalizadas
-                  </h4>
-                  <ul className="space-y-1">
-                    {analysis.workoutHabits.recommendations.map((rec, index) => (
-                      <li key={index} className="text-xs text-gray-300 flex items-start">
-                        <span className="text-green-400 mr-2">•</span>
-                        {rec}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-              {/* Factores de riesgo */}
-              {analysis.workoutHabits.riskFactors.length > 0 && (
-                <div className="p-4 bg-red-900/20 border border-red-500/30 rounded-lg">
-                  <h4 className="text-sm text-red-400 font-medium mb-2 flex items-center">
-                    <AlertTriangle className="w-4 h-4 mr-2" />
-                    Factores de Riesgo
-                  </h4>
-                  <ul className="space-y-1">
-                    {analysis.workoutHabits.riskFactors.map((risk, index) => (
-                      <li key={index} className="text-xs text-gray-300 flex items-start">
-                        <span className="text-red-400 mr-2">⚠</span>
-                        {risk}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+            )}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }; 

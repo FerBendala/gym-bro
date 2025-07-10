@@ -283,16 +283,7 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                           <div
                             className="bg-blue-500 h-2 rounded-full transition-all duration-300 relative"
                             style={{ width: `${safeNumber(balance.symmetryScore, 0)}%` }}
-                          >
-                            {/* Valor en la barra si es lo suficientemente ancha */}
-                            {safeNumber(balance.symmetryScore, 0) > 25 && (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-xs font-medium text-white drop-shadow-sm">
-                                  {safeNumber(balance.symmetryScore, 0)}%
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                          />
                         </div>
                       </div>
 
@@ -305,16 +296,7 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                           <div
                             className="bg-orange-500 h-2 rounded-full transition-all duration-300 relative"
                             style={{ width: `${safeNumber(balance.strengthIndex, 0)}%` }}
-                          >
-                            {/* Valor en la barra si es lo suficientemente ancha */}
-                            {safeNumber(balance.strengthIndex, 0) > 25 && (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-xs font-medium text-white drop-shadow-sm">
-                                  {safeNumber(balance.strengthIndex, 0)}%
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                          />
                         </div>
                       </div>
 

@@ -245,16 +245,7 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
                         <div
                           className="bg-blue-500 h-2 rounded-full transition-all duration-300 relative"
                           style={{ width: `${safeNumber(metric.intensityScore, 0)}%` }}
-                        >
-                          {/* Valor en la barra si es lo suficientemente ancha */}
-                          {safeNumber(metric.intensityScore, 0) > 25 && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-xs font-medium text-white drop-shadow-sm">
-                                {safeNumber(metric.intensityScore, 0)}%
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                        />
                       </div>
                     </div>
 
@@ -267,16 +258,7 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
                         <div
                           className="bg-orange-500 h-2 rounded-full transition-all duration-300 relative"
                           style={{ width: `${safeNumber(metric.consistencyScore, 0)}%` }}
-                        >
-                          {/* Valor en la barra si es lo suficientemente ancha */}
-                          {safeNumber(metric.consistencyScore, 0) > 25 && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-xs font-medium text-white drop-shadow-sm">
-                                {safeNumber(metric.consistencyScore, 0)}%
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                        />
                       </div>
                     </div>
 
@@ -302,7 +284,11 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
                     {/* Progresión */}
                     <div className="bg-gray-800/30 rounded-lg p-3">
                       <h5 className="text-xs font-medium text-gray-300 mb-2 flex items-center gap-1">
-                        <TrendingUp className="w-3 h-3" />
+                        {trendBadge.icon ? (
+                          <trendBadge.icon className={`w-3 h-3 ${metric.trend === 'declining' ? 'text-red-400' : 'text-green-400'}`} />
+                        ) : (
+                          <TrendingUp className="w-3 h-3" />
+                        )}
                         Progresión
                       </h5>
                       <div className="space-y-1">
