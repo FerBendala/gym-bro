@@ -184,6 +184,7 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                   <div
                     key={balance.category}
                     className={`relative p-4 sm:p-6 rounded-xl bg-gradient-to-br ${balance.isBalanced ? 'from-gray-800 to-gray-900' : 'from-gray-900 to-black'
+                      } border ${balance.isBalanced ? 'border-green-500/20' : 'border-red-500/20'
                       } hover:border-opacity-40 transition-all duration-200`}
                   >
                     {/* Header con ícono y estado */}
