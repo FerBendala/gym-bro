@@ -651,6 +651,16 @@ const generateBeginnerPredictions = (records: WorkoutRecord[]): ProgressPredicti
     recommendations.push('Considera establecer rutina de 3-4 entrenamientos por semana');
   }
 
+  // Calcular strengthTrend para determinar override
+  const calculatedStrengthTrend = nextWeekWeight - avgWeight;
+
+  // Override: Si la fuerza está claramente mejorando/empeorando, darle prioridad
+  if (calculatedStrengthTrend > 2) {
+    trendAnalysis = 'mejorando';
+  } else if (calculatedStrengthTrend < -2) {
+    trendAnalysis = 'empeorando';
+  }
+
   return {
     nextWeekVolume: Math.round(nextWeekVolume),
     nextWeekWeight: Math.round(nextWeekWeight * 100) / 100,
@@ -664,7 +674,7 @@ const generateBeginnerPredictions = (records: WorkoutRecord[]): ProgressPredicti
     timeToNextPR,
     confidenceLevel: Math.round(confidenceLevel),
     volumeTrend: Math.round(nextWeekVolume - avgVolume),
-    strengthTrend: Math.round((nextWeekWeight - avgWeight) * 100) / 100,
+    strengthTrend: Math.round(calculatedStrengthTrend * 100) / 100,
     recommendations
   };
 };
@@ -718,6 +728,13 @@ const generateIntermediatePredictions = (records: WorkoutRecord[], weeklyData: {
     const weeklyStrengthChange = overallProgress > 0 ? (overallProgress * 0.01 * avgWeight) / (daysBetween / 7) : 0;
     strengthTrend = weeklyStrengthChange;
     volumeTrend = avgVolume * 0.05; // 5% de crecimiento estimado
+  }
+
+  // Override: Si la fuerza está claramente mejorando/empeorando, darle prioridad
+  if (strengthTrend > 2) {
+    trendAnalysis = 'mejorando';
+  } else if (strengthTrend < -2) {
+    trendAnalysis = 'empeorando';
   }
 
   // Predicciones conservadoras
