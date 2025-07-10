@@ -1,7 +1,9 @@
 import {
   Activity, AlertTriangle, Award,
   Brain, Calendar, CheckCircle,
-  Clock, Shield, Target, TrendingUp, Zap
+  Clock, Shield, Target,
+  Timer,
+  TrendingUp, Zap
 } from 'lucide-react';
 import React, { useMemo } from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
@@ -701,6 +703,32 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
     );
   }
 
+  // Íconos para métricas de fatiga (mismo estilo que Balance Muscular)
+  const fatigueIcons: Record<string, React.FC<any>> = {
+    'fatigueLevel': AlertTriangle,
+    'recoveryRate': Activity,
+    'recoveryScore': CheckCircle,
+    'workloadTrend': TrendingUp,
+    'overreachingRisk': Shield
+  };
+
+  // Colores para métricas de fatiga
+  const fatigueColors: Record<string, string> = {
+    'fatigueLevel': 'from-red-500/80 to-orange-500/80',
+    'recoveryRate': 'from-blue-500/80 to-cyan-500/80',
+    'recoveryScore': 'from-green-500/80 to-emerald-500/80',
+    'workloadTrend': 'from-purple-500/80 to-violet-500/80',
+    'overreachingRisk': 'from-indigo-500/80 to-blue-500/80'
+  };
+
+  // Función utilitaria para validar valores numéricos (igual que Balance Muscular)
+  const safeNumber = (value: any, defaultValue: number = 0): number => {
+    if (typeof value !== 'number' || isNaN(value) || !isFinite(value)) {
+      return defaultValue;
+    }
+    return value;
+  };
+
   return (
     <div className="space-y-6">
       {/* Indicadores principales - Lo más importante primero */}
@@ -753,7 +781,7 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
               <AlertTriangle className="w-5 h-5 mr-2" />
               Análisis de Fatiga
               <InfoTooltip
-                content="Evaluación completa de tu estado de fatiga, recuperación y riesgo de sobreentrenamiento. Incluye análisis de tendencias y recomendaciones personalizadas."
+                content="Evaluación completa de tu estado de fatiga, recuperación y riesgo de sobreentrenamiento con análisis visual."
                 position="top"
                 className="ml-2"
               />
@@ -761,169 +789,249 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {/* Métricas principales - Mobile: 1 columna, SM+: 3 columnas */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                <div className="text-center p-3 bg-gray-800 rounded-lg">
-                  <p className={`text-xl sm:text-2xl font-bold ${analysis.fatigueAnalysis.fatigueLevel === 'Muy Baja' ? 'text-green-400' :
-                    analysis.fatigueAnalysis.fatigueLevel === 'Baja' ? 'text-blue-400' :
-                      analysis.fatigueAnalysis.fatigueLevel === 'Moderada' ? 'text-yellow-400' :
-                        analysis.fatigueAnalysis.fatigueLevel === 'Alta' ? 'text-orange-400' :
-                          'text-red-400'
-                    }`}>
-                    {analysis.fatigueAnalysis.fatigueLevel}
-                  </p>
-                  <div className="text-sm text-gray-400 flex items-center justify-center">
-                    <span>Nivel de fatiga</span>
-                    <InfoTooltip
-                      content="Evaluación general de tu nivel de fatiga actual basado en múltiples factores de entrenamiento."
-                      position="top"
-                      className="ml-1"
-                    />
+              {/* Métricas principales rediseñadas como tarjetas */}
+              <div className="space-y-4">
+                {/* Nivel de Fatiga */}
+                <div className="relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/30 hover:border-gray-600/50 transition-all duration-200">
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                      <div className={`p-2 sm:p-3 rounded-lg bg-gradient-to-br ${fatigueColors.fatigueLevel}`}>
+                        <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white truncate">
+                          Nivel de Fatiga
+                        </h4>
+                        <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${analysis.fatigueAnalysis.fatigueLevel === 'Muy Baja' ? 'bg-green-500 text-white' :
+                              analysis.fatigueAnalysis.fatigueLevel === 'Baja' ? 'bg-blue-500 text-white' :
+                                analysis.fatigueAnalysis.fatigueLevel === 'Moderada' ? 'bg-yellow-500 text-black' :
+                                  analysis.fatigueAnalysis.fatigueLevel === 'Alta' ? 'bg-orange-500 text-white' :
+                                    'bg-red-500 text-white'
+                            }`}>
+                            {analysis.fatigueAnalysis.fatigueLevel}
+                          </span>
+                          {analysis.fatigueAnalysis.fatigueIndex <= 30 && (
+                            <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
+                          )}
+                          {analysis.fatigueAnalysis.fatigueIndex > 70 && (
+                            <AlertTriangle className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right ml-2 sm:ml-4">
+                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">
+                        {safeNumber(analysis.fatigueAnalysis.fatigueIndex, 0)}%
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        índice fatiga
+                      </div>
+                      <div className="mt-1 sm:mt-2 flex justify-end">
+                        {analysis.fatigueAnalysis.fatigueIndex <= 30 ? (
+                          <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+                        ) : analysis.fatigueAnalysis.fatigueIndex > 70 ? (
+                          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
+                        ) : (
+                          <Activity className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
+                        )}
+                      </div>
+                    </div>
                   </div>
-                </div>
-                <div className="text-center p-3 bg-gray-800 rounded-lg">
-                  <p className="text-xl sm:text-2xl font-bold text-white">
-                    {analysis.fatigueAnalysis.recoveryDays}
-                  </p>
-                  <div className="text-sm text-gray-400 flex items-center justify-center">
-                    <span>Días descanso</span>
-                    <InfoTooltip
-                      content="Días transcurridos desde tu último entrenamiento. Importante para evaluar el patrón de recuperación."
-                      position="top"
-                      className="ml-1"
-                    />
+
+                  {/* Barra de progreso de fatiga */}
+                  <div className="mb-4">
+                    <div className="flex justify-between text-xs text-gray-400 mb-2">
+                      <span>Índice: {safeNumber(analysis.fatigueAnalysis.fatigueIndex, 0)}%</span>
+                      <span className="text-gray-300">
+                        Riesgo: {analysis.fatigueAnalysis.overreachingRisk}
+                      </span>
+                    </div>
+                    <div className="relative h-3 sm:h-4 md:h-6 bg-gray-800 rounded-full overflow-hidden">
+                      <div
+                        className={`relative h-full bg-gradient-to-r ${fatigueColors.fatigueLevel} transition-all duration-300`}
+                        style={{ width: `${Math.min(100, safeNumber(analysis.fatigueAnalysis.fatigueIndex, 0))}%` }}
+                      >
+                        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                        {safeNumber(analysis.fatigueAnalysis.fatigueIndex, 0) > 15 && (
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <span className="text-xs font-medium text-white drop-shadow-sm">
+                              {safeNumber(analysis.fatigueAnalysis.fatigueIndex, 0)}%
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                      {safeNumber(analysis.fatigueAnalysis.fatigueIndex, 0) <= 15 && safeNumber(analysis.fatigueAnalysis.fatigueIndex, 0) > 0 && (
+                        <div className="absolute top-0 left-2 h-full flex items-center">
+                          <span className="text-xs font-medium text-white drop-shadow-sm">
+                            {safeNumber(analysis.fatigueAnalysis.fatigueIndex, 0)}%
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-                <div className="text-center p-3 bg-gray-800 rounded-lg">
-                  <p className={`text-xl sm:text-2xl font-bold ${analysis.fatigueAnalysis.overreachingRisk === 'Bajo' ? 'text-green-400' :
-                    analysis.fatigueAnalysis.overreachingRisk === 'Medio' ? 'text-yellow-400' : 'text-red-400'
-                    }`}>
-                    {analysis.fatigueAnalysis.overreachingRisk}
-                  </p>
-                  <div className="text-sm text-gray-400 flex items-center justify-center">
-                    <span>Riesgo sobreentrenamiento</span>
-                    <InfoTooltip
-                      content="Probabilidad de estar entrenando más allá de tu capacidad de recuperación. Alto riesgo requiere descanso inmediato."
-                      position="top"
-                      className="ml-1"
-                    />
+
+                  {/* Grid de métricas */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
+                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                      <div className="text-xs text-gray-400 mb-1">Días Descanso</div>
+                      <div className="text-sm sm:text-lg font-semibold text-white">
+                        {analysis.fatigueAnalysis.recoveryDays}
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                      <div className="text-xs text-gray-400 mb-1">Tasa Recuperación</div>
+                      <div className="text-sm sm:text-lg font-semibold text-white">
+                        {safeNumber(analysis.fatigueAnalysis.recoveryRate, 0)}%
+                      </div>
+                      <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
+                        <div
+                          className="bg-blue-500 h-2 rounded-full transition-all duration-300 relative"
+                          style={{ width: `${safeNumber(analysis.fatigueAnalysis.recoveryRate, 0)}%` }}
+                        >
+                          {safeNumber(analysis.fatigueAnalysis.recoveryRate, 0) > 25 && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-xs font-medium text-white drop-shadow-sm">
+                                {safeNumber(analysis.fatigueAnalysis.recoveryRate, 0)}%
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                      <div className="text-xs text-gray-400 mb-1">Score Recuperación</div>
+                      <div className="text-sm sm:text-lg font-semibold text-white">
+                        {safeNumber(analysis.fatigueAnalysis.recoveryScore, 0)}
+                      </div>
+                      <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
+                        <div
+                          className="bg-green-500 h-2 rounded-full transition-all duration-300 relative"
+                          style={{ width: `${safeNumber(analysis.fatigueAnalysis.recoveryScore, 0)}%` }}
+                        >
+                          {safeNumber(analysis.fatigueAnalysis.recoveryScore, 0) > 25 && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-xs font-medium text-white drop-shadow-sm">
+                                {safeNumber(analysis.fatigueAnalysis.recoveryScore, 0)}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                      <div className="text-xs text-gray-400 mb-1">Tendencia Carga</div>
+                      <div className="text-sm sm:text-lg font-semibold text-white">
+                        {analysis.fatigueAnalysis.workloadTrend}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Factores de estrés como barras de progreso */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                    <div className="bg-gray-800/30 rounded-lg p-3">
+                      <h5 className="text-xs font-medium text-gray-300 mb-2 flex items-center gap-1">
+                        <Activity className="w-3 h-3" />
+                        Factores de Estrés
+                      </h5>
+                      <div className="space-y-2">
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-gray-400">Volumen:</span>
+                            <span className="text-white">{safeNumber(analysis.fatigueAnalysis.stressFactors.volumeStress, 0)}%</span>
+                          </div>
+                          <div className="w-full bg-gray-700 rounded-full h-2">
+                            <div
+                              className="bg-red-500 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${safeNumber(analysis.fatigueAnalysis.stressFactors.volumeStress, 0)}%` }}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <div className="flex justify-between text-xs mb-1">
+                            <span className="text-gray-400">Frecuencia:</span>
+                            <span className="text-white">{safeNumber(analysis.fatigueAnalysis.stressFactors.frequencyStress, 0)}%</span>
+                          </div>
+                          <div className="w-full bg-gray-700 rounded-full h-2">
+                            <div
+                              className="bg-yellow-500 h-2 rounded-full transition-all duration-300"
+                              style={{ width: `${safeNumber(analysis.fatigueAnalysis.stressFactors.frequencyStress, 0)}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="bg-gray-800/30 rounded-lg p-3">
+                      <h5 className="text-xs font-medium text-gray-300 mb-2 flex items-center gap-1">
+                        <Timer className="w-3 h-3" />
+                        Predicción Recuperación
+                      </h5>
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-400">Tiempo estimado:</span>
+                          <span className="text-xs font-medium text-white">
+                            {Math.round(safeNumber(analysis.fatigueAnalysis.predictedRecoveryTime, 0))}h
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-400">Tendencia historial:</span>
+                          <span className={`text-xs font-medium ${analysis.fatigueAnalysis.fatigueHistory.trend === 'Mejorando' ? 'text-green-400' :
+                              analysis.fatigueAnalysis.fatigueHistory.trend === 'Empeorando' ? 'text-red-400' : 'text-gray-400'
+                            }`}>
+                            {analysis.fatigueAnalysis.fatigueHistory.trend}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-400">Consistencia:</span>
+                          <span className="text-xs font-medium text-blue-400">
+                            {safeNumber(analysis.fatigueAnalysis.fatigueHistory.consistency, 0)}%
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Alertas y recomendaciones */}
+                  <div className="space-y-2">
+                    {/* Alerta de caída de volumen */}
+                    {analysis.fatigueAnalysis.volumeDropIndicators && (
+                      <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-red-300 break-words">
+                              Caída significativa en volumen detectada - revisa factores como nutrición, descanso o estrés externo
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Recomendaciones */}
+                    {analysis.fatigueAnalysis.recoveryRecommendations.length > 0 && (
+                      <div className={`${analysis.fatigueAnalysis.volumeDropIndicators ? 'bg-gray-800/50 border-gray-700/30' : 'bg-green-900/20 border-green-500/30'} border rounded-lg p-3`}>
+                        <div className="flex items-start gap-2">
+                          <CheckCircle className={`w-4 h-4 ${analysis.fatigueAnalysis.volumeDropIndicators ? 'text-gray-400' : 'text-green-400'} mt-0.5 flex-shrink-0`} />
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm ${analysis.fatigueAnalysis.volumeDropIndicators ? 'text-gray-300' : 'text-green-300'} break-words`}>
+                              {analysis.fatigueAnalysis.recoveryRecommendations[0]}
+                            </p>
+                            {analysis.fatigueAnalysis.recoveryRecommendations.length > 1 && (
+                              <p className="text-xs text-gray-400 mt-1 break-words">
+                                {analysis.fatigueAnalysis.recoveryRecommendations[1]}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
-
-              {/* Scores de recuperación - Mobile: 1 columna, SM+: 2 columnas */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="p-3 bg-gray-800 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-medium text-gray-300">Tasa de Recuperación</h4>
-                    <span className="text-lg font-bold text-blue-400">{analysis.fatigueAnalysis.recoveryRate}%</span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${Math.min(100, analysis.fatigueAnalysis.recoveryRate)}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1">Qué tan bien te estás recuperando</p>
-                </div>
-                <div className="p-3 bg-gray-800 rounded-lg">
-                  <div className="flex items-center justify-between mb-2">
-                    <h4 className="text-sm font-medium text-gray-300">Score de Recuperación</h4>
-                    <span className="text-lg font-bold text-green-400">{analysis.fatigueAnalysis.recoveryScore}</span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2">
-                    <div
-                      className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${Math.min(100, analysis.fatigueAnalysis.recoveryScore)}%` }}
-                    />
-                  </div>
-                  <p className="text-xs text-gray-400 mt-1">Evaluación general de recuperación</p>
-                </div>
-              </div>
-
-              {/* Factores de estrés - Mobile: 1 columna por factor, SM+: 2 columnas */}
-              <div className="p-3 bg-gray-800 rounded-lg">
-                <h4 className="text-sm font-medium text-gray-300 mb-3">Factores de Estrés</h4>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-gray-400">Estrés por Volumen</span>
-                      <span className="text-xs font-medium text-white">{analysis.fatigueAnalysis.stressFactors.volumeStress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-1.5">
-                      <div
-                        className="bg-red-600 h-1.5 rounded-full transition-all duration-300"
-                        style={{ width: `${Math.min(100, analysis.fatigueAnalysis.stressFactors.volumeStress)}%` }}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-gray-400">Estrés por Frecuencia</span>
-                      <span className="text-xs font-medium text-white">{analysis.fatigueAnalysis.stressFactors.frequencyStress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-1.5">
-                      <div
-                        className="bg-yellow-600 h-1.5 rounded-full transition-all duration-300"
-                        style={{ width: `${Math.min(100, analysis.fatigueAnalysis.stressFactors.frequencyStress)}%` }}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-gray-400">Estrés por Intensidad</span>
-                      <span className="text-xs font-medium text-white">{analysis.fatigueAnalysis.stressFactors.intensityStress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-1.5">
-                      <div
-                        className="bg-orange-600 h-1.5 rounded-full transition-all duration-300"
-                        style={{ width: `${Math.min(100, analysis.fatigueAnalysis.stressFactors.intensityStress)}%` }}
-                      />
-                    </div>
-                  </div>
-                  <div>
-                    <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs text-gray-400">Estrés por Recuperación</span>
-                      <span className="text-xs font-medium text-white">{analysis.fatigueAnalysis.stressFactors.recoveryStress}%</span>
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-1.5">
-                      <div
-                        className="bg-purple-600 h-1.5 rounded-full transition-all duration-300"
-                        style={{ width: `${Math.min(100, analysis.fatigueAnalysis.stressFactors.recoveryStress)}%` }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* Alertas importantes */}
-              {analysis.fatigueAnalysis.volumeDropIndicators && (
-                <div className="p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
-                  <p className="text-sm text-red-400 font-medium">
-                    ⚠️ Caída significativa en volumen detectada
-                  </p>
-                  <p className="text-xs text-red-300 mt-1">
-                    Revisa factores como nutrición, descanso o estrés externo
-                  </p>
-                </div>
-              )}
-
-              {/* Recomendaciones de recuperación */}
-              {analysis.fatigueAnalysis.recoveryRecommendations.length > 0 && (
-                <div className="p-3 bg-green-900/20 border border-green-500/30 rounded-lg">
-                  <h4 className="text-sm text-green-400 font-medium mb-2">
-                    Recomendaciones de Recuperación:
-                  </h4>
-                  <ul className="space-y-1">
-                    {analysis.fatigueAnalysis.recoveryRecommendations.slice(0, 3).map((rec, index) => (
-                      <li key={index} className="text-xs text-gray-300 flex items-start">
-                        <span className="text-green-400 mr-2">•</span>
-                        {rec}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
           </CardContent>
         </Card>
