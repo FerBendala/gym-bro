@@ -14,7 +14,12 @@ export const filterRecordsByTime = <T extends { date: Date }>(
   records: T[],
   timeFilter: TimeFilter
 ): T[] => {
-  const now = new Date();
+  // Si no hay registros, retornar array vacío
+  if (records.length === 0) return records;
+
+  // Usar la fecha más reciente de los registros como "ahora" en lugar de new Date()
+  // Esto asegura que los filtros funcionen correctamente con datos históricos o futuros
+  const now = new Date(Math.max(...records.map(r => r.date.getTime())));
 
   switch (timeFilter) {
     case 'week':
@@ -38,10 +43,11 @@ export const filterRecordsByTime = <T extends { date: Date }>(
 /**
  * Obtiene la etiqueta descriptiva del filtro temporal
  * @param timeFilter - Tipo de filtro temporal
+ * @param referenceDate - Fecha de referencia opcional (por defecto usa new Date())
  * @returns Etiqueta descriptiva
  */
-export const getTimeFilterLabel = (timeFilter: TimeFilter): string => {
-  const now = new Date();
+export const getTimeFilterLabel = (timeFilter: TimeFilter, referenceDate?: Date): string => {
+  const now = referenceDate || new Date();
 
   switch (timeFilter) {
     case 'week':

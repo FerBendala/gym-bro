@@ -1,4 +1,4 @@
-import { Activity, BarChart3, Target, TrendingUp, Zap } from 'lucide-react';
+import { Activity, Brain, Scale, Target, Zap } from 'lucide-react';
 import type { DashboardTabConfig } from './types';
 
 /**
@@ -7,22 +7,16 @@ import type { DashboardTabConfig } from './types';
  */
 export const DASHBOARD_TABS: DashboardTabConfig[] = [
   {
-    id: 'overview',
-    label: 'Resumen',
-    icon: BarChart3,
-    description: 'Vista general de estadísticas y progreso'
-  },
-  {
-    id: 'performance',
-    label: 'Rendimiento',
-    icon: TrendingUp,
-    description: 'Análisis de progreso, PRs y consistencia'
-  },
-  {
     id: 'categories',
     label: 'Por Categoría',
     icon: Target,
-    description: 'Análisis por grupos musculares y balance'
+    description: 'Análisis detallado por grupos musculares'
+  },
+  {
+    id: 'balance',
+    label: 'Balance Muscular',
+    icon: Scale,
+    description: 'Equilibrio y simetría entre grupos musculares'
   },
   {
     id: 'trends',
@@ -35,10 +29,16 @@ export const DASHBOARD_TABS: DashboardTabConfig[] = [
     label: 'Análisis Avanzado',
     icon: Zap,
     description: 'Métricas complejas y comparaciones detalladas'
+  },
+  {
+    id: 'predictions',
+    label: 'Predicciones',
+    icon: Brain,
+    description: 'Análisis predictivo e inteligencia artificial'
   }
 ];
 
 /**
  * Tab por defecto al abrir el dashboard
  */
-export const DEFAULT_DASHBOARD_TAB: DashboardTabConfig['id'] = 'overview'; 
+export const DEFAULT_DASHBOARD_TAB: DashboardTabConfig['id'] = 'categories'; 

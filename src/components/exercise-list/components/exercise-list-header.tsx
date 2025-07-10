@@ -1,6 +1,5 @@
 import { Move, Plus } from 'lucide-react';
 import React from 'react';
-import { Button } from '../../button';
 import { ConnectionIndicator } from '../../connection-indicator';
 import type { ExerciseListHeaderProps } from '../types';
 
@@ -32,12 +31,18 @@ export const ExerciseListHeader: React.FC<ExerciseListHeaderProps> = ({
             <ConnectionIndicator isOnline={isOnline} />
           </div>
         </div>
-
       </div>
-      <Button onClick={onOpenAdmin} variant="secondary" size="sm">
-        <Plus className="w-4 h-4 mr-2" />
-        Configurar
-      </Button>
+
+      {/* Botón de configurar más visible y atractivo */}
+      <button
+        onClick={onOpenAdmin}
+        className="inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+      >
+        <div className="flex items-center space-x-2">
+          <Plus className="w-4 h-4" />
+          <span className="font-medium text-sm">Añadir Ejercicio</span>
+        </div>
+      </button>
     </div>
   );
 }; 

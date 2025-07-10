@@ -22,4 +22,4 @@ export {
 } from '../modern-layout';
 
 // Tipos
-export type { ModernNavItem } from '../modern-layout';
+export type { ModernNavItem, NavigationType } from '../modern-layout';

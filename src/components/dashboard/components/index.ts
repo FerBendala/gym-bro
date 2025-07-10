@@ -4,12 +4,11 @@
  */
 
 export { AdvancedTab } from './advanced-tab';
+export { BalanceTab } from './balance-tab';
 export { CategoryTab } from './category-tab';
-export { DashboardContent } from './dashboard-content';
 export { DashboardEmptyState } from './dashboard-empty-state';
-export { DashboardFilters } from './dashboard-filters';
 export { DashboardHeader } from './dashboard-header';
 export { DashboardTabNavigation } from './dashboard-tab-navigation';
-export { PerformanceTab } from './performance-tab';
+export { PredictionsTab } from './predictions-tab';
 export { TrendsTab } from './trends-tab';
 

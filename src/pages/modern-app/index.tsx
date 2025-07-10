@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { migrateExercisesToMultipleCategories } from '../../api/database';
-import { ModernLayout, useModernNavigation } from '../../components/modern-ui';
+import { ModernLayout, NavigationType, useModernNavigation } from '../../components/modern-ui';
 import { Notification } from '../../components/notification';
 import { NotificationProvider, useNotification } from '../../context/notification-context';
 import type { DayOfWeek } from '../../interfaces';
@@ -10,11 +10,13 @@ import { ModernHome } from './pages/home';
 import { ModernProgress } from './pages/progress';
 import { ModernSettings } from './pages/settings';
 import { ModernStats } from './pages/stats';
+import { WorkoutHistory } from './pages/workout-history';
 
 const ModernAppContent = () => {
   const { activeTab, navigateTo, goBack, canGoBack } = useModernNavigation('home');
   const [activeDay, setActiveDay] = useState<DayOfWeek>('lunes');
   const [showAdmin, setShowAdmin] = useState(false);
+  const [navigationType, setNavigationType] = useState<NavigationType>('compact');
   const { showNotification } = useNotification();
 
   // Ejecutar migración al cargar la aplicación
@@ -85,6 +87,11 @@ const ModernAppContent = () => {
           title: 'Configuración',
           subtitle: 'Ejercicios y preferencias'
         };
+      case 'history':
+        return {
+          title: 'Historial de Entrenamientos',
+          subtitle: 'Resumen de tus entrenamientos'
+        };
       default:
         return { title: 'Gym Tracker' };
     }
@@ -111,6 +118,8 @@ const ModernAppContent = () => {
         return <ModernStats />;
       case 'settings':
         return <ModernSettings />;
+      case 'history':
+        return <WorkoutHistory />;
       default:
         return (
           <ModernHome
@@ -130,6 +139,7 @@ const ModernAppContent = () => {
       subtitle={pageInfo.subtitle}
       showBackButton={canGoBack}
       onBackClick={goBack}
+      navigationType={navigationType}
     >
       {renderContent()}
 

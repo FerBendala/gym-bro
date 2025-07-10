@@ -62,7 +62,7 @@ export const THEME_CONTAINERS = {
     } satisfies Record<UIVariant, string>
   },
   modal: {
-    overlay: 'fixed inset-0 bg-black/50 flex items-end lg:items-center justify-center p-0 lg:p-4 z-50',
+    overlay: 'fixed inset-0 bg-black/50 flex items-end lg:items-center justify-center p-0 lg:p-4 z-[60]',
     container: 'w-full h-full lg:h-auto lg:max-h-[90vh] bg-gray-900 rounded-t-lg lg:rounded-lg lg:max-w-4xl xl:max-w-6xl overflow-hidden',
     header: 'flex items-center justify-between p-4 sm:p-6 border-b border-gray-700',
     content: 'overflow-y-auto h-[calc(100vh-80px)] lg:max-h-[calc(90vh-80px)] p-4 sm:p-6 scroll-smooth'
@@ -250,7 +250,7 @@ export const THEME_SPINNER = {
  * Reutilizable en Notification, Toast, Alert, etc.
  */
 export const THEME_NOTIFICATION = {
-  base: 'fixed top-4 right-4 z-50 animate-slide-in',
+  base: 'fixed top-4 right-4 z-[70] animate-slide-in',
   container: 'border rounded-lg p-4 max-w-sm shadow-lg backdrop-blur-sm',
   content: 'flex items-start',
   icon: 'w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0',

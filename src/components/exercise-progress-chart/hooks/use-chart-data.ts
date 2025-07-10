@@ -25,9 +25,9 @@ export const useChartData = (records: WorkoutRecord[]): UseChartDataReturn => {
       exerciseData[exercise] = sortRecordsByDate(exerciseData[exercise]);
     });
 
-    // Calcular rangos de datos
-    const allWeights = records.map(r => r.weight);
-    const weightRange = calculateDataRange(allWeights);
+    // Calcular rangos de datos usando 1RM estimado para mostrar progreso real
+    const all1RMs = records.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30));
+    const weightRange = calculateDataRange(all1RMs);
 
     const allDates = records.map(r => r.date.getTime());
     const dateRange = calculateDataRange(allDates);

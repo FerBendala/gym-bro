@@ -1,3 +1,5 @@
+import { startOfWeek } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { Calendar, TrendingUp } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { formatNumber } from '../../utils/functions';
@@ -12,16 +14,17 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
   const timelineData = useMemo((): TimelinePoint[] => {
     if (records.length === 0) return [];
 
-    // Agrupar por semanas
+    // Agrupar por semanas usando date-fns con locale español (lunes a domingo)
     const weeklyData = new Map<string, { totalVolume: number; avgWeight: number; workouts: number }>();
 
     records.forEach(record => {
       const date = new Date(record.date);
-      const weekStart = new Date(date);
-      weekStart.setDate(date.getDate() - date.getDay()); // Inicio de semana (domingo)
+      // Usar startOfWeek con locale español para consistencia con el resto del código
+      const weekStart = startOfWeek(date, { locale: es }); // Lunes como inicio de semana
       const weekKey = weekStart.toISOString().split('T')[0];
 
       const volume = record.weight * record.reps * record.sets;
+      const estimated1RM = record.weight * (1 + Math.min(record.reps, 20) / 30);
 
       if (!weeklyData.has(weekKey)) {
         weeklyData.set(weekKey, { totalVolume: 0, avgWeight: 0, workouts: 0 });
@@ -29,7 +32,8 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
 
       const week = weeklyData.get(weekKey)!;
       week.totalVolume += volume;
-      week.avgWeight = (week.avgWeight * week.workouts + record.weight) / (week.workouts + 1);
+      // Usar 1RM estimado para el promedio de fuerza
+      week.avgWeight = (week.avgWeight * week.workouts + estimated1RM) / (week.workouts + 1);
       week.workouts += 1;
     });
 
@@ -39,7 +43,7 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
         date: new Date(weekKey),
         value: data.totalVolume,
         label: `${formatNumber(data.totalVolume)} kg`,
-        details: `${data.workouts} entrenamientos • Peso promedio: ${formatNumber(data.avgWeight)} kg`
+        details: `${data.workouts} entrenamientos • Fuerza promedio: ${formatNumber(data.avgWeight)} kg (1RM est.)`
       }))
       .sort((a, b) => a.date.getTime() - b.date.getTime());
   }, [records]);

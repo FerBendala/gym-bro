@@ -34,12 +34,16 @@ export const useChartStatistics = (records: WorkoutRecord[]): ChartStatistics =>
     const totalExercises = Object.keys(exerciseGroups).length;
     const totalSessions = records.length;
 
-    // Calcular progreso por ejercicio
+    // Calcular progreso por ejercicio considerando peso y repeticiones
     const exerciseProgress = Object.entries(exerciseGroups).map(([exerciseName, exerciseRecords]) => {
       const sortedRecords = [...exerciseRecords].sort((a, b) => a.date.getTime() - b.date.getTime());
-      const firstWeight = sortedRecords[0].weight;
-      const lastWeight = sortedRecords[sortedRecords.length - 1].weight;
-      const improvement = lastWeight - firstWeight;
+      const firstRecord = sortedRecords[0];
+      const lastRecord = sortedRecords[sortedRecords.length - 1];
+
+      // Calcular 1RM estimado para mejor comparación de progreso
+      const first1RM = firstRecord.weight * (1 + Math.min(firstRecord.reps, 20) / 30);
+      const last1RM = lastRecord.weight * (1 + Math.min(lastRecord.reps, 20) / 30);
+      const improvement = last1RM - first1RM;
 
       return {
         exercise: exerciseName,
@@ -49,7 +53,7 @@ export const useChartStatistics = (records: WorkoutRecord[]): ChartStatistics =>
       };
     });
 
-    // Progreso promedio
+    // Progreso promedio (ahora considera peso y repeticiones)
     const averageWeightIncrease = exerciseProgress.reduce((sum, ep) => sum + ep.improvement, 0) / exerciseProgress.length;
 
     // Mejor progreso

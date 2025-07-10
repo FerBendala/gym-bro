@@ -1,32 +1,23 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { THEME_CONTAINERS } from '../../constants';
 import { LoadingSpinner } from '../loading-spinner';
 import { OfflineWarning } from '../offline-warning';
 import {
-  DashboardContent,
+  AdvancedTab,
+  BalanceTab,
+  CategoryTab,
   DashboardEmptyState,
-  DashboardFilters,
-  DashboardHeader
+  DashboardHeader,
+  PredictionsTab,
+  TrendsTab
 } from './components';
-import { useDashboardData, useDashboardFilters } from './hooks';
-import type { DashboardProps } from './types';
+import { DEFAULT_DASHBOARD_TAB } from './constants';
+import { useDashboardData } from './hooks';
+import type { DashboardProps, DashboardTab } from './types';
 
 export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
   const { workoutRecords, exercises, loading, isOnline, handleDeleteRecord } = useDashboardData();
-  const {
-    selectedExercise,
-    selectedMuscleGroup,
-    filterType,
-    timeFilter,
-    activeTab,
-    filteredRecords,
-    timeFilterLabel,
-    setSelectedExercise,
-    setSelectedMuscleGroup,
-    setFilterType,
-    setTimeFilter,
-    setActiveTab
-  } = useDashboardFilters(workoutRecords);
+  const [activeTab, setActiveTab] = useState<DashboardTab>(DEFAULT_DASHBOARD_TAB);
 
   if (loading) {
     return (
@@ -45,7 +36,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
     <div className={THEME_CONTAINERS.modal.overlay}>
       <div className={THEME_CONTAINERS.modal.container}>
         <DashboardHeader
-          timeFilterLabel={timeFilterLabel}
+          timeFilterLabel="Todos los datos"
           activeTab={activeTab}
           onTabChange={setActiveTab}
           onClose={onClose}
@@ -57,28 +48,25 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
 
         <div className={THEME_CONTAINERS.modal.content}>
           <div className="p-6 space-y-6 pb-16 sm:pb-20">
-            <DashboardFilters
-              selectedExercise={selectedExercise}
-              selectedMuscleGroup={selectedMuscleGroup}
-              filterType={filterType}
-              timeFilter={timeFilter}
-              exercises={exercises}
-              isOnline={isOnline}
-              onExerciseChange={setSelectedExercise}
-              onMuscleGroupChange={setSelectedMuscleGroup}
-              onFilterTypeChange={setFilterType}
-              onTimeFilterChange={setTimeFilter}
-            />
-
-            {filteredRecords.length === 0 ? (
+            {workoutRecords.length === 0 ? (
               <DashboardEmptyState isOnline={isOnline} />
             ) : (
-              <DashboardContent
-                filteredRecords={filteredRecords}
-                allRecords={workoutRecords}
-                activeTab={activeTab}
-                onDeleteRecord={handleDeleteRecord}
-              />
+              (() => {
+                switch (activeTab) {
+                  case 'categories':
+                    return <CategoryTab records={workoutRecords} />;
+                  case 'balance':
+                    return <BalanceTab records={workoutRecords} />;
+                  case 'trends':
+                    return <TrendsTab records={workoutRecords} />;
+                  case 'advanced':
+                    return <AdvancedTab records={workoutRecords} />;
+                  case 'predictions':
+                    return <PredictionsTab records={workoutRecords} />;
+                  default:
+                    return <CategoryTab records={workoutRecords} />;
+                }
+              })()
             )}
           </div>
         </div>

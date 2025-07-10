@@ -1,7 +1,7 @@
-import { Calendar, ChevronDown } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import React, { useState } from 'react';
 import { ExerciseList } from '../../../components/exercise-list';
-import { ModernButton, ModernCard, ModernPage, ModernSection } from '../../../components/modern-ui';
+import { ModernButton, ModernPage, ModernSection } from '../../../components/modern-ui';
 import { DAYS } from '../../../constants/days';
 import { MODERN_THEME } from '../../../constants/modern-theme';
 import type { DayOfWeek } from '../../../interfaces';
@@ -62,11 +62,11 @@ export const ModernHome: React.FC<ModernHomeProps> = ({
 
             {showDaySelector && (
               <div className={cn(
-                'absolute top-full right-0 mt-2 bg-gray-900/95 backdrop-blur-md border border-gray-700/50 rounded-xl shadow-2xl z-50 min-w-[200px]',
+                'absolute top-full right-0 mt-2 bg-gray-900/95 backdrop-blur-md border border-gray-700/50 rounded-xl shadow-2xl z-[55] min-w-[200px]',
                 MODERN_THEME.animations.slide.down
               )}>
                 <div className="p-2">
-                  {DAYS.map((day, index) => {
+                  {DAYS.map((day) => {
                     const isActive = day === activeDay;
                     const isCurrentDay = day === new Date().toLocaleDateString('es-ES', { weekday: 'long' }).toLowerCase();
 
@@ -107,28 +107,10 @@ export const ModernHome: React.FC<ModernHomeProps> = ({
         </div>
       }
     >
-      {/* Información del día */}
-      {dayInfo.isToday && (
-        <ModernCard variant="active" padding="sm" className="mb-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-blue-600/20 rounded-lg">
-                <Calendar className="w-5 h-5 text-blue-400" />
-              </div>
-              <div>
-                <p className="text-sm font-medium text-white">Entrenamiento de hoy</p>
-                <p className="text-xs text-gray-400">¡Es hora de entrenar!</p>
-              </div>
-            </div>
-            <div className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-          </div>
-        </ModernCard>
-      )}
-
       {/* Navegación rápida entre días */}
-      <ModernSection title="Navegación rápida" className="mt-8">
+      <ModernSection title="" className="mt-8">
         <div className="grid grid-cols-7 gap-2">
-          {DAYS.map((day, index) => {
+          {DAYS.map((day) => {
             const isActive = day === activeDay;
             const isToday = day === new Date().toLocaleDateString('es-ES', { weekday: 'long' }).toLowerCase();
 

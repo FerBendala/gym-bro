@@ -1,13 +1,18 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LoadingSpinner } from '../loading-spinner';
 import { OfflineWarning } from '../offline-warning';
 import {
-  DashboardContent,
+  AdvancedTab,
+  BalanceTab,
+  CategoryTab,
   DashboardEmptyState,
-  DashboardFilters,
-  DashboardTabNavigation
+  DashboardTabNavigation,
+  PredictionsTab,
+  TrendsTab
 } from './components';
-import { useDashboardData, useDashboardFilters } from './hooks';
+import { DEFAULT_DASHBOARD_TAB } from './constants';
+import { useDashboardData } from './hooks';
+import type { DashboardTab } from './types';
 
 /**
  * Dashboard como página completa sin modal
@@ -15,20 +20,7 @@ import { useDashboardData, useDashboardFilters } from './hooks';
  */
 export const DashboardPage: React.FC = () => {
   const { workoutRecords, exercises, loading, isOnline, handleDeleteRecord } = useDashboardData();
-  const {
-    selectedExercise,
-    selectedMuscleGroup,
-    filterType,
-    timeFilter,
-    activeTab,
-    filteredRecords,
-    timeFilterLabel,
-    setSelectedExercise,
-    setSelectedMuscleGroup,
-    setFilterType,
-    setTimeFilter,
-    setActiveTab
-  } = useDashboardFilters(workoutRecords);
+  const [activeTab, setActiveTab] = useState<DashboardTab>(DEFAULT_DASHBOARD_TAB);
 
   if (loading) {
     return (
@@ -38,6 +30,28 @@ export const DashboardPage: React.FC = () => {
       </div>
     );
   }
+
+  // Renderizar contenido según el tab activo
+  const renderTabContent = () => {
+    if (workoutRecords.length === 0) {
+      return <DashboardEmptyState isOnline={isOnline} />;
+    }
+
+    switch (activeTab) {
+      case 'categories':
+        return <CategoryTab records={workoutRecords} />;
+      case 'balance':
+        return <BalanceTab records={workoutRecords} />;
+      case 'trends':
+        return <TrendsTab records={workoutRecords} />;
+      case 'advanced':
+        return <AdvancedTab records={workoutRecords} />;
+      case 'predictions':
+        return <PredictionsTab records={workoutRecords} />;
+      default:
+        return <CategoryTab records={workoutRecords} />;
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -50,34 +64,11 @@ export const DashboardPage: React.FC = () => {
       <DashboardTabNavigation
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        timeFilterLabel={timeFilterLabel}
-      />
-
-      {/* Filtros */}
-      <DashboardFilters
-        selectedExercise={selectedExercise}
-        selectedMuscleGroup={selectedMuscleGroup}
-        filterType={filterType}
-        timeFilter={timeFilter}
-        exercises={exercises}
-        isOnline={isOnline}
-        onExerciseChange={setSelectedExercise}
-        onMuscleGroupChange={setSelectedMuscleGroup}
-        onFilterTypeChange={setFilterType}
-        onTimeFilterChange={setTimeFilter}
+        timeFilterLabel="Todos los datos"
       />
 
       {/* Contenido principal */}
-      {filteredRecords.length === 0 ? (
-        <DashboardEmptyState isOnline={isOnline} />
-      ) : (
-        <DashboardContent
-          filteredRecords={filteredRecords}
-          allRecords={workoutRecords}
-          activeTab={activeTab}
-          onDeleteRecord={handleDeleteRecord}
-        />
-      )}
+      {renderTabContent()}
     </div>
   );
 }; 
