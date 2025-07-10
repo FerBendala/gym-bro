@@ -810,8 +810,8 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
     return generateIntermediatePredictions(records, weeklyData);
   }
 
-  // Ordenar por fecha (más reciente primero)
-  weeklyData.sort((a, b) => b.date.getTime() - a.date.getTime());
+  // Ordenar por fecha (más antiguo primero) para regresión lineal correcta
+  weeklyData.sort((a, b) => a.date.getTime() - b.date.getTime());
 
   // Calcular tendencias usando regresión lineal simple
   const calculateTrend = (values: number[]): number => {
@@ -834,8 +834,9 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
   const strengthTrend = calculateTrend(weightValues);
 
   // Predicciones para próxima semana con validación
-  const currentVolume = volumeValues[0] || 0;
-  const currentWeight = weightValues[0] || 0;
+  // Usar los valores más recientes (últimos en el array ordenado)
+  const currentVolume = volumeValues[volumeValues.length - 1] || 0;
+  const currentWeight = weightValues[weightValues.length - 1] || 0;
 
   const nextWeekVolume = Math.max(0, currentVolume + volumeTrend);
   const nextWeekWeight = Math.max(0, currentWeight + strengthTrend);
@@ -861,8 +862,10 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
     Math.ceil((prThreshold - currentWeight) / strengthTrend) : 0;
 
   // Nivel de confianza basado en consistencia de datos
-  const weightVariance = weightValues.reduce((sum, w) => sum + Math.pow(w - currentWeight, 2), 0) / weightValues.length;
-  const volumeVariance = volumeValues.reduce((sum, v) => sum + Math.pow(v - currentVolume, 2), 0) / volumeValues.length;
+  const avgWeight = weightValues.reduce((sum, w) => sum + w, 0) / weightValues.length;
+  const avgVolume = volumeValues.reduce((sum, v) => sum + v, 0) / volumeValues.length;
+  const weightVariance = weightValues.reduce((sum, w) => sum + Math.pow(w - avgWeight, 2), 0) / weightValues.length;
+  const volumeVariance = volumeValues.reduce((sum, v) => sum + Math.pow(v - avgVolume, 2), 0) / volumeValues.length;
 
   const dataConsistency = Math.max(0, Math.min(100, 100 - (weightVariance + volumeVariance) / 200));
   const trendStrength = Math.min(100, Math.abs(combinedTrend) * 10);
@@ -871,7 +874,9 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
   const prConfidence = Math.min(95, Math.max(15, confidenceLevel - Math.min(timeToNextPR, 8) * 5));
 
   // Riesgo de meseta mejorado
-  const recentVariance = weightValues.slice(0, 4).reduce((sum, w) => sum + Math.pow(w - weightValues[0], 2), 0) / 4;
+  const recentValues = weightValues.slice(-4); // Últimos 4 valores
+  const recentAvg = recentValues.reduce((sum, w) => sum + w, 0) / recentValues.length;
+  const recentVariance = recentValues.reduce((sum, w) => sum + Math.pow(w - recentAvg, 2), 0) / recentValues.length;
   const plateauRisk = recentVariance < 2 ? 85 :
     recentVariance < 8 ? 45 :
       recentVariance < 20 ? 25 : 10;
