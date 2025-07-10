@@ -96,7 +96,7 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
       )}
 
       {/* Métricas principales con diseño mejorado */}
-      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <StatCard
           title="Score de Balance"
           value={`${safeNumber(balanceScore)}%`}
@@ -184,40 +184,40 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                   >
                     {/* Header con ícono y estado */}
                     <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                         <div className={`p-2 sm:p-3 rounded-lg bg-gradient-to-br ${colorGradient}`}>
-                          <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                          <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-base sm:text-lg font-semibold text-white truncate">
+                          <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white truncate">
                             {balance.category}
                           </h4>
-                          <div className="flex items-center gap-2 mt-1 flex-wrap">
+                          <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${priorityBadge.color}`}>
                               {priorityBadge.text}
                             </span>
                             {balance.progressTrend === 'improving' && (
-                              <TrendingUp className="w-4 h-4 text-green-400" />
+                              <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
                             )}
                             {balance.progressTrend === 'declining' && (
-                              <TrendingDown className="w-4 h-4 text-red-400" />
+                              <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
                             )}
                           </div>
                         </div>
                       </div>
-                      <div className="text-right ml-4">
-                        <div className="text-xl sm:text-2xl font-bold text-white">
+                      <div className="text-right ml-2 sm:ml-4">
+                        <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">
                           {safeNumber(balance.percentage, 0).toFixed(1)}%
                         </div>
                         <div className="text-xs text-gray-400">
                           del volumen total
                         </div>
                         {/* Icono de estado movido aquí para evitar solapamiento */}
-                        <div className="mt-2 flex justify-end">
+                        <div className="mt-1 sm:mt-2 flex justify-end">
                           {balance.isBalanced ? (
-                            <CheckCircle className="w-5 h-5 text-green-400" />
+                            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
                           ) : (
-                            <XCircle className="w-5 h-5 text-red-400" />
+                            <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
                           )}
                         </div>
                       </div>
@@ -232,7 +232,7 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                         </span>
                         <span>100%</span>
                       </div>
-                      <div className="relative h-4 sm:h-6 bg-gray-800 rounded-full overflow-hidden">
+                      <div className="relative h-3 sm:h-4 md:h-6 bg-gray-800 rounded-full overflow-hidden">
                         {/* Zona ideal */}
                         <div
                           className="absolute h-full bg-green-500/20"
@@ -273,7 +273,7 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                     </div>
 
                     {/* Grid de métricas responsivo */}
-                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3 mb-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
                       <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                         <div className="text-xs text-gray-400 mb-1">Simetría</div>
                         <div className="text-sm sm:text-lg font-semibold text-white">
