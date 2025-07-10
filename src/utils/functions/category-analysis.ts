@@ -1,4 +1,4 @@
-import { endOfMonth, endOfWeek, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
+import { differenceInDays, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { EXERCISE_CATEGORIES } from '../../constants/exercise-categories';
 import type { WorkoutRecord } from '../../interfaces';
@@ -629,6 +629,53 @@ const calculateStrengthIndex = (categoryRecords: WorkoutRecord[]): number => {
 };
 
 /**
+ * Calcula un factor de ajuste temporal para métricas cuando hay pocos datos
+ * @param records - Todos los registros de entrenamiento
+ * @returns Factor entre 0.3 y 1.0 basado en el tiempo y cantidad de datos
+ */
+const calculateTemporalAdjustmentFactor = (records: WorkoutRecord[]): number => {
+  if (records.length === 0) return 0.3;
+
+  // Calcular días desde el primer registro
+  const dates = records.map(r => new Date(r.date).getTime());
+  const earliestDate = new Date(Math.min(...dates));
+  const latestDate = new Date(Math.max(...dates));
+  const daysSinceStart = Math.max(1, differenceInDays(latestDate, earliestDate));
+
+  // Factores de ajuste
+  const recordsFactor = Math.min(1, records.length / 50); // 50 registros = factor 1.0
+  const timeFactor = Math.min(1, daysSinceStart / 60); // 60 días = factor 1.0
+  const uniqueDaysFactor = Math.min(1, new Set(records.map(r => format(new Date(r.date), 'yyyy-MM-dd'))).size / 20); // 20 días únicos = factor 1.0
+
+  // Combinar factores (promedio ponderado)
+  const combinedFactor = (recordsFactor * 0.4 + timeFactor * 0.4 + uniqueDaysFactor * 0.2);
+
+  // Asegurar un mínimo de 0.3 para que las métricas no sean demasiado bajas
+  return Math.max(0.3, Math.min(1, combinedFactor));
+};
+
+/**
+ * Ajusta las métricas según el tiempo y cantidad de datos disponibles
+ */
+const adjustMetricsForLimitedData = (
+  metric: number,
+  adjustmentFactor: number,
+  metricType: 'percentage' | 'score' | 'frequency' = 'score'
+): number => {
+  if (metricType === 'percentage') {
+    // Para porcentajes, ajustar hacia un valor medio (50%)
+    return Math.round(metric * adjustmentFactor + 50 * (1 - adjustmentFactor));
+  } else if (metricType === 'frequency') {
+    // Para frecuencias, no ajustar demasiado
+    return metric;
+  } else {
+    // Para scores, ajustar proporcionalmente pero mantener un mínimo
+    const minScore = 30; // Score mínimo para usuarios nuevos
+    return Math.round(Math.max(minScore, metric * adjustmentFactor + minScore * (1 - adjustmentFactor)));
+  }
+};
+
+/**
  * Analiza la tendencia de progreso para un grupo muscular
  */
 const analyzeProgressTrend = (categoryRecords: WorkoutRecord[]): {
@@ -871,6 +918,9 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
   const categoryMetrics = calculateCategoryMetrics(records);
   const totalVolume = categoryMetrics.reduce((sum, metric) => sum + metric.totalVolume, 0);
 
+  // Calcular factor de ajuste temporal
+  const temporalAdjustmentFactor = calculateTemporalAdjustmentFactor(records);
+
   // Volúmenes ideales por categoría (porcentajes recomendados)
   const idealDistribution: Record<string, number> = {
     'Pecho': 20,
@@ -905,28 +955,45 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
     const actualPercentage = (metric.totalVolume / totalVolume) * 100;
     const idealPercentage = idealDistribution[metric.category] || 15;
     const deviation = actualPercentage - idealPercentage;
-    const isBalanced = Math.abs(deviation) <= 5; // Margen de 5%
+
+    // Ajustar el margen de balance según el factor temporal
+    const balanceMargin = 5 + (15 * (1 - temporalAdjustmentFactor)); // Margen más amplio con menos datos
+    const isBalanced = Math.abs(deviation) <= balanceMargin;
 
     // Obtener registros específicos para esta categoría
     const categoryRecords = recordsByCategory[metric.category] || [];
 
-    // Calcular métricas avanzadas
-    const symmetryScore = calculateSymmetryScore(metric.category, categoryRecords);
-    const antagonistRatio = calculateAntagonistRatio(metric.category, categoryMetrics);
-    const strengthIndex = calculateStrengthIndex(categoryRecords);
-    const progressAnalysis = analyzeProgressTrend(categoryRecords);
-    const intensityScore = calculateIntensityScore(categoryRecords);
-    const balanceHistory = analyzeBalanceHistory(categoryRecords);
+    // Calcular métricas avanzadas con ajustes
+    const rawSymmetryScore = calculateSymmetryScore(metric.category, categoryRecords);
+    const symmetryScore = adjustMetricsForLimitedData(rawSymmetryScore, temporalAdjustmentFactor, 'score');
 
-    // Determinar características
-    const priorityLevel = determinePriorityLevel(deviation, metric.avgWorkoutsPerWeek, progressAnalysis.trend);
+    const antagonistRatio = calculateAntagonistRatio(metric.category, categoryMetrics);
+
+    const rawStrengthIndex = calculateStrengthIndex(categoryRecords);
+    const strengthIndex = adjustMetricsForLimitedData(rawStrengthIndex, temporalAdjustmentFactor, 'score');
+
+    const progressAnalysis = analyzeProgressTrend(categoryRecords);
+
+    const rawIntensityScore = calculateIntensityScore(categoryRecords);
+    const intensityScore = adjustMetricsForLimitedData(rawIntensityScore, temporalAdjustmentFactor, 'percentage');
+
+    const balanceHistory = analyzeBalanceHistory(categoryRecords);
+    // Ajustar consistencia del historial
+    balanceHistory.consistency = adjustMetricsForLimitedData(balanceHistory.consistency, temporalAdjustmentFactor, 'percentage');
+
+    // Determinar características con ajustes para datos limitados
+    const adjustedDeviation = deviation * temporalAdjustmentFactor; // Reducir la importancia de la desviación con pocos datos
+    const priorityLevel = determinePriorityLevel(adjustedDeviation, metric.avgWorkoutsPerWeek, progressAnalysis.trend);
     const developmentStage = determineDevelopmentStage(strengthIndex, metric.avgWorkoutsPerWeek, metric.totalVolume);
 
-    // Generar recomendación básica
+    // Generar recomendación básica considerando el factor temporal
     let recommendation = '';
-    if (actualPercentage < idealPercentage - 5) {
+    if (temporalAdjustmentFactor < 0.5) {
+      // Con muy pocos datos, dar recomendaciones más generales
+      recommendation = `Continúa registrando entrenamientos de ${metric.category.toLowerCase()} para análisis más precisos`;
+    } else if (actualPercentage < idealPercentage - balanceMargin) {
       recommendation = `Entrenar más ${metric.category.toLowerCase()} (+${Math.round(Math.abs(deviation))}%)`;
-    } else if (actualPercentage > idealPercentage + 5) {
+    } else if (actualPercentage > idealPercentage + balanceMargin) {
       recommendation = `Reducir volumen de ${metric.category.toLowerCase()} (-${Math.round(deviation)}%)`;
     } else {
       recommendation = `Balance adecuado en ${metric.category.toLowerCase()}`;
@@ -969,32 +1036,40 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
   EXERCISE_CATEGORIES.forEach(category => {
     if (!muscleBalance.find(balance => balance.category === category)) {
       const idealPercentage = idealDistribution[category] || 15;
+
+      // Ajustar métricas por defecto según el factor temporal
+      const adjustedSymmetryScore = adjustMetricsForLimitedData(0, temporalAdjustmentFactor, 'score');
+      const adjustedStrengthIndex = adjustMetricsForLimitedData(0, temporalAdjustmentFactor, 'score');
+      const adjustedIntensityScore = adjustMetricsForLimitedData(0, temporalAdjustmentFactor, 'percentage');
+
       const balanceData: Partial<MuscleBalance> = {
         category,
         volume: 0,
         percentage: 0,
         isBalanced: false,
-        recommendation: `Comenzar entrenamientos de ${category.toLowerCase()}`,
+        recommendation: temporalAdjustmentFactor < 0.5
+          ? `Considera agregar ejercicios de ${category.toLowerCase()} cuando estés listo`
+          : `Comenzar entrenamientos de ${category.toLowerCase()}`,
         idealPercentage,
         deviation: -idealPercentage,
-        symmetryScore: 0,
+        symmetryScore: adjustedSymmetryScore,
         antagonistRatio: 0,
-        strengthIndex: 0,
+        strengthIndex: adjustedStrengthIndex,
         progressTrend: 'stable',
         lastImprovement: null,
-        priorityLevel: 'critical',
+        priorityLevel: temporalAdjustmentFactor < 0.5 ? 'medium' : 'critical',
         developmentStage: 'neglected',
         weeklyFrequency: 0,
-        intensityScore: 0,
+        intensityScore: adjustedIntensityScore,
         balanceHistory: {
           trend: 'stable',
-          consistency: 0,
+          consistency: adjustMetricsForLimitedData(0, temporalAdjustmentFactor, 'percentage'),
           volatility: 0
         }
       };
 
       const specificRecommendations = generateSpecificRecommendations(category, balanceData, categoryMetrics);
-      const warnings = generateWarnings(category, balanceData);
+      const warnings = temporalAdjustmentFactor < 0.5 ? [] : generateWarnings(category, balanceData);
 
       muscleBalance.push({
         ...balanceData,
@@ -1010,7 +1085,7 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
 /**
  * Calcula el score de balance general (0-100)
  */
-export const calculateBalanceScore = (muscleBalance: MuscleBalance[]): number => {
+export const calculateBalanceScore = (muscleBalance: MuscleBalance[], records?: WorkoutRecord[]): number => {
   if (muscleBalance.length === 0) return 0;
 
   const balancedCategories = muscleBalance.filter(balance => balance.isBalanced).length;
@@ -1018,7 +1093,22 @@ export const calculateBalanceScore = (muscleBalance: MuscleBalance[]): number =>
 
   if (totalCategories === 0) return 0;
 
-  return Math.round((balancedCategories / totalCategories) * 100);
+  // Calcular score base
+  const baseScore = (balancedCategories / totalCategories) * 100;
+
+  // Si se proporcionan los records, ajustar el score según el factor temporal
+  if (records && records.length > 0) {
+    const temporalAdjustmentFactor = calculateTemporalAdjustmentFactor(records);
+
+    // Con pocos datos, ser más generoso con el score
+    if (temporalAdjustmentFactor < 0.7) {
+      // Dar bonus por estar empezando
+      const beginnerBonus = (1 - temporalAdjustmentFactor) * 20;
+      return Math.min(100, Math.round(baseScore + beginnerBonus));
+    }
+  }
+
+  return Math.round(baseScore);
 };
 
 /**
@@ -1050,7 +1140,7 @@ export const findLeastTrainedCategory = (categoryMetrics: CategoryMetrics[]): st
 export const calculateCategoryAnalysis = (records: WorkoutRecord[]): CategoryAnalysis => {
   const categoryMetrics = calculateCategoryMetrics(records);
   const muscleBalance = analyzeMuscleBalance(records);
-  const balanceScore = calculateBalanceScore(muscleBalance);
+  const balanceScore = calculateBalanceScore(muscleBalance, records);
   const dominantCategory = findDominantCategory(categoryMetrics);
   const leastTrainedCategory = findLeastTrainedCategory(categoryMetrics);
 

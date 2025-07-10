@@ -1,15 +1,12 @@
 import {
   AlertCircle,
-  Award,
   BarChart,
-  Calendar,
   Dumbbell,
   Minus,
   Target,
   Timer,
   TrendingDown,
   TrendingUp,
-  Weight,
   Zap
 } from 'lucide-react';
 import React, { useMemo } from 'react';
@@ -158,14 +155,6 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
                   {/* Métricas principales en diseño compacto */}
                   <div className="grid grid-cols-4 gap-2 mb-3">
                     <div className="bg-gray-900/50 rounded-lg p-2 text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <Dumbbell className="w-3 h-3 text-gray-400" />
-                        <InfoTooltip
-                          content="Número total de sesiones de entrenamiento"
-                          position="top"
-                          className="text-xs"
-                        />
-                      </div>
                       <p className="text-sm font-semibold text-white">
                         {metric.workouts}
                       </p>
@@ -173,14 +162,6 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
                     </div>
 
                     <div className="bg-gray-900/50 rounded-lg p-2 text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <Calendar className="w-3 h-3 text-gray-400" />
-                        <InfoTooltip
-                          content="Frecuencia promedio de entrenamiento por semana"
-                          position="top"
-                          className="text-xs"
-                        />
-                      </div>
                       <p className="text-sm font-semibold text-white">
                         {metric.avgWorkoutsPerWeek.toFixed(1)}
                       </p>
@@ -188,14 +169,6 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
                     </div>
 
                     <div className="bg-gray-900/50 rounded-lg p-2 text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <Award className="w-3 h-3 text-gray-400" />
-                        <InfoTooltip
-                          content="Récords personales alcanzados"
-                          position="top"
-                          className="text-xs"
-                        />
-                      </div>
                       <p className="text-sm font-semibold text-purple-400">
                         {metric.personalRecords}
                       </p>
@@ -203,14 +176,6 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
                     </div>
 
                     <div className="bg-gray-900/50 rounded-lg p-2 text-center">
-                      <div className="flex items-center justify-center gap-1 mb-1">
-                        <Weight className="w-3 h-3 text-gray-400" />
-                        <InfoTooltip
-                          content="Estimación de tu repetición máxima (1RM)"
-                          position="top"
-                          className="text-xs"
-                        />
-                      </div>
                       <p className="text-sm font-semibold text-orange-400">
                         {metric.estimatedOneRM}
                       </p>
