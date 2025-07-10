@@ -96,7 +96,7 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
       )}
 
       {/* Métricas principales con diseño mejorado */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="relative">
           <StatCard
             title="Score de Balance"
@@ -130,11 +130,20 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
         />
 
         <StatCard
-          title="Prioridad Alta"
-          value={muscleBalance.filter(b => b.priorityLevel === 'high' || b.priorityLevel === 'critical').length.toString()}
+          title="Desbalance Crítico"
+          value={muscleBalance.filter(b => b.priorityLevel === 'critical').length.toString()}
           icon={AlertTriangle}
-          variant={muscleBalance.filter(b => b.priorityLevel === 'critical').length > 0 ? 'danger' : 'warning'}
-          tooltip="Número de grupos musculares que requieren atención inmediata."
+          variant="danger"
+          tooltip="Grupos musculares con desbalance crítico que requieren corrección inmediata."
+          tooltipPosition="top"
+        />
+
+        <StatCard
+          title="Requiere Atención"
+          value={muscleBalance.filter(b => b.priorityLevel === 'high' || b.priorityLevel === 'medium').length.toString()}
+          icon={AlertTriangle}
+          variant="warning"
+          tooltip="Grupos musculares que requieren ajustes en balance, frecuencia o progreso."
           tooltipPosition="top"
         />
       </div>
@@ -175,7 +184,6 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                   <div
                     key={balance.category}
                     className={`relative p-4 sm:p-6 rounded-xl bg-gradient-to-br ${balance.isBalanced ? 'from-gray-800 to-gray-900' : 'from-gray-900 to-black'
-                      } border ${balance.isBalanced ? 'border-green-500/20' : 'border-red-500/20'
                       } hover:border-opacity-40 transition-all duration-200`}
                   >
                     {/* Header con ícono y estado */}
@@ -209,11 +217,11 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                           del volumen total
                         </div>
                         {/* Icono de estado movido aquí para evitar solapamiento */}
-                        <div className="mt-2">
+                        <div className="mt-2 flex justify-end">
                           {balance.isBalanced ? (
-                            <CheckCircle className="w-5 h-5 text-green-400 mx-auto" />
+                            <CheckCircle className="w-5 h-5 text-green-400" />
                           ) : (
-                            <XCircle className="w-5 h-5 text-red-400 mx-auto" />
+                            <XCircle className="w-5 h-5 text-red-400" />
                           )}
                         </div>
                       </div>

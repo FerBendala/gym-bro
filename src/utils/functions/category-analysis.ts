@@ -727,15 +727,30 @@ const analyzeProgressTrend = (categoryRecords: WorkoutRecord[]): {
 
 /**
  * Determina el nivel de prioridad para un grupo muscular
+ * Enfocado principalmente en el balance de volumen, con factores secundarios
  */
 const determinePriorityLevel = (
   deviation: number,
   weeklyFrequency: number,
-  progressTrend: 'improving' | 'stable' | 'declining'
+  progressTrend: 'improving' | 'stable' | 'declining',
+  isBalanced: boolean
 ): 'low' | 'medium' | 'high' | 'critical' => {
-  if (Math.abs(deviation) > 15 || weeklyFrequency < 1) return 'critical';
-  if (Math.abs(deviation) > 10 || progressTrend === 'declining') return 'high';
-  if (Math.abs(deviation) > 5 || weeklyFrequency < 2) return 'medium';
+  // Si está balanceado, prioridad máxima es 'medium' (solo por factores secundarios)
+  if (isBalanced) {
+    if (weeklyFrequency < 1) return 'medium'; // Frecuencia muy baja
+    if (progressTrend === 'declining') return 'medium'; // Tendencia negativa
+    return 'low'; // Bien balanceado y sin problemas
+  }
+
+  // Si no está balanceado, prioridad basada en desviación
+  if (Math.abs(deviation) > 15) return 'critical';
+  if (Math.abs(deviation) > 10) return 'high';
+  if (Math.abs(deviation) > 5) return 'medium';
+
+  // Casos edge: frecuencia muy baja o tendencia muy negativa
+  if (weeklyFrequency < 1) return 'critical';
+  if (progressTrend === 'declining' && Math.abs(deviation) > 3) return 'high';
+
   return 'low';
 };
 
@@ -983,7 +998,7 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
 
     // Determinar características con ajustes para datos limitados
     const adjustedDeviation = deviation * temporalAdjustmentFactor; // Reducir la importancia de la desviación con pocos datos
-    const priorityLevel = determinePriorityLevel(adjustedDeviation, metric.avgWorkoutsPerWeek, progressAnalysis.trend);
+    const priorityLevel = determinePriorityLevel(adjustedDeviation, metric.avgWorkoutsPerWeek, progressAnalysis.trend, isBalanced);
     const developmentStage = determineDevelopmentStage(strengthIndex, metric.avgWorkoutsPerWeek, metric.totalVolume);
 
     // Generar recomendación básica considerando el factor temporal
