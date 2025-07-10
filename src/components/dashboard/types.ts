@@ -1,5 +1,5 @@
 
-export type DashboardTab = 'categories' | 'balance' | 'trends' | 'advanced';
+export type DashboardTab = 'categories' | 'balance' | 'trends' | 'advanced' | 'predictions';
 
 export interface DashboardTabConfig {
   id: DashboardTab;

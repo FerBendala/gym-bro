@@ -1,4 +1,4 @@
-import { Activity, Scale, Target, Zap } from 'lucide-react';
+import { Activity, Brain, Scale, Target, Zap } from 'lucide-react';
 import type { DashboardTabConfig } from './types';
 
 /**
@@ -29,6 +29,12 @@ export const DASHBOARD_TABS: DashboardTabConfig[] = [
     label: 'Análisis Avanzado',
     icon: Zap,
     description: 'Métricas complejas y comparaciones detalladas'
+  },
+  {
+    id: 'predictions',
+    label: 'Predicciones',
+    icon: Brain,
+    description: 'Análisis predictivo e inteligencia artificial'
   }
 ];
 

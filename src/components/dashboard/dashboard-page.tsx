@@ -7,6 +7,7 @@ import {
   CategoryTab,
   DashboardEmptyState,
   DashboardTabNavigation,
+  PredictionsTab,
   TrendsTab
 } from './components';
 import { DEFAULT_DASHBOARD_TAB } from './constants';
@@ -45,6 +46,8 @@ export const DashboardPage: React.FC = () => {
         return <TrendsTab records={workoutRecords} />;
       case 'advanced':
         return <AdvancedTab records={workoutRecords} />;
+      case 'predictions':
+        return <PredictionsTab records={workoutRecords} />;
       default:
         return <CategoryTab records={workoutRecords} />;
     }

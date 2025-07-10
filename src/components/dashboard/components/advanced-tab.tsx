@@ -1,18 +1,14 @@
 import {
   Activity, AlertTriangle, Award,
-  BarChart,
   Brain, Calendar, CheckCircle,
   Clock, Shield, Target,
   Timer,
-  TrendingDown,
   TrendingUp,
-  Trophy, Weight,
   Zap
 } from 'lucide-react';
 import React, { useMemo } from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
 import { calculateAdvancedAnalysis, getLastWeekRecords, getThisWeekRecords } from '../../../utils/functions/advanced-analysis';
-import { formatNumber } from '../../../utils/functions/stats-utils';
 import { Card, CardContent, CardHeader } from '../../card';
 import { StatCard } from '../../stat-card';
 import { InfoTooltip } from '../../tooltip';
@@ -1024,6 +1020,8 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
           </CardContent>
         </Card>
 
+
+
         {/* Grid para desktop - Las siguientes dos secciones lado a lado en pantallas grandes */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
@@ -1099,307 +1097,87 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
             </CardContent>
           </Card>
 
-          {/* Predicciones - Rediseñadas usando Balance Muscular como referencia */}
+          {/* Sugerencias de Optimización - Mobile: lista simple, Desktop: grid */}
           <Card>
             <CardHeader>
               <h3 className="text-lg font-semibold text-white flex items-center">
                 <Brain className="w-5 h-5 mr-2" />
-                Predicciones Avanzadas
+                Sugerencias de Optimización
                 <InfoTooltip
-                  content="Análisis predictivo avanzado basado en inteligencia artificial y patrones de entrenamiento personalizados."
+                  content="Recomendaciones personalizadas y priorizadas basadas en análisis detallado de tus datos de entrenamiento."
                   position="top"
                   className="ml-2"
                 />
               </h3>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {/* Análisis de Tendencia Principal - Estilo Balance Muscular */}
-                <div className="relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/30 hover:border-gray-600/50 transition-all duration-200">
-                  {/* Header con ícono y estado */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                      <div className={`p-2 sm:p-3 rounded-lg bg-gradient-to-br ${analysis.progressPrediction.trendAnalysis === 'mejorando' ? 'from-green-500/80 to-emerald-500/80' :
-                        analysis.progressPrediction.trendAnalysis === 'estable' ? 'from-blue-500/80 to-cyan-500/80' :
-                          analysis.progressPrediction.trendAnalysis === 'empeorando' ? 'from-red-500/80 to-orange-500/80' :
-                            'from-gray-500/80 to-gray-600/80'}`}>
-                        {analysis.progressPrediction.trendAnalysis === 'mejorando' ? (
-                          <TrendingUp className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
-                        ) : analysis.progressPrediction.trendAnalysis === 'empeorando' ? (
-                          <TrendingDown className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
-                        ) : (
-                          <Activity className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
-                        )}
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white truncate">
-                          Análisis de Tendencia
-                        </h4>
-                        <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${analysis.progressPrediction.trendAnalysis === 'mejorando' ? 'bg-green-500 text-white' :
-                            analysis.progressPrediction.trendAnalysis === 'estable' ? 'bg-blue-500 text-white' :
-                              analysis.progressPrediction.trendAnalysis === 'empeorando' ? 'bg-red-500 text-white' :
-                                'bg-gray-500 text-white'}`}>
-                            {analysis.progressPrediction.trendAnalysis === 'mejorando' ? '📈 MEJORANDO' :
-                              analysis.progressPrediction.trendAnalysis === 'estable' ? '➡️ ESTABLE' :
-                                analysis.progressPrediction.trendAnalysis === 'empeorando' ? '📉 EMPEORANDO' :
-                                  '❓ INSUFICIENTE'}
-                          </span>
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${analysis.progressPrediction.confidenceLevel >= 70 ? 'bg-green-500 text-white' :
-                            analysis.progressPrediction.confidenceLevel >= 50 ? 'bg-yellow-500 text-black' :
-                              'bg-red-500 text-white'}`}>
-                            Confianza: {analysis.progressPrediction.confidenceLevel}%
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right ml-2 sm:ml-4">
-                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">
-                        {analysis.progressPrediction.nextWeekWeight}kg
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        próxima semana
-                      </div>
-                    </div>
-                  </div>
+              <div className="space-y-3">
+                {categorizedSuggestions.length > 0 ? (
+                  categorizedSuggestions.slice(0, 4).map((suggestion, index) => {
+                    const getCategoryStyles = (category: string) => {
+                      switch (category) {
+                        case 'intensity':
+                          return 'bg-red-900/20 border-red-500/30 text-red-400';
+                        case 'recovery':
+                          return 'bg-green-900/20 border-green-500/30 text-green-400';
+                        case 'frequency':
+                          return 'bg-purple-900/20 border-purple-500/30 text-purple-400';
+                        case 'planning':
+                          return 'bg-indigo-900/20 border-indigo-500/30 text-indigo-400';
+                        case 'progress':
+                          return 'bg-blue-900/20 border-blue-500/30 text-blue-400';
+                        case 'technique':
+                          return 'bg-yellow-900/20 border-yellow-500/30 text-yellow-400';
+                        case 'balance':
+                          return 'bg-cyan-900/20 border-cyan-500/30 text-cyan-400';
+                        default:
+                          return 'bg-gray-900/20 border-gray-500/30 text-gray-400';
+                      }
+                    };
 
-                  {/* Barra de progreso de confianza */}
-                  <div className="mb-4">
-                    <div className="flex justify-between text-xs text-gray-400 mb-2">
-                      <span>Nivel de Confianza</span>
-                      <span className="text-gray-300">
-                        {analysis.progressPrediction.confidenceLevel}%
-                      </span>
-                    </div>
-                    <div className="relative h-3 sm:h-4 md:h-6 bg-gray-800 rounded-full overflow-hidden">
+                    const getPriorityBadge = (priority: string) => {
+                      switch (priority) {
+                        case 'high':
+                          return 'bg-red-600 text-white';
+                        case 'medium':
+                          return 'bg-yellow-600 text-white';
+                        case 'low':
+                          return 'bg-gray-600 text-white';
+                        default:
+                          return 'bg-gray-600 text-white';
+                      }
+                    };
+
+                    return (
                       <div
-                        className={`relative h-full bg-gradient-to-r ${analysis.progressPrediction.confidenceLevel >= 70 ? 'from-green-500/80 to-emerald-500/80' :
-                          analysis.progressPrediction.confidenceLevel >= 50 ? 'from-yellow-500/80 to-orange-500/80' :
-                            'from-red-500/80 to-pink-500/80'} transition-all duration-300`}
-                        style={{ width: `${Math.min(100, safeNumber(analysis.progressPrediction.confidenceLevel, 0))}%` }}
+                        key={index}
+                        className={`p-3 sm:p-4 border rounded-lg ${getCategoryStyles(suggestion.category)}`}
                       >
-                        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
-                        {safeNumber(analysis.progressPrediction.confidenceLevel, 0) > 15 && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-xs font-medium text-white drop-shadow-sm">
-                              {safeNumber(analysis.progressPrediction.confidenceLevel, 0)}%
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                      {safeNumber(analysis.progressPrediction.confidenceLevel, 0) <= 15 && safeNumber(analysis.progressPrediction.confidenceLevel, 0) > 0 && (
-                        <div className="absolute top-0 left-2 h-full flex items-center">
-                          <span className="text-xs font-medium text-white drop-shadow-sm">
-                            {safeNumber(analysis.progressPrediction.confidenceLevel, 0)}%
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Grid de métricas - Estilo Balance Muscular */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3">
-                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                      <div className="text-xs text-gray-400 mb-1">Tendencia Fuerza</div>
-                      <div className={`text-sm sm:text-lg font-semibold ${analysis.progressPrediction.strengthTrend > 0 ? 'text-green-400' :
-                        analysis.progressPrediction.strengthTrend < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                        {analysis.progressPrediction.strengthTrend > 0 ? '+' : ''}{analysis.progressPrediction.strengthTrend}kg
-                      </div>
-                      <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
-                        <div
-                          className={`${analysis.progressPrediction.strengthTrend > 0 ? 'bg-green-500' : 'bg-red-500'} h-2 rounded-full transition-all duration-300`}
-                          style={{ width: `${Math.min(100, Math.max(10, Math.abs(safeNumber(analysis.progressPrediction.strengthTrend, 0)) * 5))}%` }}
-                        >
-                          {Math.abs(safeNumber(analysis.progressPrediction.strengthTrend, 0)) * 5 > 25 && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-xs font-medium text-white drop-shadow-sm">
-                                {analysis.progressPrediction.strengthTrend > 0 ? '+' : ''}{analysis.progressPrediction.strengthTrend}
+                        <div className="flex items-start space-x-3">
+                          <suggestion.icon className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
+                              <h4 className="font-medium text-sm mb-1 sm:mb-0">{suggestion.title}</h4>
+                              <span className={`px-2 py-1 rounded-full text-xs font-bold ${getPriorityBadge(suggestion.priority)} w-fit`}>
+                                {suggestion.priority === 'high' ? 'ALTA' :
+                                  suggestion.priority === 'medium' ? 'MEDIA' : 'BAJA'}
                               </span>
                             </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                      <div className="text-xs text-gray-400 mb-1">Tendencia Volumen</div>
-                      <div className={`text-sm sm:text-lg font-semibold ${analysis.progressPrediction.volumeTrend > 0 ? 'text-green-400' :
-                        analysis.progressPrediction.volumeTrend < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                        {analysis.progressPrediction.volumeTrend > 0 ? '+' : ''}{analysis.progressPrediction.volumeTrend}kg
-                      </div>
-                      <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
-                        <div
-                          className={`${analysis.progressPrediction.volumeTrend > 0 ? 'bg-blue-500' : 'bg-orange-500'} h-2 rounded-full transition-all duration-300`}
-                          style={{ width: `${Math.min(100, Math.max(10, Math.abs(safeNumber(analysis.progressPrediction.volumeTrend, 0)) / 10))}%` }}
-                        />
-                      </div>
-                    </div>
-
-                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                      <div className="text-xs text-gray-400 mb-1">Crecimiento Mensual</div>
-                      <div className="text-sm sm:text-lg font-semibold text-white">
-                        {analysis.progressPrediction.monthlyGrowthRate}kg
-                      </div>
-                      <div className="text-xs text-gray-500">por mes</div>
-                    </div>
-
-                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                      <div className="text-xs text-gray-400 mb-1">Riesgo Meseta</div>
-                      <div className={`text-sm sm:text-lg font-semibold ${analysis.progressPrediction.plateauRisk < 30 ? 'text-green-400' :
-                        analysis.progressPrediction.plateauRisk <= 60 ? 'text-yellow-400' : 'text-red-400'}`}>
-                        {analysis.progressPrediction.plateauRisk}%
-                      </div>
-                      <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
-                        <div
-                          className={`${analysis.progressPrediction.plateauRisk < 30 ? 'bg-green-500' :
-                            analysis.progressPrediction.plateauRisk <= 60 ? 'bg-yellow-500' : 'bg-red-500'} h-2 rounded-full transition-all duration-300`}
-                          style={{ width: `${safeNumber(analysis.progressPrediction.plateauRisk, 0)}%` }}
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Predicción de PR Principal - Estilo Balance Muscular */}
-                <div className="relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-purple-900/20 to-indigo-900/20 border border-purple-500/30 hover:border-purple-400/50 transition-all duration-200">
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                      <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-br from-purple-500/80 to-violet-500/80">
-                        <Trophy className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white truncate">
-                          Próximo Récord Personal
-                        </h4>
-                        <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${analysis.progressPrediction.predictedPR.confidence >= 70 ? 'bg-green-500 text-white' :
-                            analysis.progressPrediction.predictedPR.confidence >= 50 ? 'bg-yellow-500 text-black' :
-                              'bg-red-500 text-white'}`}>
-                            Confianza: {analysis.progressPrediction.predictedPR.confidence}%
-                          </span>
-                          {analysis.progressPrediction.timeToNextPR > 0 && (
-                            <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500 text-white">
-                              {analysis.progressPrediction.timeToNextPR} semana{analysis.progressPrediction.timeToNextPR !== 1 ? 's' : ''}
-                            </span>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right ml-2 sm:ml-4">
-                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-purple-400">
-                        {analysis.progressPrediction.predictedPR.weight}kg
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        record estimado
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Barra de progreso hacia el PR */}
-                  <div className="mb-4">
-                    <div className="flex justify-between text-xs text-gray-400 mb-2">
-                      <span>Progreso hacia PR</span>
-                      <span className="text-purple-300">
-                        {analysis.progressPrediction.predictedPR.confidence}% probabilidad
-                      </span>
-                    </div>
-                    <div className="relative h-3 sm:h-4 md:h-6 bg-gray-800 rounded-full overflow-hidden">
-                      <div
-                        className="relative h-full bg-gradient-to-r from-purple-500/80 to-violet-500/80 transition-all duration-300"
-                        style={{ width: `${Math.min(100, safeNumber(analysis.progressPrediction.predictedPR.confidence, 0))}%` }}
-                      >
-                        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
-                        {safeNumber(analysis.progressPrediction.predictedPR.confidence, 0) > 15 && (
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-xs font-medium text-white drop-shadow-sm">
-                              {analysis.progressPrediction.predictedPR.weight}kg
-                            </span>
+                            <p className="text-xs opacity-90 mb-2">{suggestion.description}</p>
+                            <div className="flex items-start space-x-2">
+                              <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0 opacity-70" />
+                              <p className="text-xs font-medium">{suggestion.action}</p>
+                            </div>
                           </div>
-                        )}
-                      </div>
-                      {safeNumber(analysis.progressPrediction.predictedPR.confidence, 0) <= 15 && safeNumber(analysis.progressPrediction.predictedPR.confidence, 0) > 0 && (
-                        <div className="absolute top-0 left-2 h-full flex items-center">
-                          <span className="text-xs font-medium text-white drop-shadow-sm">
-                            {analysis.progressPrediction.predictedPR.weight}kg
-                          </span>
                         </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Grid de métricas del PR */}
-                  <div className="grid grid-cols-2 gap-2 sm:gap-3">
-                    <div className="bg-purple-800/30 rounded-lg p-2 sm:p-3 text-center">
-                      <div className="text-xs text-purple-300 mb-1">Peso Actual Máximo</div>
-                      <div className="text-sm sm:text-lg font-semibold text-white">
-                        {Math.max(...records.map(r => r.weight))}kg
                       </div>
-                    </div>
-                    <div className="bg-purple-800/30 rounded-lg p-2 sm:p-3 text-center">
-                      <div className="text-xs text-purple-300 mb-1">Mejora Esperada</div>
-                      <div className="text-sm sm:text-lg font-semibold text-purple-400">
-                        +{(analysis.progressPrediction.predictedPR.weight - Math.max(...records.map(r => r.weight))).toFixed(1)}kg
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Predicciones Semanales */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="relative p-4 rounded-xl bg-gradient-to-br from-blue-900/20 to-cyan-900/20 border border-blue-500/30">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/80 to-cyan-500/80">
-                        <Weight className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h5 className="text-sm font-medium text-white">Peso Próxima Semana</h5>
-                        <p className="text-xs text-gray-400">Predicción de fuerza</p>
-                      </div>
-                    </div>
-                    <div className="text-2xl font-bold text-blue-400 mb-2">
-                      {analysis.progressPrediction.nextWeekWeight}kg
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      Basado en tendencia actual de {analysis.progressPrediction.strengthTrend > 0 ? '+' : ''}{analysis.progressPrediction.strengthTrend}kg/semana
-                    </div>
-                  </div>
-
-                  <div className="relative p-4 rounded-xl bg-gradient-to-br from-green-900/20 to-emerald-900/20 border border-green-500/30">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-green-500/80 to-emerald-500/80">
-                        <BarChart className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h5 className="text-sm font-medium text-white">Volumen Próxima Semana</h5>
-                        <p className="text-xs text-gray-400">Predicción de carga</p>
-                      </div>
-                    </div>
-                    <div className="text-2xl font-bold text-green-400 mb-2">
-                      {formatNumber(analysis.progressPrediction.nextWeekVolume)}
-                    </div>
-                    <div className="text-xs text-gray-400">
-                      Basado en tendencia de {analysis.progressPrediction.volumeTrend > 0 ? '+' : ''}{analysis.progressPrediction.volumeTrend}kg/semana
-                    </div>
-                  </div>
-                </div>
-
-                {/* Recomendaciones Personalizadas */}
-                {analysis.progressPrediction.recommendations.length > 0 && (
-                  <div className="relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/30">
-                    <div className="flex items-center gap-3 mb-4">
-                      <div className="p-2 rounded-lg bg-gradient-to-br from-indigo-500/80 to-blue-500/80">
-                        <CheckCircle className="w-5 h-5 text-white" />
-                      </div>
-                      <h5 className="text-sm font-medium text-white">Recomendaciones IA</h5>
-                    </div>
-                    <div className="space-y-2">
-                      {analysis.progressPrediction.recommendations.slice(0, 3).map((rec, index) => (
-                        <div key={index} className="flex items-start gap-2">
-                          <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-2 flex-shrink-0" />
-                          <p className="text-sm text-gray-300 break-words">{rec}</p>
-                        </div>
-                      ))}
-                    </div>
+                    );
+                  })
+                ) : (
+                  <div className="text-center py-4">
+                    <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-2" />
+                    <p className="text-green-400 font-medium">¡Excelente trabajo!</p>
+                    <p className="text-gray-400 text-sm">Tu entrenamiento está bien optimizado</p>
                   </div>
                 )}
               </div>
@@ -1407,193 +1185,6 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
           </Card>
         </div>
 
-        {/* Análisis de Intensidad - Ancho completo */}
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-white flex items-center">
-              <Zap className="w-5 h-5 mr-2" />
-              Análisis de Intensidad
-              <InfoTooltip
-                content="Evaluación detallada de la intensidad en diferentes aspectos de tu entrenamiento. Clave para optimizar el estímulo de crecimiento."
-                position="top"
-                className="ml-2"
-              />
-            </h3>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {/* Gráfico de barras de intensidad - Mobile: 1 columna, SM+: 3 columnas */}
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="flex items-center justify-center space-x-1 mb-2">
-                    <p className="text-sm text-gray-400">Intensidad Peso</p>
-                    <InfoTooltip
-                      content="Porcentaje de tu peso máximo que utilizas en promedio. Mayor intensidad = mayor estímulo de fuerza."
-                      position="top"
-                    />
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                    <div
-                      className="bg-blue-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${Math.min(100, analysis.intensityMetrics.averageIntensity)}%` }}
-                    />
-                  </div>
-                  <p className="text-lg font-bold text-white">
-                    {analysis.intensityMetrics.averageIntensity}%
-                  </p>
-                </div>
-
-                <div className="text-center">
-                  <div className="flex items-center justify-center space-x-1 mb-2">
-                    <p className="text-sm text-gray-400">Intensidad Volumen</p>
-                    <InfoTooltip
-                      content="Intensidad basada en el volumen total de trabajo. Mayor volumen = mayor estímulo de hipertrofia."
-                      position="top"
-                    />
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                    <div
-                      className="bg-green-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${Math.min(100, analysis.intensityMetrics.volumeIntensity)}%` }}
-                    />
-                  </div>
-                  <p className="text-lg font-bold text-white">
-                    {analysis.intensityMetrics.volumeIntensity}%
-                  </p>
-                </div>
-
-                <div className="text-center">
-                  <div className="flex items-center justify-center space-x-1 mb-2">
-                    <p className="text-sm text-gray-400">Intensidad Frecuencia</p>
-                    <InfoTooltip
-                      content="Intensidad basada en la frecuencia de entrenamientos. Mayor frecuencia = mayor estímulo de adaptación."
-                      position="top"
-                    />
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-2 mb-2">
-                    <div
-                      className="bg-yellow-600 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${Math.min(100, analysis.intensityMetrics.frequencyIntensity)}%` }}
-                    />
-                  </div>
-                  <p className="text-lg font-bold text-white">
-                    {analysis.intensityMetrics.frequencyIntensity}%
-                  </p>
-                </div>
-              </div>
-
-              {/* Rango óptimo de carga */}
-              <div className="pt-4 border-t border-gray-700">
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                  <div className="mb-2 sm:mb-0">
-                    <div className="flex items-center space-x-2">
-                      <h4 className="text-sm font-medium text-gray-300">
-                        Rango Óptimo de Carga
-                      </h4>
-                      <InfoTooltip
-                        content="Rango de peso recomendado para maximizar el progreso basado en tu historial y capacidades actuales."
-                        position="top"
-                      />
-                    </div>
-                    <p className="text-xs text-gray-400">
-                      Basado en historial de entrenamientos
-                    </p>
-                  </div>
-                  <p className="text-lg font-bold text-blue-400">
-                    {analysis.trainingEfficiency.optimalLoadRange.min}-{analysis.trainingEfficiency.optimalLoadRange.max}kg
-                  </p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Sugerencias de Optimización - Mobile: lista simple, Desktop: grid */}
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-white flex items-center">
-              <Brain className="w-5 h-5 mr-2" />
-              Sugerencias de Optimización
-              <InfoTooltip
-                content="Recomendaciones personalizadas y priorizadas basadas en análisis detallado de tus datos de entrenamiento."
-                position="top"
-                className="ml-2"
-              />
-            </h3>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {categorizedSuggestions.length > 0 ? (
-                categorizedSuggestions.slice(0, 4).map((suggestion, index) => {
-                  const getCategoryStyles = (category: string) => {
-                    switch (category) {
-                      case 'intensity':
-                        return 'bg-red-900/20 border-red-500/30 text-red-400';
-                      case 'recovery':
-                        return 'bg-green-900/20 border-green-500/30 text-green-400';
-                      case 'frequency':
-                        return 'bg-purple-900/20 border-purple-500/30 text-purple-400';
-                      case 'planning':
-                        return 'bg-indigo-900/20 border-indigo-500/30 text-indigo-400';
-                      case 'progress':
-                        return 'bg-blue-900/20 border-blue-500/30 text-blue-400';
-                      case 'technique':
-                        return 'bg-yellow-900/20 border-yellow-500/30 text-yellow-400';
-                      case 'balance':
-                        return 'bg-cyan-900/20 border-cyan-500/30 text-cyan-400';
-                      default:
-                        return 'bg-gray-900/20 border-gray-500/30 text-gray-400';
-                    }
-                  };
-
-                  const getPriorityBadge = (priority: string) => {
-                    switch (priority) {
-                      case 'high':
-                        return 'bg-red-600 text-white';
-                      case 'medium':
-                        return 'bg-yellow-600 text-white';
-                      case 'low':
-                        return 'bg-gray-600 text-white';
-                      default:
-                        return 'bg-gray-600 text-white';
-                    }
-                  };
-
-                  return (
-                    <div
-                      key={index}
-                      className={`p-3 sm:p-4 border rounded-lg ${getCategoryStyles(suggestion.category)}`}
-                    >
-                      <div className="flex items-start space-x-3">
-                        <suggestion.icon className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
-                            <h4 className="font-medium text-sm mb-1 sm:mb-0">{suggestion.title}</h4>
-                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${getPriorityBadge(suggestion.priority)} w-fit`}>
-                              {suggestion.priority === 'high' ? 'ALTA' :
-                                suggestion.priority === 'medium' ? 'MEDIA' : 'BAJA'}
-                            </span>
-                          </div>
-                          <p className="text-xs opacity-90 mb-2">{suggestion.description}</p>
-                          <div className="flex items-start space-x-2">
-                            <CheckCircle className="w-3 h-3 sm:w-4 sm:h-4 mt-0.5 flex-shrink-0 opacity-70" />
-                            <p className="text-xs font-medium">{suggestion.action}</p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="text-center py-4">
-                  <CheckCircle className="w-12 h-12 text-green-400 mx-auto mb-2" />
-                  <p className="text-green-400 font-medium">¡Excelente trabajo!</p>
-                  <p className="text-gray-400 text-sm">Tu entrenamiento está bien optimizado</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

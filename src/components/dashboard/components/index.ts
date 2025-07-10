@@ -9,5 +9,6 @@ export { CategoryTab } from './category-tab';
 export { DashboardEmptyState } from './dashboard-empty-state';
 export { DashboardHeader } from './dashboard-header';
 export { DashboardTabNavigation } from './dashboard-tab-navigation';
+export { PredictionsTab } from './predictions-tab';
 export { TrendsTab } from './trends-tab';
 
