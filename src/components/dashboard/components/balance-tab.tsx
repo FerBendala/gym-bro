@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, Award, BarChart, CheckCircle, Heart, Info, Scale, Target, TrendingDown, TrendingUp, Weight, XCircle, Zap } from 'lucide-react';
+import { Activity, AlertTriangle, BarChart, CheckCircle, Heart, Info, Scale, Target, TrendingDown, TrendingUp, Weight, XCircle, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
 import { analyzeMuscleBalance, calculateBalanceScore } from '../../../utils/functions/category-analysis';
@@ -106,9 +106,6 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
             tooltip="Puntuación que indica qué tan equilibrado está tu entrenamiento entre diferentes grupos musculares."
             tooltipPosition="top"
           />
-          <div className="absolute -top-2 -right-2 z-10">
-            {balanceScore >= 80 && <Award className="w-6 h-6 text-yellow-400" />}
-          </div>
         </div>
 
         <StatCard
@@ -257,7 +254,23 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                           style={{ width: `${Math.min(100, Math.max(0, safeNumber(balance.percentage, 0)))}%` }}
                         >
                           <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                          {/* Valor dentro de la barra si es lo suficientemente ancha */}
+                          {safeNumber(balance.percentage, 0) > 15 && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-xs font-medium text-white drop-shadow-sm">
+                                {safeNumber(balance.percentage, 0).toFixed(1)}%
+                              </span>
+                            </div>
+                          )}
                         </div>
+                        {/* Valor fuera de la barra si es muy estrecha */}
+                        {safeNumber(balance.percentage, 0) <= 15 && safeNumber(balance.percentage, 0) > 0 && (
+                          <div className="absolute top-0 left-2 h-full flex items-center">
+                            <span className="text-xs font-medium text-white drop-shadow-sm">
+                              {safeNumber(balance.percentage, 0).toFixed(1)}%
+                            </span>
+                          </div>
+                        )}
                       </div>
                     </div>
 
@@ -268,11 +281,20 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                         <div className="text-sm sm:text-lg font-semibold text-white">
                           {safeNumber(balance.symmetryScore, 0)}%
                         </div>
-                        <div className="w-full bg-gray-700 rounded-full h-1 mt-1">
+                        <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
                           <div
-                            className="bg-blue-500 h-1 rounded-full transition-all duration-300"
+                            className="bg-blue-500 h-2 rounded-full transition-all duration-300 relative"
                             style={{ width: `${safeNumber(balance.symmetryScore, 0)}%` }}
-                          />
+                          >
+                            {/* Valor en la barra si es lo suficientemente ancha */}
+                            {safeNumber(balance.symmetryScore, 0) > 25 && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-xs font-medium text-white drop-shadow-sm">
+                                  {safeNumber(balance.symmetryScore, 0)}%
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -281,11 +303,20 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                         <div className="text-sm sm:text-lg font-semibold text-white">
                           {safeNumber(balance.strengthIndex, 0)}%
                         </div>
-                        <div className="w-full bg-gray-700 rounded-full h-1 mt-1">
+                        <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
                           <div
-                            className="bg-orange-500 h-1 rounded-full transition-all duration-300"
+                            className="bg-orange-500 h-2 rounded-full transition-all duration-300 relative"
                             style={{ width: `${safeNumber(balance.strengthIndex, 0)}%` }}
-                          />
+                          >
+                            {/* Valor en la barra si es lo suficientemente ancha */}
+                            {safeNumber(balance.strengthIndex, 0) > 25 && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-xs font-medium text-white drop-shadow-sm">
+                                  {safeNumber(balance.strengthIndex, 0)}%
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -302,11 +333,20 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                         <div className="text-sm sm:text-lg font-semibold text-white">
                           {safeNumber(balance.intensityScore, 0)}%
                         </div>
-                        <div className="w-full bg-gray-700 rounded-full h-1 mt-1">
+                        <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
                           <div
-                            className="bg-purple-500 h-1 rounded-full transition-all duration-300"
+                            className="bg-purple-500 h-2 rounded-full transition-all duration-300 relative"
                             style={{ width: `${safeNumber(balance.intensityScore, 0)}%` }}
-                          />
+                          >
+                            {/* Valor en la barra si es lo suficientemente ancha */}
+                            {safeNumber(balance.intensityScore, 0) > 25 && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-xs font-medium text-white drop-shadow-sm">
+                                  {safeNumber(balance.intensityScore, 0)}%
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
