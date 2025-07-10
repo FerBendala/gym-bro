@@ -284,9 +284,9 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
                         </div>
 
                         <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                          <div className="text-xs text-gray-400 mb-1">Eficiencia</div>
+                          <div className="text-xs text-gray-400 mb-1">Peso Promedio</div>
                           <div className="text-sm sm:text-lg font-semibold text-white">
-                            {formatNumber(day.efficiency)}
+                            {day.avgWeight} kg
                           </div>
                         </div>
                       </div>
