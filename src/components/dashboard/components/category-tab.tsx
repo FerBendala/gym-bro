@@ -1,16 +1,18 @@
 import {
-  Activity,
   AlertCircle,
   BarChart,
   Dumbbell,
+  Footprints,
   Heart,
-  Scale,
+  Hexagon,
+  RotateCcw,
+  Shield,
   Target,
   Timer,
   TrendingDown,
   TrendingUp,
+  Triangle,
   Trophy,
-  Weight,
   Zap
 } from 'lucide-react';
 import React, { useMemo } from 'react';
@@ -25,15 +27,15 @@ interface CategoryTabProps {
   records: WorkoutRecord[];
 }
 
-// Íconos para cada categoría muscular (igual que en BalanceTab)
+// Iconos más específicos para cada categoría muscular
 const categoryIcons: Record<string, React.FC<any>> = {
-  'Pecho': Heart,
-  'Espalda': Activity,
-  'Piernas': Weight,
-  'Hombros': Target,
-  'Brazos': Zap,
-  'Core': Scale,
-  'Cardio': Activity
+  'Pecho': Hexagon,        // Hexágono representa la forma de los pectorales
+  'Espalda': Shield,       // Escudo representa la protección/soporte de la espalda
+  'Piernas': Footprints,   // Huellas representan el movimiento de piernas
+  'Hombros': Triangle,     // Triángulo representa la forma de los deltoides
+  'Brazos': Dumbbell,      // Mancuerna es el icono más representativo para brazos
+  'Core': RotateCcw,       // Rotación representa los movimientos de core/abdominales
+  'Cardio': Heart          // Corazón es perfecto para cardio
 };
 
 // Colores para cada categoría (igual que en BalanceTab)
@@ -207,7 +209,7 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
                         {metric.workouts} sesiones
                       </span>
                     </div>
-                    <div className="relative h-3 sm:h-4 md:h-6 bg-gray-800 rounded-full overflow-hidden">
+                    <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">
                       {/* Barra de volumen */}
                       <div
                         className={`relative h-full bg-gradient-to-r ${colorGradient} transition-all duration-300`}
@@ -271,15 +273,29 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
                     </div>
 
                     <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                      <div className="text-xs text-gray-400 mb-1">1RM Est.</div>
+                      <div className="text-xs text-gray-400 mb-1">Eficiencia</div>
                       <div className="text-sm sm:text-lg font-semibold text-white">
-                        {safeNumber(metric.estimatedOneRM, 0)} kg
+                        {safeNumber(metric.efficiencyScore, 0)}%
                       </div>
-                      <div className="text-xs text-gray-500">máximo</div>
+                      <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
+                        <div
+                          className="bg-purple-500 h-2 rounded-full transition-all duration-300 relative"
+                          style={{ width: `${safeNumber(metric.efficiencyScore, 0)}%` }}
+                        >
+                          {/* Valor en la barra si es lo suficientemente ancha */}
+                          {safeNumber(metric.efficiencyScore, 0) > 25 && (
+                            <div className="absolute inset-0 flex items-center justify-center">
+                              <span className="text-xs font-medium text-white drop-shadow-sm">
+                                {safeNumber(metric.efficiencyScore, 0)}%
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Sección de progresión y datos adicionales */}
+                  {/* Información detallada */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
                     {/* Progresión */}
                     <div className="bg-gray-800/30 rounded-lg p-3">
@@ -335,16 +351,16 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
-                          <span className="text-xs text-gray-400">Este mes:</span>
-                          <span className="text-xs font-medium text-green-400">
-                            {formatNumber(metric.volumeDistribution.thisMonth)} kg
+                          <span className="text-xs text-gray-400">Mes pasado:</span>
+                          <span className="text-xs font-medium text-gray-300">
+                            {formatNumber(metric.volumeDistribution.lastMonth)} kg
                           </span>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Recomendaciones y advertencias */}
+                  {/* Advertencias y recomendaciones */}
                   <div className="space-y-2">
                     {/* Advertencias */}
                     {metric.warnings && metric.warnings.length > 0 && (
@@ -360,7 +376,7 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
                       </div>
                     )}
 
-                    {/* Recomendaciones */}
+                    {/* Recomendación principal */}
                     {metric.recommendations && metric.recommendations.length > 0 && (
                       <div className={`${metric.warnings && metric.warnings.length === 0 ? 'bg-blue-900/20 border-blue-500/30' : 'bg-gray-800/50 border-gray-700/30'} border rounded-lg p-3`}>
                         <div className="flex items-start gap-2">

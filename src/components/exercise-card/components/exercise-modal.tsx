@@ -1,4 +1,4 @@
-import { Calendar, Dumbbell, Target, TrendingUp, X, Zap } from 'lucide-react';
+import { Calendar, Dumbbell, TrendingUp, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { formatNumber } from '../../../utils/functions';
@@ -18,7 +18,7 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
   onSubmit,
   formMethods,
   advancedFormMethods,
-  lastRecord
+  lastWorkoutSeries = []
 }) => {
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
 
@@ -53,6 +53,44 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
     await onSubmit(data);
     onClose();
   };
+
+  // Expandir las series para mostrar cada una individualmente
+  const expandedSeries: Array<{ weight: number; reps: number; volume: number; recordIndex: number; setIndex: number }> = [];
+
+  lastWorkoutSeries.forEach((record, recordIndex) => {
+    if (record.individualSets && record.individualSets.length > 0) {
+      // Modo avanzado: cada serie individual
+      record.individualSets.forEach((set, setIndex) => {
+        expandedSeries.push({
+          weight: set.weight,
+          reps: set.reps,
+          volume: set.weight * set.reps,
+          recordIndex,
+          setIndex
+        });
+      });
+    } else {
+      // Modo tradicional: múltiples series iguales
+      for (let i = 0; i < record.sets; i++) {
+        expandedSeries.push({
+          weight: record.weight,
+          reps: record.reps,
+          volume: record.weight * record.reps,
+          recordIndex,
+          setIndex: i
+        });
+      }
+    }
+  });
+
+  // Calcular estadísticas del último entrenamiento
+  const lastWorkoutStats = expandedSeries.length > 0 ? {
+    totalVolume: expandedSeries.reduce((sum, series) => sum + series.volume, 0),
+    totalSets: expandedSeries.length,
+    averageWeight: expandedSeries.reduce((sum, series) => sum + series.weight, 0) / expandedSeries.length,
+    maxWeight: Math.max(...expandedSeries.map(series => series.weight)),
+    date: lastWorkoutSeries[0]?.date
+  } : null;
 
   const modalContent = (
     <div
@@ -108,21 +146,8 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
 
         {/* Contenido principal */}
         <div className="overflow-y-auto max-h-[70vh] p-6 space-y-6">
-          {/* Descripción del ejercicio */}
-          {assignment.exercise?.description && (
-            <div className="p-4 bg-gradient-to-r from-gray-800/50 to-gray-700/50 rounded-xl border border-gray-600/30 hover:border-gray-500/50 transition-colors duration-200">
-              <div className="flex items-center space-x-2 mb-2">
-                <Target className="w-4 h-4 text-blue-400" />
-                <span className="text-sm font-medium text-blue-300">Descripción</span>
-              </div>
-              <p className="text-sm text-gray-300 leading-relaxed">
-                {assignment.exercise.description}
-              </p>
-            </div>
-          )}
-
-          {/* Resumen del último entrenamiento mejorado */}
-          {lastRecord && (
+          {/* Resumen del último entrenamiento mejorado con series exactas */}
+          {expandedSeries.length > 0 && lastWorkoutStats && (
             <div className="bg-gradient-to-r from-green-900/20 via-green-800/20 to-green-900/20 rounded-xl border border-green-700/30 p-5 hover:border-green-600/50 transition-all duration-200 hover:shadow-lg">
               <div className="flex items-center space-x-3 mb-4">
                 <div className="p-2 bg-green-500/20 rounded-lg">
@@ -132,7 +157,7 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
                   <h4 className="text-lg font-semibold text-white">Último Entrenamiento</h4>
                   <p className="text-sm text-green-300">
                     <Calendar className="w-4 h-4 inline mr-1" />
-                    {lastRecord.date.toLocaleDateString('es-ES', {
+                    {lastWorkoutStats.date.toLocaleDateString('es-ES', {
                       day: 'numeric',
                       month: 'long',
                       year: 'numeric'
@@ -141,44 +166,58 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-3 bg-green-800/20 rounded-lg border border-green-700/30 hover:bg-green-700/30 transition-colors duration-200">
-                  <div className="flex items-center justify-center mb-1">
-                    <Zap className="w-4 h-4 text-green-400 mr-1" />
-                  </div>
+              {/* Estadísticas generales */}
+              <div className="grid grid-cols-3 gap-3 mb-4">
+                <div className="text-center p-3 bg-green-800/20 rounded-lg border border-green-700/30">
                   <p className="text-lg font-bold text-green-300">
-                    {formatNumber(lastRecord.weight)} kg
+                    {formatNumber(lastWorkoutStats.totalVolume)} kg
                   </p>
-                  <p className="text-xs text-green-400">Peso</p>
+                  <p className="text-xs text-green-400">Volumen Total</p>
                 </div>
 
-                <div className="text-center p-3 bg-green-800/20 rounded-lg border border-green-700/30 hover:bg-green-700/30 transition-colors duration-200">
-                  <div className="flex items-center justify-center mb-1">
-                    <Target className="w-4 h-4 text-green-400 mr-1" />
-                  </div>
+                <div className="text-center p-3 bg-green-800/20 rounded-lg border border-green-700/30">
                   <p className="text-lg font-bold text-green-300">
-                    {lastRecord.reps}
+                    {lastWorkoutStats.totalSets}
                   </p>
-                  <p className="text-xs text-green-400">Reps</p>
+                  <p className="text-xs text-green-400">Series Totales</p>
                 </div>
 
-                <div className="text-center p-3 bg-green-800/20 rounded-lg border border-green-700/30 hover:bg-green-700/30 transition-colors duration-200">
-                  <div className="flex items-center justify-center mb-1">
-                    <Dumbbell className="w-4 h-4 text-green-400 mr-1" />
-                  </div>
+                <div className="text-center p-3 bg-green-800/20 rounded-lg border border-green-700/30">
                   <p className="text-lg font-bold text-green-300">
-                    {lastRecord.sets}
+                    {formatNumber(lastWorkoutStats.maxWeight)} kg
                   </p>
-                  <p className="text-xs text-green-400">Series</p>
+                  <p className="text-xs text-green-400">Peso Máximo</p>
                 </div>
               </div>
 
-              <div className="mt-4 pt-3 border-t border-green-700/30">
-                <div className="flex items-center justify-center space-x-2">
-                  <div className="w-2 h-2 bg-green-400 rounded-full animate-pulse" />
-                  <p className="text-sm text-green-300 font-medium">
-                    <strong>Volumen Total:</strong> {formatNumber(lastRecord.weight * lastRecord.reps * lastRecord.sets)} kg
-                  </p>
+              {/* Series detalladas - ahora mostrando cada serie individual exacta */}
+              <div className="border-t border-green-700/30 pt-4">
+                <h5 className="text-sm font-medium text-green-300 mb-3 flex items-center">
+                  <Dumbbell className="w-4 h-4 mr-2" />
+                  Series Realizadas
+                </h5>
+
+                <div className="space-y-2 max-h-32 overflow-y-auto">
+                  {expandedSeries.map((series, index) => (
+                    <div
+                      key={`${series.recordIndex}-${series.setIndex}-${index}`}
+                      className="flex items-center justify-between p-2 bg-green-800/10 rounded-lg border border-green-700/20"
+                    >
+                      <div className="flex items-center space-x-3">
+                        <span className="text-xs font-medium text-green-400 bg-green-700/30 px-2 py-1 rounded-full min-w-[32px] text-center">
+                          S{index + 1}
+                        </span>
+                        <div className="text-sm text-green-300">
+                          <span className="font-medium">{formatNumber(series.weight)} kg</span>
+                          <span className="text-green-400 mx-1">×</span>
+                          <span className="font-medium">{series.reps} reps</span>
+                        </div>
+                      </div>
+                      <div className="text-xs text-green-400 font-medium">
+                        {formatNumber(series.volume)} kg
+                      </div>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>

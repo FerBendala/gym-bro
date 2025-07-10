@@ -847,7 +847,7 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                         Riesgo: {analysis.fatigueAnalysis.overreachingRisk}
                       </span>
                     </div>
-                    <div className="relative h-3 sm:h-4 md:h-6 bg-gray-800 rounded-full overflow-hidden">
+                    <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">
                       <div
                         className={`relative h-full bg-gradient-to-r ${fatigueColors.fatigueLevel} transition-all duration-300`}
                         style={{ width: `${Math.min(100, safeNumber(analysis.fatigueAnalysis.fatigueIndex, 0))}%` }}

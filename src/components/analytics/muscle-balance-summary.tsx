@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, Award, BarChart3, Shield, Target, TrendingDown, TrendingUp, Users } from 'lucide-react';
+import { Activity, AlertTriangle, Award, BarChart3, Dumbbell, Footprints, Heart, Hexagon, RotateCcw, Shield, Target, TrendingDown, TrendingUp, Triangle, Users } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { MUSCLE_GROUPS } from '../../constants/muscle-groups';
 import type { WorkoutRecord } from '../../interfaces';
@@ -10,6 +10,17 @@ interface MuscleBalanceSummaryProps {
   records: WorkoutRecord[];
   selectedCategory?: string;
 }
+
+// Iconos más específicos para cada categoría muscular
+const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
+  'Pecho': Hexagon,        // Hexágono representa la forma de los pectorales
+  'Espalda': Shield,       // Escudo representa la protección/soporte de la espalda
+  'Piernas': Footprints,   // Huellas representan el movimiento de piernas
+  'Hombros': Triangle,     // Triángulo representa la forma de los deltoides
+  'Brazos': Dumbbell,      // Mancuerna es el icono más representativo para brazos
+  'Core': RotateCcw,       // Rotación representa los movimientos de core/abdominales
+  'Cardio': Heart          // Corazón es perfecto para cardio
+};
 
 interface CategoryMetrics {
   name: string;
@@ -24,7 +35,7 @@ interface CategoryMetrics {
   progressPercent: number;
   percentage: number;
   balanceScore: number;
-  lastWorkout: Date | null;
+  lastWorkout: Date;
   recommendations: string[];
 }
 
@@ -109,7 +120,7 @@ export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
     const categories: CategoryMetrics[] = Object.entries(categoryData).map(([categoryName, data]) => {
       // Buscar información del grupo muscular
       const muscleGroup = Object.values(MUSCLE_GROUPS).find(group =>
-        group.categories.includes(categoryName as any) || group.name === categoryName
+        group.categories.some(cat => cat === categoryName) || group.name === categoryName
       );
 
       const icon = muscleGroup?.icon || '💪';
@@ -303,145 +314,135 @@ export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
             <div className="p-4 rounded-lg border border-gray-700 bg-gray-800/30">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-2xl font-bold text-orange-400">
-                    {analysis.riskFactors.length}
+                  <p className="text-2xl font-bold text-red-400">
+                    {analysis.weakestCategory?.name.slice(0, 8) || 'N/A'}
                   </p>
-                  <p className="text-sm text-gray-400">Alertas</p>
+                  <p className="text-sm text-gray-400">Más Débil</p>
                 </div>
-                <AlertTriangle className="w-4 h-4 text-orange-400" />
+                <TrendingDown className="w-4 h-4 text-red-400" />
               </div>
             </div>
           </div>
         </CardContent>
       </Card>
 
-      {/* Distribución por categorías */}
+      {/* Análisis detallado por categoría */}
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-semibold text-white flex items-center">
-            <BarChart3 className="w-5 h-5 mr-2" />
-            Distribución de Volumen
-            <InfoTooltip
-              content="Distribución del volumen de entrenamiento entre grupos musculares con análisis de balance."
-              position="top"
-              className="ml-2"
-            />
-          </h3>
+          <h3 className="text-lg font-semibold text-white">Análisis Detallado por Categoría</h3>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {analysis.categories.map((category, index) => (
-              <div
-                key={category.name}
-                className={`p-4 rounded-lg border transition-all duration-200 hover:border-opacity-80 ${getColorClasses(category.color)}`}
-              >
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="flex items-center justify-center w-10 h-10 bg-gray-800 rounded-lg">
-                      <span className="text-lg">{category.icon}</span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-white flex items-center">
-                        {category.name}
-                        <span className="ml-2 text-xs bg-gray-700 px-2 py-1 rounded-full">
-                          #{index + 1}
-                        </span>
-                      </h4>
-                      <p className="text-sm text-gray-400">
-                        {category.exercises} ejercicio{category.exercises !== 1 ? 's' : ''} • {category.frequency} sesiones
-                      </p>
-                    </div>
-                  </div>
+            {analysis.categories.map((category, index) => {
+              // Obtener el componente de icono específico
+              const IconComponent = categoryIcons[category.name] || Dumbbell;
 
-                  <div className="text-right">
-                    <p className="text-xl font-bold text-white">
-                      {formatNumber(category.volume)} kg
-                    </p>
-                    <p className="text-sm text-gray-400">
-                      {category.percentage.toFixed(1)}% del total
-                    </p>
-                  </div>
-                </div>
-
-                {/* Barra de progreso mejorada */}
-                <div className="mb-4">
-                  <div className="flex justify-between text-xs text-gray-400 mb-2">
-                    <span>Distribución del volumen</span>
-                    <span>{category.percentage.toFixed(1)}%</span>
-                  </div>
-                  <div className="w-full bg-gray-700 rounded-full h-3 relative overflow-hidden">
-                    <div
-                      className={`h-3 rounded-full transition-all duration-500 bg-gradient-to-r ${category.color === 'blue' ? 'from-blue-500 to-blue-600' :
-                        category.color === 'green' ? 'from-green-500 to-green-600' :
-                          category.color === 'purple' ? 'from-purple-500 to-purple-600' :
-                            category.color === 'red' ? 'from-red-500 to-red-600' :
-                              category.color === 'yellow' ? 'from-yellow-500 to-yellow-600' :
-                                'from-gray-500 to-gray-600'
-                        }`}
-                      style={{ width: `${category.percentage}%` }}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -skew-x-12 animate-pulse opacity-30" />
-                  </div>
-                </div>
-
-                {/* Métricas detalladas */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                  <div className="text-center p-3 bg-gray-800/50 rounded-lg">
-                    <p className="text-lg font-bold text-white">
-                      {formatNumber(category.avgWeight)}kg
-                    </p>
-                    <p className="text-xs text-gray-400">Peso Promedio</p>
-                  </div>
-
-                  <div className="text-center p-3 bg-gray-800/50 rounded-lg">
-                    <p className="text-lg font-bold text-white">
-                      {formatNumber(category.maxWeight)}kg
-                    </p>
-                    <p className="text-xs text-gray-400">Peso Máximo</p>
-                  </div>
-
-                  <div className="text-center p-3 bg-gray-800/50 rounded-lg">
-                    <div className="flex items-center justify-center space-x-1">
-                      <p className={`text-lg font-bold ${category.progressPercent > 0 ? 'text-green-400' :
-                        category.progressPercent < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                        {category.progressPercent > 0 ? '+' : ''}{category.progressPercent.toFixed(1)}%
-                      </p>
-                      {category.progressPercent !== 0 && (
-                        category.progressPercent > 0 ?
-                          <TrendingUp className="w-4 h-4 text-green-400" /> :
-                          <TrendingDown className="w-4 h-4 text-red-400" />
-                      )}
-                    </div>
-                    <p className="text-xs text-gray-400">Progreso</p>
-                  </div>
-
-                  <div className="text-center p-3 bg-gray-800/50 rounded-lg">
-                    <div className="flex items-center justify-center space-x-1">
-                      <p className={`text-lg font-bold ${getBalanceColor(category.balanceScore).split(' ')[0]}`}>
-                        {Math.round(category.balanceScore)}
-                      </p>
-                      {getBalanceIcon(category.balanceScore)}
-                    </div>
-                    <p className="text-xs text-gray-400">Balance Score</p>
-                  </div>
-                </div>
-
-                {/* Recomendaciones por categoría */}
-                {category.recommendations.length > 0 && (
-                  <div className="border-t border-gray-700 pt-3">
-                    <h5 className="text-sm font-medium text-gray-300 mb-2">Recomendaciones:</h5>
-                    <div className="space-y-1">
-                      {category.recommendations.slice(0, 2).map((rec, recIndex) => (
-                        <p key={recIndex} className="text-xs text-gray-400 flex items-start">
-                          <span className="text-blue-400 mr-1">•</span>
-                          {rec}
+              return (
+                <div
+                  key={category.name}
+                  className={`p-4 rounded-lg border transition-all duration-200 hover:border-opacity-80 ${getColorClasses(category.color)}`}
+                >
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="flex items-center justify-center w-10 h-10 bg-gray-800 rounded-lg">
+                        <IconComponent className="w-5 h-5 text-gray-300" />
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-white flex items-center">
+                          {category.name}
+                          <span className="ml-2 text-xs bg-gray-700 px-2 py-1 rounded-full">
+                            #{index + 1}
+                          </span>
+                        </h4>
+                        <p className="text-sm text-gray-400">
+                          {category.exercises} ejercicio{category.exercises !== 1 ? 's' : ''} • {category.frequency} sesiones
                         </p>
-                      ))}
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-xl font-bold text-white">
+                        {formatNumber(category.volume)} kg
+                      </p>
+                      <p className="text-sm text-gray-400">
+                        {category.percentage.toFixed(1)}% del total
+                      </p>
                     </div>
                   </div>
-                )}
-              </div>
-            ))}
+
+                  {/* Barra de progreso mejorada */}
+                  <div className="mb-4">
+                    <div className="flex justify-between text-xs text-gray-400 mb-1">
+                      <span>{category.name}</span>
+                      <span>{category.percentage.toFixed(1)}%</span>
+                    </div>
+                    <div className="w-full bg-gray-700 rounded-full h-2">
+                      <div
+                        className={`h-2 rounded-full transition-all duration-300 ${getColorClasses(category.color).split(' ')[0]} bg-current`}
+                        style={{ width: `${Math.min(category.percentage, 100)}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Métricas específicas */}
+                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
+                    <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+                      <p className="text-lg font-bold text-white">
+                        {formatNumber(category.avgWeight)}kg
+                      </p>
+                      <p className="text-xs text-gray-400">Peso Promedio</p>
+                    </div>
+
+                    <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+                      <p className="text-lg font-bold text-white">
+                        {formatNumber(category.maxWeight)}kg
+                      </p>
+                      <p className="text-xs text-gray-400">Peso Máximo</p>
+                    </div>
+
+                    <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+                      <div className="flex items-center justify-center space-x-1">
+                        <p className={`text-lg font-bold ${category.progressPercent > 0 ? 'text-green-400' :
+                          category.progressPercent < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                          {category.progressPercent > 0 ? '+' : ''}{category.progressPercent.toFixed(1)}%
+                        </p>
+                        {category.progressPercent !== 0 && (
+                          category.progressPercent > 0 ?
+                            <TrendingUp className="w-4 h-4 text-green-400" /> :
+                            <TrendingDown className="w-4 h-4 text-red-400" />
+                        )}
+                      </div>
+                      <p className="text-xs text-gray-400">Progreso</p>
+                    </div>
+
+                    <div className="text-center p-3 bg-gray-800/50 rounded-lg">
+                      <div className="flex items-center justify-center space-x-1">
+                        <p className={`text-lg font-bold ${getBalanceColor(category.balanceScore).split(' ')[0]}`}>
+                          {Math.round(category.balanceScore)}
+                        </p>
+                        {getBalanceIcon(category.balanceScore)}
+                      </div>
+                      <p className="text-xs text-gray-400">Balance Score</p>
+                    </div>
+                  </div>
+
+                  {/* Recomendaciones por categoría */}
+                  {category.recommendations.length > 0 && (
+                    <div className="border-t border-gray-700 pt-3">
+                      <h5 className="text-sm font-medium text-gray-300 mb-2">Recomendaciones:</h5>
+                      <div className="space-y-1">
+                        {category.recommendations.slice(0, 2).map((rec, recIndex) => (
+                          <p key={recIndex} className="text-xs text-gray-400 flex items-start">
+                            <span className="text-blue-400 mr-1">•</span>
+                            {rec}
+                          </p>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>
@@ -483,124 +484,39 @@ export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
           <CardHeader>
             <h3 className="text-lg font-semibold text-white flex items-center">
               <AlertTriangle className="w-5 h-5 mr-2" />
-              Alertas de Desequilibrio
+              Factores de Riesgo
               <InfoTooltip
-                content="Posibles desequilibrios que podrían afectar el rendimiento o aumentar el riesgo de lesiones."
+                content="Identificación de posibles desequilibrios que podrían llevar a lesiones."
                 position="top"
                 className="ml-2"
               />
             </h3>
           </CardHeader>
           <CardContent>
-            {analysis.riskFactors.length === 0 ? (
-              <div className="text-center py-8">
-                <Shield className="w-12 h-12 text-green-400 mx-auto mb-4" />
-                <p className="text-green-400 font-medium mb-2">Balance Saludable</p>
-                <p className="text-sm text-gray-400">
-                  No se detectaron desequilibrios significativos en tu entrenamiento
-                </p>
-              </div>
-            ) : (
+            {analysis.riskFactors.length > 0 ? (
               <div className="space-y-3">
                 {analysis.riskFactors.map((risk, index) => (
                   <div
                     key={index}
-                    className="flex items-start space-x-3 p-3 bg-orange-900/20 rounded-lg border border-orange-500/30"
+                    className="flex items-start space-x-3 p-3 bg-red-900/20 rounded-lg border border-red-500/30"
                   >
-                    <AlertTriangle className="w-5 h-5 text-orange-400 flex-shrink-0 mt-0.5" />
+                    <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-gray-300">{risk}</p>
                   </div>
                 ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <Shield className="w-12 h-12 text-green-400 mx-auto mb-3" />
+                <p className="text-green-400 font-medium">Sin factores de riesgo detectados</p>
+                <p className="text-sm text-gray-400 mt-1">
+                  Tu balance muscular actual parece saludable
+                </p>
               </div>
             )}
           </CardContent>
         </Card>
       </div>
-
-      {/* Comparación dominante vs más débil */}
-      {analysis.dominantCategory && analysis.weakestCategory && analysis.dominantCategory !== analysis.weakestCategory && (
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-white flex items-center">
-              <Users className="w-5 h-5 mr-2" />
-              Comparación: Dominante vs Más Débil
-            </h3>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Categoría dominante */}
-              <div className="p-4 bg-yellow-900/20 rounded-lg border border-yellow-500/30">
-                <div className="flex items-center space-x-3 mb-4">
-                  <span className="text-2xl">{analysis.dominantCategory.icon}</span>
-                  <div>
-                    <h4 className="font-semibold text-yellow-400">
-                      Grupo Dominante: {analysis.dominantCategory.name}
-                    </h4>
-                    <p className="text-sm text-gray-400">
-                      {analysis.dominantCategory.percentage.toFixed(1)}% del volumen total
-                    </p>
-                  </div>
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Volumen:</span>
-                    <span className="text-white font-medium">
-                      {formatNumber(analysis.dominantCategory.volume)} kg
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Progreso:</span>
-                    <span className={`font-medium ${analysis.dominantCategory.progressPercent > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {analysis.dominantCategory.progressPercent > 0 ? '+' : ''}{analysis.dominantCategory.progressPercent.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Balance Score:</span>
-                    <span className="text-white font-medium">
-                      {Math.round(analysis.dominantCategory.balanceScore)}/100
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Categoría más débil */}
-              <div className="p-4 bg-red-900/20 rounded-lg border border-red-500/30">
-                <div className="flex items-center space-x-3 mb-4">
-                  <span className="text-2xl">{analysis.weakestCategory.icon}</span>
-                  <div>
-                    <h4 className="font-semibold text-red-400">
-                      Grupo Más Débil: {analysis.weakestCategory.name}
-                    </h4>
-                    <p className="text-sm text-gray-400">
-                      {analysis.weakestCategory.percentage.toFixed(1)}% del volumen total
-                    </p>
-                  </div>
-                </div>
-                <div className="space-y-2 text-sm">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Volumen:</span>
-                    <span className="text-white font-medium">
-                      {formatNumber(analysis.weakestCategory.volume)} kg
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Progreso:</span>
-                    <span className={`font-medium ${analysis.weakestCategory.progressPercent > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {analysis.weakestCategory.progressPercent > 0 ? '+' : ''}{analysis.weakestCategory.progressPercent.toFixed(1)}%
-                    </span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Balance Score:</span>
-                    <span className="text-white font-medium">
-                      {Math.round(analysis.weakestCategory.balanceScore)}/100
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
     </div>
   );
 };
@@ -622,36 +538,25 @@ const getIdealPercentage = (categoryName: string): number => {
 
 const generateCategoryRecommendations = (
   categoryName: string,
-  metrics: {
-    percentage: number;
-    idealPercentage: number;
-    frequency: number;
-    progressPercent: number;
-    balanceScore: number;
-  }
+  metrics: { percentage: number; idealPercentage: number; frequency: number; progressPercent: number; balanceScore: number }
 ): string[] => {
   const recommendations: string[] = [];
+  const { percentage, idealPercentage, frequency, progressPercent, balanceScore } = metrics;
 
-  const deviation = metrics.percentage - metrics.idealPercentage;
-
-  if (Math.abs(deviation) > 10) {
-    if (deviation > 0) {
-      recommendations.push(`Reducir volumen en ${categoryName} en aproximadamente ${Math.round(Math.abs(deviation))}%`);
-    } else {
-      recommendations.push(`Aumentar volumen en ${categoryName} en aproximadamente ${Math.round(Math.abs(deviation))}%`);
-    }
+  if (percentage < idealPercentage - 5) {
+    recommendations.push(`Aumentar volumen de ${categoryName.toLowerCase()} en un ${(idealPercentage - percentage).toFixed(1)}%`);
   }
 
-  if (metrics.frequency < 2) {
-    recommendations.push(`Aumentar frecuencia de entrenamiento para ${categoryName}`);
+  if (frequency < 2) {
+    recommendations.push(`Entrenar ${categoryName.toLowerCase()} al menos 2 veces por semana`);
   }
 
-  if (metrics.progressPercent < 0) {
-    recommendations.push(`Revisar técnica y progresión en ejercicios de ${categoryName}`);
+  if (progressPercent < 0) {
+    recommendations.push(`Revisar progresión en ${categoryName.toLowerCase()} - hay una tendencia descendente`);
   }
 
-  if (metrics.balanceScore < 50) {
-    recommendations.push(`Priorizar el equilibrio en ${categoryName} con ejercicios variados`);
+  if (balanceScore < 60) {
+    recommendations.push(`Priorizar equilibrio en ${categoryName.toLowerCase()} para evitar desequilibrios`);
   }
 
   return recommendations.slice(0, 3);
@@ -692,34 +597,29 @@ const generateGeneralRecommendations = (
 const identifyRiskFactors = (categories: CategoryMetrics[]): string[] => {
   const riskFactors: string[] = [];
 
-  // Desequilibrio extremo
-  if (categories.length > 1) {
-    const highest = categories[0];
-    const lowest = categories[categories.length - 1];
-    const ratio = highest.percentage / lowest.percentage;
-
-    if (ratio > 5) {
-      riskFactors.push(`Desequilibrio extremo: ${highest.name} domina sobre ${lowest.name} (ratio ${ratio.toFixed(1)}:1)`);
-    }
+  // Desequilibrios críticos
+  const criticalImbalances = categories.filter(cat => cat.balanceScore < 30);
+  if (criticalImbalances.length > 0) {
+    riskFactors.push(`Desequilibrios críticos en: ${criticalImbalances.map(cat => cat.name).join(', ')}`);
   }
 
-  // Categorías con muy bajo desarrollo
-  const neglectedCategories = categories.filter(cat => cat.percentage < 3);
-  if (neglectedCategories.length > 0) {
-    riskFactors.push(`Grupos descuidados: ${neglectedCategories.map(cat => cat.name).join(', ')} (<3% del volumen)`);
-  }
-
-  // Progreso negativo en múltiples categorías
-  const decliningCategories = categories.filter(cat => cat.progressPercent < -5);
-  if (decliningCategories.length > 1) {
+  // Progreso negativo
+  const decliningCategories = categories.filter(cat => cat.progressPercent < -10);
+  if (decliningCategories.length > 0) {
     riskFactors.push(`Pérdida de fuerza en: ${decliningCategories.map(cat => cat.name).join(', ')}`);
   }
 
-  // Balance score muy bajo
-  const lowBalanceCategories = categories.filter(cat => cat.balanceScore < 30);
-  if (lowBalanceCategories.length > 0) {
-    riskFactors.push(`Balance crítico en: ${lowBalanceCategories.map(cat => cat.name).join(', ')}`);
+  // Grupos dominantes excesivos
+  const overDominant = categories.filter(cat => cat.percentage > 50);
+  if (overDominant.length > 0) {
+    riskFactors.push(`Sobreentrenamiento posible en: ${overDominant.map(cat => cat.name).join(', ')}`);
   }
 
-  return riskFactors;
+  // Grupos completamente abandonados
+  const abandoned = categories.filter(cat => cat.frequency === 0);
+  if (abandoned.length > 2) {
+    riskFactors.push(`Múltiples grupos musculares sin entrenar: ${abandoned.map(cat => cat.name).join(', ')}`);
+  }
+
+  return riskFactors.slice(0, 3);
 }; 

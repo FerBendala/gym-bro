@@ -54,4 +54,5 @@ export interface ExerciseModalProps {
   formMethods: UseFormReturn<WorkoutFormData>;
   advancedFormMethods: UseFormReturn<WorkoutFormDataAdvanced>;
   lastRecord?: import('../../interfaces').WorkoutRecord | null;
+  lastWorkoutSeries?: import('../../interfaces').WorkoutRecord[];
 } 

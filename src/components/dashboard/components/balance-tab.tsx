@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, BarChart, CheckCircle, Heart, Info, Scale, Target, TrendingDown, TrendingUp, Weight, XCircle, Zap } from 'lucide-react';
+import { Activity, AlertTriangle, BarChart, CheckCircle, Dumbbell, Footprints, Heart, Hexagon, RotateCcw, Scale, Shield, TrendingDown, TrendingUp, Triangle, XCircle } from 'lucide-react';
 import React, { useMemo } from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
 import { analyzeMuscleBalance, calculateBalanceScore } from '../../../utils/functions/category-analysis';
@@ -12,15 +12,15 @@ interface BalanceTabProps {
   records: WorkoutRecord[];
 }
 
-// Íconos para cada categoría muscular
+// Iconos más específicos para cada categoría muscular
 const categoryIcons: Record<string, React.FC<any>> = {
-  'Pecho': Heart,
-  'Espalda': Activity,
-  'Piernas': Weight,
-  'Hombros': Target,
-  'Brazos': Zap,
-  'Core': Scale,
-  'Cardio': Activity
+  'Pecho': Hexagon,        // Hexágono representa la forma de los pectorales
+  'Espalda': Shield,       // Escudo representa la protección/soporte de la espalda
+  'Piernas': Footprints,   // Huellas representan el movimiento de piernas
+  'Hombros': Triangle,     // Triángulo representa la forma de los deltoides
+  'Brazos': Dumbbell,      // Mancuerna es el icono más representativo para brazos
+  'Core': RotateCcw,       // Rotación representa los movimientos de core/abdominales
+  'Cardio': Heart          // Corazón es perfecto para cardio
 };
 
 // Colores para cada categoría
@@ -75,27 +75,7 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header informativo */}
-      {records.length < 20 && (
-        <Card className="bg-gradient-to-r from-blue-900/20 to-purple-900/20 border-blue-500/30">
-          <CardContent>
-            <div className="flex items-start gap-3 p-2">
-              <Info className="w-5 h-5 text-blue-400 mt-0.5 flex-shrink-0" />
-              <div>
-                <h4 className="text-sm font-medium text-blue-300 mb-1">
-                  Análisis adaptado a tu nivel ({experienceLevel})
-                </h4>
-                <p className="text-xs text-gray-400">
-                  Las métricas se ajustan automáticamente según tu historial de entrenamiento.
-                  Con más datos, el análisis será más preciso.
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Métricas principales con diseño mejorado */}
+      {/* Stats Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <StatCard
           title="Score de Balance"
@@ -205,7 +185,9 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                           </div>
                         </div>
                       </div>
-                      <div className="text-right ml-2 sm:ml-4">
+
+                      {/* Porcentaje principal */}
+                      <div className="text-right flex-shrink-0">
                         <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">
                           {safeNumber(balance.percentage, 0).toFixed(1)}%
                         </div>
@@ -232,7 +214,7 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                         </span>
                         <span>100%</span>
                       </div>
-                      <div className="relative h-3 sm:h-4 md:h-6 bg-gray-800 rounded-full overflow-hidden">
+                      <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">
                         {/* Zona ideal */}
                         <div
                           className="absolute h-full bg-green-500/20"
@@ -272,7 +254,7 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                       </div>
                     </div>
 
-                    {/* Grid de métricas responsivo */}
+                    {/* Métricas detalladas */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
                       <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                         <div className="text-xs text-gray-400 mb-1">Simetría</div>
@@ -303,9 +285,14 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                       <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                         <div className="text-xs text-gray-400 mb-1">Frecuencia</div>
                         <div className="text-sm sm:text-lg font-semibold text-white">
-                          {safeNumber(balance.weeklyFrequency, 0).toFixed(1)}
+                          {safeNumber(balance.weeklyFrequency, 0).toFixed(1)}x/sem
                         </div>
-                        <div className="text-xs text-gray-500">por semana</div>
+                        <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
+                          <div
+                            className="bg-green-500 h-2 rounded-full transition-all duration-300 relative"
+                            style={{ width: `${Math.min(safeNumber(balance.weeklyFrequency, 0) * 25, 100)}%` }}
+                          />
+                        </div>
                       </div>
 
                       <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
@@ -317,62 +304,45 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                           <div
                             className="bg-purple-500 h-2 rounded-full transition-all duration-300 relative"
                             style={{ width: `${safeNumber(balance.intensityScore, 0)}%` }}
-                          >
-                            {/* Valor en la barra si es lo suficientemente ancha */}
-                            {safeNumber(balance.intensityScore, 0) > 25 && (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-xs font-medium text-white drop-shadow-sm">
-                                  {safeNumber(balance.intensityScore, 0)}%
-                                </span>
-                              </div>
-                            )}
-                          </div>
+                          />
                         </div>
                       </div>
                     </div>
 
-                    {/* Recomendaciones y advertencias */}
-                    <div className="space-y-2">
-                      {/* Advertencias */}
-                      {balance.warnings && balance.warnings.length > 0 && (
-                        <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
-                          <div className="flex items-start gap-2">
-                            <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm text-red-300 break-words">
-                                {balance.warnings[0]}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                    {/* Recomendaciones principales */}
+                    <div className="border-t border-gray-700/50 pt-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <h5 className="text-sm font-medium text-gray-300">Recomendación Principal</h5>
+                        <span className={`text-xs px-2 py-1 rounded-full ${balance.isBalanced ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
+                          {balance.isBalanced ? 'Equilibrado' : 'Ajuste necesario'}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-400 leading-relaxed">
+                        {balance.recommendation}
+                      </p>
+                    </div>
 
-                      {/* Recomendación principal */}
-                      <div className={`${balance.warnings && balance.warnings.length === 0 ? 'bg-blue-900/20 border-blue-500/30' : 'bg-gray-800/50 border-gray-700/30'
-                        } border rounded-lg p-3`}>
-                        <div className="flex items-start gap-2">
-                          <Zap className={`w-4 h-4 ${balance.warnings && balance.warnings.length === 0 ? 'text-blue-400' : 'text-gray-400'
-                            } mt-0.5 flex-shrink-0`} />
-                          <div className="flex-1 min-w-0">
-                            <p className={`text-sm ${balance.warnings && balance.warnings.length === 0 ? 'text-blue-300' : 'text-gray-300'
-                              } break-words`}>
-                              {balance.recommendation}
+                    {/* Advertencias si existen */}
+                    {balance.warnings && balance.warnings.length > 0 && (
+                      <div className="mt-3 p-2 bg-red-500/10 border border-red-500/20 rounded-lg">
+                        <div className="flex items-center gap-2 mb-1">
+                          <AlertTriangle className="w-4 h-4 text-red-400" />
+                          <span className="text-sm font-medium text-red-400">Advertencias</span>
+                        </div>
+                        <div className="space-y-1">
+                          {balance.warnings.slice(0, 2).map((warning, index) => (
+                            <p key={index} className="text-xs text-red-300">
+                              • {warning}
                             </p>
-                            {balance.specificRecommendations && balance.specificRecommendations.length > 0 && (
-                              <p className="text-xs text-gray-400 mt-1 break-words">
-                                {balance.specificRecommendations[0]}
-                              </p>
-                            )}
-                          </div>
+                          ))}
                         </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 );
               })}
           </div>
 
-          {/* Grupos no entrenados */}
           {muscleBalance.filter(balance => balance.volume === 0 && balance.priorityLevel !== 'critical').length > 0 && (
             <div className="mt-6 p-4 bg-gray-800/30 rounded-lg">
               <h4 className="text-sm font-medium text-gray-400 mb-3">

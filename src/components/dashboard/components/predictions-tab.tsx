@@ -161,7 +161,7 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
                   {analysis.progressPrediction.confidenceLevel}%
                 </span>
               </div>
-              <div className="relative h-3 sm:h-4 md:h-6 bg-gray-800 rounded-full overflow-hidden">
+              <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">
                 <div
                   className={`relative h-full bg-gradient-to-r ${analysis.progressPrediction.confidenceLevel >= 70 ? 'from-green-500/80 to-emerald-500/80' :
                     analysis.progressPrediction.confidenceLevel >= 50 ? 'from-yellow-500/80 to-orange-500/80' :
@@ -300,7 +300,7 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
                   {analysis.progressPrediction.predictedPR.confidence}% probabilidad
                 </span>
               </div>
-              <div className="relative h-3 sm:h-4 md:h-6 bg-gray-800 rounded-full overflow-hidden">
+              <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">
                 <div
                   className="relative h-full bg-gradient-to-r from-purple-500/80 to-violet-500/80 transition-all duration-300"
                   style={{ width: `${Math.min(100, safeNumber(analysis.progressPrediction.predictedPR.confidence, 0))}%` }}

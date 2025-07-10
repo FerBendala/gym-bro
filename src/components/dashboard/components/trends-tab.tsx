@@ -236,7 +236,7 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
                             {day.percentage.toFixed(1)}% del total
                           </span>
                         </div>
-                        <div className="relative h-3 sm:h-4 md:h-6 bg-gray-800 rounded-full overflow-hidden">
+                        <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">
                           <div
                             className={`relative h-full bg-gradient-to-r ${colorGradient} transition-all duration-300`}
                             style={{ width: `${Math.min(100, safeNumber(day.percentage, 0))}%` }}
