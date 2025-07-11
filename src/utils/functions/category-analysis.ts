@@ -1029,7 +1029,8 @@ const generateSpecificRecommendations = (
  */
 const generateWarnings = (
   category: string,
-  balance: Partial<MuscleBalance>
+  balance: Partial<MuscleBalance>,
+  categoryMetrics: CategoryMetrics[] = []
 ): string[] => {
   const warnings: string[] = [];
 
@@ -1051,12 +1052,15 @@ const generateWarnings = (
     const antagonist = getAntagonistGroup(category);
 
     if (imbalanceAnalysis.hasImbalance && antagonist) {
-      const idealRatio = calculateIdealAntagonistRatio(category);
+      // Solo mostrar advertencia si este grupo debe mostrarla (evitar duplicados)
+      if (shouldShowAntagonistWarning(category, antagonist, balance.antagonistRatio, categoryMetrics)) {
+        const idealRatio = calculateIdealAntagonistRatio(category);
 
-      if (imbalanceAnalysis.type === 'too_much') {
-        warnings.push(`Se entrena demasiado ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()} (ratio actual ${balance.antagonistRatio} vs ideal ${idealRatio.toFixed(1)})`);
-      } else if (imbalanceAnalysis.type === 'too_little') {
-        warnings.push(`Se entrena muy poco ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()} (ratio actual ${balance.antagonistRatio} vs ideal ${idealRatio.toFixed(1)})`);
+        if (imbalanceAnalysis.type === 'too_much') {
+          warnings.push(`Se entrena demasiado ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()} (ratio actual ${balance.antagonistRatio} vs ideal ${idealRatio.toFixed(1)})`);
+        } else if (imbalanceAnalysis.type === 'too_little') {
+          warnings.push(`Se entrena muy poco ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()} (ratio actual ${balance.antagonistRatio} vs ideal ${idealRatio.toFixed(1)})`);
+        }
       }
     }
   }
@@ -1066,6 +1070,38 @@ const generateWarnings = (
   }
 
   return warnings;
+};
+
+/**
+ * Determina si debe mostrar advertencia antagonista para evitar duplicados
+ * Solo muestra la advertencia desde el grupo con mayor desviación
+ */
+const shouldShowAntagonistWarning = (
+  category: string,
+  antagonist: string,
+  actualRatio: number,
+  categoryMetrics: CategoryMetrics[]
+): boolean => {
+  // Obtener métricas de ambos grupos
+  const categoryData = categoryMetrics.find(m => m.category === category);
+  const antagonistData = categoryMetrics.find(m => m.category === antagonist);
+
+  if (!categoryData || !antagonistData) return false;
+
+  // Calcular desviaciones absolutas respecto a sus ideales individuales
+  const categoryIdeal = IDEAL_VOLUME_DISTRIBUTION[category] || 15;
+  const antagonistIdeal = IDEAL_VOLUME_DISTRIBUTION[antagonist] || 15;
+
+  const categoryDeviation = Math.abs(categoryData.percentage - categoryIdeal);
+  const antagonistDeviation = Math.abs(antagonistData.percentage - antagonistIdeal);
+
+  // Solo mostrar desde el grupo con mayor desviación individual
+  // En caso de empate, usar orden alfabético para consistencia
+  if (categoryDeviation === antagonistDeviation) {
+    return category < antagonist;
+  }
+
+  return categoryDeviation > antagonistDeviation;
 };
 
 /**
@@ -1172,7 +1208,7 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
 
     // Generar recomendaciones específicas y advertencias
     const specificRecommendations = generateSpecificRecommendations(metric.category, balanceData, categoryMetrics);
-    const warnings = generateWarnings(metric.category, balanceData);
+    const warnings = generateWarnings(metric.category, balanceData, categoryMetrics);
 
     // Objeto final completo
     muscleBalance.push({
@@ -1219,7 +1255,7 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
       };
 
       const specificRecommendations = generateSpecificRecommendations(category, balanceData, categoryMetrics);
-      const warnings = temporalAdjustmentFactor < 0.5 ? [] : generateWarnings(category, balanceData);
+      const warnings = temporalAdjustmentFactor < 0.5 ? [] : generateWarnings(category, balanceData, categoryMetrics);
 
       muscleBalance.push({
         ...balanceData,
