@@ -1,6 +1,6 @@
 import { differenceInDays, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { EXERCISE_CATEGORIES, IDEAL_VOLUME_DISTRIBUTION } from '../../constants/exercise-categories';
+import { EXERCISE_CATEGORIES, IDEAL_VOLUME_DISTRIBUTION, calculateCategoryEffortDistribution } from '../../constants/exercise-categories';
 import type { WorkoutRecord } from '../../interfaces';
 
 /**
@@ -473,7 +473,7 @@ const generateCategoryWarnings = (
 
 /**
  * Calcula métricas por categoría de ejercicio con análisis avanzado
- * Ahora maneja ejercicios con múltiples categorías
+ * Opción 2: Volumen Relativo al Esfuerzo - distribuye el volumen proporcionalmente
  */
 export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetrics[] => {
   if (records.length === 0) return [];
@@ -498,9 +498,10 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
       workoutsByCategory[category]++;
       volumeByCategory[category] += record.weight * record.reps * record.sets;
     } else {
-      // CORREGIDO: Asignar volumen completo a cada categoría
-      // Un ejercicio multi-categoría trabaja realmente ambos grupos musculares
+      // OPCIÓN 2: Volumen Relativo al Esfuerzo
+      // Calcular la distribución de esfuerzo entre categorías
       const totalVolume = record.weight * record.reps * record.sets;
+      const effortDistribution = calculateCategoryEffortDistribution(categories);
       const workoutContribution = 1 / categories.length; // Solo dividir workouts, no volumen
 
       categories.forEach(category => {
@@ -511,12 +512,13 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
         }
         recordsByCategory[category].push(record);
         workoutsByCategory[category] += workoutContribution;
-        volumeByCategory[category] += totalVolume; // Volumen completo para cada categoría
+        // Asignar volumen basado en el esfuerzo relativo de cada categoría
+        volumeByCategory[category] += totalVolume * (effortDistribution[category] || 0);
       });
     }
   });
 
-  // CORREGIDO: Calcular totalVolume para porcentajes consistentes
+  // Calcular totalVolume para porcentajes consistentes
   const totalVolume = Object.values(volumeByCategory).reduce((sum, volume) => sum + volume, 0);
   const totalWorkouts = Object.values(workoutsByCategory).reduce((sum, count) => sum + count, 0);
   const metrics: CategoryMetrics[] = [];
@@ -570,7 +572,7 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
 
     const lastWorkout = new Date(Math.max(...dates.map(d => d.getTime())));
 
-    // CORREGIDO: Usar porcentaje de volumen en lugar de porcentaje de workouts
+    // Usar porcentaje de volumen relativo al esfuerzo
     const percentage = totalVolume > 0 ? (categoryVolume / totalVolume) * 100 : 0;
 
     // Calcular métricas avanzadas

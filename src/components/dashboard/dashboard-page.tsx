@@ -4,7 +4,6 @@ import { OfflineWarning } from '../offline-warning';
 import {
   AdvancedTab,
   BalanceTab,
-  CategoryTab,
   DashboardEmptyState,
   DashboardTabNavigation,
   PredictionsTab,
@@ -38,8 +37,6 @@ export const DashboardPage: React.FC = () => {
     }
 
     switch (activeTab) {
-      case 'categories':
-        return <CategoryTab records={workoutRecords} />;
       case 'balance':
         return <BalanceTab records={workoutRecords} />;
       case 'trends':
@@ -49,26 +46,27 @@ export const DashboardPage: React.FC = () => {
       case 'predictions':
         return <PredictionsTab records={workoutRecords} />;
       default:
-        return <CategoryTab records={workoutRecords} />;
+        return <BalanceTab records={workoutRecords} />;
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Warning de conexión */}
-      {!isOnline && (
-        <OfflineWarning message="Sin conexión. Los datos mostrados pueden estar desactualizados." />
-      )}
+    <div className="min-h-screen bg-gray-900 text-white">
+      <div className="max-w-7xl mx-auto px-4 py-6">
+        <DashboardTabNavigation
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          timeFilterLabel="Todos los datos"
+        />
 
-      {/* Navegación de tabs moderna */}
-      <DashboardTabNavigation
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        timeFilterLabel="Todos los datos"
-      />
+        {!isOnline && (
+          <OfflineWarning message="Sin conexión. Los datos mostrados pueden estar desactualizados." />
+        )}
 
-      {/* Contenido principal */}
-      {renderTabContent()}
+        <div className="mt-8">
+          {renderTabContent()}
+        </div>
+      </div>
     </div>
   );
 }; 

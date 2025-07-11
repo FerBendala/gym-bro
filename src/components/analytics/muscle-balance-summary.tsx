@@ -1,6 +1,6 @@
 import { Activity, AlertTriangle, Award, BarChart3, Dumbbell, Footprints, Hexagon, RotateCcw, Shield, Target, TrendingDown, TrendingUp, Triangle, Users } from 'lucide-react';
 import React, { useMemo } from 'react';
-import { getIdealVolumePercentage } from '../../constants/exercise-categories';
+import { calculateCategoryEffortDistribution, getIdealVolumePercentage } from '../../constants/exercise-categories';
 import { MUSCLE_GROUPS } from '../../constants/muscle-groups';
 import type { WorkoutRecord } from '../../interfaces';
 import { formatNumber } from '../../utils/functions';
@@ -56,18 +56,7 @@ export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
   selectedCategory = 'all'
 }) => {
   const analysis = useMemo((): BalanceAnalysis => {
-    if (records.length === 0) {
-      return {
-        categories: [],
-        overallBalance: 0,
-        dominantCategory: null,
-        weakestCategory: null,
-        recommendations: ['Registra entrenamientos para ver el análisis de balance muscular'],
-        riskFactors: []
-      };
-    }
-
-    // Filtrar registros válidos
+    // Filtrar registros válidos con información de ejercicio
     const validRecords = records.filter(record =>
       record.exercise && record.exercise.name && record.exercise.name !== 'Ejercicio desconocido'
     );
@@ -78,12 +67,19 @@ export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
         overallBalance: 0,
         dominantCategory: null,
         weakestCategory: null,
-        recommendations: ['No hay datos válidos de ejercicios para analizar'],
+        recommendations: [],
         riskFactors: []
       };
     }
 
-    // Calcular métricas por categoría
+    // Filtrar por categoría si se especifica
+    const filteredRecords = selectedCategory === 'all'
+      ? validRecords
+      : validRecords.filter(record =>
+        record.exercise?.categories?.includes(selectedCategory)
+      );
+
+    // Agrupar por categoría usando volumen relativo al esfuerzo
     const categoryData: Record<string, {
       volume: number;
       exercises: Set<string>;
@@ -91,11 +87,13 @@ export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
       weights: number[];
     }> = {};
 
-    validRecords.forEach(record => {
+    filteredRecords.forEach(record => {
       const categories = record.exercise?.categories || ['Sin categoría'];
       const totalVolume = record.weight * record.reps * record.sets;
 
-      categories.forEach(category => {
+      if (categories.length === 0 || categories.includes('Sin categoría')) {
+        // Sin categorías
+        const category = 'Sin categoría';
         if (!categoryData[category]) {
           categoryData[category] = {
             volume: 0,
@@ -104,14 +102,32 @@ export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
             weights: []
           };
         }
-
-        // CORREGIDO: Asignar volumen completo a cada categoría
-        // Un ejercicio multi-categoría trabaja realmente ambos grupos musculares
         categoryData[category].volume += totalVolume;
         categoryData[category].exercises.add(record.exercise!.name);
         categoryData[category].records.push(record);
         categoryData[category].weights.push(record.weight);
-      });
+      } else {
+        // OPCIÓN 2: Volumen Relativo al Esfuerzo
+        // Calcular la distribución de esfuerzo entre categorías
+        const effortDistribution = calculateCategoryEffortDistribution(categories);
+
+        categories.forEach(category => {
+          if (!categoryData[category]) {
+            categoryData[category] = {
+              volume: 0,
+              exercises: new Set(),
+              records: [],
+              weights: []
+            };
+          }
+
+          // Asignar volumen basado en el esfuerzo relativo de cada categoría
+          categoryData[category].volume += totalVolume * (effortDistribution[category] || 0);
+          categoryData[category].exercises.add(record.exercise!.name);
+          categoryData[category].records.push(record);
+          categoryData[category].weights.push(record.weight);
+        });
+      }
     });
 
     const totalVolume = Object.values(categoryData).reduce((sum, data) => sum + data.volume, 0);
@@ -127,7 +143,7 @@ export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
       const icon = muscleGroup?.icon || '💪';
       const color = muscleGroup?.color || 'gray';
 
-      // Calcular métricas básicas
+      // Calcular métricas básicas usando volumen relativo al esfuerzo
       const percentage = totalVolume > 0 ? (data.volume / totalVolume) * 100 : 0;
       const exerciseCount = data.exercises.size;
       const frequency = data.records.length;

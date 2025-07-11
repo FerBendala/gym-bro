@@ -5,7 +5,6 @@ import { OfflineWarning } from '../offline-warning';
 import {
   AdvancedTab,
   BalanceTab,
-  CategoryTab,
   DashboardEmptyState,
   DashboardHeader,
   PredictionsTab,
@@ -53,8 +52,6 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
             ) : (
               (() => {
                 switch (activeTab) {
-                  case 'categories':
-                    return <CategoryTab records={workoutRecords} />;
                   case 'balance':
                     return <BalanceTab records={workoutRecords} />;
                   case 'trends':
@@ -64,7 +61,7 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                   case 'predictions':
                     return <PredictionsTab records={workoutRecords} />;
                   default:
-                    return <CategoryTab records={workoutRecords} />;
+                    return <BalanceTab records={workoutRecords} />;
                 }
               })()
             )}

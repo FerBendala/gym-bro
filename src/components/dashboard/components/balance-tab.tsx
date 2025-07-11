@@ -1,7 +1,8 @@
-import { Activity, AlertTriangle, BarChart, CheckCircle, Dumbbell, Footprints, Hexagon, RotateCcw, Scale, Shield, TrendingDown, TrendingUp, Triangle, XCircle } from 'lucide-react';
+import { Activity, AlertTriangle, BarChart, CheckCircle, Dumbbell, Footprints, Hexagon, RotateCcw, Scale, Shield, Target, Timer, TrendingDown, TrendingUp, Triangle, Trophy, XCircle, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
-import { analyzeMuscleBalance, calculateBalanceScore } from '../../../utils/functions/category-analysis';
+import { formatNumber } from '../../../utils/functions';
+import { analyzeMuscleBalance, calculateBalanceScore, calculateCategoryMetrics } from '../../../utils/functions/category-analysis';
 import { Card } from '../../card';
 import { CardContent } from '../../card/components/card-content';
 import { CardHeader } from '../../card/components/card-header';
@@ -41,19 +42,12 @@ const safeNumber = (value: any, defaultValue: number = 0): number => {
 };
 
 export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
-  const { muscleBalance, balanceScore } = useMemo(() => {
+  const { muscleBalance, balanceScore, categoryMetrics } = useMemo(() => {
     const balance = analyzeMuscleBalance(records);
     const score = calculateBalanceScore(balance);
-    return { muscleBalance: balance, balanceScore: score };
+    const metrics = calculateCategoryMetrics(records);
+    return { muscleBalance: balance, balanceScore: score, categoryMetrics: metrics };
   }, [records]);
-
-  // Calcular indicador de experiencia basado en registros
-  const experienceLevel = useMemo(() => {
-    if (records.length < 10) return 'Principiante';
-    if (records.length < 30) return 'Intermedio';
-    if (records.length < 60) return 'Avanzado';
-    return 'Experto';
-  }, [records.length]);
 
   if (records.length === 0) {
     return (
@@ -73,19 +67,28 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
 
   return (
     <div className="space-y-6">
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+      {/* Métricas principales consolidadas */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
         <StatCard
           title="Score de Balance"
           value={`${safeNumber(balanceScore)}%`}
-          icon={Activity}
+          icon={Scale}
           variant={balanceScore >= 80 ? 'success' : balanceScore >= 60 ? 'warning' : 'danger'}
           tooltip="Puntuación que indica qué tan equilibrado está tu entrenamiento entre diferentes grupos musculares."
           tooltipPosition="top"
         />
 
         <StatCard
-          title="Grupos en Balance"
+          title="Total Categorías"
+          value={categoryMetrics.length.toString()}
+          icon={Target}
+          variant="primary"
+          tooltip="Número total de categorías musculares diferentes que has entrenado."
+          tooltipPosition="top"
+        />
+
+        <StatCard
+          title="Grupos Balanceados"
           value={muscleBalance.filter(b => b.isBalanced).length.toString()}
           icon={CheckCircle}
           variant="success"
@@ -94,41 +97,41 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
         />
 
         <StatCard
-          title="Grupos Desbalanceados"
-          value={muscleBalance.filter(b => !b.isBalanced && b.volume > 0).length.toString()}
-          icon={XCircle}
-          variant={muscleBalance.filter(b => !b.isBalanced && b.volume > 0).length > 2 ? 'danger' : 'warning'}
-          tooltip="Número de grupos musculares que necesitan ajuste en su volumen de entrenamiento."
-          tooltipPosition="top"
-        />
-
-        <StatCard
-          title="Desbalance Crítico"
-          value={muscleBalance.filter(b => b.priorityLevel === 'critical').length.toString()}
+          title="Requieren Atención"
+          value={muscleBalance.filter(b => b.priorityLevel === 'high' || b.priorityLevel === 'critical').length.toString()}
           icon={AlertTriangle}
           variant="danger"
-          tooltip="Grupos musculares con desbalance crítico que requieren corrección inmediata."
+          tooltip="Grupos musculares que requieren corrección inmediata o ajustes importantes."
           tooltipPosition="top"
         />
 
         <StatCard
-          title="Requiere Atención"
-          value={muscleBalance.filter(b => b.priorityLevel === 'high' || b.priorityLevel === 'medium').length.toString()}
-          icon={AlertTriangle}
+          title="Volumen Total"
+          value={formatNumber(categoryMetrics.reduce((sum, m) => sum + m.totalVolume, 0))}
+          icon={Dumbbell}
+          variant="indigo"
+          tooltip="Volumen total de entrenamiento sumando todas las categorías con distribución por esfuerzo."
+          tooltipPosition="top"
+        />
+
+        <StatCard
+          title="PRs Totales"
+          value={categoryMetrics.reduce((sum, m) => sum + m.personalRecords, 0).toString()}
+          icon={Trophy}
           variant="warning"
-          tooltip="Grupos musculares que requieren ajustes en balance, frecuencia o progreso."
+          tooltip="Número total de récords personales establecidos en todas las categorías."
           tooltipPosition="top"
         />
       </div>
 
-      {/* Análisis visual de balance muscular */}
+      {/* Análisis completo por categoría con balance */}
       <Card>
         <CardHeader>
           <h3 className="text-lg font-semibold text-white flex items-center">
             <BarChart className="w-5 h-5 mr-2" />
-            Análisis Visual de Balance Muscular
+            Análisis Completo de Balance Muscular
             <InfoTooltip
-              content="Vista general del equilibrio entre grupos musculares con métricas clave y recomendaciones personalizadas."
+              content="Vista consolidada del balance muscular con métricas detalladas de rendimiento, progresión y recomendaciones específicas por grupo muscular."
               position="top"
               className="ml-2"
             />
@@ -136,211 +139,325 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {muscleBalance
-              .filter(balance => balance.volume > 0 || balance.priorityLevel === 'critical')
-              .map((balance) => {
-                const Icon = categoryIcons[balance.category] || Activity;
-                const colorGradient = categoryColors[balance.category] || 'from-gray-500/80 to-gray-600/80';
+            {categoryMetrics.map((metric) => {
+              const Icon = categoryIcons[metric.category] || Target;
+              const colorGradient = categoryColors[metric.category] || 'from-gray-500/80 to-gray-600/80';
 
-                const getPriorityBadge = () => {
-                  switch (balance.priorityLevel) {
-                    case 'critical': return { text: 'Crítico', color: 'bg-red-500 text-white' };
-                    case 'high': return { text: 'Alto', color: 'bg-orange-500 text-white' };
-                    case 'medium': return { text: 'Medio', color: 'bg-yellow-500 text-black' };
-                    default: return { text: 'Bajo', color: 'bg-green-500 text-white' };
-                  }
-                };
+              // Encontrar el balance correspondiente
+              const balanceInfo = muscleBalance.find(b => b.category === metric.category);
 
-                const priorityBadge = getPriorityBadge();
+              // Helper functions para obtener estados y colores
+              const getTrendBadge = () => {
+                switch (metric.trend) {
+                  case 'improving': return { text: 'Mejorando', color: 'bg-green-500 text-white', icon: TrendingUp };
+                  case 'declining': return { text: 'Declinando', color: 'bg-red-500 text-white', icon: TrendingDown };
+                  default: return { text: 'Estable', color: 'bg-gray-500 text-white', icon: null };
+                }
+              };
 
-                return (
-                  <div
-                    key={balance.category}
-                    className={`relative p-4 sm:p-6 rounded-xl bg-gradient-to-br ${balance.isBalanced ? 'from-gray-800 to-gray-900' : 'from-gray-900 to-black'
-                      } border ${balance.isBalanced ? 'border-green-500/20' : 'border-red-500/20'
-                      } hover:border-opacity-40 transition-all duration-200`}
-                  >
-                    {/* Header con ícono y estado */}
-                    <div className="flex items-start justify-between mb-4">
-                      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                        <div className={`p-2 sm:p-3 rounded-lg bg-gradient-to-br ${colorGradient}`}>
-                          <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white truncate">
-                            {balance.category}
-                          </h4>
-                          <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${priorityBadge.color}`}>
-                              {priorityBadge.text}
-                            </span>
-                            {balance.progressTrend === 'improving' && (
-                              <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
-                            )}
-                            {balance.progressTrend === 'declining' && (
-                              <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
-                            )}
-                          </div>
-                        </div>
+              const getStrengthLevelBadge = () => {
+                switch (metric.strengthLevel) {
+                  case 'advanced': return { text: 'Avanzado', color: 'bg-purple-500 text-white' };
+                  case 'intermediate': return { text: 'Intermedio', color: 'bg-blue-500 text-white' };
+                  default: return { text: 'Principiante', color: 'bg-green-500 text-white' };
+                }
+              };
+
+              const getPriorityBadge = () => {
+                if (!balanceInfo) return { text: 'N/A', color: 'bg-gray-500 text-white' };
+                switch (balanceInfo.priorityLevel) {
+                  case 'critical': return { text: 'Crítico', color: 'bg-red-500 text-white' };
+                  case 'high': return { text: 'Alto', color: 'bg-orange-500 text-white' };
+                  case 'medium': return { text: 'Medio', color: 'bg-yellow-500 text-black' };
+                  default: return { text: 'Bajo', color: 'bg-green-500 text-white' };
+                }
+              };
+
+              const getDaysColor = (days: number) => {
+                if (days <= 3) return 'text-green-400';
+                if (days <= 7) return 'text-yellow-400';
+                if (days <= 14) return 'text-orange-400';
+                return 'text-red-400';
+              };
+
+              const trendBadge = getTrendBadge();
+              const strengthBadge = getStrengthLevelBadge();
+              const priorityBadge = getPriorityBadge();
+              const isBalanced = balanceInfo?.isBalanced ?? false;
+
+              return (
+                <div
+                  key={metric.category}
+                  className={`relative p-4 sm:p-6 rounded-xl bg-gradient-to-br ${isBalanced ? 'from-gray-800 to-gray-900' : 'from-gray-900 to-black'} border ${isBalanced ? 'border-green-500/20' : 'border-red-500/20'} hover:border-opacity-40 transition-all duration-200`}
+                >
+                  {/* Header con ícono y estados */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                      <div className={`p-2 sm:p-3 rounded-lg bg-gradient-to-br ${colorGradient}`}>
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
                       </div>
-
-                      {/* Porcentaje principal */}
-                      <div className="text-right flex-shrink-0">
-                        <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">
-                          {safeNumber(balance.percentage, 0).toFixed(1)}%
-                        </div>
-                        <div className="text-xs text-gray-400">
-                          del volumen total
-                        </div>
-                        {/* Icono de estado movido aquí para evitar solapamiento */}
-                        <div className="mt-1 sm:mt-2 flex justify-end">
-                          {balance.isBalanced ? (
-                            <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
-                          ) : (
-                            <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white truncate">
+                          {metric.category}
+                        </h4>
+                        <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${trendBadge.color}`}>
+                            {trendBadge.text}
+                          </span>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${strengthBadge.color}`}>
+                            {strengthBadge.text}
+                          </span>
+                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${priorityBadge.color}`}>
+                            Prioridad: {priorityBadge.text}
+                          </span>
+                          {trendBadge.icon && (
+                            <trendBadge.icon className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
                           )}
                         </div>
                       </div>
                     </div>
-
-                    {/* Barra de progreso visual mejorada */}
-                    <div className="mb-4">
-                      <div className="flex justify-between text-xs text-gray-400 mb-2">
-                        <span>0%</span>
-                        <span className="text-gray-300">
-                          Ideal: {safeNumber(balance.idealPercentage, 0)}%
-                        </span>
-                        <span>100%</span>
+                    <div className="text-right ml-2 sm:ml-4">
+                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">
+                        {safeNumber(metric.percentage, 0).toFixed(1)}%
                       </div>
-                      <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">
-                        {/* Zona ideal */}
-                        <div
-                          className="absolute h-full bg-green-500/20"
-                          style={{
-                            left: `${Math.max(0, safeNumber(balance.idealPercentage, 0) - 5)}%`,
-                            width: '10%'
-                          }}
-                        />
-                        {/* Línea ideal */}
-                        <div
-                          className="absolute h-full w-0.5 bg-green-500"
-                          style={{ left: `${safeNumber(balance.idealPercentage, 0)}%` }}
-                        />
-                        {/* Barra actual */}
-                        <div
-                          className={`relative h-full bg-gradient-to-r ${colorGradient} transition-all duration-300`}
-                          style={{ width: `${Math.min(100, Math.max(0, safeNumber(balance.percentage, 0)))}%` }}
-                        >
-                          <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
-                          {/* Valor dentro de la barra si es lo suficientemente ancha */}
-                          {safeNumber(balance.percentage, 0) > 15 && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-xs font-medium text-white drop-shadow-sm">
-                                {safeNumber(balance.percentage, 0).toFixed(1)}%
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        {/* Valor fuera de la barra si es muy estrecha */}
-                        {safeNumber(balance.percentage, 0) <= 15 && safeNumber(balance.percentage, 0) > 0 && (
-                          <div className="absolute top-0 left-2 h-full flex items-center">
+                      <div className="text-xs text-gray-400">
+                        del volumen total
+                      </div>
+                      <div className="mt-1 sm:mt-2 flex justify-end">
+                        {isBalanced ? (
+                          <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+                        ) : (
+                          <XCircle className="w-4 h-4 sm:w-5 sm:h-5 text-red-400" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Barra de progreso de volumen con referencia ideal */}
+                  <div className="mb-4">
+                    <div className="flex justify-between text-xs text-gray-400 mb-2">
+                      <span>Volumen: {formatNumber(metric.totalVolume)} kg</span>
+                      <span className="text-gray-300">
+                        Ideal: {balanceInfo?.idealPercentage?.toFixed(1) || 'N/A'}%
+                      </span>
+                      <span className="text-gray-300">
+                        {metric.workouts} sesiones
+                      </span>
+                    </div>
+                    <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">
+                      {/* Zona ideal si existe */}
+                      {balanceInfo && (
+                        <>
+                          <div
+                            className="absolute h-full bg-green-500/20"
+                            style={{
+                              left: `${Math.max(0, safeNumber(balanceInfo.idealPercentage, 0) - 5)}%`,
+                              width: '10%'
+                            }}
+                          />
+                          <div
+                            className="absolute h-full w-0.5 bg-green-500"
+                            style={{ left: `${safeNumber(balanceInfo.idealPercentage, 0)}%` }}
+                          />
+                        </>
+                      )}
+                      {/* Barra de volumen actual */}
+                      <div
+                        className={`relative h-full bg-gradient-to-r ${colorGradient} transition-all duration-300`}
+                        style={{ width: `${Math.min(100, safeNumber(metric.percentage, 0))}%` }}
+                      >
+                        <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                        {/* Valor dentro de la barra si es lo suficientemente ancha */}
+                        {safeNumber(metric.percentage, 0) > 15 && (
+                          <div className="absolute inset-0 flex items-center justify-center">
                             <span className="text-xs font-medium text-white drop-shadow-sm">
-                              {safeNumber(balance.percentage, 0).toFixed(1)}%
+                              {formatNumber(metric.totalVolume)} kg
                             </span>
                           </div>
                         )}
                       </div>
+                      {/* Valor fuera de la barra si es muy estrecha */}
+                      {safeNumber(metric.percentage, 0) <= 15 && safeNumber(metric.percentage, 0) > 0 && (
+                        <div className="absolute top-0 left-2 h-full flex items-center">
+                          <span className="text-xs font-medium text-white drop-shadow-sm">
+                            {formatNumber(metric.totalVolume)} kg
+                          </span>
+                        </div>
+                      )}
                     </div>
+                  </div>
 
-                    {/* Métricas detalladas */}
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
-                      <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                        <div className="text-xs text-gray-400 mb-1">Simetría</div>
-                        <div className="text-sm sm:text-lg font-semibold text-white">
-                          {safeNumber(balance.symmetryScore, 0)}%
-                        </div>
-                        <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
-                          <div
-                            className="bg-blue-500 h-2 rounded-full transition-all duration-300 relative"
-                            style={{ width: `${safeNumber(balance.symmetryScore, 0)}%` }}
-                          />
-                        </div>
+                  {/* Grid de métricas detalladas */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
+                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                      <div className="text-xs text-gray-400 mb-1">Intensidad</div>
+                      <div className="text-sm sm:text-lg font-semibold text-white">
+                        {safeNumber(metric.intensityScore, 0)}%
                       </div>
-
-                      <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                        <div className="text-xs text-gray-400 mb-1">Fuerza</div>
-                        <div className="text-sm sm:text-lg font-semibold text-white">
-                          {safeNumber(balance.strengthIndex, 0)}%
-                        </div>
-                        <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
-                          <div
-                            className="bg-orange-500 h-2 rounded-full transition-all duration-300 relative"
-                            style={{ width: `${safeNumber(balance.strengthIndex, 0)}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                        <div className="text-xs text-gray-400 mb-1">Frecuencia</div>
-                        <div className="text-sm sm:text-lg font-semibold text-white">
-                          {safeNumber(balance.weeklyFrequency, 0).toFixed(1)}x/sem
-                        </div>
-                        <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
-                          <div
-                            className="bg-green-500 h-2 rounded-full transition-all duration-300 relative"
-                            style={{ width: `${Math.min(safeNumber(balance.weeklyFrequency, 0) * 25, 100)}%` }}
-                          />
-                        </div>
-                      </div>
-
-                      <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                        <div className="text-xs text-gray-400 mb-1">Intensidad</div>
-                        <div className="text-sm sm:text-lg font-semibold text-white">
-                          {safeNumber(balance.intensityScore, 0)}%
-                        </div>
-                        <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
-                          <div
-                            className="bg-purple-500 h-2 rounded-full transition-all duration-300 relative"
-                            style={{ width: `${safeNumber(balance.intensityScore, 0)}%` }}
-                          />
-                        </div>
+                      <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
+                        <div
+                          className="bg-blue-500 h-2 rounded-full transition-all duration-300 relative"
+                          style={{ width: `${safeNumber(metric.intensityScore, 0)}%` }}
+                        />
                       </div>
                     </div>
 
-                    {/* Recomendaciones principales */}
-                    <div className="border-t border-gray-700/50 pt-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <h5 className="text-sm font-medium text-gray-300">Recomendación Principal</h5>
-                        <span className={`text-xs px-2 py-1 rounded-full ${balance.isBalanced ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}`}>
-                          {balance.isBalanced ? 'Equilibrado' : 'Ajuste necesario'}
-                        </span>
+                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                      <div className="text-xs text-gray-400 mb-1">Consistencia</div>
+                      <div className="text-sm sm:text-lg font-semibold text-white">
+                        {safeNumber(metric.consistencyScore, 0)}%
                       </div>
-                      <p className="text-xs text-gray-400 leading-relaxed">
-                        {balance.recommendation}
-                      </p>
+                      <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
+                        <div
+                          className="bg-orange-500 h-2 rounded-full transition-all duration-300 relative"
+                          style={{ width: `${safeNumber(metric.consistencyScore, 0)}%` }}
+                        />
+                      </div>
                     </div>
 
-                    {/* Advertencias si existen */}
-                    {balance.warnings && balance.warnings.length > 0 && (
-                      <div className="mt-3 p-2 bg-red-500/10 border border-red-500/20 rounded-lg">
-                        <div className="flex items-center gap-2 mb-1">
-                          <AlertTriangle className="w-4 h-4 text-red-400" />
-                          <span className="text-sm font-medium text-red-400">Advertencias</span>
+                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                      <div className="text-xs text-gray-400 mb-1">Frecuencia</div>
+                      <div className="text-sm sm:text-lg font-semibold text-white">
+                        {safeNumber(metric.avgWorkoutsPerWeek, 0).toFixed(1)}
+                      </div>
+                      <div className="text-xs text-gray-500">por semana</div>
+                    </div>
+
+                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                      <div className="text-xs text-gray-400 mb-1">Eficiencia</div>
+                      <div className="text-sm sm:text-lg font-semibold text-white">
+                        {safeNumber(metric.efficiencyScore, 0)}%
+                      </div>
+                      <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
+                        <div
+                          className="bg-purple-500 h-2 rounded-full transition-all duration-300 relative"
+                          style={{ width: `${safeNumber(metric.efficiencyScore, 0)}%` }}
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Información detallada */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                    {/* Progresión */}
+                    <div className="bg-gray-800/30 rounded-lg p-3">
+                      <h5 className="text-xs font-medium text-gray-300 mb-2 flex items-center gap-1">
+                        {trendBadge.icon ? (
+                          <trendBadge.icon className={`w-3 h-3 ${metric.trend === 'declining' ? 'text-red-400' : 'text-green-400'}`} />
+                        ) : (
+                          <TrendingUp className="w-3 h-3" />
+                        )}
+                        Progresión
+                      </h5>
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-400">Peso:</span>
+                          <span className={`text-xs font-medium ${metric.weightProgression > 0 ? 'text-green-400' : metric.weightProgression < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                            {metric.weightProgression > 0 ? '+' : ''}{metric.weightProgression}%
+                          </span>
                         </div>
-                        <div className="space-y-1">
-                          {balance.warnings.slice(0, 2).map((warning, index) => (
-                            <p key={index} className="text-xs text-red-300">
-                              • {warning}
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-400">Volumen:</span>
+                          <span className={`text-xs font-medium ${metric.volumeProgression > 0 ? 'text-green-400' : metric.volumeProgression < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                            {metric.volumeProgression > 0 ? '+' : ''}{metric.volumeProgression}%
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-400">PRs:</span>
+                          <span className="text-xs font-medium text-purple-400">
+                            {metric.personalRecords}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-400">1RM Est:</span>
+                          <span className="text-xs font-medium text-blue-400">
+                            {formatNumber(metric.estimatedOneRM)}kg
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Datos temporales */}
+                    <div className="bg-gray-800/30 rounded-lg p-3">
+                      <h5 className="text-xs font-medium text-gray-300 mb-2 flex items-center gap-1">
+                        <Timer className="w-3 h-3" />
+                        Actividad Reciente
+                      </h5>
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-400">Último entreno:</span>
+                          <span className={`text-xs font-medium ${getDaysColor(metric.daysSinceLastWorkout)}`}>
+                            {metric.daysSinceLastWorkout === 0 ? 'Hoy' :
+                              metric.daysSinceLastWorkout === 1 ? 'Ayer' :
+                                `${metric.daysSinceLastWorkout}d`}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-400">Esta semana:</span>
+                          <span className="text-xs font-medium text-blue-400">
+                            {formatNumber(metric.volumeDistribution.thisWeek)} kg
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-400">Mes pasado:</span>
+                          <span className="text-xs font-medium text-gray-300">
+                            {formatNumber(metric.volumeDistribution.lastMonth)} kg
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Recomendaciones y advertencias */}
+                  <div className="space-y-2">
+                    {/* Advertencias */}
+                    {metric.warnings && metric.warnings.length > 0 && (
+                      <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-3">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-red-300 break-words">
+                              {metric.warnings[0]}
                             </p>
-                          ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Recomendación principal */}
+                    {metric.recommendations && metric.recommendations.length > 0 && (
+                      <div className={`${metric.warnings && metric.warnings.length === 0 ? 'bg-blue-900/20 border-blue-500/30' : 'bg-gray-800/50 border-gray-700/30'} border rounded-lg p-3`}>
+                        <div className="flex items-start gap-2">
+                          <Zap className={`w-4 h-4 ${metric.warnings && metric.warnings.length === 0 ? 'text-blue-400' : 'text-gray-400'} mt-0.5 flex-shrink-0`} />
+                          <div className="flex-1 min-w-0">
+                            <p className={`text-sm ${metric.warnings && metric.warnings.length === 0 ? 'text-blue-300' : 'text-gray-300'} break-words`}>
+                              {metric.recommendations[0]}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Recomendación de balance si existe */}
+                    {balanceInfo && balanceInfo.recommendation && (
+                      <div className="bg-purple-900/20 border border-purple-500/30 rounded-lg p-3">
+                        <div className="flex items-start gap-2">
+                          <Scale className="w-4 h-4 text-purple-400 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-purple-300 break-words">
+                              <strong>Balance:</strong> {balanceInfo.recommendation}
+                            </p>
+                          </div>
                         </div>
                       </div>
                     )}
                   </div>
-                );
-              })}
+                </div>
+              );
+            })}
           </div>
 
+          {/* Grupos musculares sin entrenar */}
           {muscleBalance.filter(balance => balance.volume === 0 && balance.priorityLevel !== 'critical').length > 0 && (
             <div className="mt-6 p-4 bg-gray-800/30 rounded-lg">
               <h4 className="text-sm font-medium text-gray-400 mb-3">

@@ -1,10 +1,11 @@
+import type { LucideIcon } from 'lucide-react';
 
-export type DashboardTab = 'categories' | 'balance' | 'trends' | 'advanced' | 'predictions';
+export type DashboardTab = 'balance' | 'trends' | 'advanced' | 'predictions';
 
 export interface DashboardTabConfig {
   id: DashboardTab;
   label: string;
-  icon: any;
+  icon: LucideIcon;
   description: string;
 }
 

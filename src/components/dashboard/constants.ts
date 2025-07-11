@@ -1,4 +1,4 @@
-import { Activity, Brain, Scale, Target, Zap } from 'lucide-react';
+import { Activity, Brain, Scale, Zap } from 'lucide-react';
 import type { DashboardTabConfig } from './types';
 
 /**
@@ -7,16 +7,10 @@ import type { DashboardTabConfig } from './types';
  */
 export const DASHBOARD_TABS: DashboardTabConfig[] = [
   {
-    id: 'categories',
-    label: 'Por Categoría',
-    icon: Target,
-    description: 'Análisis detallado por grupos musculares'
-  },
-  {
     id: 'balance',
     label: 'Balance Muscular',
     icon: Scale,
-    description: 'Equilibrio y simetría entre grupos musculares'
+    description: 'Análisis completo de balance, progresión y métricas por grupo muscular'
   },
   {
     id: 'trends',
@@ -39,6 +33,6 @@ export const DASHBOARD_TABS: DashboardTabConfig[] = [
 ];
 
 /**
- * Tab por defecto al abrir el dashboard
+ * Tab por defecto al abrir el Dashboard
  */
-export const DEFAULT_DASHBOARD_TAB: DashboardTabConfig['id'] = 'categories'; 
+export const DEFAULT_DASHBOARD_TAB: DashboardTabConfig['id'] = 'balance'; 
