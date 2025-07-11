@@ -20,35 +20,3 @@ export * from './trends-analysis';
 export * from './url-preview-utils';
 export * from './url-validation';
 
-// Tipos
-export type { ChartDimensions, DataRange } from './chart-utils';
-
-// Re-exportar funciones específicas de stats-utils para compatibilidad
-export {
-  calculateAverageStrengthIndex, calculateEstimated1RM,
-  calculateStrengthIndex,
-  calculateStrengthProgress
-} from './stats-utils';
-
-// Re-exportar funciones específicas de advanced-analysis para consistencia
-export {
-  getLastWeekRecords, getThisWeekRecords
-} from './advanced-analysis';
-
-// Re-exportar funciones avanzadas de análisis de fuerza
-export {
-  calculateAdvancedStrengthAnalysis,
-  calculateEnhanced1RMPrediction
-} from './stats-utils';
-
-// Re-exportar tipos de análisis de fuerza
-export type {
-  AdvancedStrengthAnalysis,
-  Enhanced1RMPrediction
-} from './stats-utils';
-
-// Re-exportar funciones específicas de category-analysis para consistencia
-export {
-  calculateIntensityScore
-} from './category-analysis';
-

@@ -4,6 +4,18 @@ import { EXERCISE_CATEGORIES, IDEAL_VOLUME_DISTRIBUTION } from '../../constants/
 import type { WorkoutRecord } from '../../interfaces';
 
 /**
+ * Parejas de grupos musculares antagonistas
+ */
+const ANTAGONIST_PAIRS: Record<string, string> = {
+  'Pecho': 'Espalda',
+  'Espalda': 'Pecho',
+  'Brazos': 'Piernas', // Simplificado
+  'Piernas': 'Brazos',
+  'Hombros': 'Core',
+  'Core': 'Hombros'
+};
+
+/**
  * Obtiene la fecha "actual" basada en los datos reales del usuario
  * En lugar de usar new Date() que puede estar en un año diferente
  */
@@ -661,16 +673,7 @@ const calculateSymmetryScore = (category: string, categoryRecords: WorkoutRecord
  * Calcula el ratio antagonista para un grupo muscular
  */
 const calculateAntagonistRatio = (category: string, categoryMetrics: CategoryMetrics[]): number => {
-  const antagonistPairs: Record<string, string> = {
-    'Pecho': 'Espalda',
-    'Espalda': 'Pecho',
-    'Brazos': 'Piernas', // Simplificado
-    'Piernas': 'Brazos',
-    'Hombros': 'Core',
-    'Core': 'Hombros'
-  };
-
-  const antagonist = antagonistPairs[category];
+  const antagonist = ANTAGONIST_PAIRS[category];
   if (!antagonist) return 1; // No hay antagonista directo
 
   const currentMetric = categoryMetrics.find(m => m.category === category);
@@ -681,6 +684,13 @@ const calculateAntagonistRatio = (category: string, categoryMetrics: CategoryMet
   }
 
   return Math.round((currentMetric.totalVolume / antagonistMetric.totalVolume) * 100) / 100;
+};
+
+/**
+ * Obtiene el grupo muscular antagonista para una categoría dada
+ */
+const getAntagonistGroup = (category: string): string | null => {
+  return ANTAGONIST_PAIRS[category] || null;
 };
 
 /**
@@ -955,9 +965,19 @@ const generateSpecificRecommendations = (
 
   // Recomendaciones por ratio antagonista
   if (balance.antagonistRatio && balance.antagonistRatio < 0.8) {
-    recommendations.push(`Fortalecer ${category.toLowerCase()} para balancear con antagonista`);
+    const antagonist = getAntagonistGroup(category);
+    if (antagonist) {
+      recommendations.push(`Fortalecer ${category.toLowerCase()} para balancear con ${antagonist.toLowerCase()}`);
+    } else {
+      recommendations.push(`Fortalecer ${category.toLowerCase()} para balancear con antagonista`);
+    }
   } else if (balance.antagonistRatio && balance.antagonistRatio > 1.2) {
-    recommendations.push(`Equilibrar con más trabajo del grupo antagonista`);
+    const antagonist = getAntagonistGroup(category);
+    if (antagonist) {
+      recommendations.push(`Equilibrar con más trabajo de ${antagonist.toLowerCase()}`);
+    } else {
+      recommendations.push(`Equilibrar con más trabajo del grupo antagonista`);
+    }
   }
 
   // Recomendaciones por intensidad
@@ -990,7 +1010,12 @@ const generateWarnings = (
   }
 
   if (balance.antagonistRatio && (balance.antagonistRatio < 0.6 || balance.antagonistRatio > 1.4)) {
-    warnings.push(`Desequilibrio significativo con grupo antagonista`);
+    const antagonist = getAntagonistGroup(category);
+    if (antagonist) {
+      warnings.push(`Desequilibrio significativo con ${antagonist.toLowerCase()} (ratio ${balance.antagonistRatio})`);
+    } else {
+      warnings.push(`Desequilibrio significativo con grupo antagonista`);
+    }
   }
 
   if (balance.balanceHistory?.volatility && balance.balanceHistory.volatility > 50) {
