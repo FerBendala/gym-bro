@@ -694,6 +694,45 @@ const getAntagonistGroup = (category: string): string | null => {
 };
 
 /**
+ * Calcula el ratio ideal entre un grupo muscular y su antagonista
+ */
+const calculateIdealAntagonistRatio = (category: string): number => {
+  const antagonist = ANTAGONIST_PAIRS[category];
+  if (!antagonist) return 1;
+
+  const categoryIdeal = IDEAL_VOLUME_DISTRIBUTION[category] || 15;
+  const antagonistIdeal = IDEAL_VOLUME_DISTRIBUTION[antagonist] || 15;
+
+  return categoryIdeal / antagonistIdeal;
+};
+
+/**
+ * Analiza el desequilibrio antagonista comparando con el ratio ideal
+ */
+const analyzeAntagonistImbalance = (category: string, actualRatio: number): {
+  hasImbalance: boolean;
+  type: 'too_much' | 'too_little' | 'balanced';
+  severity: 'mild' | 'moderate' | 'severe';
+  deviation: number;
+} => {
+  const idealRatio = calculateIdealAntagonistRatio(category);
+  const deviation = ((actualRatio - idealRatio) / idealRatio) * 100;
+
+  // Umbrales basados en porcentaje de desviación del ratio ideal
+  const mildThreshold = 20; // ±20%
+  const moderateThreshold = 40; // ±40%
+
+  if (Math.abs(deviation) <= mildThreshold) {
+    return { hasImbalance: false, type: 'balanced', severity: 'mild', deviation };
+  }
+
+  const type = deviation > 0 ? 'too_much' : 'too_little';
+  const severity = Math.abs(deviation) > moderateThreshold ? 'severe' : 'moderate';
+
+  return { hasImbalance: true, type, severity, deviation };
+};
+
+/**
  * Calcula el índice de fuerza para un grupo muscular
  */
 const calculateStrengthIndex = (categoryRecords: WorkoutRecord[]): number => {
@@ -963,20 +1002,17 @@ const generateSpecificRecommendations = (
     recommendations.push(`Variar ejercicios para estimular crecimiento`);
   }
 
-  // Recomendaciones por ratio antagonista
-  if (balance.antagonistRatio && balance.antagonistRatio < 0.8) {
+  // Recomendaciones por ratio antagonista - Nueva lógica basada en ratios ideales
+  if (balance.antagonistRatio && balance.antagonistRatio > 0) {
+    const imbalanceAnalysis = analyzeAntagonistImbalance(category, balance.antagonistRatio);
     const antagonist = getAntagonistGroup(category);
-    if (antagonist) {
-      recommendations.push(`Aumentar volumen de ${category.toLowerCase()} para equilibrar con ${antagonist.toLowerCase()}`);
-    } else {
-      recommendations.push(`Fortalecer ${category.toLowerCase()} para balancear con antagonista`);
-    }
-  } else if (balance.antagonistRatio && balance.antagonistRatio > 1.2) {
-    const antagonist = getAntagonistGroup(category);
-    if (antagonist) {
-      recommendations.push(`Reducir volumen de ${category.toLowerCase()} o aumentar ${antagonist.toLowerCase()} para equilibrar`);
-    } else {
-      recommendations.push(`Equilibrar con más trabajo del grupo antagonista`);
+
+    if (imbalanceAnalysis.hasImbalance && antagonist) {
+      if (imbalanceAnalysis.type === 'too_little') {
+        recommendations.push(`Aumentar volumen de ${category.toLowerCase()} para equilibrar con ${antagonist.toLowerCase()}`);
+      } else if (imbalanceAnalysis.type === 'too_much') {
+        recommendations.push(`Reducir volumen de ${category.toLowerCase()} o aumentar ${antagonist.toLowerCase()} para equilibrar`);
+      }
     }
   }
 
@@ -1009,16 +1045,19 @@ const generateWarnings = (
     warnings.push(`Progreso en declive en ${category.toLowerCase()}`);
   }
 
-  if (balance.antagonistRatio && (balance.antagonistRatio < 0.6 || balance.antagonistRatio > 1.4)) {
+  // Nueva lógica de desequilibrio antagonista basada en ratios ideales
+  if (balance.antagonistRatio && balance.antagonistRatio > 0) {
+    const imbalanceAnalysis = analyzeAntagonistImbalance(category, balance.antagonistRatio);
     const antagonist = getAntagonistGroup(category);
-    if (antagonist) {
-      if (balance.antagonistRatio > 1.4) {
-        warnings.push(`Se entrena demasiado ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()} (ratio ${balance.antagonistRatio})`);
-      } else {
-        warnings.push(`Se entrena muy poco ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()} (ratio ${balance.antagonistRatio})`);
+
+    if (imbalanceAnalysis.hasImbalance && antagonist) {
+      const idealRatio = calculateIdealAntagonistRatio(category);
+
+      if (imbalanceAnalysis.type === 'too_much') {
+        warnings.push(`Se entrena demasiado ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()} (ratio actual ${balance.antagonistRatio} vs ideal ${idealRatio.toFixed(1)})`);
+      } else if (imbalanceAnalysis.type === 'too_little') {
+        warnings.push(`Se entrena muy poco ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()} (ratio actual ${balance.antagonistRatio} vs ideal ${idealRatio.toFixed(1)})`);
       }
-    } else {
-      warnings.push(`Desequilibrio significativo con grupo antagonista`);
     }
   }
 
