@@ -967,14 +967,14 @@ const generateSpecificRecommendations = (
   if (balance.antagonistRatio && balance.antagonistRatio < 0.8) {
     const antagonist = getAntagonistGroup(category);
     if (antagonist) {
-      recommendations.push(`Fortalecer ${category.toLowerCase()} para balancear con ${antagonist.toLowerCase()}`);
+      recommendations.push(`Aumentar volumen de ${category.toLowerCase()} para equilibrar con ${antagonist.toLowerCase()}`);
     } else {
       recommendations.push(`Fortalecer ${category.toLowerCase()} para balancear con antagonista`);
     }
   } else if (balance.antagonistRatio && balance.antagonistRatio > 1.2) {
     const antagonist = getAntagonistGroup(category);
     if (antagonist) {
-      recommendations.push(`Equilibrar con más trabajo de ${antagonist.toLowerCase()}`);
+      recommendations.push(`Reducir volumen de ${category.toLowerCase()} o aumentar ${antagonist.toLowerCase()} para equilibrar`);
     } else {
       recommendations.push(`Equilibrar con más trabajo del grupo antagonista`);
     }
@@ -1012,7 +1012,11 @@ const generateWarnings = (
   if (balance.antagonistRatio && (balance.antagonistRatio < 0.6 || balance.antagonistRatio > 1.4)) {
     const antagonist = getAntagonistGroup(category);
     if (antagonist) {
-      warnings.push(`Desequilibrio significativo con ${antagonist.toLowerCase()} (ratio ${balance.antagonistRatio})`);
+      if (balance.antagonistRatio > 1.4) {
+        warnings.push(`Se entrena demasiado ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()} (ratio ${balance.antagonistRatio})`);
+      } else {
+        warnings.push(`Se entrena muy poco ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()} (ratio ${balance.antagonistRatio})`);
+      }
     } else {
       warnings.push(`Desequilibrio significativo con grupo antagonista`);
     }
