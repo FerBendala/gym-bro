@@ -93,8 +93,7 @@ export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
 
     validRecords.forEach(record => {
       const categories = record.exercise?.categories || ['Sin categoría'];
-      const categoriesCount = categories.length;
-      const volumePerCategory = (record.weight * record.reps * record.sets) / categoriesCount;
+      const totalVolume = record.weight * record.reps * record.sets;
 
       categories.forEach(category => {
         if (!categoryData[category]) {
@@ -106,7 +105,9 @@ export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
           };
         }
 
-        categoryData[category].volume += volumePerCategory;
+        // CORREGIDO: Asignar volumen completo a cada categoría
+        // Un ejercicio multi-categoría trabaja realmente ambos grupos musculares
+        categoryData[category].volume += totalVolume;
         categoryData[category].exercises.add(record.exercise!.name);
         categoryData[category].records.push(record);
         categoryData[category].weights.push(record.weight);

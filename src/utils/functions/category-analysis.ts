@@ -486,9 +486,10 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
       workoutsByCategory[category]++;
       volumeByCategory[category] += record.weight * record.reps * record.sets;
     } else {
-      // Distribuir entre múltiples categorías
-      const volumePerCategory = (record.weight * record.reps * record.sets) / categories.length;
-      const workoutContribution = 1 / categories.length;
+      // CORREGIDO: Asignar volumen completo a cada categoría
+      // Un ejercicio multi-categoría trabaja realmente ambos grupos musculares
+      const totalVolume = record.weight * record.reps * record.sets;
+      const workoutContribution = 1 / categories.length; // Solo dividir workouts, no volumen
 
       categories.forEach(category => {
         if (!recordsByCategory[category]) {
@@ -498,7 +499,7 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
         }
         recordsByCategory[category].push(record);
         workoutsByCategory[category] += workoutContribution;
-        volumeByCategory[category] += volumePerCategory;
+        volumeByCategory[category] += totalVolume; // Volumen completo para cada categoría
       });
     }
   });
