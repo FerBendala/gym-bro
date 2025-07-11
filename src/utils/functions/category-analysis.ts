@@ -1054,12 +1054,10 @@ const generateWarnings = (
     if (imbalanceAnalysis.hasImbalance && antagonist) {
       // Solo mostrar advertencia si este grupo debe mostrarla (evitar duplicados)
       if (shouldShowAntagonistWarning(category, antagonist, balance.antagonistRatio, categoryMetrics)) {
-        const idealRatio = calculateIdealAntagonistRatio(category);
-
         if (imbalanceAnalysis.type === 'too_much') {
-          warnings.push(`Se entrena demasiado ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()} (ratio actual ${balance.antagonistRatio} vs ideal ${idealRatio.toFixed(1)})`);
+          warnings.push(`Se entrena demasiado ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()}`);
         } else if (imbalanceAnalysis.type === 'too_little') {
-          warnings.push(`Se entrena muy poco ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()} (ratio actual ${balance.antagonistRatio} vs ideal ${idealRatio.toFixed(1)})`);
+          warnings.push(`Se entrena muy poco ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()}`);
         }
       }
     }
