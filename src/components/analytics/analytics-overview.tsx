@@ -1,7 +1,7 @@
 import { Activity, BarChart3, Calendar, Target, TrendingDown, TrendingUp, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { formatNumber } from '../../utils/functions';
-import { Card, CardContent, CardHeader } from '../card';
+import { Card, CardContent } from '../card';
 import { InfoTooltip } from '../tooltip';
 import type { AnalyticsMetric, AnalyticsOverviewProps } from './types';
 
@@ -39,15 +39,31 @@ export const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ records })
     // Calcular días únicos de entrenamiento
     const uniqueDays = new Set(validRecords.map(r => r.date.toDateString())).size;
 
-    // Calcular frecuencia semanal CORRECTA
+    // Calcular frecuencia semanal CORRECTA - Agrupar por semanas y calcular promedio
+    const weeklyData = new Map<string, Set<string>>();
+
+    validRecords.forEach(record => {
+      const date = new Date(record.date);
+      // Obtener el lunes de la semana
+      const monday = new Date(date);
+      monday.setDate(date.getDate() - date.getDay() + 1);
+      const weekKey = monday.toISOString().split('T')[0];
+
+      if (!weeklyData.has(weekKey)) {
+        weeklyData.set(weekKey, new Set());
+      }
+      weeklyData.get(weekKey)!.add(record.date.toDateString());
+    });
+
+    // Calcular promedio de días por semana solo para semanas con entrenamientos
+    const weeklyFrequency = weeklyData.size > 0
+      ? Array.from(weeklyData.values()).reduce((sum, daysSet) => sum + daysSet.size, 0) / weeklyData.size
+      : 0;
+
+    // Mantener variables necesarias para el cálculo de progreso
     const sortedDates = validRecords.map(r => r.date).sort((a, b) => a.getTime() - b.getTime());
     const firstDate = sortedDates[0];
     const lastDate = sortedDates[sortedDates.length - 1];
-
-    // Calcular el número de semanas completas en el período
-    const daysDiff = Math.max(1, (lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
-    const weeks = Math.max(1, daysDiff / 7);
-    const weeklyFrequency = uniqueDays / weeks;
 
     // Calcular progreso (comparar primera y última semana)
     const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
@@ -263,61 +279,7 @@ export const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ records })
         })}
       </div>
 
-      {/* Resumen textual */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-white flex items-center">
-            <Target className="w-5 h-5 mr-2" />
-            Resumen del Período
-            <InfoTooltip
-              content="Análisis automático de tus datos de entrenamiento con insights clave."
-              position="top"
-              className="ml-2"
-            />
-          </h3>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium text-blue-400">Logros Destacados</h4>
-                <ul className="space-y-2 text-sm text-gray-300">
-                  <li className="flex items-start space-x-2">
-                    <div className="w-1.5 h-1.5 bg-green-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Has levantado un total de <strong>{formatNumber(metrics[0]?.value || 0)} kg</strong></span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Completaste <strong>{metrics[1]?.value || 0} entrenamientos</strong></span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <div className="w-1.5 h-1.5 bg-purple-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Trabajaste <strong>{metrics[2]?.value || 0} ejercicios diferentes</strong></span>
-                  </li>
-                </ul>
-              </div>
 
-              <div className="space-y-3">
-                <h4 className="text-sm font-medium text-yellow-400">Patrones de Entrenamiento</h4>
-                <ul className="space-y-2 text-sm text-gray-300">
-                  <li className="flex items-start space-x-2">
-                    <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Peso promedio: <strong>{formatNumber(metrics[3]?.value || 0)} kg</strong></span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Entrenaste <strong>{metrics[4]?.value || 0} días únicos</strong></span>
-                  </li>
-                  <li className="flex items-start space-x-2">
-                    <div className="w-1.5 h-1.5 bg-teal-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <span>Frecuencia: <strong>{formatNumber(metrics[5]?.value || 0)} días/semana</strong></span>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }; 

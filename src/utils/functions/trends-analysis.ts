@@ -237,9 +237,11 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
     // Eficiencia: volumen promedio por entrenamiento
     const efficiency = Math.round(avgVolume);
 
-    // Intensidad: peso promedio relativo al máximo del usuario
-    const userMaxWeight = Math.max(...records.map(r => r.weight));
-    const intensity = userMaxWeight > 0 ? Math.round((avgWeight / userMaxWeight) * 100) : 0;
+    // Intensidad: 1RM estimado promedio relativo al máximo del usuario (más preciso)
+    const oneRMs = records.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30));
+    const userMaxOneRM = Math.max(...oneRMs);
+    const avgOneRM = oneRMs.reduce((sum, orm) => sum + orm, 0) / oneRMs.length;
+    const intensity = userMaxOneRM > 0 ? Math.round((avgOneRM / userMaxOneRM) * 100) : 0;
 
     // Recomendaciones específicas para el día
     const recommendations: string[] = [];
@@ -519,9 +521,29 @@ export const analyzeWorkoutHabits = (records: WorkoutRecord[]): WorkoutHabits =>
   const restDayPattern = workoutDays <= 3 ? '4+ días descanso' :
     workoutDays <= 5 ? '1-2 días descanso' : 'Entrenamiento diario';
 
-  // Nuevas métricas
+  // Nuevas métricas - Calcular frecuencia semanal correctamente
   const uniqueDates = new Set(records.map(r => new Date(r.date).toDateString()));
-  const weeklyFrequency = Math.round((uniqueDates.size / Math.max(1, Math.ceil(uniqueDates.size / 7))) * 100) / 100;
+
+  // Agrupar por semanas para calcular frecuencia semanal real
+  const weeklyData = new Map<string, Set<string>>();
+
+  records.forEach(record => {
+    const date = new Date(record.date);
+    // Obtener el lunes de la semana
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (!weeklyData.has(weekKey)) {
+      weeklyData.set(weekKey, new Set());
+    }
+    weeklyData.get(weekKey)!.add(record.date.toDateString());
+  });
+
+  // Calcular promedio de días por semana solo para semanas con entrenamientos
+  const weeklyFrequency = weeklyData.size > 0
+    ? Math.round((Array.from(weeklyData.values()).reduce((sum, daysSet) => sum + daysSet.size, 0) / weeklyData.size) * 100) / 100
+    : 0;
 
   // Calcular fuerza del hábito basado en consistencia y frecuencia
   let habitStrength: WorkoutHabits['habitStrength'];

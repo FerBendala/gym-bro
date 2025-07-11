@@ -47,3 +47,8 @@ export type {
   Enhanced1RMPrediction
 } from './stats-utils';
 
+// Re-exportar funciones específicas de category-analysis para consistencia
+export {
+  calculateIntensityScore
+} from './category-analysis';
+

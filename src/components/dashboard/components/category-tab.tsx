@@ -281,16 +281,7 @@ export const CategoryTab: React.FC<CategoryTabProps> = ({ records }) => {
                         <div
                           className="bg-purple-500 h-2 rounded-full transition-all duration-300 relative"
                           style={{ width: `${safeNumber(metric.efficiencyScore, 0)}%` }}
-                        >
-                          {/* Valor en la barra si es lo suficientemente ancha */}
-                          {safeNumber(metric.efficiencyScore, 0) > 25 && (
-                            <div className="absolute inset-0 flex items-center justify-center">
-                              <span className="text-xs font-medium text-white drop-shadow-sm">
-                                {safeNumber(metric.efficiencyScore, 0)}%
-                              </span>
-                            </div>
-                          )}
-                        </div>
+                        />
                       </div>
                     </div>
                   </div>

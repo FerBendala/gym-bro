@@ -1,6 +1,6 @@
 import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Calendar, TrendingUp } from 'lucide-react';
+import { ArrowDown, ArrowUp, Calendar, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { formatNumber } from '../../utils/functions';
 import { Card, CardContent, CardHeader } from '../card';
@@ -8,14 +8,39 @@ import { InfoTooltip } from '../tooltip';
 import type { ProgressTimelineProps, TimelinePoint } from './types';
 
 /**
+ * Interfaz extendida para datos de timeline con comparativas
+ */
+interface ExtendedTimelinePoint extends TimelinePoint {
+  weekNumber: number;
+  totalWorkouts: number;
+  avgWeight: number;
+  maxWeight: number;
+  totalSets: number;
+  totalReps: number;
+  uniqueExercises: number;
+  change: number;
+  changePercent: number;
+  trend: 'up' | 'down' | 'stable';
+}
+
+/**
  * Componente de timeline de progreso
  */
 export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) => {
-  const timelineData = useMemo((): TimelinePoint[] => {
+  const timelineData = useMemo((): ExtendedTimelinePoint[] => {
     if (records.length === 0) return [];
 
     // Agrupar por semanas usando date-fns con locale español (lunes a domingo)
-    const weeklyData = new Map<string, { totalVolume: number; avgWeight: number; workouts: number }>();
+    const weeklyData = new Map<string, {
+      totalVolume: number;
+      avgWeight: number;
+      workouts: number;
+      maxWeight: number;
+      totalSets: number;
+      totalReps: number;
+      exercises: Set<string>;
+      weekStart: Date;
+    }>();
 
     records.forEach(record => {
       const date = new Date(record.date);
@@ -27,28 +52,106 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
       const estimated1RM = record.weight * (1 + Math.min(record.reps, 20) / 30);
 
       if (!weeklyData.has(weekKey)) {
-        weeklyData.set(weekKey, { totalVolume: 0, avgWeight: 0, workouts: 0 });
+        weeklyData.set(weekKey, {
+          totalVolume: 0,
+          avgWeight: 0,
+          workouts: 0,
+          maxWeight: 0,
+          totalSets: 0,
+          totalReps: 0,
+          exercises: new Set(),
+          weekStart
+        });
       }
 
       const week = weeklyData.get(weekKey)!;
       week.totalVolume += volume;
       // Usar 1RM estimado para el promedio de fuerza
       week.avgWeight = (week.avgWeight * week.workouts + estimated1RM) / (week.workouts + 1);
+      week.maxWeight = Math.max(week.maxWeight, record.weight);
+      week.totalSets += record.sets;
+      week.totalReps += record.reps;
       week.workouts += 1;
+
+      if (record.exercise?.name) {
+        week.exercises.add(record.exercise.name);
+      }
     });
 
-    // Convertir a timeline points
-    return Array.from(weeklyData.entries())
+    // Convertir a timeline points con comparativas
+    const sortedData = Array.from(weeklyData.entries())
       .map(([weekKey, data]) => ({
         date: new Date(weekKey),
         value: data.totalVolume,
         label: `${formatNumber(data.totalVolume)} kg`,
-        details: `${data.workouts} entrenamientos • Fuerza promedio: ${formatNumber(data.avgWeight)} kg (1RM est.)`
+        details: `${data.workouts} entrenamientos • Fuerza promedio: ${formatNumber(data.avgWeight)} kg (1RM est.)`,
+        weekNumber: 0, // Se calculará después
+        totalWorkouts: data.workouts,
+        avgWeight: data.avgWeight,
+        maxWeight: data.maxWeight,
+        totalSets: data.totalSets,
+        totalReps: data.totalReps,
+        uniqueExercises: data.exercises.size,
+        change: 0,
+        changePercent: 0,
+        trend: 'stable' as const
       }))
       .sort((a, b) => a.date.getTime() - b.date.getTime());
+
+    // Calcular cambios y tendencias
+    return sortedData.map((point, index) => {
+      const weekNumber = index + 1;
+      let change = 0;
+      let changePercent = 0;
+      let trend: 'up' | 'down' | 'stable' = 'stable';
+
+      if (index > 0) {
+        const previousPoint = sortedData[index - 1];
+        change = point.value - previousPoint.value;
+        changePercent = previousPoint.value > 0 ? (change / previousPoint.value) * 100 : 0;
+
+        if (Math.abs(changePercent) < 5) {
+          trend = 'stable';
+        } else if (changePercent > 0) {
+          trend = 'up';
+        } else {
+          trend = 'down';
+        }
+      }
+
+      return {
+        ...point,
+        weekNumber,
+        change,
+        changePercent,
+        trend
+      };
+    });
   }, [records]);
 
   const maxValue = Math.max(...timelineData.map(point => point.value));
+
+  // Calcular estadísticas de comparativa
+  const totalGrowth = timelineData.length > 1 ?
+    timelineData[timelineData.length - 1].value - timelineData[0].value : 0;
+  const totalGrowthPercent = timelineData.length > 1 && timelineData[0].value > 0 ?
+    (totalGrowth / timelineData[0].value) * 100 : 0;
+
+  const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
+    switch (trend) {
+      case 'up': return ArrowUp;
+      case 'down': return ArrowDown;
+      default: return Minus;
+    }
+  };
+
+  const getTrendColor = (trend: 'up' | 'down' | 'stable') => {
+    switch (trend) {
+      case 'up': return 'text-green-400';
+      case 'down': return 'text-red-400';
+      default: return 'text-gray-400';
+    }
+  };
 
   if (records.length === 0) {
     return (
@@ -75,7 +178,7 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
           <TrendingUp className="w-5 h-5 mr-2" />
           Timeline de Progreso
           <InfoTooltip
-            content="Evolución semanal de tu volumen de entrenamiento. Cada punto representa una semana completa."
+            content="Evolución semanal detallada con números exactos y comparativas entre semanas."
             position="top"
             className="ml-2"
           />
@@ -83,6 +186,46 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
+          {/* Estadísticas generales con comparativas */}
+          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+              <p className="text-2xl font-bold text-blue-400">
+                {timelineData.length}
+              </p>
+              <p className="text-sm text-gray-400">Semanas registradas</p>
+            </div>
+
+            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+              <p className="text-2xl font-bold text-green-400">
+                {timelineData.length > 0 ? formatNumber(Math.max(...timelineData.map(p => p.value))) : 0} kg
+              </p>
+              <p className="text-sm text-gray-400">Mejor semana</p>
+            </div>
+
+            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+              <p className="text-2xl font-bold text-purple-400">
+                {timelineData.length > 0 ? formatNumber(timelineData.reduce((sum, p) => sum + p.value, 0) / timelineData.length) : 0} kg
+              </p>
+              <p className="text-sm text-gray-400">Promedio semanal</p>
+            </div>
+
+            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
+              <div className="flex items-center justify-center space-x-2">
+                <p className={`text-2xl font-bold ${totalGrowthPercent > 0 ? 'text-green-400' : totalGrowthPercent < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                  {totalGrowthPercent > 0 ? '+' : ''}{totalGrowthPercent.toFixed(1)}%
+                </p>
+                {totalGrowthPercent > 0 ? (
+                  <TrendingUp className="w-5 h-5 text-green-400" />
+                ) : totalGrowthPercent < 0 ? (
+                  <TrendingDown className="w-5 h-5 text-red-400" />
+                ) : (
+                  <Minus className="w-5 h-5 text-gray-400" />
+                )}
+              </div>
+              <p className="text-sm text-gray-400">Crecimiento total</p>
+            </div>
+          </div>
+
           {/* Gráfico de línea simple */}
           <div className="relative h-64 bg-gray-900/50 rounded-lg p-4">
             <svg className="w-full h-full" viewBox="0 0 800 200">
@@ -156,47 +299,76 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
             </svg>
           </div>
 
-          {/* Estadísticas del timeline */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
-              <p className="text-2xl font-bold text-blue-400">
-                {timelineData.length}
-              </p>
-              <p className="text-sm text-gray-400">Semanas registradas</p>
-            </div>
-
-            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
-              <p className="text-2xl font-bold text-green-400">
-                {timelineData.length > 0 ? formatNumber(Math.max(...timelineData.map(p => p.value))) : 0} kg
-              </p>
-              <p className="text-sm text-gray-400">Mejor semana</p>
-            </div>
-
-            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
-              <p className="text-2xl font-bold text-purple-400">
-                {timelineData.length > 0 ? formatNumber(timelineData.reduce((sum, p) => sum + p.value, 0) / timelineData.length) : 0} kg
-              </p>
-              <p className="text-sm text-gray-400">Promedio semanal</p>
-            </div>
-          </div>
-
-          {/* Lista de semanas recientes */}
+          {/* Datos semanales detallados con comparativas */}
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-300">Últimas Semanas</h4>
-            <div className="space-y-2 max-h-48 overflow-y-auto">
-              {timelineData.slice(-6).reverse().map((point, index) => (
-                <div key={index} className="flex items-center justify-between p-3 bg-gray-800/30 rounded-lg">
-                  <div>
-                    <p className="text-sm font-medium text-white">
-                      Semana del {point.date.toLocaleDateString()}
-                    </p>
-                    <p className="text-xs text-gray-400">{point.details}</p>
+            <h4 className="text-sm font-medium text-gray-300">Progreso Semanal Detallado</h4>
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {timelineData.slice().reverse().map((point, index) => {
+                const TrendIcon = getTrendIcon(point.trend);
+                const trendColor = getTrendColor(point.trend);
+
+                return (
+                  <div key={index} className="p-4 bg-gray-800/30 rounded-lg border border-gray-700/50">
+                    <div className="flex items-center justify-between mb-3">
+                      <div className="flex items-center space-x-3">
+                        <span className="text-lg font-bold text-white">
+                          Semana {point.weekNumber}
+                        </span>
+                        <span className="text-sm text-gray-400">
+                          {point.date.toLocaleDateString('es-ES', {
+                            day: 'numeric',
+                            month: 'short',
+                            year: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xl font-bold text-blue-400">
+                          {formatNumber(point.value)} kg
+                        </span>
+                        {point.weekNumber > 1 && (
+                          <div className={`flex items-center space-x-1 ${trendColor}`}>
+                            <TrendIcon className="w-4 h-4" />
+                            <span className="text-sm font-medium">
+                              {point.changePercent > 0 ? '+' : ''}{point.changePercent.toFixed(1)}%
+                            </span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                      <div>
+                        <span className="text-gray-400">Entrenamientos:</span>
+                        <span className="ml-2 font-medium text-white">{point.totalWorkouts}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Peso máximo:</span>
+                        <span className="ml-2 font-medium text-white">{formatNumber(point.maxWeight)} kg</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Series totales:</span>
+                        <span className="ml-2 font-medium text-white">{point.totalSets}</span>
+                      </div>
+                      <div>
+                        <span className="text-gray-400">Ejercicios únicos:</span>
+                        <span className="ml-2 font-medium text-white">{point.uniqueExercises}</span>
+                      </div>
+                    </div>
+
+                    {point.weekNumber > 1 && (
+                      <div className="mt-3 pt-3 border-t border-gray-700/50 text-sm">
+                        <div className="flex items-center space-x-4">
+                          <span className="text-gray-400">Cambio vs semana anterior:</span>
+                          <span className={`font-medium ${point.change > 0 ? 'text-green-400' : point.change < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                            {point.change > 0 ? '+' : ''}{formatNumber(point.change)} kg
+                          </span>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-blue-400">{point.label}</p>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         </div>

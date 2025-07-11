@@ -131,22 +131,34 @@ const calculatePersonalRecords = (categoryRecords: WorkoutRecord[]): number => {
 
 /**
  * Calcula la progresión de peso para una categoría
+ * Usa 1RM estimado siempre para mayor precisión y consistencia
  */
 const calculateWeightProgression = (categoryRecords: WorkoutRecord[]): number => {
   if (categoryRecords.length < 2) return 0;
 
   const sortedRecords = [...categoryRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  const recentRecords = sortedRecords.slice(-5); // Últimos 5 entrenamientos
-  const olderRecords = sortedRecords.slice(0, 5); // Primeros 5 entrenamientos
 
-  if (recentRecords.length === 0 || olderRecords.length === 0) return 0;
+  // Siempre comparar primera mitad vs segunda mitad para máxima precisión temporal
+  const midpoint = Math.floor(sortedRecords.length / 2);
+  const firstHalf = sortedRecords.slice(0, midpoint);
+  const secondHalf = sortedRecords.slice(midpoint);
 
-  const recentAvgWeight = recentRecords.reduce((sum, r) => sum + r.weight, 0) / recentRecords.length;
-  const olderAvgWeight = olderRecords.reduce((sum, r) => sum + r.weight, 0) / olderRecords.length;
+  if (firstHalf.length === 0 || secondHalf.length === 0) return 0;
 
-  if (olderAvgWeight === 0) return 0;
+  // Usar 1RM estimado SIEMPRE para precisión y consistencia
+  const firstHalfAvg1RM = firstHalf.reduce((sum, r) => {
+    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+    return sum + oneRM;
+  }, 0) / firstHalf.length;
 
-  return Math.round(((recentAvgWeight - olderAvgWeight) / olderAvgWeight) * 100);
+  const secondHalfAvg1RM = secondHalf.reduce((sum, r) => {
+    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+    return sum + oneRM;
+  }, 0) / secondHalf.length;
+
+  if (firstHalfAvg1RM === 0) return 0;
+
+  return Math.round(((secondHalfAvg1RM - firstHalfAvg1RM) / firstHalfAvg1RM) * 100);
 };
 
 /**
@@ -155,6 +167,41 @@ const calculateWeightProgression = (categoryRecords: WorkoutRecord[]): number =>
 const calculateVolumeProgression = (categoryRecords: WorkoutRecord[]): number => {
   if (categoryRecords.length < 2) return 0;
 
+  // Agrupar por semanas para detectar cuántas semanas de datos tenemos
+  const weeklyData = new Map<string, WorkoutRecord[]>();
+
+  categoryRecords.forEach(record => {
+    const date = new Date(record.date);
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (!weeklyData.has(weekKey)) {
+      weeklyData.set(weekKey, []);
+    }
+    weeklyData.get(weekKey)!.push(record);
+  });
+
+  const weeksWithData = weeklyData.size;
+
+  // Si tenemos 3 semanas o menos, comparar primera mitad vs segunda mitad de registros
+  if (weeksWithData <= 3) {
+    const sortedRecords = [...categoryRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const midpoint = Math.floor(sortedRecords.length / 2);
+    const firstHalf = sortedRecords.slice(0, midpoint);
+    const secondHalf = sortedRecords.slice(midpoint);
+
+    if (firstHalf.length === 0 || secondHalf.length === 0) return 0;
+
+    const firstHalfVolume = firstHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+    const secondHalfVolume = secondHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+
+    if (firstHalfVolume === 0) return 0;
+
+    return Math.round(((secondHalfVolume - firstHalfVolume) / firstHalfVolume) * 100);
+  }
+
+  // Para usuarios con más semanas de datos, usar la lógica original
   const now = new Date();
   const twoWeeksAgo = new Date(now.getTime() - (14 * 24 * 60 * 60 * 1000));
   const fourWeeksAgo = new Date(now.getTime() - (28 * 24 * 60 * 60 * 1000));
@@ -177,17 +224,22 @@ const calculateVolumeProgression = (categoryRecords: WorkoutRecord[]): number =>
 
 /**
  * Calcula el score de intensidad para una categoría
+ * Exportada para uso en múltiples componentes
  */
-const calculateCategoryIntensityScore = (categoryRecords: WorkoutRecord[]): number => {
+export const calculateIntensityScore = (categoryRecords: WorkoutRecord[]): number => {
   if (categoryRecords.length === 0) return 0;
 
-  const weights = categoryRecords.map(r => r.weight);
-  const maxWeight = Math.max(...weights);
-  const avgWeight = weights.reduce((sum, w) => sum + w, 0) / weights.length;
+  // Calcular 1RM estimado para cada registro
+  const oneRMs = categoryRecords.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30));
 
-  if (maxWeight === 0) return 0;
+  const maxOneRM = Math.max(...oneRMs);
+  const avgOneRM = oneRMs.reduce((sum, orm) => sum + orm, 0) / oneRMs.length;
 
-  return Math.round((avgWeight / maxWeight) * 100);
+  if (maxOneRM === 0) return 0;
+
+  // Intensidad basada en % de 1RM (más precisa)
+  const intensityPercentage = (avgOneRM / maxOneRM) * 100;
+  return Math.round(intensityPercentage);
 };
 
 /**
@@ -478,13 +530,30 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
     const totalSets = sets.reduce((sum, s) => sum + s, 0);
     const totalReps = reps.reduce((sum, r) => sum + r, 0);
 
-    // Calcular entrenamientos por semana aproximado
+    // Calcular entrenamientos por semana aproximado - CORREGIDO
     const dates = categoryRecords.map(record => new Date(record.date));
     const uniqueDates = [...new Set(dates.map(d => d.toDateString()))];
-    const earliestDate = new Date(Math.min(...dates.map(d => d.getTime())));
-    const latestDate = new Date(Math.max(...dates.map(d => d.getTime())));
-    const daysDifference = Math.max(1, Math.ceil((latestDate.getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24)));
-    const avgWorkoutsPerWeek = (workouts / daysDifference) * 7;
+
+    // Agrupar por semanas para calcular frecuencia semanal real
+    const weeklyData = new Map<string, Set<string>>();
+
+    categoryRecords.forEach(record => {
+      const date = new Date(record.date);
+      // Obtener el lunes de la semana
+      const monday = new Date(date);
+      monday.setDate(date.getDate() - date.getDay() + 1);
+      const weekKey = monday.toISOString().split('T')[0];
+
+      if (!weeklyData.has(weekKey)) {
+        weeklyData.set(weekKey, new Set());
+      }
+      weeklyData.get(weekKey)!.add(record.date.toDateString());
+    });
+
+    // Calcular promedio de días únicos por semana solo para semanas con entrenamientos
+    const avgWorkoutsPerWeek = weeklyData.size > 0
+      ? Array.from(weeklyData.values()).reduce((sum, daysSet) => sum + daysSet.size, 0) / weeklyData.size
+      : 0;
 
     const lastWorkout = new Date(Math.max(...dates.map(d => d.getTime())));
     const percentage = (workouts / totalWorkouts) * 100;
@@ -496,7 +565,7 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
 
     const weightProgression = calculateWeightProgression(categoryRecords);
     const volumeProgression = calculateVolumeProgression(categoryRecords);
-    const intensityScore = calculateCategoryIntensityScore(categoryRecords);
+    const intensityScore = calculateIntensityScore(categoryRecords);
     const efficiencyScore = calculateEfficiencyScore(categoryRecords);
     const consistencyScore = calculateConsistencyScore(categoryRecords, avgWorkoutsPerWeek);
 
@@ -677,6 +746,7 @@ const adjustMetricsForLimitedData = (
 
 /**
  * Analiza la tendencia de progreso para un grupo muscular
+ * Corregido para usar 1RM estimado consistentemente
  */
 const analyzeProgressTrend = (categoryRecords: WorkoutRecord[]): {
   trend: 'improving' | 'stable' | 'declining';
@@ -691,33 +761,43 @@ const analyzeProgressTrend = (categoryRecords: WorkoutRecord[]): {
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-  // Analizar últimas 4 semanas
-  const recentRecords = sortedRecords.slice(-8); // Últimos 8 records
-  const midpoint = Math.floor(recentRecords.length / 2);
-  const firstHalf = recentRecords.slice(0, midpoint);
-  const secondHalf = recentRecords.slice(midpoint);
+  // Usar primera mitad vs segunda mitad para máxima precisión temporal
+  const midpoint = Math.floor(sortedRecords.length / 2);
+  const firstHalf = sortedRecords.slice(0, midpoint);
+  const secondHalf = sortedRecords.slice(midpoint);
 
-  // Calcular volumen promedio para cada mitad
-  const firstHalfVolume = firstHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / firstHalf.length;
-  const secondHalfVolume = secondHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / secondHalf.length;
+  if (firstHalf.length === 0 || secondHalf.length === 0) {
+    return { trend: 'stable', lastImprovement: null };
+  }
 
-  const improvement = ((secondHalfVolume - firstHalfVolume) / firstHalfVolume) * 100;
+  // Calcular 1RM promedio para cada mitad - CORREGIDO
+  const firstHalfAvg1RM = firstHalf.reduce((sum, r) => {
+    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+    return sum + oneRM;
+  }, 0) / firstHalf.length;
+
+  const secondHalfAvg1RM = secondHalf.reduce((sum, r) => {
+    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+    return sum + oneRM;
+  }, 0) / secondHalf.length;
+
+  const improvement = firstHalfAvg1RM > 0 ? ((secondHalfAvg1RM - firstHalfAvg1RM) / firstHalfAvg1RM) * 100 : 0;
 
   let trend: 'improving' | 'stable' | 'declining';
   if (improvement > 5) trend = 'improving';
   else if (improvement < -5) trend = 'declining';
   else trend = 'stable';
 
-  // Encontrar último record con mejora significativa
+  // Encontrar último record con mejora significativa usando 1RM
   let lastImprovement: Date | null = null;
   for (let i = 1; i < sortedRecords.length; i++) {
     const current = sortedRecords[i];
     const previous = sortedRecords[i - 1];
 
-    const currentVolume = current.weight * current.reps * current.sets;
-    const previousVolume = previous.weight * previous.reps * previous.sets;
+    const current1RM = current.weight * (1 + Math.min(current.reps, 20) / 30);
+    const previous1RM = previous.weight * (1 + Math.min(previous.reps, 20) / 30);
 
-    if (currentVolume > previousVolume * 1.1) { // Mejora del 10%
+    if (current1RM > previous1RM * 1.05) { // Mejora del 5% en 1RM
       lastImprovement = new Date(current.date);
     }
   }
@@ -769,24 +849,8 @@ const determineDevelopmentStage = (
 };
 
 /**
- * Calcula el score de intensidad para un grupo muscular
- */
-const calculateIntensityScore = (categoryRecords: WorkoutRecord[]): number => {
-  if (categoryRecords.length === 0) return 0;
-
-  // Calcular intensidad basada en % de 1RM promedio
-  const weights = categoryRecords.map(r => r.weight);
-  const maxWeight = Math.max(...weights);
-  const avgWeight = weights.reduce((sum, w) => sum + w, 0) / weights.length;
-
-  if (maxWeight === 0) return 0;
-
-  const intensityPercentage = (avgWeight / maxWeight) * 100;
-  return Math.round(intensityPercentage);
-};
-
-/**
  * Analiza el historial de balance para un grupo muscular
+ * Corregido para usar 1RM estimado en lugar de volumen bruto
  */
 const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[]): {
   trend: 'improving' | 'stable' | 'declining';
@@ -797,40 +861,49 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[]): {
     return { trend: 'stable', consistency: 0, volatility: 0 };
   }
 
-  // Analizar volumen semanal usando date-fns con locale español
+  // Analizar 1RM promedio semanal usando date-fns con locale español
   const sortedRecords = [...categoryRecords].sort((a, b) =>
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
   // Agrupar por semana usando startOfWeek con locale español
-  const weeklyData: Record<string, number> = {};
+  const weeklyData: Record<string, { total1RM: number; count: number }> = {};
   sortedRecords.forEach(record => {
     const recordDate = new Date(record.date);
     const weekStart = startOfWeek(recordDate, { locale: es });
     const weekKey = weekStart.toISOString().split('T')[0]; // YYYY-MM-DD del lunes
-    const volume = record.weight * record.reps * record.sets;
-    weeklyData[weekKey] = (weeklyData[weekKey] || 0) + volume;
+    const oneRM = record.weight * (1 + Math.min(record.reps, 20) / 30);
+
+    if (!weeklyData[weekKey]) {
+      weeklyData[weekKey] = { total1RM: 0, count: 0 };
+    }
+    weeklyData[weekKey].total1RM += oneRM;
+    weeklyData[weekKey].count += 1;
   });
 
-  const volumes = Object.values(weeklyData);
+  // Calcular 1RM promedio por semana
+  const weekly1RMValues = Object.values(weeklyData).map(week =>
+    week.count > 0 ? week.total1RM / week.count : 0
+  );
 
-  // Calcular tendencia
-  const firstHalf = volumes.slice(0, Math.floor(volumes.length / 2));
-  const secondHalf = volumes.slice(Math.floor(volumes.length / 2));
+  // Calcular tendencia usando primera mitad vs segunda mitad
+  const midpoint = Math.floor(weekly1RMValues.length / 2);
+  const firstHalf = weekly1RMValues.slice(0, midpoint);
+  const secondHalf = weekly1RMValues.slice(midpoint);
 
-  const firstAvg = firstHalf.reduce((sum, v) => sum + v, 0) / firstHalf.length;
-  const secondAvg = secondHalf.reduce((sum, v) => sum + v, 0) / secondHalf.length;
+  const firstAvg = firstHalf.length > 0 ? firstHalf.reduce((sum, v) => sum + v, 0) / firstHalf.length : 0;
+  const secondAvg = secondHalf.length > 0 ? secondHalf.reduce((sum, v) => sum + v, 0) / secondHalf.length : 0;
 
-  const trendChange = ((secondAvg - firstAvg) / firstAvg) * 100;
+  const trendChange = firstAvg > 0 ? ((secondAvg - firstAvg) / firstAvg) * 100 : 0;
 
   let trend: 'improving' | 'stable' | 'declining';
-  if (trendChange > 10) trend = 'improving';
-  else if (trendChange < -10) trend = 'declining';
+  if (trendChange > 5) trend = 'improving';
+  else if (trendChange < -5) trend = 'declining';
   else trend = 'stable';
 
   // Calcular consistencia (inverso del coeficiente de variación)
-  const mean = volumes.reduce((sum, v) => sum + v, 0) / volumes.length;
-  const variance = volumes.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / volumes.length;
+  const mean = weekly1RMValues.reduce((sum, v) => sum + v, 0) / weekly1RMValues.length;
+  const variance = weekly1RMValues.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / weekly1RMValues.length;
   const stdDev = Math.sqrt(variance);
   const consistency = mean > 0 ? Math.max(0, 100 - ((stdDev / mean) * 100)) : 0;
 
@@ -989,8 +1062,7 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
 
     const progressAnalysis = analyzeProgressTrend(categoryRecords);
 
-    const rawIntensityScore = calculateIntensityScore(categoryRecords);
-    const intensityScore = adjustMetricsForLimitedData(rawIntensityScore, temporalAdjustmentFactor, 'percentage');
+    const intensityScore = calculateIntensityScore(categoryRecords);
 
     const balanceHistory = analyzeBalanceHistory(categoryRecords);
     // Ajustar consistencia del historial

@@ -1,6 +1,7 @@
 import { differenceInDays, endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { WorkoutRecord } from '../../interfaces';
+import { calculateIntensityScore } from './category-analysis';
 
 /**
  * Interfaz para densidad de entrenamiento
@@ -194,7 +195,9 @@ export const calculateTrainingDensity = (records: WorkoutRecord[]): TrainingDens
     if (periodRecords.length > 0) {
       const totalVolume = periodRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
       const avgVolumePerWorkout = totalVolume / periodRecords.length;
-      const workoutsPerWeek = periodRecords.length / period.weeks;
+      // Calcular días únicos por semana en lugar de ejercicios individuales
+      const uniqueDays = new Set(periodRecords.map(r => r.date.toDateString())).size;
+      const workoutsPerWeek = uniqueDays / period.weeks;
 
       // Calcular densidad (volumen por unidad de tiempo estimada)
       const estimatedMinutesPerWorkout = 60; // Asumimos 60 min promedio
@@ -337,7 +340,8 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
 
   // Índice de fatiga basado en frecuencia y volumen
   const thisWeekRecords = getThisWeekRecords(records);
-  const weeklyFrequency = thisWeekRecords.length;
+  // Calcular días únicos en lugar de registros individuales
+  const weeklyFrequency = new Set(thisWeekRecords.map(r => r.date.toDateString())).size;
   const frequencyFactor = weeklyFrequency > 5 ? 30 : weeklyFrequency > 3 ? 15 : 0;
   const volumeFactor = volumeDropIndicators ? 25 : 0;
   const recoveryFactor = recoveryDays === 0 ? 20 : recoveryDays > 3 ? -10 : 0;
@@ -975,15 +979,8 @@ export const analyzeIntensityMetrics = (records: WorkoutRecord[]): IntensityMetr
     };
   }
 
-  // Calcular intensidad de peso de forma más realista
-  const weights = records.map(r => r.weight);
-  const maxWeight = Math.max(...weights);
-  const avgWeight = weights.reduce((sum, w) => sum + w, 0) / weights.length;
-
-  // Usar percentil 80 como referencia en lugar del máximo absoluto
-  const sortedWeights = weights.sort((a, b) => b - a);
-  const percentile80Weight = sortedWeights[Math.floor(sortedWeights.length * 0.2)];
-  const averageIntensity = percentile80Weight > 0 ? (avgWeight / percentile80Weight) * 100 : 0;
+  // Calcular intensidad de peso usando la función centralizada (más preciso y consistente)
+  const averageIntensity = calculateIntensityScore(records);
 
   // Calcular intensidad de volumen basada en métricas más realistas
   const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
@@ -995,7 +992,8 @@ export const analyzeIntensityMetrics = (records: WorkoutRecord[]): IntensityMetr
 
   // Calcular intensidad de frecuencia de forma más equilibrada
   const thisWeekRecords = getThisWeekRecords(records);
-  const weeklyFrequency = thisWeekRecords.length;
+  // Calcular días únicos en lugar de registros individuales
+  const weeklyFrequency = new Set(thisWeekRecords.map(r => r.date.toDateString())).size;
 
   // Escala más realista: 3-5 sesiones por semana es óptimo
   let frequencyIntensity = 0;
