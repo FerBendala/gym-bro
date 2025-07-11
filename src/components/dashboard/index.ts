@@ -1,16 +1,19 @@
 /**
- * Dashboard Components
- * Exportaciones centralizadas del sistema de dashboard
+ * Exportaciones centralizadas de todos los componentes relacionados con el dashboard
+ * Incluye componentes, hooks, tipos y constantes
  */
 
-// Componente principal (modal)
 export { Dashboard } from './dashboard-modal';
-
-// Componente para página completa
 export { DashboardPage } from './dashboard-page';
 
 // Hooks
-export { useDashboardData, useDashboardFilters } from './hooks';
+export { useDashboardData } from './hooks';
+
+// Componentes de las tabs
+export * from './components';
 
 // Tipos
-export type { DashboardProps, DashboardTab } from './types';
+export * from './types';
+
+// Constantes
+export * from './constants';
