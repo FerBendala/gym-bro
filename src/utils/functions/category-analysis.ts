@@ -31,7 +31,7 @@ export interface CategoryMetrics {
   maxWeight: number;
   avgWorkoutsPerWeek: number;
   lastWorkout: Date | null;
-  percentage: number; // Porcentaje del total de entrenamientos
+  percentage: number; // Porcentaje del volumen total de entrenamiento
   // Nuevas métricas avanzadas
   minWeight: number;
   avgSets: number;
@@ -504,6 +504,8 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
     }
   });
 
+  // CORREGIDO: Calcular totalVolume para porcentajes consistentes
+  const totalVolume = Object.values(volumeByCategory).reduce((sum, volume) => sum + volume, 0);
   const totalWorkouts = Object.values(workoutsByCategory).reduce((sum, count) => sum + count, 0);
   const metrics: CategoryMetrics[] = [];
 
@@ -513,7 +515,7 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
   // Calcular métricas para cada categoría
   Object.entries(recordsByCategory).forEach(([category, categoryRecords]) => {
     const workouts = workoutsByCategory[category];
-    const totalVolume = volumeByCategory[category];
+    const categoryVolume = volumeByCategory[category];
 
     // Calcular pesos promedio, máximo y mínimo considerando todos los ejercicios de la categoría
     const weights = categoryRecords.map(record => record.weight);
@@ -555,7 +557,9 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
       : 0;
 
     const lastWorkout = new Date(Math.max(...dates.map(d => d.getTime())));
-    const percentage = (workouts / totalWorkouts) * 100;
+
+    // CORREGIDO: Usar porcentaje de volumen en lugar de porcentaje de workouts
+    const percentage = totalVolume > 0 ? (categoryVolume / totalVolume) * 100 : 0;
 
     // Calcular métricas avanzadas
     const personalRecords = calculatePersonalRecords(categoryRecords);
@@ -587,7 +591,7 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
     const baseMetrics: Partial<CategoryMetrics> = {
       category,
       workouts: Math.round(workouts * 100) / 100,
-      totalVolume: Math.round(totalVolume),
+      totalVolume: Math.round(categoryVolume),
       avgWeight: Math.round(avgWeight * 100) / 100,
       maxWeight,
       minWeight,
