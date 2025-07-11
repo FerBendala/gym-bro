@@ -1,6 +1,6 @@
 import { differenceInDays, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { EXERCISE_CATEGORIES } from '../../constants/exercise-categories';
+import { EXERCISE_CATEGORIES, IDEAL_VOLUME_DISTRIBUTION } from '../../constants/exercise-categories';
 import type { WorkoutRecord } from '../../interfaces';
 
 /**
@@ -1009,16 +1009,8 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
   // Calcular factor de ajuste temporal
   const temporalAdjustmentFactor = calculateTemporalAdjustmentFactor(records);
 
-  // Volúmenes ideales por categoría (porcentajes recomendados)
-  const idealDistribution: Record<string, number> = {
-    'Pecho': 20,
-    'Espalda': 25, // Espalda ligeramente más por balance postural
-    'Piernas': 30, // Piernas más por ser el grupo muscular más grande
-    'Hombros': 15,
-    'Brazos': 10,
-    'Core': 10,
-    'Cardio': 5
-  };
+  // Usar distribución ideal centralizada
+  const idealDistribution = IDEAL_VOLUME_DISTRIBUTION;
 
   // Agrupar registros por categoría para análisis detallado
   const recordsByCategory: Record<string, WorkoutRecord[]> = {};

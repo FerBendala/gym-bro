@@ -1,5 +1,6 @@
 import { Activity, AlertTriangle, Award, BarChart3, Dumbbell, Footprints, Heart, Hexagon, RotateCcw, Shield, Target, TrendingDown, TrendingUp, Triangle, Users } from 'lucide-react';
 import React, { useMemo } from 'react';
+import { getIdealVolumePercentage } from '../../constants/exercise-categories';
 import { MUSCLE_GROUPS } from '../../constants/muscle-groups';
 import type { WorkoutRecord } from '../../interfaces';
 import { formatNumber } from '../../utils/functions';
@@ -149,7 +150,7 @@ export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
       }
 
       // Calcular score de balance (0-100)
-      const idealPercentage = getIdealPercentage(categoryName);
+      const idealPercentage = getIdealVolumePercentage(categoryName);
       const balanceDeviation = Math.abs(percentage - idealPercentage);
       const balanceScore = Math.max(0, 100 - (balanceDeviation * 3));
 
@@ -522,20 +523,6 @@ export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
 };
 
 // Funciones auxiliares
-const getIdealPercentage = (categoryName: string): number => {
-  const idealDistribution: Record<string, number> = {
-    'Pecho': 20,
-    'Espalda': 25,
-    'Piernas': 30,
-    'Hombros': 15,
-    'Brazos': 10,
-    'Core': 10,
-    'Cardio': 5,
-    'Funcional': 10
-  };
-  return idealDistribution[categoryName] || 15;
-};
-
 const generateCategoryRecommendations = (
   categoryName: string,
   metrics: { percentage: number; idealPercentage: number; frequency: number; progressPercent: number; balanceScore: number }
