@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, Award, BarChart3, Dumbbell, Footprints, Heart, Hexagon, RotateCcw, Shield, Target, TrendingDown, TrendingUp, Triangle, Users } from 'lucide-react';
+import { Activity, AlertTriangle, Award, BarChart3, Dumbbell, Footprints, Hexagon, RotateCcw, Shield, Target, TrendingDown, TrendingUp, Triangle, Users } from 'lucide-react';
 import React, { useMemo } from 'react';
 import { getIdealVolumePercentage } from '../../constants/exercise-categories';
 import { MUSCLE_GROUPS } from '../../constants/muscle-groups';
@@ -19,8 +19,7 @@ const categoryIcons: Record<string, React.ComponentType<{ className?: string }>>
   'Piernas': Footprints,   // Huellas representan el movimiento de piernas
   'Hombros': Triangle,     // Triángulo representa la forma de los deltoides
   'Brazos': Dumbbell,      // Mancuerna es el icono más representativo para brazos
-  'Core': RotateCcw,       // Rotación representa los movimientos de core/abdominales
-  'Cardio': Heart          // Corazón es perfecto para cardio
+  'Core': RotateCcw        // Rotación representa los movimientos de core/abdominales
 };
 
 interface CategoryMetrics {

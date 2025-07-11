@@ -1,6 +1,5 @@
 /**
- * Categorías de ejercicios disponibles
- * Usado en: AdminPanel, Dashboard (filtros), ExerciseCard, etc.
+ * Categorías disponibles para ejercicios
  */
 export const EXERCISE_CATEGORIES = [
   'Pecho',
@@ -8,9 +7,7 @@ export const EXERCISE_CATEGORIES = [
   'Piernas',
   'Hombros',
   'Brazos',
-  'Core',
-  'Cardio',
-  'Funcional'
+  'Core'
 ] as const;
 
 export type ExerciseCategory = typeof EXERCISE_CATEGORIES[number];
@@ -20,14 +17,12 @@ export type ExerciseCategory = typeof EXERCISE_CATEGORIES[number];
  * Basada en principios de anatomía funcional, prevención de lesiones y desarrollo equilibrado
  */
 export const IDEAL_VOLUME_DISTRIBUTION: Record<string, number> = {
-  'Pecho': 20,        // Grupo muscular grande, balance con espalda
-  'Espalda': 25,      // Ligeramente más por balance postural y prevención
-  'Piernas': 30,      // Grupo muscular más grande del cuerpo
-  'Hombros': 15,      // Crucial para estabilidad, músculos más pequeños
-  'Brazos': 10,       // Músculos más pequeños, se benefician del trabajo indirecto
-  'Core': 10,         // Fundamental para estabilidad y fuerza funcional
-  'Cardio': 5,        // Complementario al entrenamiento de fuerza
-  'Funcional': 10     // Movimientos funcionales y ejercicios compuestos
+  'Pecho': 20,        // Aumentado por redistribución
+  'Espalda': 25,      // Aumentado por balance postural y redistribución  
+  'Piernas': 30,      // Reducido ligeramente por redistribución
+  'Hombros': 10,      // Mantenido
+  'Brazos': 10,        // Reducido ligeramente
+  'Core': 5          // Reducido ligeramente
 };
 
 /**

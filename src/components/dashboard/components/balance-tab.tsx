@@ -1,4 +1,4 @@
-import { Activity, AlertTriangle, BarChart, CheckCircle, Dumbbell, Footprints, Heart, Hexagon, RotateCcw, Scale, Shield, TrendingDown, TrendingUp, Triangle, XCircle } from 'lucide-react';
+import { Activity, AlertTriangle, BarChart, CheckCircle, Dumbbell, Footprints, Hexagon, RotateCcw, Scale, Shield, TrendingDown, TrendingUp, Triangle, XCircle } from 'lucide-react';
 import React, { useMemo } from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
 import { analyzeMuscleBalance, calculateBalanceScore } from '../../../utils/functions/category-analysis';
@@ -19,8 +19,7 @@ const categoryIcons: Record<string, React.FC<any>> = {
   'Piernas': Footprints,   // Huellas representan el movimiento de piernas
   'Hombros': Triangle,     // Triángulo representa la forma de los deltoides
   'Brazos': Dumbbell,      // Mancuerna es el icono más representativo para brazos
-  'Core': RotateCcw,       // Rotación representa los movimientos de core/abdominales
-  'Cardio': Heart          // Corazón es perfecto para cardio
+  'Core': RotateCcw        // Rotación representa los movimientos de core/abdominales
 };
 
 // Colores para cada categoría
@@ -30,8 +29,7 @@ const categoryColors: Record<string, string> = {
   'Piernas': 'from-green-500/80 to-emerald-500/80',
   'Hombros': 'from-purple-500/80 to-violet-500/80',
   'Brazos': 'from-orange-500/80 to-amber-500/80',
-  'Core': 'from-indigo-500/80 to-blue-500/80',
-  'Cardio': 'from-teal-500/80 to-green-500/80'
+  'Core': 'from-indigo-500/80 to-blue-500/80'
 };
 
 // Función utilitaria para validar valores numéricos

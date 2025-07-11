@@ -3,7 +3,6 @@ import {
   BarChart,
   Dumbbell,
   Footprints,
-  Heart,
   Hexagon,
   RotateCcw,
   Shield,
@@ -34,19 +33,17 @@ const categoryIcons: Record<string, React.FC<any>> = {
   'Piernas': Footprints,   // Huellas representan el movimiento de piernas
   'Hombros': Triangle,     // Triángulo representa la forma de los deltoides
   'Brazos': Dumbbell,      // Mancuerna es el icono más representativo para brazos
-  'Core': RotateCcw,       // Rotación representa los movimientos de core/abdominales
-  'Cardio': Heart          // Corazón es perfecto para cardio
+  'Core': RotateCcw        // Rotación representa los movimientos de core/abdominales
 };
 
-// Colores para cada categoría (igual que en BalanceTab)
+// Colores para cada categoría
 const categoryColors: Record<string, string> = {
   'Pecho': 'from-red-500/80 to-pink-500/80',
   'Espalda': 'from-blue-500/80 to-cyan-500/80',
   'Piernas': 'from-green-500/80 to-emerald-500/80',
   'Hombros': 'from-purple-500/80 to-violet-500/80',
   'Brazos': 'from-orange-500/80 to-amber-500/80',
-  'Core': 'from-indigo-500/80 to-blue-500/80',
-  'Cardio': 'from-teal-500/80 to-green-500/80'
+  'Core': 'from-indigo-500/80 to-blue-500/80'
 };
 
 // Función utilitaria para validar valores numéricos

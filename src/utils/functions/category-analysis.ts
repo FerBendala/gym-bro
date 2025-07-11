@@ -292,9 +292,7 @@ const determineStrengthLevel = (estimatedOneRM: number, category: string): 'begi
     'Piernas': { intermediate: 100, advanced: 160 },
     'Hombros': { intermediate: 60, advanced: 90 },
     'Brazos': { intermediate: 50, advanced: 80 },
-    'Core': { intermediate: 40, advanced: 70 },
-    'Cardio': { intermediate: 30, advanced: 50 },
-    'Funcional': { intermediate: 70, advanced: 110 }
+    'Core': { intermediate: 40, advanced: 70 }
   };
 
   const categoryStandards = standards[category] || { intermediate: 60, advanced: 100 };
