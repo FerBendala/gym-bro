@@ -193,12 +193,13 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
                 <div className="text-xs text-gray-400 mb-1">Tendencia Fuerza</div>
                 <div className={`text-sm sm:text-lg font-semibold ${analysis.progressPrediction.strengthTrend > 0 ? 'text-green-400' :
                   analysis.progressPrediction.strengthTrend < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                  {analysis.progressPrediction.strengthTrend > 0 ? '+' : ''}{analysis.progressPrediction.strengthTrend}kg
+                  {analysis.progressPrediction.strengthTrend > 0 ? '+' : ''}{analysis.progressPrediction.strengthTrend}kg/sem
                 </div>
                 <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
                   <div
-                    className={`${analysis.progressPrediction.strengthTrend > 0 ? 'bg-green-500' : 'bg-red-500'} h-2 rounded-full transition-all duration-300`}
-                    style={{ width: `${Math.min(100, Math.max(10, Math.abs(safeNumber(analysis.progressPrediction.strengthTrend, 0)) * 5))}%` }}
+                    className={`${analysis.progressPrediction.strengthTrend > 0 ? 'bg-green-500' :
+                      analysis.progressPrediction.strengthTrend < 0 ? 'bg-red-500' : 'bg-gray-500'} h-2 rounded-full transition-all duration-300`}
+                    style={{ width: `${Math.min(100, Math.max(5, Math.abs(safeNumber(analysis.progressPrediction.strengthTrend, 0)) * 10))}%` }}
                   />
                 </div>
               </div>
@@ -207,12 +208,13 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
                 <div className="text-xs text-gray-400 mb-1">Tendencia Volumen</div>
                 <div className={`text-sm sm:text-lg font-semibold ${analysis.progressPrediction.volumeTrend > 0 ? 'text-green-400' :
                   analysis.progressPrediction.volumeTrend < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                  {analysis.progressPrediction.volumeTrend > 0 ? '+' : ''}{analysis.progressPrediction.volumeTrend}kg
+                  {analysis.progressPrediction.volumeTrend > 0 ? '+' : ''}{analysis.progressPrediction.volumeTrend}kg/sem
                 </div>
                 <div className="relative w-full bg-gray-700 rounded-full h-2 mt-1">
                   <div
-                    className={`${analysis.progressPrediction.volumeTrend > 0 ? 'bg-blue-500' : 'bg-orange-500'} h-2 rounded-full transition-all duration-300`}
-                    style={{ width: `${Math.min(100, Math.max(10, Math.abs(safeNumber(analysis.progressPrediction.volumeTrend, 0)) / 10))}%` }}
+                    className={`${analysis.progressPrediction.volumeTrend > 0 ? 'bg-blue-500' :
+                      analysis.progressPrediction.volumeTrend < 0 ? 'bg-orange-500' : 'bg-gray-500'} h-2 rounded-full transition-all duration-300`}
+                    style={{ width: `${Math.min(100, Math.max(5, Math.abs(safeNumber(analysis.progressPrediction.volumeTrend, 0)) / 20))}%` }}
                   />
                 </div>
               </div>
@@ -329,14 +331,23 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
               <div className="bg-purple-800/30 rounded-lg p-2 sm:p-3 text-center">
                 <div className="text-xs text-purple-300 mb-1">Peso Actual Máximo</div>
                 <div className="text-sm sm:text-lg font-semibold text-white">
-                  {Math.max(...records.map(r => r.weight))}kg
+                  {(() => {
+                    const current1RM = Math.max(...records.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30)));
+                    return current1RM > 0 ? current1RM.toFixed(1) : '0.0';
+                  })()}kg
                 </div>
+                <div className="text-xs text-gray-500">1RM estimado</div>
               </div>
               <div className="bg-purple-800/30 rounded-lg p-2 sm:p-3 text-center">
                 <div className="text-xs text-purple-300 mb-1">Mejora Esperada</div>
                 <div className="text-sm sm:text-lg font-semibold text-purple-400">
-                  +{(analysis.progressPrediction.predictedPR.weight - Math.max(...records.map(r => r.weight))).toFixed(1)}kg
+                  {(() => {
+                    const current1RM = Math.max(...records.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30)));
+                    const improvement = Math.max(0, analysis.progressPrediction.predictedPR.weight - current1RM);
+                    return improvement > 0 ? `+${improvement.toFixed(1)}kg` : 'Sin mejora';
+                  })()}
                 </div>
+                <div className="text-xs text-gray-500">vs actual</div>
               </div>
             </div>
           </div>
@@ -387,10 +398,10 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
                 </div>
               </div>
               <div className="text-2xl font-bold text-green-400 mb-2">
-                {formatNumber(analysis.progressPrediction.nextWeekVolume)}
+                {formatNumber(analysis.progressPrediction.nextWeekVolume)} kg
               </div>
               <div className="text-xs text-gray-400">
-                Basado en tendencia de {analysis.progressPrediction.volumeTrend > 0 ? '+' : ''}{analysis.progressPrediction.volumeTrend}kg/semana
+                Basado en tendencia de {analysis.progressPrediction.volumeTrend > 0 ? '+' : ''}{formatNumber(analysis.progressPrediction.volumeTrend)}kg/semana
               </div>
             </div>
           </div>

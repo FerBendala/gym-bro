@@ -1,4 +1,4 @@
-import { Calendar, Clock, Dumbbell, Edit, Filter, Footprints, Heart, Hexagon, RotateCcw, Search, Shield, Target, Trash2, TrendingDown, TrendingUp, Triangle, Zap } from 'lucide-react';
+import { Calendar, Clock, Dumbbell, Edit, Filter, Footprints, Hexagon, RotateCcw, Search, Shield, Target, Trash2, TrendingDown, TrendingUp, Triangle, Zap } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { deleteWorkoutRecord, getExercises, getWorkoutRecords, updateWorkoutRecord } from '../../../api/database';
 import { Button } from '../../../components/button';
@@ -13,26 +13,24 @@ import { useNotification } from '../../../context/notification-context';
 import type { Exercise, WorkoutRecord } from '../../../interfaces';
 import { formatNumber } from '../../../utils/functions';
 
-// Iconos específicos para cada categoría muscular (igual que en balance muscular)
+// Iconos más específicos para cada categoría muscular
 const categoryIcons: Record<string, React.FC<any>> = {
   'Pecho': Hexagon,        // Hexágono representa la forma de los pectorales
   'Espalda': Shield,       // Escudo representa la protección/soporte de la espalda
   'Piernas': Footprints,   // Huellas representan el movimiento de piernas
   'Hombros': Triangle,     // Triángulo representa la forma de los deltoides
   'Brazos': Dumbbell,      // Mancuerna es el icono más representativo para brazos
-  'Core': RotateCcw,       // Rotación representa los movimientos de core/abdominales
-  'Cardio': Heart          // Corazón es perfecto para cardio
+  'Core': RotateCcw        // Rotación representa los movimientos de core/abdominales
 };
 
-// Colores para cada categoría (igual que en balance muscular)
+// Colores para cada categoría
 const categoryColors: Record<string, string> = {
   'Pecho': 'from-red-500/80 to-pink-500/80',
   'Espalda': 'from-blue-500/80 to-cyan-500/80',
   'Piernas': 'from-green-500/80 to-emerald-500/80',
   'Hombros': 'from-purple-500/80 to-violet-500/80',
   'Brazos': 'from-orange-500/80 to-amber-500/80',
-  'Core': 'from-indigo-500/80 to-blue-500/80',
-  'Cardio': 'from-teal-500/80 to-green-500/80'
+  'Core': 'from-indigo-500/80 to-blue-500/80'
 };
 
 /**

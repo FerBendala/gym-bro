@@ -1,16 +1,27 @@
 import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ArrowDown, ArrowUp, Calendar, Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import { ArrowDown, ArrowUp, History, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import React, { useMemo } from 'react';
-import { formatNumber } from '../../utils/functions';
-import { Card, CardContent, CardHeader } from '../card';
-import { InfoTooltip } from '../tooltip';
-import type { ProgressTimelineProps, TimelinePoint } from './types';
+import type { WorkoutRecord } from '../../../interfaces';
+import { formatNumber } from '../../../utils/functions';
+import { Card, CardContent, CardHeader } from '../../card';
+import { InfoTooltip } from '../../tooltip';
 
 /**
- * Interfaz extendida para datos de timeline con comparativas
+ * Props para el componente HistoryTab
  */
-interface ExtendedTimelinePoint extends TimelinePoint {
+interface HistoryTabProps {
+  records: WorkoutRecord[];
+}
+
+/**
+ * Interfaz para puntos del historial
+ */
+interface HistoryPoint {
+  date: Date;
+  value: number;
+  label: string;
+  details: string;
   weekNumber: number;
   totalWorkouts: number;
   avgWeight: number;
@@ -24,10 +35,10 @@ interface ExtendedTimelinePoint extends TimelinePoint {
 }
 
 /**
- * Componente de timeline de progreso
+ * Tab del dashboard para mostrar el historial de entrenamientos con evolución temporal
  */
-export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) => {
-  const timelineData = useMemo((): ExtendedTimelinePoint[] => {
+export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
+  const historyData = useMemo((): HistoryPoint[] => {
     if (records.length === 0) return [];
 
     // Agrupar por semanas usando date-fns con locale español (lunes a domingo)
@@ -78,7 +89,7 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
       }
     });
 
-    // Convertir a timeline points con comparativas
+    // Convertir a historial points con comparativas
     const sortedData = Array.from(weeklyData.entries())
       .map(([weekKey, data]) => ({
         date: new Date(weekKey),
@@ -129,13 +140,13 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
     });
   }, [records]);
 
-  const maxValue = Math.max(...timelineData.map(point => point.value));
+  const maxValue = Math.max(...historyData.map(point => point.value));
 
   // Calcular estadísticas de comparativa
-  const totalGrowth = timelineData.length > 1 ?
-    timelineData[timelineData.length - 1].value - timelineData[0].value : 0;
-  const totalGrowthPercent = timelineData.length > 1 && timelineData[0].value > 0 ?
-    (totalGrowth / timelineData[0].value) * 100 : 0;
+  const totalGrowth = historyData.length > 1 ?
+    historyData[historyData.length - 1].value - historyData[0].value : 0;
+  const totalGrowthPercent = historyData.length > 1 && historyData[0].value > 0 ?
+    (totalGrowth / historyData[0].value) * 100 : 0;
 
   const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
@@ -158,12 +169,12 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
       <Card>
         <CardContent>
           <div className="text-center py-12">
-            <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <History className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-300 mb-2">
-              Sin datos de progreso
+              Sin historial de entrenamientos
             </h3>
             <p className="text-gray-500">
-              Registra entrenamientos durante varias semanas para ver tu evolución
+              Registra entrenamientos durante varias semanas para ver tu historial
             </p>
           </div>
         </CardContent>
@@ -175,10 +186,10 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
     <Card>
       <CardHeader>
         <h3 className="text-lg font-semibold text-white flex items-center">
-          <TrendingUp className="w-5 h-5 mr-2" />
-          Timeline de Progreso
+          <History className="w-5 h-5 mr-2" />
+          Historial de Entrenamientos
           <InfoTooltip
-            content="Evolución semanal detallada con números exactos y comparativas entre semanas."
+            content="Evolución semanal detallada de tu progreso con métricas completas y comparativas entre períodos."
             position="top"
             className="ml-2"
           />
@@ -190,21 +201,21 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
           <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
             <div className="text-center p-4 bg-gray-800/50 rounded-lg">
               <p className="text-2xl font-bold text-blue-400">
-                {timelineData.length}
+                {historyData.length}
               </p>
               <p className="text-sm text-gray-400">Semanas registradas</p>
             </div>
 
             <div className="text-center p-4 bg-gray-800/50 rounded-lg">
               <p className="text-2xl font-bold text-green-400">
-                {timelineData.length > 0 ? formatNumber(Math.max(...timelineData.map(p => p.value))) : 0} kg
+                {historyData.length > 0 ? formatNumber(Math.max(...historyData.map(p => p.value))) : 0} kg
               </p>
               <p className="text-sm text-gray-400">Mejor semana</p>
             </div>
 
             <div className="text-center p-4 bg-gray-800/50 rounded-lg">
               <p className="text-2xl font-bold text-purple-400">
-                {timelineData.length > 0 ? formatNumber(timelineData.reduce((sum, p) => sum + p.value, 0) / timelineData.length) : 0} kg
+                {historyData.length > 0 ? formatNumber(historyData.reduce((sum, p) => sum + p.value, 0) / historyData.length) : 0} kg
               </p>
               <p className="text-sm text-gray-400">Promedio semanal</p>
             </div>
@@ -238,10 +249,10 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
               <rect width="100%" height="100%" fill="url(#grid)" />
 
               {/* Línea de progreso */}
-              {timelineData.length > 1 && (
+              {historyData.length > 1 && (
                 <path
-                  d={timelineData.map((point, index) => {
-                    const x = (index / (timelineData.length - 1)) * 760 + 20;
+                  d={historyData.map((point, index) => {
+                    const x = (index / (historyData.length - 1)) * 760 + 20;
                     const y = 180 - ((point.value / maxValue) * 160);
                     return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
                   }).join(' ')}
@@ -254,13 +265,13 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
               )}
 
               {/* Área bajo la línea */}
-              {timelineData.length > 1 && (
+              {historyData.length > 1 && (
                 <path
-                  d={timelineData.map((point, index) => {
-                    const x = (index / (timelineData.length - 1)) * 760 + 20;
+                  d={historyData.map((point, index) => {
+                    const x = (index / (historyData.length - 1)) * 760 + 20;
                     const y = 180 - ((point.value / maxValue) * 160);
                     if (index === 0) return `M ${x} 180 L ${x} ${y}`;
-                    if (index === timelineData.length - 1) return `L ${x} ${y} L ${x} 180 Z`;
+                    if (index === historyData.length - 1) return `L ${x} ${y} L ${x} 180 Z`;
                     return `L ${x} ${y}`;
                   }).join(' ')}
                   fill="url(#gradient)"
@@ -277,8 +288,8 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
               </defs>
 
               {/* Puntos */}
-              {timelineData.map((point, index) => {
-                const x = (index / Math.max(1, timelineData.length - 1)) * 760 + 20;
+              {historyData.map((point, index) => {
+                const x = (index / Math.max(1, historyData.length - 1)) * 760 + 20;
                 const y = 180 - ((point.value / maxValue) * 160);
 
                 return (
@@ -301,9 +312,9 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
 
           {/* Datos semanales detallados con comparativas */}
           <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-300">Progreso Semanal Detallado</h4>
+            <h4 className="text-sm font-medium text-gray-300">Historial Semanal Detallado</h4>
             <div className="space-y-3 max-h-96 overflow-y-auto">
-              {timelineData.slice().reverse().map((point, index) => {
+              {historyData.slice().reverse().map((point, index) => {
                 const TrendIcon = getTrendIcon(point.trend);
                 const trendColor = getTrendColor(point.trend);
 

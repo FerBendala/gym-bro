@@ -4,9 +4,10 @@ import { OfflineWarning } from '../offline-warning';
 import {
   AdvancedTab,
   BalanceTab,
-  CategoryTab,
   DashboardEmptyState,
   DashboardTabNavigation,
+  ExercisesTab,
+  HistoryTab,
   PredictionsTab,
   TrendsTab
 } from './components';
@@ -38,18 +39,20 @@ export const DashboardPage: React.FC = () => {
     }
 
     switch (activeTab) {
-      case 'categories':
-        return <CategoryTab records={workoutRecords} />;
       case 'balance':
         return <BalanceTab records={workoutRecords} />;
       case 'trends':
         return <TrendsTab records={workoutRecords} />;
+      case 'history':
+        return <HistoryTab records={workoutRecords} />;
+      case 'exercises':
+        return <ExercisesTab records={workoutRecords} />;
       case 'advanced':
         return <AdvancedTab records={workoutRecords} />;
       case 'predictions':
         return <PredictionsTab records={workoutRecords} />;
       default:
-        return <CategoryTab records={workoutRecords} />;
+        return <BalanceTab records={workoutRecords} />;
     }
   };
 

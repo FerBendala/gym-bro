@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
-import { calculateAdvancedStrengthAnalysis } from '../../../utils/functions';
+import { calculateAdvancedStrengthAnalysis, calculateIntensityScore } from '../../../utils/functions';
 import type { CategoryMetrics } from '../../../utils/functions/category-analysis';
 
 export interface StrengthByCategory {
@@ -88,13 +88,31 @@ const calculateSingleCategoryMetrics = (categoryName: string, categoryRecords: W
   const totalSets = sets.reduce((sum, s) => sum + s, 0);
   const totalReps = reps.reduce((sum, r) => sum + r, 0);
 
-  // Calcular frecuencia semanal
+  // Calcular frecuencia semanal - CORREGIDO
   const dates = categoryRecords.map(record => new Date(record.date));
-  const earliestDate = new Date(Math.min(...dates.map(d => d.getTime())));
-  const latestDate = new Date(Math.max(...dates.map(d => d.getTime())));
-  const daysDifference = Math.max(1, Math.ceil((latestDate.getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24)));
-  const avgWorkoutsPerWeek = (workouts / daysDifference) * 7;
 
+  // Agrupar por semanas para calcular frecuencia semanal real
+  const weeklyData = new Map<string, Set<string>>();
+
+  categoryRecords.forEach(record => {
+    const date = new Date(record.date);
+    // Obtener el lunes de la semana
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (!weeklyData.has(weekKey)) {
+      weeklyData.set(weekKey, new Set());
+    }
+    weeklyData.get(weekKey)!.add(record.date.toDateString());
+  });
+
+  // Calcular promedio de días únicos por semana solo para semanas con entrenamientos
+  const avgWorkoutsPerWeek = weeklyData.size > 0
+    ? Array.from(weeklyData.values()).reduce((sum, daysSet) => sum + daysSet.size, 0) / weeklyData.size
+    : 0;
+
+  const latestDate = new Date(Math.max(...dates.map(d => d.getTime())));
   const lastWorkout = latestDate;
   const daysSinceLastWorkout = Math.floor((new Date().getTime() - lastWorkout.getTime()) / (1000 * 60 * 60 * 24));
 
@@ -103,7 +121,10 @@ const calculateSingleCategoryMetrics = (categoryName: string, categoryRecords: W
 
   // Calcular métricas básicas adicionales
   const personalRecords = 1; // Simplificado
-  const intensityScore = maxWeight > 0 ? Math.round((avgWeight / maxWeight) * 100) : 0;
+
+  // Usar la función centralizada para calcular intensidad
+  const intensityScore = calculateIntensityScore(categoryRecords);
+
   const efficiencyScore = workouts > 0 ? Math.round(totalVolume / workouts) : 0;
   const consistencyScore = avgWorkoutsPerWeek > 0 ? Math.min(100, Math.round(avgWorkoutsPerWeek * 25)) : 0;
 

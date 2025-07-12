@@ -266,14 +266,15 @@ export const calculateStrengthProgress = (firstRecord: WorkoutRecord, lastRecord
   strengthProgress: number;
   oneRMProgress: number;
 } => {
-  const weightProgress = calculateProgress(firstRecord.weight, lastRecord.weight);
+  // Usar 1RM estimado para weightProgress también (para consistencia)
+  const first1RM = calculateEstimated1RM(firstRecord.weight, firstRecord.reps);
+  const last1RM = calculateEstimated1RM(lastRecord.weight, lastRecord.reps);
+  const weightProgress = calculateProgress(first1RM, last1RM);
 
   const firstStrengthIndex = calculateStrengthIndex(firstRecord);
   const lastStrengthIndex = calculateStrengthIndex(lastRecord);
   const strengthProgress = calculateProgress(firstStrengthIndex, lastStrengthIndex);
 
-  const first1RM = calculateEstimated1RM(firstRecord.weight, firstRecord.reps);
-  const last1RM = calculateEstimated1RM(lastRecord.weight, lastRecord.reps);
   const oneRMProgress = calculateProgress(first1RM, last1RM);
 
   return {

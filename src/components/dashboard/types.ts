@@ -1,5 +1,9 @@
 
-export type DashboardTab = 'categories' | 'balance' | 'trends' | 'advanced' | 'predictions';
+/**
+ * Tabs disponibles en el dashboard
+ * Ahora incluye history y exercises junto con los tabs existentes
+ */
+export type DashboardTab = 'balance' | 'trends' | 'advanced' | 'predictions' | 'history' | 'exercises';
 
 export interface DashboardTabConfig {
   id: DashboardTab;

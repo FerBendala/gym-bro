@@ -4,6 +4,55 @@ import type { SelectGroup, SelectOption } from '../../interfaces/ui';
 import { groupExercisesByCategory } from './select-utils';
 
 /**
+ * Utilidades para filtros y selects
+ */
+
+export interface FilterOption {
+  value: string;
+  label: string;
+}
+
+/**
+ * Opciones de categorías para filtros
+ */
+export const CATEGORY_FILTER_OPTIONS: FilterOption[] = [
+  { value: 'all', label: '🎯 Todas las categorías' },
+  { value: 'pecho', label: '💪 Pecho' },
+  { value: 'espalda', label: '🔙 Espalda' },
+  { value: 'piernas', label: '🦵 Piernas' },
+  { value: 'hombros', label: '🤸 Hombros' },
+  { value: 'brazos', label: '💪 Brazos' },
+  { value: 'core', label: '🎯 Core' }
+];
+
+/**
+ * Opciones de períodos temporales
+ */
+export const TIME_FILTER_OPTIONS: FilterOption[] = [
+  { value: 'all', label: '📅 Todo el tiempo' },
+  { value: 'week', label: '📅 Esta semana' },
+  { value: 'month', label: '📅 Este mes' },
+  { value: 'quarter', label: '📅 Últimos 3 meses' },
+  { value: 'year', label: '📅 Este año' }
+];
+
+/**
+ * Mapea valores de filtro a categorías reales
+ */
+export const mapFilterValueToCategory = (filterValue: string): string | null => {
+  const mapping: Record<string, string> = {
+    'pecho': 'Pecho',
+    'espalda': 'Espalda',
+    'piernas': 'Piernas',
+    'hombros': 'Hombros',
+    'brazos': 'Brazos',
+    'core': 'Core'
+  };
+
+  return mapping[filterValue] || null;
+};
+
+/**
  * Generar opciones de filtro para el dashboard
  */
 
@@ -26,9 +75,7 @@ export const createMuscleGroupFilterOptions = (): SelectGroup[] => {
       options: [
         { value: 'tren-superior', label: '💪 Tren Superior' },
         { value: 'tren-inferior', label: '🦵 Tren Inferior' },
-        { value: 'core', label: '🎯 Core' },
-        { value: 'cardio', label: '❤️ Cardio' },
-        { value: 'funcional', label: '⚡ Funcional' }
+        { value: 'core', label: '🎯 Core' }
       ]
     },
     {

@@ -1,7 +1,19 @@
 import { differenceInDays, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { EXERCISE_CATEGORIES } from '../../constants/exercise-categories';
+import { EXERCISE_CATEGORIES, IDEAL_VOLUME_DISTRIBUTION, calculateCategoryEffortDistribution } from '../../constants/exercise-categories';
 import type { WorkoutRecord } from '../../interfaces';
+
+/**
+ * Parejas de grupos musculares antagonistas
+ */
+const ANTAGONIST_PAIRS: Record<string, string> = {
+  'Pecho': 'Espalda',
+  'Espalda': 'Pecho',
+  'Brazos': 'Piernas', // Simplificado
+  'Piernas': 'Brazos',
+  'Hombros': 'Core',
+  'Core': 'Hombros'
+};
 
 /**
  * Obtiene la fecha "actual" basada en los datos reales del usuario
@@ -31,7 +43,7 @@ export interface CategoryMetrics {
   maxWeight: number;
   avgWorkoutsPerWeek: number;
   lastWorkout: Date | null;
-  percentage: number; // Porcentaje del total de entrenamientos
+  percentage: number; // Porcentaje del volumen total de entrenamiento
   // Nuevas métricas avanzadas
   minWeight: number;
   avgSets: number;
@@ -131,22 +143,79 @@ const calculatePersonalRecords = (categoryRecords: WorkoutRecord[]): number => {
 
 /**
  * Calcula la progresión de peso para una categoría
+ * Corregido: maneja pocas semanas agrupando por semanas, no por entrenamientos individuales
  */
 const calculateWeightProgression = (categoryRecords: WorkoutRecord[]): number => {
   if (categoryRecords.length < 2) return 0;
 
   const sortedRecords = [...categoryRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  const recentRecords = sortedRecords.slice(-5); // Últimos 5 entrenamientos
-  const olderRecords = sortedRecords.slice(0, 5); // Primeros 5 entrenamientos
 
-  if (recentRecords.length === 0 || olderRecords.length === 0) return 0;
+  // Agrupar por semanas para detectar cuántas semanas de datos tenemos
+  const weeklyData = new Map<string, WorkoutRecord[]>();
 
-  const recentAvgWeight = recentRecords.reduce((sum, r) => sum + r.weight, 0) / recentRecords.length;
-  const olderAvgWeight = olderRecords.reduce((sum, r) => sum + r.weight, 0) / olderRecords.length;
+  categoryRecords.forEach(record => {
+    const date = new Date(record.date);
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    const weekKey = monday.toISOString().split('T')[0];
 
-  if (olderAvgWeight === 0) return 0;
+    if (!weeklyData.has(weekKey)) {
+      weeklyData.set(weekKey, []);
+    }
+    weeklyData.get(weekKey)!.push(record);
+  });
 
-  return Math.round(((recentAvgWeight - olderAvgWeight) / olderAvgWeight) * 100);
+  const weeksWithData = weeklyData.size;
+
+  // Si tenemos 3 semanas o menos, comparar promedio semanal entre primera y última semana
+  if (weeksWithData <= 3) {
+    // Con solo 1 semana, no hay progresión
+    if (weeksWithData === 1) return 0;
+
+    // Convertir a array ordenado por fecha
+    const weeklyArray = Array.from(weeklyData.entries())
+      .sort(([weekA], [weekB]) => weekA.localeCompare(weekB));
+
+    // Calcular 1RM promedio de la primera semana
+    const firstWeekRecords = weeklyArray[0][1];
+    const firstWeekAvg1RM = firstWeekRecords.reduce((sum, r) => {
+      const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+      return sum + oneRM;
+    }, 0) / firstWeekRecords.length;
+
+    // Calcular 1RM promedio de la última semana
+    const lastWeekRecords = weeklyArray[weeklyArray.length - 1][1];
+    const lastWeekAvg1RM = lastWeekRecords.reduce((sum, r) => {
+      const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+      return sum + oneRM;
+    }, 0) / lastWeekRecords.length;
+
+    if (firstWeekAvg1RM === 0) return 0;
+
+    return Math.round(((lastWeekAvg1RM - firstWeekAvg1RM) / firstWeekAvg1RM) * 100);
+  }
+
+  // Para usuarios con más semanas de datos, usar la lógica original de primera mitad vs segunda mitad
+  const midpoint = Math.floor(sortedRecords.length / 2);
+  const firstHalf = sortedRecords.slice(0, midpoint);
+  const secondHalf = sortedRecords.slice(midpoint);
+
+  if (firstHalf.length === 0 || secondHalf.length === 0) return 0;
+
+  // Usar 1RM estimado SIEMPRE para precisión y consistencia
+  const firstHalfAvg1RM = firstHalf.reduce((sum, r) => {
+    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+    return sum + oneRM;
+  }, 0) / firstHalf.length;
+
+  const secondHalfAvg1RM = secondHalf.reduce((sum, r) => {
+    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+    return sum + oneRM;
+  }, 0) / secondHalf.length;
+
+  if (firstHalfAvg1RM === 0) return 0;
+
+  return Math.round(((secondHalfAvg1RM - firstHalfAvg1RM) / firstHalfAvg1RM) * 100);
 };
 
 /**
@@ -155,6 +224,41 @@ const calculateWeightProgression = (categoryRecords: WorkoutRecord[]): number =>
 const calculateVolumeProgression = (categoryRecords: WorkoutRecord[]): number => {
   if (categoryRecords.length < 2) return 0;
 
+  // Agrupar por semanas para detectar cuántas semanas de datos tenemos
+  const weeklyData = new Map<string, WorkoutRecord[]>();
+
+  categoryRecords.forEach(record => {
+    const date = new Date(record.date);
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (!weeklyData.has(weekKey)) {
+      weeklyData.set(weekKey, []);
+    }
+    weeklyData.get(weekKey)!.push(record);
+  });
+
+  const weeksWithData = weeklyData.size;
+
+  // Si tenemos 3 semanas o menos, comparar primera mitad vs segunda mitad de registros
+  if (weeksWithData <= 3) {
+    const sortedRecords = [...categoryRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const midpoint = Math.floor(sortedRecords.length / 2);
+    const firstHalf = sortedRecords.slice(0, midpoint);
+    const secondHalf = sortedRecords.slice(midpoint);
+
+    if (firstHalf.length === 0 || secondHalf.length === 0) return 0;
+
+    const firstHalfVolume = firstHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+    const secondHalfVolume = secondHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+
+    if (firstHalfVolume === 0) return 0;
+
+    return Math.round(((secondHalfVolume - firstHalfVolume) / firstHalfVolume) * 100);
+  }
+
+  // Para usuarios con más semanas de datos, usar la lógica original
   const now = new Date();
   const twoWeeksAgo = new Date(now.getTime() - (14 * 24 * 60 * 60 * 1000));
   const fourWeeksAgo = new Date(now.getTime() - (28 * 24 * 60 * 60 * 1000));
@@ -177,17 +281,22 @@ const calculateVolumeProgression = (categoryRecords: WorkoutRecord[]): number =>
 
 /**
  * Calcula el score de intensidad para una categoría
+ * Exportada para uso en múltiples componentes
  */
-const calculateCategoryIntensityScore = (categoryRecords: WorkoutRecord[]): number => {
+export const calculateIntensityScore = (categoryRecords: WorkoutRecord[]): number => {
   if (categoryRecords.length === 0) return 0;
 
-  const weights = categoryRecords.map(r => r.weight);
-  const maxWeight = Math.max(...weights);
-  const avgWeight = weights.reduce((sum, w) => sum + w, 0) / weights.length;
+  // Calcular 1RM estimado para cada registro
+  const oneRMs = categoryRecords.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30));
 
-  if (maxWeight === 0) return 0;
+  const maxOneRM = Math.max(...oneRMs);
+  const avgOneRM = oneRMs.reduce((sum, orm) => sum + orm, 0) / oneRMs.length;
 
-  return Math.round((avgWeight / maxWeight) * 100);
+  if (maxOneRM === 0) return 0;
+
+  // Intensidad basada en % de 1RM (más precisa)
+  const intensityPercentage = (avgOneRM / maxOneRM) * 100;
+  return Math.round(intensityPercentage);
 };
 
 /**
@@ -204,51 +313,422 @@ const calculateEfficiencyScore = (categoryRecords: WorkoutRecord[]): number => {
 };
 
 /**
- * Calcula el score de consistencia para una categoría
+ * Calcula la consistencia de entrenamiento para una categoría
+ * Mejorado: separa frecuencia de regularidad y penaliza menos los patrones sistemáticos
  */
-const calculateConsistencyScore = (categoryRecords: WorkoutRecord[], avgWorkoutsPerWeek: number): number => {
-  if (categoryRecords.length === 0) return 0;
-
-  // Basado en frecuencia semanal y regularidad
-  const frequencyScore = Math.min(100, (avgWorkoutsPerWeek / 3) * 100); // 3 sesiones por semana es ideal
-
-  // Calcular regularidad (varianza en días entre entrenamientos)
-  const sortedRecords = [...categoryRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  if (sortedRecords.length < 2) return frequencyScore;
-
-  const daysBetweenWorkouts: number[] = [];
-  for (let i = 1; i < sortedRecords.length; i++) {
-    const days = Math.floor((new Date(sortedRecords[i].date).getTime() - new Date(sortedRecords[i - 1].date).getTime()) / (1000 * 60 * 60 * 24));
-    daysBetweenWorkouts.push(days);
+const calculateTrainingConsistency = (categoryRecords: WorkoutRecord[], avgWorkoutsPerWeek: number): {
+  frequencyScore: number;
+  regularityScore: number;
+  overallScore: number;
+} => {
+  if (categoryRecords.length === 0) {
+    return { frequencyScore: 0, regularityScore: 0, overallScore: 0 };
   }
 
-  const avgDaysBetween = daysBetweenWorkouts.reduce((sum, days) => sum + days, 0) / daysBetweenWorkouts.length;
-  const variance = daysBetweenWorkouts.reduce((sum, days) => sum + Math.pow(days - avgDaysBetween, 2), 0) / daysBetweenWorkouts.length;
-  const regularityScore = Math.max(0, 100 - Math.sqrt(variance));
+  // 1. Score de frecuencia (basado en frecuencia óptima por categoría)
+  const optimalFrequency = getOptimalFrequency(categoryRecords[0]?.exercise?.categories?.[0] || '');
+  const frequencyScore = Math.min(100, (avgWorkoutsPerWeek / optimalFrequency) * 100);
 
-  return Math.round((frequencyScore + regularityScore) / 2);
+  // 2. Score de regularidad (mejorado para no penalizar patrones sistemáticos)
+  const regularityScore = calculateRegularityScore(categoryRecords);
+
+  // 3. Score general (ponderado)
+  const overallScore = Math.round((frequencyScore * 0.6) + (regularityScore * 0.4));
+
+  return {
+    frequencyScore: Math.round(frequencyScore),
+    regularityScore: Math.round(regularityScore),
+    overallScore
+  };
 };
 
 /**
- * Determina el nivel de fuerza para una categoría
+ * Obtiene la frecuencia óptima de entrenamiento por categoría muscular
  */
-const determineStrengthLevel = (estimatedOneRM: number, category: string): 'beginner' | 'intermediate' | 'advanced' => {
-  // Estándares simplificados por categoría (en kg)
-  const standards: Record<string, { intermediate: number; advanced: number }> = {
-    'Pecho': { intermediate: 80, advanced: 120 },
-    'Espalda': { intermediate: 90, advanced: 140 },
-    'Piernas': { intermediate: 100, advanced: 160 },
-    'Hombros': { intermediate: 60, advanced: 90 },
-    'Brazos': { intermediate: 50, advanced: 80 },
-    'Core': { intermediate: 40, advanced: 70 },
-    'Cardio': { intermediate: 30, advanced: 50 },
-    'Funcional': { intermediate: 70, advanced: 110 }
+const getOptimalFrequency = (category: string): number => {
+  const frequencies: Record<string, number> = {
+    'Pecho': 2.5,      // 2-3 veces por semana
+    'Espalda': 2.5,    // 2-3 veces por semana  
+    'Piernas': 2.0,    // 2 veces por semana (recuperación lenta)
+    'Hombros': 3.0,    // 3 veces por semana (recuperación rápida)
+    'Brazos': 3.0,     // 3 veces por semana (recuperación rápida)
+    'Core': 3.5       // 3-4 veces por semana (recuperación muy rápida)
   };
 
-  const categoryStandards = standards[category] || { intermediate: 60, advanced: 100 };
+  return frequencies[category] || 2.5; // Default 2.5 veces por semana
+};
 
-  if (estimatedOneRM >= categoryStandards.advanced) return 'advanced';
-  if (estimatedOneRM >= categoryStandards.intermediate) return 'intermediate';
+/**
+ * Calcula score de regularidad mejorado que no penaliza patrones sistemáticos
+ */
+const calculateRegularityScore = (categoryRecords: WorkoutRecord[]): number => {
+  if (categoryRecords.length < 3) return 50; // Score neutral para pocos datos
+
+  const sortedRecords = [...categoryRecords].sort((a, b) =>
+    new Date(a.date).getTime() - new Date(b.date).getTime()
+  );
+
+  const daysBetweenWorkouts: number[] = [];
+  for (let i = 1; i < sortedRecords.length; i++) {
+    const days = Math.floor(
+      (new Date(sortedRecords[i].date).getTime() -
+        new Date(sortedRecords[i - 1].date).getTime()) / (1000 * 60 * 60 * 24)
+    );
+    daysBetweenWorkouts.push(days);
+  }
+
+  // Detectar si hay un patrón sistemático
+  const avgInterval = daysBetweenWorkouts.reduce((sum, days) => sum + days, 0) / daysBetweenWorkouts.length;
+  const variance = daysBetweenWorkouts.reduce((sum, days) =>
+    sum + Math.pow(days - avgInterval, 2), 0
+  ) / daysBetweenWorkouts.length;
+  const stdDev = Math.sqrt(variance);
+  const coefficientOfVariation = avgInterval > 0 ? stdDev / avgInterval : 1;
+
+  // Mejorado: No penalizar patrones sistemáticos
+  // Si el CV es bajo (< 0.3), es un patrón regular = buena puntuación
+  if (coefficientOfVariation < 0.3) {
+    return Math.min(100, 90 + (10 * (0.3 - coefficientOfVariation) / 0.3));
+  }
+
+  // Para mayor variabilidad, reducir puntuación gradualmente
+  const regularityScore = Math.max(20, 90 - (coefficientOfVariation * 100));
+  return Math.round(regularityScore);
+};
+
+/**
+ * Métricas de consistencia independientes
+ * Cada eje se mide por separado sin mezclar conceptos
+ */
+interface ConsistencyMetrics {
+  balanceConsistency: number;      // 0-100: Estabilidad del % de volumen
+  activityConsistency: number;     // 0-100: Regularidad de actividad
+  frequencyConsistency: number;    // 0-100: Estabilidad de frecuencia semanal
+  globalConsistency: number;       // 0-100: Promedio ponderado
+}
+
+/**
+ * Estándares de fuerza por categoría muscular (1RM estimado en kg)
+ * Basados en estándares de powerlifting y levantamiento de pesas
+ */
+const STRENGTH_STANDARDS: Record<string, {
+  beginner: number;
+  intermediate: number;
+  advanced: number;
+  elite: number;
+}> = {
+  'Pecho': {
+    beginner: 40,      // Press de banca
+    intermediate: 70,
+    advanced: 100,
+    elite: 130
+  },
+  'Espalda': {
+    beginner: 50,      // Peso muerto / Dominadas lastradas
+    intermediate: 80,
+    advanced: 120,
+    elite: 160
+  },
+  'Piernas': {
+    beginner: 60,      // Sentadilla
+    intermediate: 100,
+    advanced: 140,
+    elite: 180
+  },
+  'Hombros': {
+    beginner: 25,      // Press militar
+    intermediate: 45,
+    advanced: 65,
+    elite: 85
+  },
+  'Brazos': {
+    beginner: 30,      // Curl de bíceps / Press francés
+    intermediate: 50,
+    advanced: 70,
+    elite: 90
+  },
+  'Core': {
+    beginner: 20,      // Plancha con peso / Crunch con disco
+    intermediate: 40,
+    advanced: 60,
+    elite: 80
+  }
+};
+
+/**
+ * Calcula la consistencia específica del balance muscular
+ * Mide qué tan estable se mantiene la distribución de volumen de una categoría
+ */
+const calculateBalanceConsistency = (
+  categoryRecords: WorkoutRecord[],
+  allRecords: WorkoutRecord[]
+): number => {
+  if (categoryRecords.length === 0 || allRecords.length === 0) return 0;
+
+  // Agrupar por semanas
+  const weeklyData = groupRecordsByWeek(allRecords);
+  const categoryWeeklyData = groupRecordsByWeek(categoryRecords);
+
+  // Necesitamos mínimo 4-5 semanas para una medición confiable
+  if (weeklyData.length < 4) return 0;
+
+  // Calcular % de volumen de esta categoría cada semana
+  const weeklyPercentages = weeklyData.map(week => {
+    const weekTotalVolume = week.reduce((sum, record) => sum + (record.weight * record.reps), 0);
+    const categoryVolume = categoryWeeklyData
+      .find(catWeek => isSameWeek(catWeek[0]?.date.toString(), week[0]?.date.toString()))
+      ?.reduce((sum, record) => sum + (record.weight * record.reps), 0) || 0;
+
+    return weekTotalVolume > 0 ? (categoryVolume / weekTotalVolume) * 100 : 0;
+  });
+
+  // Calcular desviación estándar
+  const mean = weeklyPercentages.reduce((sum, val) => sum + val, 0) / weeklyPercentages.length;
+  const variance = weeklyPercentages.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / weeklyPercentages.length;
+  const stdDev = Math.sqrt(variance);
+
+  // Límites lógicos:
+  // - Si stdDev = 0 → score = 100 (perfecta consistencia)
+  // - Si stdDev > 20 → score = 0 (muy inconsistente)
+  // - Escala entre 0-20 de stdDev a 100-0 de score
+  const maxAcceptableStdDev = 20; // 20% de desviación es el límite
+  const score = Math.max(0, Math.min(100, 100 - (stdDev / maxAcceptableStdDev) * 100));
+
+  return Math.round(score);
+};
+
+/**
+ * Calcula la consistencia de actividad (regularidad de entrenamiento)
+ * Mide qué tan regularmente se entrena esta categoría
+ */
+const calculateActivityConsistency = (categoryRecords: WorkoutRecord[]): number => {
+  if (categoryRecords.length === 0) return 0;
+
+  // Agrupar por semanas
+  const weeklyData = groupRecordsByWeek(categoryRecords);
+
+  // Necesitamos mínimo 4 semanas para una medición confiable
+  if (weeklyData.length < 4) return 0;
+
+  // Calcular semanas totales en el período
+  const firstWeek = weeklyData[0][0].date;
+  const lastWeek = weeklyData[weeklyData.length - 1][0].date;
+  const totalWeeks = Math.ceil((new Date(lastWeek).getTime() - new Date(firstWeek).getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
+
+  // Contar semanas activas (con al menos 1 entrenamiento)
+  const activeWeeks = weeklyData.length;
+
+  // % de semanas con actividad en esta categoría
+  const activityRate = (activeWeeks / totalWeeks) * 100;
+
+  return Math.round(Math.min(100, activityRate));
+};
+
+/**
+ * Calcula la consistencia de frecuencia (estabilidad de entrenamientos/semana)
+ * Mide qué tan estable es el número de entrenamientos por semana
+ */
+const calculateFrequencyConsistency = (categoryRecords: WorkoutRecord[]): number => {
+  if (categoryRecords.length === 0) return 0;
+
+  // Agrupar por semanas y contar entrenamientos
+  const weeklyData = groupRecordsByWeek(categoryRecords);
+
+  // Necesitamos mínimo 4 semanas para una medición confiable
+  if (weeklyData.length < 4) return 0;
+
+  // Contar entrenamientos por semana
+  const weeklyFrequencies = weeklyData.map(week => {
+    // Contar días únicos de entrenamiento en la semana
+    const uniqueDays = Array.from(new Set(week.map(record => new Date(record.date).toDateString())));
+    return uniqueDays.length;
+  });
+
+  // Calcular desviación estándar de la frecuencia
+  const mean = weeklyFrequencies.reduce((sum, val) => sum + val, 0) / weeklyFrequencies.length;
+  const variance = weeklyFrequencies.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / weeklyFrequencies.length;
+  const stdDev = Math.sqrt(variance);
+
+  // Límites lógicos:
+  // - Si stdDev = 0 → score = 100 (frecuencia perfectamente estable)
+  // - Si stdDev > 2 → score = 0 (frecuencia muy variable)
+  // - Escala entre 0-2 de stdDev a 100-0 de score
+  const maxAcceptableStdDev = 2; // 2 días de desviación es el límite
+  const score = Math.max(0, Math.min(100, 100 - (stdDev / maxAcceptableStdDev) * 100));
+
+  return Math.round(score);
+};
+
+/**
+ * Calcula todas las métricas de consistencia de forma independiente
+ * Cada eje se mide por separado sin mezclar conceptos
+ */
+const calculateConsistencyMetrics = (
+  categoryRecords: WorkoutRecord[],
+  allRecords: WorkoutRecord[]
+): ConsistencyMetrics => {
+  // Calcular cada métrica de forma independiente
+  const balanceConsistency = calculateBalanceConsistency(categoryRecords, allRecords);
+  const activityConsistency = calculateActivityConsistency(categoryRecords);
+  const frequencyConsistency = calculateFrequencyConsistency(categoryRecords);
+
+  // Promedio ponderado con pesos claros
+  const weights = {
+    balance: 0.4,      // 40% - Lo más importante para balance muscular
+    activity: 0.35,    // 35% - Regularidad de entrenamiento
+    frequency: 0.25    // 25% - Estabilidad de frecuencia
+  };
+
+  const globalConsistency = Math.round(
+    (balanceConsistency * weights.balance) +
+    (activityConsistency * weights.activity) +
+    (frequencyConsistency * weights.frequency)
+  );
+
+  return {
+    balanceConsistency,
+    activityConsistency,
+    frequencyConsistency,
+    globalConsistency
+  };
+};
+
+/**
+ * Función auxiliar para agrupar registros por semana
+ */
+const groupRecordsByWeek = (records: WorkoutRecord[]): WorkoutRecord[][] => {
+  const weekGroups: { [key: string]: WorkoutRecord[] } = {};
+
+  records.forEach(record => {
+    const date = new Date(record.date);
+    const weekKey = `${date.getFullYear()}-W${getWeekNumber(date)}`;
+
+    if (!weekGroups[weekKey]) {
+      weekGroups[weekKey] = [];
+    }
+    weekGroups[weekKey].push(record);
+  });
+
+  return Object.values(weekGroups).sort((a, b) =>
+    new Date(a[0].date).getTime() - new Date(b[0].date).getTime()
+  );
+};
+
+/**
+ * Función auxiliar para obtener el número de semana
+ */
+const getWeekNumber = (date: Date): number => {
+  const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+  const dayNum = d.getUTCDay() || 7;
+  d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+  return Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+};
+
+/**
+ * Función auxiliar para verificar si dos fechas están en la misma semana
+ */
+const isSameWeek = (date1: string, date2: string): boolean => {
+  const d1 = new Date(date1);
+  const d2 = new Date(date2);
+  const week1 = getWeekNumber(d1);
+  const week2 = getWeekNumber(d2);
+  return d1.getFullYear() === d2.getFullYear() && week1 === week2;
+};
+
+
+
+/**
+ * Calcula porcentajes de volumen por semana para análisis de balance
+ */
+const calculateWeeklyBalancePercentages = (categoryRecords: WorkoutRecord[], allRecords: WorkoutRecord[]) => {
+  const weeklyData: Record<string, { categoryVolume: number; totalVolume: number }> = {};
+
+  // Agrupar todos los registros por semana
+  allRecords.forEach(record => {
+    const date = new Date(record.date);
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (!weeklyData[weekKey]) {
+      weeklyData[weekKey] = { categoryVolume: 0, totalVolume: 0 };
+    }
+
+    const recordVolume = record.weight * record.reps * record.sets;
+    weeklyData[weekKey].totalVolume += recordVolume;
+
+    // Si es de la categoría específica, añadir al volumen de categoría
+    const recordCategories = record.exercise?.categories || [];
+    const targetCategory = categoryRecords[0]?.exercise?.categories?.[0];
+    if (recordCategories.includes(targetCategory || '')) {
+      // Usar distribución de esfuerzo si es multi-categoría
+      const effortDistribution = calculateCategoryEffortDistribution(recordCategories);
+      const categoryEffort = effortDistribution[targetCategory || ''] || 1;
+      weeklyData[weekKey].categoryVolume += recordVolume * categoryEffort;
+    }
+  });
+
+  // Convertir a array con porcentajes
+  return Object.entries(weeklyData)
+    .filter(([_, data]) => data.totalVolume > 0)
+    .map(([week, data]) => ({
+      week,
+      percentage: (data.categoryVolume / data.totalVolume) * 100,
+      categoryVolume: data.categoryVolume,
+      totalVolume: data.totalVolume
+    }))
+    .sort((a, b) => a.week.localeCompare(b.week));
+};
+
+/**
+ * Analiza la tendencia hacia el balance ideal
+ */
+const analyzeTrendTowardsIdeal = (weeklyData: any[], idealPercentage: number): number => {
+  if (weeklyData.length < 3) return 0;
+
+  const midpoint = Math.floor(weeklyData.length / 2);
+  const firstHalf = weeklyData.slice(0, midpoint);
+  const secondHalf = weeklyData.slice(midpoint);
+
+  const firstHalfAvg = firstHalf.reduce((sum, w) => sum + w.percentage, 0) / firstHalf.length;
+  const secondHalfAvg = secondHalf.reduce((sum, w) => sum + w.percentage, 0) / secondHalf.length;
+
+  // Calcular si se acerca al ideal
+  const firstDeviation = Math.abs(firstHalfAvg - idealPercentage);
+  const secondDeviation = Math.abs(secondHalfAvg - idealPercentage);
+
+  // Retorna valor entre -1 (se aleja del ideal) y 1 (se acerca al ideal)
+  return firstDeviation > 0 ? (firstDeviation - secondDeviation) / firstDeviation : 0;
+};
+
+/**
+ * Calcula el score de consistencia para una categoría (función actualizada)
+ * Ahora separa diferentes tipos de consistencia para mayor claridad
+ */
+const calculateConsistencyScore = (categoryRecords: WorkoutRecord[], avgWorkoutsPerWeek: number): number => {
+  // Usar solo la consistencia de entrenamiento para mantener compatibilidad
+  const trainingConsistency = calculateTrainingConsistency(categoryRecords, avgWorkoutsPerWeek);
+  return trainingConsistency.overallScore;
+};
+
+/**
+ * Determina el nivel de fuerza para una categoría usando los nuevos estándares
+ * Actualizada para ser consistente con calculateStrengthIndex
+ */
+const determineStrengthLevel = (estimatedOneRM: number, category: string): 'beginner' | 'intermediate' | 'advanced' => {
+  const standards = STRENGTH_STANDARDS[category];
+
+  if (!standards) {
+    // Fallback para categorías sin estándares
+    if (estimatedOneRM >= 80) return 'advanced';
+    if (estimatedOneRM >= 50) return 'intermediate';
+    return 'beginner';
+  }
+
+  // Usar los estándares específicos de la categoría
+  if (estimatedOneRM >= standards.advanced) return 'advanced';
+  if (estimatedOneRM >= standards.intermediate) return 'intermediate';
   return 'beginner';
 };
 
@@ -411,7 +891,7 @@ const generateCategoryWarnings = (
 
 /**
  * Calcula métricas por categoría de ejercicio con análisis avanzado
- * Ahora maneja ejercicios con múltiples categorías
+ * Opción 2: Volumen Relativo al Esfuerzo - distribuye el volumen proporcionalmente
  */
 export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetrics[] => {
   if (records.length === 0) return [];
@@ -436,9 +916,11 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
       workoutsByCategory[category]++;
       volumeByCategory[category] += record.weight * record.reps * record.sets;
     } else {
-      // Distribuir entre múltiples categorías
-      const volumePerCategory = (record.weight * record.reps * record.sets) / categories.length;
-      const workoutContribution = 1 / categories.length;
+      // OPCIÓN 2: Volumen Relativo al Esfuerzo
+      // Calcular la distribución de esfuerzo entre categorías
+      const totalVolume = record.weight * record.reps * record.sets;
+      const effortDistribution = calculateCategoryEffortDistribution(categories);
+      const workoutContribution = 1 / categories.length; // Solo dividir workouts, no volumen
 
       categories.forEach(category => {
         if (!recordsByCategory[category]) {
@@ -448,11 +930,14 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
         }
         recordsByCategory[category].push(record);
         workoutsByCategory[category] += workoutContribution;
-        volumeByCategory[category] += volumePerCategory;
+        // Asignar volumen basado en el esfuerzo relativo de cada categoría
+        volumeByCategory[category] += totalVolume * (effortDistribution[category] || 0);
       });
     }
   });
 
+  // Calcular totalVolume para porcentajes consistentes
+  const totalVolume = Object.values(volumeByCategory).reduce((sum, volume) => sum + volume, 0);
   const totalWorkouts = Object.values(workoutsByCategory).reduce((sum, count) => sum + count, 0);
   const metrics: CategoryMetrics[] = [];
 
@@ -462,7 +947,7 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
   // Calcular métricas para cada categoría
   Object.entries(recordsByCategory).forEach(([category, categoryRecords]) => {
     const workouts = workoutsByCategory[category];
-    const totalVolume = volumeByCategory[category];
+    const categoryVolume = volumeByCategory[category];
 
     // Calcular pesos promedio, máximo y mínimo considerando todos los ejercicios de la categoría
     const weights = categoryRecords.map(record => record.weight);
@@ -478,16 +963,35 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
     const totalSets = sets.reduce((sum, s) => sum + s, 0);
     const totalReps = reps.reduce((sum, r) => sum + r, 0);
 
-    // Calcular entrenamientos por semana aproximado
+    // Calcular entrenamientos por semana aproximado - CORREGIDO
     const dates = categoryRecords.map(record => new Date(record.date));
-    const uniqueDates = [...new Set(dates.map(d => d.toDateString()))];
-    const earliestDate = new Date(Math.min(...dates.map(d => d.getTime())));
-    const latestDate = new Date(Math.max(...dates.map(d => d.getTime())));
-    const daysDifference = Math.max(1, Math.ceil((latestDate.getTime() - earliestDate.getTime()) / (1000 * 60 * 60 * 24)));
-    const avgWorkoutsPerWeek = (workouts / daysDifference) * 7;
+    const uniqueDates = Array.from(new Set(dates.map(d => d.toDateString())));
+
+    // Agrupar por semanas para calcular frecuencia semanal real
+    const weeklyData = new Map<string, Set<string>>();
+
+    categoryRecords.forEach(record => {
+      const date = new Date(record.date);
+      // Obtener el lunes de la semana
+      const monday = new Date(date);
+      monday.setDate(date.getDate() - date.getDay() + 1);
+      const weekKey = monday.toISOString().split('T')[0];
+
+      if (!weeklyData.has(weekKey)) {
+        weeklyData.set(weekKey, new Set());
+      }
+      weeklyData.get(weekKey)!.add(record.date.toDateString());
+    });
+
+    // Calcular promedio de días únicos por semana solo para semanas con entrenamientos
+    const avgWorkoutsPerWeek = weeklyData.size > 0
+      ? Array.from(weeklyData.values()).reduce((sum, daysSet) => sum + daysSet.size, 0) / weeklyData.size
+      : 0;
 
     const lastWorkout = new Date(Math.max(...dates.map(d => d.getTime())));
-    const percentage = (workouts / totalWorkouts) * 100;
+
+    // Usar porcentaje de volumen relativo al esfuerzo
+    const percentage = totalVolume > 0 ? (categoryVolume / totalVolume) * 100 : 0;
 
     // Calcular métricas avanzadas
     const personalRecords = calculatePersonalRecords(categoryRecords);
@@ -496,7 +1000,7 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
 
     const weightProgression = calculateWeightProgression(categoryRecords);
     const volumeProgression = calculateVolumeProgression(categoryRecords);
-    const intensityScore = calculateCategoryIntensityScore(categoryRecords);
+    const intensityScore = calculateIntensityScore(categoryRecords);
     const efficiencyScore = calculateEfficiencyScore(categoryRecords);
     const consistencyScore = calculateConsistencyScore(categoryRecords, avgWorkoutsPerWeek);
 
@@ -504,9 +1008,26 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
     const daysSinceLastWorkout = Math.floor((currentDate.getTime() - lastWorkout.getTime()) / (1000 * 60 * 60 * 24));
 
     // Determinar tendencia basada en progresión de peso y volumen
+    // Ser más conservador con pocas semanas de datos
+    const weeksWithData = new Set(categoryRecords.map(r => {
+      const date = new Date(r.date);
+      const monday = new Date(date);
+      monday.setDate(date.getDate() - date.getDay() + 1);
+      return monday.toISOString().split('T')[0];
+    })).size;
+
     let trend: 'improving' | 'stable' | 'declining' = 'stable';
-    if (weightProgression > 5 || volumeProgression > 5) trend = 'improving';
-    else if (weightProgression < -5 || volumeProgression < -5) trend = 'declining';
+
+    // Con pocas semanas (≤3), ser más conservador - requiere cambios más grandes para detectar tendencia
+    if (weeksWithData <= 3) {
+      if (weightProgression > 10 || volumeProgression > 15) trend = 'improving';
+      else if (weightProgression < -15 || volumeProgression < -20) trend = 'declining';
+      // De lo contrario, mantener como 'stable' para evitar falsos negativos
+    } else {
+      // Con más datos, usar thresholds normales
+      if (weightProgression > 5 || volumeProgression > 5) trend = 'improving';
+      else if (weightProgression < -5 || volumeProgression < -5) trend = 'declining';
+    }
 
     const strengthLevel = determineStrengthLevel(estimatedOneRM, category);
 
@@ -519,7 +1040,7 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
     const baseMetrics: Partial<CategoryMetrics> = {
       category,
       workouts: Math.round(workouts * 100) / 100,
-      totalVolume: Math.round(totalVolume),
+      totalVolume: Math.round(categoryVolume),
       avgWeight: Math.round(avgWeight * 100) / 100,
       maxWeight,
       minWeight,
@@ -589,16 +1110,7 @@ const calculateSymmetryScore = (category: string, categoryRecords: WorkoutRecord
  * Calcula el ratio antagonista para un grupo muscular
  */
 const calculateAntagonistRatio = (category: string, categoryMetrics: CategoryMetrics[]): number => {
-  const antagonistPairs: Record<string, string> = {
-    'Pecho': 'Espalda',
-    'Espalda': 'Pecho',
-    'Brazos': 'Piernas', // Simplificado
-    'Piernas': 'Brazos',
-    'Hombros': 'Core',
-    'Core': 'Hombros'
-  };
-
-  const antagonist = antagonistPairs[category];
+  const antagonist = ANTAGONIST_PAIRS[category];
   if (!antagonist) return 1; // No hay antagonista directo
 
   const currentMetric = categoryMetrics.find(m => m.category === category);
@@ -612,7 +1124,56 @@ const calculateAntagonistRatio = (category: string, categoryMetrics: CategoryMet
 };
 
 /**
- * Calcula el índice de fuerza para un grupo muscular
+ * Obtiene el grupo muscular antagonista para una categoría dada
+ */
+const getAntagonistGroup = (category: string): string | null => {
+  return ANTAGONIST_PAIRS[category] || null;
+};
+
+/**
+ * Calcula el ratio ideal entre un grupo muscular y su antagonista
+ */
+const calculateIdealAntagonistRatio = (category: string): number => {
+  const antagonist = ANTAGONIST_PAIRS[category];
+  if (!antagonist) return 1;
+
+  const categoryIdeal = IDEAL_VOLUME_DISTRIBUTION[category] || 15;
+  const antagonistIdeal = IDEAL_VOLUME_DISTRIBUTION[antagonist] || 15;
+
+  return categoryIdeal / antagonistIdeal;
+};
+
+/**
+ * Analiza el desequilibrio antagonista comparando con el ratio ideal
+ */
+const analyzeAntagonistImbalance = (category: string, actualRatio: number): {
+  hasImbalance: boolean;
+  type: 'too_much' | 'too_little' | 'balanced';
+  severity: 'mild' | 'moderate' | 'severe';
+  deviation: number;
+} => {
+  const idealRatio = calculateIdealAntagonistRatio(category);
+  const deviation = ((actualRatio - idealRatio) / idealRatio) * 100;
+
+  // Umbrales basados en porcentaje de desviación del ratio ideal
+  const mildThreshold = 20; // ±20%
+  const moderateThreshold = 40; // ±40%
+
+  if (Math.abs(deviation) <= mildThreshold) {
+    return { hasImbalance: false, type: 'balanced', severity: 'mild', deviation };
+  }
+
+  const type = deviation > 0 ? 'too_much' : 'too_little';
+  const severity = Math.abs(deviation) > moderateThreshold ? 'severe' : 'moderate';
+
+  return { hasImbalance: true, type, severity, deviation };
+};
+
+
+
+/**
+ * Calcula el índice de fuerza para un grupo muscular usando estándares específicos
+ * Opción mejorada que considera las diferencias naturales entre categorías musculares
  */
 const calculateStrengthIndex = (categoryRecords: WorkoutRecord[]): number => {
   if (categoryRecords.length === 0) return 0;
@@ -624,9 +1185,50 @@ const calculateStrengthIndex = (categoryRecords: WorkoutRecord[]): number => {
 
   const avgOneRM = estimatedOneRMs.reduce((sum, orm) => sum + orm, 0) / estimatedOneRMs.length;
 
-  // Normalizar a escala 0-100 (asumiendo que 100kg es un buen baseline)
-  return Math.min(100, Math.round((avgOneRM / 100) * 100));
+  // Obtener la categoría del primer record (asumiendo que todos son de la misma categoría)
+  const category = categoryRecords[0]?.exercise?.categories?.[0];
+
+  if (!category || !STRENGTH_STANDARDS[category]) {
+    // Fallback para categorías sin estándares definidos
+    return Math.min(100, Math.round((avgOneRM / 50) * 100));
+  }
+
+  const standards = STRENGTH_STANDARDS[category];
+
+  // Calcular índice basado en los estándares específicos de la categoría
+  if (avgOneRM >= standards.elite) {
+    // Elite: 90-100 puntos
+    const eliteProgress = Math.min(1, (avgOneRM - standards.elite) / (standards.elite * 0.3));
+    return Math.round(90 + (eliteProgress * 10));
+  } else if (avgOneRM >= standards.advanced) {
+    // Avanzado: 70-89 puntos
+    const advancedProgress = (avgOneRM - standards.advanced) / (standards.elite - standards.advanced);
+    return Math.round(70 + (advancedProgress * 19));
+  } else if (avgOneRM >= standards.intermediate) {
+    // Intermedio: 50-69 puntos
+    const intermediateProgress = (avgOneRM - standards.intermediate) / (standards.advanced - standards.intermediate);
+    return Math.round(50 + (intermediateProgress * 19));
+  } else if (avgOneRM >= standards.beginner) {
+    // Principiante: 25-49 puntos
+    const beginnerProgress = (avgOneRM - standards.beginner) / (standards.intermediate - standards.beginner);
+    return Math.round(25 + (beginnerProgress * 24));
+  } else {
+    // Por debajo de principiante: 0-24 puntos
+    const preBeginnerProgress = Math.min(1, avgOneRM / standards.beginner);
+    return Math.round(preBeginnerProgress * 24);
+  }
 };
+
+/**
+ * Obtiene la etiqueta descriptiva del nivel de fuerza
+ */
+const getStrengthLevelLabel = (strengthIndex: number): 'principiante' | 'intermedio' | 'avanzado' | 'elite' => {
+  if (strengthIndex >= 90) return 'elite';
+  if (strengthIndex >= 70) return 'avanzado';
+  if (strengthIndex >= 50) return 'intermedio';
+  return 'principiante';
+};
+
 
 /**
  * Calcula un factor de ajuste temporal para métricas cuando hay pocos datos
@@ -677,6 +1279,7 @@ const adjustMetricsForLimitedData = (
 
 /**
  * Analiza la tendencia de progreso para un grupo muscular
+ * Corregido para usar 1RM estimado consistentemente
  */
 const analyzeProgressTrend = (categoryRecords: WorkoutRecord[]): {
   trend: 'improving' | 'stable' | 'declining';
@@ -691,33 +1294,43 @@ const analyzeProgressTrend = (categoryRecords: WorkoutRecord[]): {
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-  // Analizar últimas 4 semanas
-  const recentRecords = sortedRecords.slice(-8); // Últimos 8 records
-  const midpoint = Math.floor(recentRecords.length / 2);
-  const firstHalf = recentRecords.slice(0, midpoint);
-  const secondHalf = recentRecords.slice(midpoint);
+  // Usar primera mitad vs segunda mitad para máxima precisión temporal
+  const midpoint = Math.floor(sortedRecords.length / 2);
+  const firstHalf = sortedRecords.slice(0, midpoint);
+  const secondHalf = sortedRecords.slice(midpoint);
 
-  // Calcular volumen promedio para cada mitad
-  const firstHalfVolume = firstHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / firstHalf.length;
-  const secondHalfVolume = secondHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / secondHalf.length;
+  if (firstHalf.length === 0 || secondHalf.length === 0) {
+    return { trend: 'stable', lastImprovement: null };
+  }
 
-  const improvement = ((secondHalfVolume - firstHalfVolume) / firstHalfVolume) * 100;
+  // Calcular 1RM promedio para cada mitad - CORREGIDO
+  const firstHalfAvg1RM = firstHalf.reduce((sum, r) => {
+    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+    return sum + oneRM;
+  }, 0) / firstHalf.length;
+
+  const secondHalfAvg1RM = secondHalf.reduce((sum, r) => {
+    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+    return sum + oneRM;
+  }, 0) / secondHalf.length;
+
+  const improvement = firstHalfAvg1RM > 0 ? ((secondHalfAvg1RM - firstHalfAvg1RM) / firstHalfAvg1RM) * 100 : 0;
 
   let trend: 'improving' | 'stable' | 'declining';
   if (improvement > 5) trend = 'improving';
   else if (improvement < -5) trend = 'declining';
   else trend = 'stable';
 
-  // Encontrar último record con mejora significativa
+  // Encontrar último record con mejora significativa usando 1RM
   let lastImprovement: Date | null = null;
   for (let i = 1; i < sortedRecords.length; i++) {
     const current = sortedRecords[i];
     const previous = sortedRecords[i - 1];
 
-    const currentVolume = current.weight * current.reps * current.sets;
-    const previousVolume = previous.weight * previous.reps * previous.sets;
+    const current1RM = current.weight * (1 + Math.min(current.reps, 20) / 30);
+    const previous1RM = previous.weight * (1 + Math.min(previous.reps, 20) / 30);
 
-    if (currentVolume > previousVolume * 1.1) { // Mejora del 10%
+    if (current1RM > previous1RM * 1.05) { // Mejora del 5% en 1RM
       lastImprovement = new Date(current.date);
     }
   }
@@ -756,39 +1369,36 @@ const determinePriorityLevel = (
 
 /**
  * Determina la etapa de desarrollo para un grupo muscular
+ * Actualizada para usar los nuevos estándares de fuerza
  */
 const determineDevelopmentStage = (
   strengthIndex: number,
   weeklyFrequency: number,
   volume: number
 ): 'beginner' | 'intermediate' | 'advanced' | 'neglected' => {
+  // Si no hay volumen o frecuencia muy baja, está descuidado
   if (volume === 0 || weeklyFrequency < 0.5) return 'neglected';
-  if (strengthIndex < 30) return 'beginner';
-  if (strengthIndex < 70) return 'intermediate';
-  return 'advanced';
-};
 
-/**
- * Calcula el score de intensidad para un grupo muscular
- */
-const calculateIntensityScore = (categoryRecords: WorkoutRecord[]): number => {
-  if (categoryRecords.length === 0) return 0;
+  // Usar la nueva función de etiquetas de nivel
+  const strengthLevel = getStrengthLevelLabel(strengthIndex);
 
-  // Calcular intensidad basada en % de 1RM promedio
-  const weights = categoryRecords.map(r => r.weight);
-  const maxWeight = Math.max(...weights);
-  const avgWeight = weights.reduce((sum, w) => sum + w, 0) / weights.length;
-
-  if (maxWeight === 0) return 0;
-
-  const intensityPercentage = (avgWeight / maxWeight) * 100;
-  return Math.round(intensityPercentage);
+  // Mapear a los tipos esperados por la interfaz
+  switch (strengthLevel) {
+    case 'elite':
+    case 'avanzado':
+      return 'advanced';
+    case 'intermedio':
+      return 'intermediate';
+    default:
+      return 'beginner';
+  }
 };
 
 /**
  * Analiza el historial de balance para un grupo muscular
+ * Actualizado para medir consistencia real de balance, no solo fuerza
  */
-const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[]): {
+const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: WorkoutRecord[]): {
   trend: 'improving' | 'stable' | 'declining';
   consistency: number;
   volatility: number;
@@ -797,40 +1407,66 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[]): {
     return { trend: 'stable', consistency: 0, volatility: 0 };
   }
 
-  // Analizar volumen semanal usando date-fns con locale español
+  // Si tenemos todos los registros, usar análisis de balance real
+  if (allRecords && allRecords.length >= categoryRecords.length) {
+    const balanceConsistency = calculateBalanceConsistency(categoryRecords, allRecords);
+    const weeklyBalanceData = calculateWeeklyBalancePercentages(categoryRecords, allRecords);
+
+    if (weeklyBalanceData.length >= 3) {
+      // Analizar tendencia de balance (se acerca o aleja del ideal)
+      const idealPercentage = IDEAL_VOLUME_DISTRIBUTION[categoryRecords[0]?.exercise?.categories?.[0] || ''] || 15;
+      const trendTowardsIdeal = analyzeTrendTowardsIdeal(weeklyBalanceData, idealPercentage);
+
+      let trend: 'improving' | 'stable' | 'declining';
+      if (trendTowardsIdeal > 0.1) trend = 'improving';
+      else if (trendTowardsIdeal < -0.1) trend = 'declining';
+      else trend = 'stable';
+
+      // Calcular volatilidad del balance (variabilidad en porcentajes semanales)
+      const percentages = weeklyBalanceData.map(w => w.percentage);
+      const avgPercentage = percentages.reduce((sum, p) => sum + p, 0) / percentages.length;
+      const variance = percentages.reduce((sum, p) => sum + Math.pow(p - avgPercentage, 2), 0) / percentages.length;
+      const volatility = avgPercentage > 0 ? Math.round((Math.sqrt(variance) / avgPercentage) * 100) : 0;
+
+      return {
+        trend,
+        consistency: balanceConsistency,
+        volatility: Math.min(100, volatility)
+      };
+    }
+  }
+
+  // Fallback: usar análisis de progresión de fuerza si no hay suficientes datos de balance
   const sortedRecords = [...categoryRecords].sort((a, b) =>
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-  // Agrupar por semana usando startOfWeek con locale español
-  const weeklyData: Record<string, number> = {};
-  sortedRecords.forEach(record => {
-    const recordDate = new Date(record.date);
-    const weekStart = startOfWeek(recordDate, { locale: es });
-    const weekKey = weekStart.toISOString().split('T')[0]; // YYYY-MM-DD del lunes
-    const volume = record.weight * record.reps * record.sets;
-    weeklyData[weekKey] = (weeklyData[weekKey] || 0) + volume;
-  });
+  // Analizar 1RM promedio por período para detectar tendencia de progreso
+  const midpoint = Math.floor(sortedRecords.length / 2);
+  const firstHalf = sortedRecords.slice(0, midpoint);
+  const secondHalf = sortedRecords.slice(midpoint);
 
-  const volumes = Object.values(weeklyData);
+  const firstHalfAvg1RM = firstHalf.reduce((sum, r) => {
+    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+    return sum + oneRM;
+  }, 0) / firstHalf.length;
 
-  // Calcular tendencia
-  const firstHalf = volumes.slice(0, Math.floor(volumes.length / 2));
-  const secondHalf = volumes.slice(Math.floor(volumes.length / 2));
+  const secondHalfAvg1RM = secondHalf.reduce((sum, r) => {
+    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+    return sum + oneRM;
+  }, 0) / secondHalf.length;
 
-  const firstAvg = firstHalf.reduce((sum, v) => sum + v, 0) / firstHalf.length;
-  const secondAvg = secondHalf.reduce((sum, v) => sum + v, 0) / secondHalf.length;
-
-  const trendChange = ((secondAvg - firstAvg) / firstAvg) * 100;
+  const trendChange = firstHalfAvg1RM > 0 ? ((secondHalfAvg1RM - firstHalfAvg1RM) / firstHalfAvg1RM) * 100 : 0;
 
   let trend: 'improving' | 'stable' | 'declining';
-  if (trendChange > 10) trend = 'improving';
-  else if (trendChange < -10) trend = 'declining';
+  if (trendChange > 5) trend = 'improving';
+  else if (trendChange < -5) trend = 'declining';
   else trend = 'stable';
 
-  // Calcular consistencia (inverso del coeficiente de variación)
-  const mean = volumes.reduce((sum, v) => sum + v, 0) / volumes.length;
-  const variance = volumes.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / volumes.length;
+  // Calcular consistencia de progreso (no de balance, pero mejor que nada)
+  const oneRMs = sortedRecords.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30));
+  const mean = oneRMs.reduce((sum, v) => sum + v, 0) / oneRMs.length;
+  const variance = oneRMs.reduce((sum, v) => sum + Math.pow(v - mean, 2), 0) / oneRMs.length;
   const stdDev = Math.sqrt(variance);
   const consistency = mean > 0 ? Math.max(0, 100 - ((stdDev / mean) * 100)) : 0;
 
@@ -840,7 +1476,7 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[]): {
   return {
     trend,
     consistency: Math.round(consistency),
-    volatility: Math.round(volatility)
+    volatility: Math.round(Math.min(100, volatility))
   };
 };
 
@@ -877,11 +1513,18 @@ const generateSpecificRecommendations = (
     recommendations.push(`Variar ejercicios para estimular crecimiento`);
   }
 
-  // Recomendaciones por ratio antagonista
-  if (balance.antagonistRatio && balance.antagonistRatio < 0.8) {
-    recommendations.push(`Fortalecer ${category.toLowerCase()} para balancear con antagonista`);
-  } else if (balance.antagonistRatio && balance.antagonistRatio > 1.2) {
-    recommendations.push(`Equilibrar con más trabajo del grupo antagonista`);
+  // Recomendaciones por ratio antagonista - Nueva lógica basada en ratios ideales
+  if (balance.antagonistRatio && balance.antagonistRatio > 0) {
+    const imbalanceAnalysis = analyzeAntagonistImbalance(category, balance.antagonistRatio);
+    const antagonist = getAntagonistGroup(category);
+
+    if (imbalanceAnalysis.hasImbalance && antagonist) {
+      if (imbalanceAnalysis.type === 'too_little') {
+        recommendations.push(`Aumentar volumen de ${category.toLowerCase()} para equilibrar con ${antagonist.toLowerCase()}`);
+      } else if (imbalanceAnalysis.type === 'too_much') {
+        recommendations.push(`Reducir volumen de ${category.toLowerCase()} o aumentar ${antagonist.toLowerCase()} para equilibrar`);
+      }
+    }
   }
 
   // Recomendaciones por intensidad
@@ -897,7 +1540,8 @@ const generateSpecificRecommendations = (
  */
 const generateWarnings = (
   category: string,
-  balance: Partial<MuscleBalance>
+  balance: Partial<MuscleBalance>,
+  categoryMetrics: CategoryMetrics[] = []
 ): string[] => {
   const warnings: string[] = [];
 
@@ -913,8 +1557,21 @@ const generateWarnings = (
     warnings.push(`Progreso en declive en ${category.toLowerCase()}`);
   }
 
-  if (balance.antagonistRatio && (balance.antagonistRatio < 0.6 || balance.antagonistRatio > 1.4)) {
-    warnings.push(`Desequilibrio significativo con grupo antagonista`);
+  // Nueva lógica de desequilibrio antagonista basada en ratios ideales
+  if (balance.antagonistRatio && balance.antagonistRatio > 0) {
+    const imbalanceAnalysis = analyzeAntagonistImbalance(category, balance.antagonistRatio);
+    const antagonist = getAntagonistGroup(category);
+
+    if (imbalanceAnalysis.hasImbalance && antagonist) {
+      // Solo mostrar advertencia si este grupo debe mostrarla (evitar duplicados)
+      if (shouldShowAntagonistWarning(category, antagonist, balance.antagonistRatio, categoryMetrics)) {
+        if (imbalanceAnalysis.type === 'too_much') {
+          warnings.push(`Se entrena demasiado ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()}`);
+        } else if (imbalanceAnalysis.type === 'too_little') {
+          warnings.push(`Se entrena muy poco ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()}`);
+        }
+      }
+    }
   }
 
   if (balance.balanceHistory?.volatility && balance.balanceHistory.volatility > 50) {
@@ -922,6 +1579,38 @@ const generateWarnings = (
   }
 
   return warnings;
+};
+
+/**
+ * Determina si debe mostrar advertencia antagonista para evitar duplicados
+ * Solo muestra la advertencia desde el grupo con mayor desviación
+ */
+const shouldShowAntagonistWarning = (
+  category: string,
+  antagonist: string,
+  actualRatio: number,
+  categoryMetrics: CategoryMetrics[]
+): boolean => {
+  // Obtener métricas de ambos grupos
+  const categoryData = categoryMetrics.find(m => m.category === category);
+  const antagonistData = categoryMetrics.find(m => m.category === antagonist);
+
+  if (!categoryData || !antagonistData) return false;
+
+  // Calcular desviaciones absolutas respecto a sus ideales individuales
+  const categoryIdeal = IDEAL_VOLUME_DISTRIBUTION[category] || 15;
+  const antagonistIdeal = IDEAL_VOLUME_DISTRIBUTION[antagonist] || 15;
+
+  const categoryDeviation = Math.abs(categoryData.percentage - categoryIdeal);
+  const antagonistDeviation = Math.abs(antagonistData.percentage - antagonistIdeal);
+
+  // Solo mostrar desde el grupo con mayor desviación individual
+  // En caso de empate, usar orden alfabético para consistencia
+  if (categoryDeviation === antagonistDeviation) {
+    return category < antagonist;
+  }
+
+  return categoryDeviation > antagonistDeviation;
 };
 
 /**
@@ -936,16 +1625,8 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
   // Calcular factor de ajuste temporal
   const temporalAdjustmentFactor = calculateTemporalAdjustmentFactor(records);
 
-  // Volúmenes ideales por categoría (porcentajes recomendados)
-  const idealDistribution: Record<string, number> = {
-    'Pecho': 20,
-    'Espalda': 25, // Espalda ligeramente más por balance postural
-    'Piernas': 30, // Piernas más por ser el grupo muscular más grande
-    'Hombros': 15,
-    'Brazos': 10,
-    'Core': 10,
-    'Cardio': 5
-  };
+  // Usar distribución ideal centralizada
+  const idealDistribution = IDEAL_VOLUME_DISTRIBUTION;
 
   // Agrupar registros por categoría para análisis detallado
   const recordsByCategory: Record<string, WorkoutRecord[]> = {};
@@ -989,10 +1670,9 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
 
     const progressAnalysis = analyzeProgressTrend(categoryRecords);
 
-    const rawIntensityScore = calculateIntensityScore(categoryRecords);
-    const intensityScore = adjustMetricsForLimitedData(rawIntensityScore, temporalAdjustmentFactor, 'percentage');
+    const intensityScore = calculateIntensityScore(categoryRecords);
 
-    const balanceHistory = analyzeBalanceHistory(categoryRecords);
+    const balanceHistory = analyzeBalanceHistory(categoryRecords, records);
     // Ajustar consistencia del historial
     balanceHistory.consistency = adjustMetricsForLimitedData(balanceHistory.consistency, temporalAdjustmentFactor, 'percentage');
 
@@ -1037,7 +1717,7 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
 
     // Generar recomendaciones específicas y advertencias
     const specificRecommendations = generateSpecificRecommendations(metric.category, balanceData, categoryMetrics);
-    const warnings = generateWarnings(metric.category, balanceData);
+    const warnings = generateWarnings(metric.category, balanceData, categoryMetrics);
 
     // Objeto final completo
     muscleBalance.push({
@@ -1084,7 +1764,7 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
       };
 
       const specificRecommendations = generateSpecificRecommendations(category, balanceData, categoryMetrics);
-      const warnings = temporalAdjustmentFactor < 0.5 ? [] : generateWarnings(category, balanceData);
+      const warnings = temporalAdjustmentFactor < 0.5 ? [] : generateWarnings(category, balanceData, categoryMetrics);
 
       muscleBalance.push({
         ...balanceData,
