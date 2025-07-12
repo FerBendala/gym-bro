@@ -17,7 +17,6 @@ import type { WorkoutRecord } from '../../../interfaces';
 import { formatNumber } from '../../../utils/functions';
 import { calculateTrendsAnalysis } from '../../../utils/functions/trends-analysis';
 import { Card, CardContent, CardHeader } from '../../card';
-import { StatCard } from '../../stat-card';
 import { InfoTooltip } from '../../tooltip';
 
 interface TrendsTabProps {
@@ -103,53 +102,70 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
         </Card>
       )}
 
-      {/* Métricas principales con diseño mejorado */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
-        <StatCard
-          title="Día Preferido"
-          value={analysis.workoutHabits.preferredDay}
-          icon={Calendar}
-          variant="primary"
-          tooltip="El día de la semana en el que entrenas con mayor frecuencia. Útil para planificar tu rutina semanal."
-          tooltipPosition="top"
-        />
-        <StatCard
-          title="Hora Preferida"
-          value={analysis.workoutHabits.preferredTime}
-          icon={Clock}
-          variant="success"
-          tooltip="El rango horario en el que realizas la mayoría de tus entrenamientos. Indica tu ventana de mayor energía."
-          tooltipPosition="top"
-        />
-        <StatCard
-          title="Consistencia"
-          value={`${analysis.workoutHabits.consistencyScore}%`}
-          icon={Target}
-          variant={analysis.workoutHabits.consistencyScore >= 70 ? 'success' :
-            analysis.workoutHabits.consistencyScore >= 50 ? 'warning' : 'danger'}
-          tooltip="Puntuación de qué tan regular eres en tus entrenamientos. 70%+ es excelente, 50-69% es bueno, <50% necesita mejoras."
-          tooltipPosition="top"
-        />
-        <StatCard
-          title="Racha Actual"
-          value={analysis.workoutHabits.workoutStreaks.current.toString()}
-          icon={Trophy}
-          variant={analysis.workoutHabits.workoutStreaks.current > 7 ? 'success' :
-            analysis.workoutHabits.workoutStreaks.current > 3 ? 'warning' : 'danger'}
-          tooltip="Tu racha actual de días consecutivos entrenando. ¡Mantén el momentum!"
-          tooltipPosition="top"
-        />
-        <StatCard
-          title="Tendencia General"
-          value={analysis.temporalEvolution.overallTrend}
-          icon={analysis.temporalEvolution.overallTrend === 'Mejorando' ? TrendingUp :
-            analysis.temporalEvolution.overallTrend === 'Declinando' ? TrendingDown : Activity}
-          variant={analysis.temporalEvolution.overallTrend === 'Mejorando' ? 'success' :
-            analysis.temporalEvolution.overallTrend === 'Declinando' ? 'danger' : 'indigo'}
-          tooltip="La tendencia general de tu progreso en las últimas semanas."
-          tooltipPosition="top"
-        />
-      </div>
+      {/* Evolución Temporal */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <TrendingUp className="w-5 h-5 mr-2" />
+            Evolución Temporal
+            <InfoTooltip
+              content="Análisis avanzado de tu progreso temporal con predicciones, volatilidad y comparaciones por períodos."
+              position="top"
+              className="ml-2"
+            />
+          </h3>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-6">
+            {/* Métricas de tendencia general */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <TrendingUp className={`w-5 h-5 ${analysis.temporalEvolution.overallTrend === 'Mejorando' ? 'text-green-400' :
+                    analysis.temporalEvolution.overallTrend === 'Declinando' ? 'text-red-400' : 'text-gray-400'}`} />
+                </div>
+                <div className="text-sm text-gray-400 mb-1">Tendencia</div>
+                <div className={`text-lg font-semibold ${analysis.temporalEvolution.overallTrend === 'Mejorando' ? 'text-green-400' :
+                  analysis.temporalEvolution.overallTrend === 'Declinando' ? 'text-red-400' : 'text-gray-400'}`}>
+                  {analysis.temporalEvolution.overallTrend}
+                </div>
+              </div>
+
+              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Target className="w-5 h-5 text-blue-400" />
+                </div>
+                <div className="text-sm text-gray-400 mb-1">Crecimiento</div>
+                <div className="text-lg font-semibold text-blue-400">
+                  {analysis.temporalEvolution.growthRate > 0 ? '+' : ''}{analysis.temporalEvolution.growthRate}%
+                </div>
+              </div>
+
+              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Activity className={`w-5 h-5 ${analysis.temporalEvolution.volatility < 20 ? 'text-green-400' :
+                    analysis.temporalEvolution.volatility < 40 ? 'text-yellow-400' : 'text-red-400'}`} />
+                </div>
+                <div className="text-sm text-gray-400 mb-1">Volatilidad</div>
+                <div className={`text-lg font-semibold ${analysis.temporalEvolution.volatility < 20 ? 'text-green-400' :
+                  analysis.temporalEvolution.volatility < 40 ? 'text-yellow-400' : 'text-red-400'}`}>
+                  {analysis.temporalEvolution.volatility}%
+                </div>
+              </div>
+
+              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                <div className="flex items-center justify-center mb-2">
+                  <Brain className="w-5 h-5 text-purple-400" />
+                </div>
+                <div className="text-sm text-gray-400 mb-1">Confianza</div>
+                <div className="text-lg font-semibold text-purple-400">
+                  {Math.round(analysis.temporalEvolution.predictions.confidence * 100)}%
+                </div>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Análisis por Día de la Semana */}
       <Card>
@@ -322,100 +338,6 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
                 </div>
               );
             })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Evolución Temporal */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-white flex items-center">
-            <TrendingUp className="w-5 h-5 mr-2" />
-            Evolución Temporal
-            <InfoTooltip
-              content="Análisis avanzado de tu progreso temporal con predicciones, volatilidad y comparaciones por períodos."
-              position="top"
-              className="ml-2"
-            />
-          </h3>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {/* Métricas de tendencia general */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <TrendingUp className={`w-5 h-5 ${analysis.temporalEvolution.overallTrend === 'Mejorando' ? 'text-green-400' :
-                    analysis.temporalEvolution.overallTrend === 'Declinando' ? 'text-red-400' : 'text-gray-400'}`} />
-                </div>
-                <div className="text-sm text-gray-400 mb-1">Tendencia</div>
-                <div className={`text-lg font-semibold ${analysis.temporalEvolution.overallTrend === 'Mejorando' ? 'text-green-400' :
-                  analysis.temporalEvolution.overallTrend === 'Declinando' ? 'text-red-400' : 'text-gray-400'}`}>
-                  {analysis.temporalEvolution.overallTrend}
-                </div>
-              </div>
-
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Target className="w-5 h-5 text-blue-400" />
-                </div>
-                <div className="text-sm text-gray-400 mb-1">Crecimiento</div>
-                <div className="text-lg font-semibold text-blue-400">
-                  {analysis.temporalEvolution.growthRate > 0 ? '+' : ''}{analysis.temporalEvolution.growthRate}%
-                </div>
-              </div>
-
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Activity className={`w-5 h-5 ${analysis.temporalEvolution.volatility < 20 ? 'text-green-400' :
-                    analysis.temporalEvolution.volatility < 40 ? 'text-yellow-400' : 'text-red-400'}`} />
-                </div>
-                <div className="text-sm text-gray-400 mb-1">Volatilidad</div>
-                <div className={`text-lg font-semibold ${analysis.temporalEvolution.volatility < 20 ? 'text-green-400' :
-                  analysis.temporalEvolution.volatility < 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                  {analysis.temporalEvolution.volatility}%
-                </div>
-              </div>
-
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Brain className="w-5 h-5 text-purple-400" />
-                </div>
-                <div className="text-sm text-gray-400 mb-1">Confianza</div>
-                <div className="text-lg font-semibold text-purple-400">
-                  {Math.round(analysis.temporalEvolution.predictions.confidence * 100)}%
-                </div>
-              </div>
-            </div>
-
-            {/* Predicciones */}
-            <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4">
-              <h4 className="text-sm font-medium text-blue-300 mb-3 flex items-center">
-                <Brain className="w-4 h-4 mr-2" />
-                Predicciones para la Próxima Semana
-              </h4>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="text-center">
-                  <div className="text-xl font-bold text-blue-400">
-                    {formatNumber(analysis.temporalEvolution.predictions.nextWeekVolume)} kg
-                  </div>
-                  <div className="text-xs text-gray-400">Volumen estimado</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-xl font-bold text-blue-400">
-                    {analysis.temporalEvolution.predictions.nextWeekWorkouts}
-                  </div>
-                  <div className="text-xs text-gray-400">Entrenamientos</div>
-                </div>
-                <div className="text-center">
-                  <div className={`text-xl font-bold ${analysis.temporalEvolution.predictions.trend === 'Alcista' ? 'text-green-400' :
-                    analysis.temporalEvolution.predictions.trend === 'Bajista' ? 'text-red-400' : 'text-gray-400'}`}>
-                    {analysis.temporalEvolution.predictions.trend}
-                  </div>
-                  <div className="text-xs text-gray-400">Tendencia</div>
-                </div>
-              </div>
-            </div>
           </div>
         </CardContent>
       </Card>

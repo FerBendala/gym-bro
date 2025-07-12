@@ -9,7 +9,6 @@ import { ModernCalendar } from './pages/calendar';
 import { ModernHome } from './pages/home';
 import { ModernProgress } from './pages/progress';
 import { ModernSettings } from './pages/settings';
-import { ModernStats } from './pages/stats';
 import { WorkoutHistory } from './pages/workout-history';
 
 const ModernAppContent = () => {
@@ -77,11 +76,6 @@ const ModernAppContent = () => {
           title: 'Calendario',
           subtitle: 'Vista mensual de entrenamientos'
         };
-      case 'stats':
-        return {
-          title: 'Estadísticas',
-          subtitle: 'Métricas detalladas y análisis'
-        };
       case 'settings':
         return {
           title: 'Configuración',
@@ -114,8 +108,6 @@ const ModernAppContent = () => {
         return <ModernProgress />;
       case 'calendar':
         return <ModernCalendar />;
-      case 'stats':
-        return <ModernStats />;
       case 'settings':
         return <ModernSettings />;
       case 'history':

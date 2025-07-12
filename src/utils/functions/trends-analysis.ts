@@ -135,6 +135,9 @@ export interface TrendsAnalysis {
 export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
   if (records.length === 0) return [];
 
+  // Asegurar que los registros estén ordenados cronológicamente (más antiguos primero)
+  const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
   const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
   const dayStats: Record<number, { workouts: WorkoutRecord[]; volumes: number[]; times: number[]; weights: number[]; exercises: string[] }> = {};
 
@@ -144,7 +147,7 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
   }
 
   // Agrupar por día de la semana
-  records.forEach(record => {
+  sortedRecords.forEach(record => {
     const dayIndex = getDay(new Date(record.date));
     const volume = record.weight * record.reps * record.sets;
     const hour = getHours(new Date(record.date));
@@ -158,12 +161,37 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
     }
   });
 
-  const totalWorkouts = records.length;
-  const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const totalWorkouts = sortedRecords.length;
+  const totalVolume = sortedRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
 
   // Calcular tendencias comparando con semanas anteriores
-  const recentRecords = records.slice(-28); // Últimas 4 semanas
-  const olderRecords = records.slice(-56, -28); // 4 semanas anteriores
+  // Ajustar según la cantidad de datos disponibles para evitar comparaciones erróneas
+  const totalRecords = sortedRecords.length;
+
+  let recentRecords: WorkoutRecord[];
+  let olderRecords: WorkoutRecord[];
+
+  if (totalRecords < 20) {
+    // Con pocos datos, comparar segunda mitad vs primera mitad
+    const midpoint = Math.floor(totalRecords / 2);
+    if (midpoint >= 2) {
+      recentRecords = sortedRecords.slice(midpoint);
+      olderRecords = sortedRecords.slice(0, midpoint);
+    } else {
+      // Si hay muy pocos datos, no hacer comparaciones
+      recentRecords = sortedRecords;
+      olderRecords = [];
+    }
+  } else if (totalRecords < 40) {
+    // Con datos moderados, comparar primera mitad vs segunda mitad
+    const midpoint = Math.floor(totalRecords / 2);
+    recentRecords = sortedRecords.slice(midpoint);
+    olderRecords = sortedRecords.slice(0, midpoint);
+  } else {
+    // Con suficientes datos, usar lógica original de 4 semanas
+    recentRecords = sortedRecords.slice(-28); // Últimas 4 semanas
+    olderRecords = sortedRecords.slice(-56, -28); // 4 semanas anteriores
+  }
 
   const dayMetrics: DayMetrics[] = [];
 
@@ -204,7 +232,7 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
     const avgSets = workoutCount > 0 ? Math.round((totalSets / stats.workouts.length) * 100) / 100 : 0;
 
     // Consistencia: frecuencia de entrenamientos en este día
-    const weeksWithData = Math.max(1, Math.ceil(records.length / 35)); // Estimación de semanas
+    const weeksWithData = Math.max(1, Math.ceil(sortedRecords.length / 35)); // Estimación de semanas
     const consistency = Math.round((workoutCount / weeksWithData) * 100);
 
     // Tendencia: comparar volumen reciente vs anterior
@@ -214,7 +242,37 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
     const olderDayVolume = olderRecords
       .filter(r => getDay(new Date(r.date)) === i)
       .reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-    const trend = olderDayVolume > 0 ? Math.round(((recentDayVolume - olderDayVolume) / olderDayVolume) * 100) : 0;
+
+    let trend = 0;
+
+    // Calcular tendencia con diferentes estrategias según la situación
+    if (olderRecords.length === 0) {
+      // Sin datos anteriores, no mostrar tendencia
+      trend = 0;
+    } else if (olderDayVolume > 0 && recentDayVolume > 0) {
+      // Ambos períodos tienen volumen, usar cálculo porcentual normal
+      const rawTrend = Math.round(((recentDayVolume - olderDayVolume) / olderDayVolume) * 100);
+      // Usar threshold más bajo para ser menos conservador
+      if (Math.abs(rawTrend) >= 5) {
+        trend = rawTrend;
+      }
+    } else if (olderDayVolume === 0 && recentDayVolume > 0) {
+      // Comenzó a entrenar en este día - tendencia muy positiva
+      trend = 100; // Máximo positivo
+    } else if (olderDayVolume > 0 && recentDayVolume === 0) {
+      // Dejó de entrenar en este día - tendencia muy negativa
+      trend = -100; // Máximo negativo
+    } else {
+      // Sin entrenamientos en ningún período para este día
+      trend = 0;
+    }
+
+    // Para datos muy limitados, ser aún más conservador
+    if (totalRecords < 10) {
+      trend = 0; // No mostrar tendencias con muy pocos datos
+    }
+
+
 
     // Performance score (0-100) basado en volumen, consistencia y variedad
     const volumeScore = totalVolume > 0 ? Math.min(100, (dayTotalVolume / totalVolume) * 700) : 0; // Normalize to week
@@ -238,7 +296,7 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
     const efficiency = Math.round(avgVolume);
 
     // Intensidad: 1RM estimado promedio relativo al máximo del usuario (más preciso)
-    const oneRMs = records.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30));
+    const oneRMs = sortedRecords.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30));
     const userMaxOneRM = Math.max(...oneRMs);
     const avgOneRM = oneRMs.reduce((sum, orm) => sum + orm, 0) / oneRMs.length;
     const intensity = userMaxOneRM > 0 ? Math.round((avgOneRM / userMaxOneRM) * 100) : 0;
@@ -257,8 +315,13 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
       if (uniqueExercises < 2) {
         recommendations.push('Añade más variedad de ejercicios');
       }
-      if (trend < -10) {
+      // Solo mostrar mensaje de declive si hay suficientes datos y es una tendencia significativa
+      if (trend <= -20 && totalRecords >= 15) {
         recommendations.push('Tu rendimiento ha disminuido recientemente');
+      }
+      // Mostrar mensaje positivo para mejoras significativas
+      if (trend >= 20 && totalRecords >= 10) {
+        recommendations.push('¡Excelente progreso en este día!');
       }
       if (efficiency < avgVolume * 0.7) {
         recommendations.push('Optimiza la intensidad de tus entrenamientos');
@@ -686,9 +749,37 @@ export const analyzeWorkoutHabits = (records: WorkoutRecord[]): WorkoutHabits =>
 export const calculateVolumeTrendByDay = (records: WorkoutRecord[]): { day: string; trend: number }[] => {
   if (records.length === 0) return [];
 
+  // Asegurar que los registros estén ordenados cronológicamente
+  const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
   const dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-  const recentRecords = records.slice(-28); // Últimas 4 semanas
-  const olderRecords = records.slice(-56, -28); // 4 semanas anteriores
+
+  // Usar la misma lógica adaptativa que en calculateDayMetrics
+  const totalRecords = sortedRecords.length;
+  let recentRecords: WorkoutRecord[];
+  let olderRecords: WorkoutRecord[];
+
+  if (totalRecords < 20) {
+    // Con pocos datos, comparar segunda mitad vs primera mitad
+    const midpoint = Math.floor(totalRecords / 2);
+    if (midpoint >= 2) {
+      recentRecords = sortedRecords.slice(midpoint);
+      olderRecords = sortedRecords.slice(0, midpoint);
+    } else {
+      // Si hay muy pocos datos, no hacer comparaciones
+      recentRecords = sortedRecords;
+      olderRecords = [];
+    }
+  } else if (totalRecords < 40) {
+    // Con datos moderados, comparar primera mitad vs segunda mitad
+    const midpoint = Math.floor(totalRecords / 2);
+    recentRecords = sortedRecords.slice(midpoint);
+    olderRecords = sortedRecords.slice(0, midpoint);
+  } else {
+    // Con suficientes datos, usar lógica original de 4 semanas
+    recentRecords = sortedRecords.slice(-28); // Últimas 4 semanas
+    olderRecords = sortedRecords.slice(-56, -28); // 4 semanas anteriores
+  }
 
   const trends: { day: string; trend: number }[] = [];
 
@@ -701,7 +792,34 @@ export const calculateVolumeTrendByDay = (records: WorkoutRecord[]): { day: stri
       .filter(r => getDay(new Date(r.date)) === dayIndex)
       .reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
 
-    const trend = olderVolume > 0 ? ((recentVolume - olderVolume) / olderVolume) * 100 : 0;
+    let trend = 0;
+
+    // Usar la misma lógica de tendencias que en calculateDayMetrics
+    if (olderRecords.length === 0) {
+      // Sin datos anteriores, no mostrar tendencia
+      trend = 0;
+    } else if (olderVolume > 0 && recentVolume > 0) {
+      // Ambos períodos tienen volumen, usar cálculo porcentual normal
+      const rawTrend = ((recentVolume - olderVolume) / olderVolume) * 100;
+      // Usar threshold más bajo para ser menos conservador
+      if (Math.abs(rawTrend) >= 5) {
+        trend = rawTrend;
+      }
+    } else if (olderVolume === 0 && recentVolume > 0) {
+      // Comenzó a entrenar en este día - tendencia muy positiva
+      trend = 100; // Máximo positivo
+    } else if (olderVolume > 0 && recentVolume === 0) {
+      // Dejó de entrenar en este día - tendencia muy negativa
+      trend = -100; // Máximo negativo
+    } else {
+      // Sin entrenamientos en ningún período para este día
+      trend = 0;
+    }
+
+    // Para datos muy limitados, ser aún más conservador
+    if (totalRecords < 10) {
+      trend = 0; // No mostrar tendencias con muy pocos datos
+    }
 
     trends.push({
       day: dayNames[dayIndex],

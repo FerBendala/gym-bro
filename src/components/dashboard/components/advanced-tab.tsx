@@ -387,11 +387,12 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
       action: string;
     }> = [];
 
-    // 1. ANÁLISIS DE FRECUENCIA (mejorado)
+    // 1. ANÁLISIS DE FRECUENCIA (corregido - contar días únicos)
     const thisWeekRecords = getThisWeekRecords(records);
     const lastWeekRecords = getLastWeekRecords(records);
-    const weeklyFrequency = thisWeekRecords.length;
-    const lastWeekFrequency = lastWeekRecords.length;
+    // Contar días únicos en lugar de registros individuales
+    const weeklyFrequency = new Set(thisWeekRecords.map(r => r.date.toDateString())).size;
+    const lastWeekFrequency = new Set(lastWeekRecords.map(r => r.date.toDateString())).size;
 
     if (weeklyFrequency === 0) {
       suggestions.push({
@@ -611,31 +612,49 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
       });
     }
 
-    // 6. ANÁLISIS DE VOLUMEN (nuevo)
+    // 6. ANÁLISIS DE VOLUMEN (mejorado)
     const recentVolume = thisWeekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
     const lastWeekVolume = lastWeekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
 
     if (recentVolume > 0 && lastWeekVolume > 0) {
       const volumeChange = ((recentVolume - lastWeekVolume) / lastWeekVolume) * 100;
-      if (volumeChange < -30) {
+      if (volumeChange < -25) {
         suggestions.push({
           category: 'intensity',
           priority: 'medium',
           icon: Activity,
-          title: 'Volumen Significativamente Reducido',
+          title: 'Volumen Reducido Significativamente',
           description: `${Math.abs(Math.round(volumeChange))}% menos volumen que la semana pasada`,
-          action: 'Evalúa si es estratégico o necesitas retomar intensidad gradualmente'
+          action: 'Evalúa si es planificado o necesitas retomar intensidad gradualmente'
         });
-      } else if (volumeChange > 50) {
+      } else if (volumeChange > 40) {
         suggestions.push({
           category: 'recovery',
           priority: 'medium',
           icon: Shield,
-          title: 'Aumento Brusco de Volumen',
-          description: `+${Math.round(volumeChange)}% más volumen - monitora recuperación`,
-          action: 'Asegúrate de descansar adecuadamente y ajusta si aparece fatiga'
+          title: 'Aumento Súbito de Volumen',
+          description: `+${Math.round(volumeChange)}% más volumen - monitorea recuperación`,
+          action: 'Asegúrate de descansar adecuadamente y observa señales de fatiga'
         });
       }
+    } else if (recentVolume > 0 && lastWeekVolume === 0) {
+      suggestions.push({
+        category: 'frequency',
+        priority: 'low',
+        icon: TrendingUp,
+        title: 'Retorno al Entrenamiento',
+        description: 'Has retomado los entrenamientos después de descanso',
+        action: 'Comienza gradualmente y aumenta intensidad progresivamente'
+      });
+    } else if (recentVolume === 0 && lastWeekVolume > 0) {
+      suggestions.push({
+        category: 'frequency',
+        priority: 'high',
+        icon: AlertTriangle,
+        title: 'Pausa en Entrenamiento',
+        description: 'Has dejado de entrenar esta semana',
+        action: 'Retoma los entrenamientos lo antes posible para mantener progreso'
+      });
     }
 
     // 7. ANÁLISIS DE EFICIENCIA (nuevo)
@@ -1159,8 +1178,8 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
                               <h4 className="font-medium text-sm mb-1 sm:mb-0">{suggestion.title}</h4>
                               <span className={`px-2 py-1 rounded-full text-xs font-bold ${getPriorityBadge(suggestion.priority)} w-fit`}>
-                                {suggestion.priority === 'high' ? 'ALTA' :
-                                  suggestion.priority === 'medium' ? 'MEDIA' : 'BAJA'}
+                                {suggestion.priority === 'high' ? 'PRIORIDAD ALTA' :
+                                  suggestion.priority === 'medium' ? 'PRIORIDAD MEDIA' : 'PRIORIDAD BAJA'}
                               </span>
                             </div>
                             <p className="text-xs opacity-90 mb-2">{suggestion.description}</p>

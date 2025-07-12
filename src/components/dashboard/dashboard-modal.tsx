@@ -7,6 +7,8 @@ import {
   BalanceTab,
   DashboardEmptyState,
   DashboardHeader,
+  ExercisesTab,
+  HistoryTab,
   PredictionsTab,
   TrendsTab
 } from './components';
@@ -56,6 +58,10 @@ export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
                     return <BalanceTab records={workoutRecords} />;
                   case 'trends':
                     return <TrendsTab records={workoutRecords} />;
+                  case 'history':
+                    return <HistoryTab records={workoutRecords} />;
+                  case 'exercises':
+                    return <ExercisesTab records={workoutRecords} />;
                   case 'advanced':
                     return <AdvancedTab records={workoutRecords} />;
                   case 'predictions':

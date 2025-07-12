@@ -6,6 +6,8 @@ import {
   BalanceTab,
   DashboardEmptyState,
   DashboardTabNavigation,
+  ExercisesTab,
+  HistoryTab,
   PredictionsTab,
   TrendsTab
 } from './components';
@@ -41,6 +43,10 @@ export const DashboardPage: React.FC = () => {
         return <BalanceTab records={workoutRecords} />;
       case 'trends':
         return <TrendsTab records={workoutRecords} />;
+      case 'history':
+        return <HistoryTab records={workoutRecords} />;
+      case 'exercises':
+        return <ExercisesTab records={workoutRecords} />;
       case 'advanced':
         return <AdvancedTab records={workoutRecords} />;
       case 'predictions':
@@ -51,22 +57,21 @@ export const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      <div className="max-w-7xl mx-auto px-4 py-6">
-        <DashboardTabNavigation
-          activeTab={activeTab}
-          onTabChange={setActiveTab}
-          timeFilterLabel="Todos los datos"
-        />
+    <div className="space-y-6">
+      {/* Warning de conexión */}
+      {!isOnline && (
+        <OfflineWarning message="Sin conexión. Los datos mostrados pueden estar desactualizados." />
+      )}
 
-        {!isOnline && (
-          <OfflineWarning message="Sin conexión. Los datos mostrados pueden estar desactualizados." />
-        )}
+      {/* Navegación de tabs moderna */}
+      <DashboardTabNavigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        timeFilterLabel="Todos los datos"
+      />
 
-        <div className="mt-8">
-          {renderTabContent()}
-        </div>
-      </div>
+      {/* Contenido principal */}
+      {renderTabContent()}
     </div>
   );
 }; 
