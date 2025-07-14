@@ -143,75 +143,30 @@ const calculatePersonalRecords = (categoryRecords: WorkoutRecord[]): number => {
 
 /**
  * Calcula la progresión de peso para una categoría
- * Corregido: maneja pocas semanas agrupando por semanas, no por entrenamientos individuales
+ * CORREGIDO: Comparación justa de 1RM promedio por sesión entre períodos
  */
 const calculateWeightProgression = (categoryRecords: WorkoutRecord[]): number => {
   if (categoryRecords.length < 2) return 0;
 
   const sortedRecords = [...categoryRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  // Agrupar por semanas para detectar cuántas semanas de datos tenemos
-  const weeklyData = new Map<string, WorkoutRecord[]>();
-
-  categoryRecords.forEach(record => {
-    const date = new Date(record.date);
-    const monday = new Date(date);
-    monday.setDate(date.getDate() - date.getDay() + 1);
-    const weekKey = monday.toISOString().split('T')[0];
-
-    if (!weeklyData.has(weekKey)) {
-      weeklyData.set(weekKey, []);
-    }
-    weeklyData.get(weekKey)!.push(record);
-  });
-
-  const weeksWithData = weeklyData.size;
-
-  // Si tenemos 3 semanas o menos, comparar promedio semanal entre primera y última semana
-  if (weeksWithData <= 3) {
-    // Con solo 1 semana, no hay progresión
-    if (weeksWithData === 1) return 0;
-
-    // Convertir a array ordenado por fecha
-    const weeklyArray = Array.from(weeklyData.entries())
-      .sort(([weekA], [weekB]) => weekA.localeCompare(weekB));
-
-    // Calcular 1RM promedio de la primera semana
-    const firstWeekRecords = weeklyArray[0][1];
-    const firstWeekAvg1RM = firstWeekRecords.reduce((sum, r) => {
-      const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-      return sum + oneRM;
-    }, 0) / firstWeekRecords.length;
-
-    // Calcular 1RM promedio de la última semana
-    const lastWeekRecords = weeklyArray[weeklyArray.length - 1][1];
-    const lastWeekAvg1RM = lastWeekRecords.reduce((sum, r) => {
-      const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-      return sum + oneRM;
-    }, 0) / lastWeekRecords.length;
-
-    if (firstWeekAvg1RM === 0) return 0;
-
-    return Math.round(((lastWeekAvg1RM - firstWeekAvg1RM) / firstWeekAvg1RM) * 100);
-  }
-
-  // Para usuarios con más semanas de datos, usar la lógica original de primera mitad vs segunda mitad
+  // Dividir en primera mitad vs segunda mitad para comparación justa
   const midpoint = Math.floor(sortedRecords.length / 2);
   const firstHalf = sortedRecords.slice(0, midpoint);
   const secondHalf = sortedRecords.slice(midpoint);
 
   if (firstHalf.length === 0 || secondHalf.length === 0) return 0;
 
-  // Usar 1RM estimado SIEMPRE para precisión y consistencia
+  // **CORRECCIÓN CLAVE**: Usar 1RM promedio por sesión para comparación justa
   const firstHalfAvg1RM = firstHalf.reduce((sum, r) => {
     const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
     return sum + oneRM;
-  }, 0) / firstHalf.length;
+  }, 0) / firstHalf.length; // Promedio por sesión
 
   const secondHalfAvg1RM = secondHalf.reduce((sum, r) => {
     const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
     return sum + oneRM;
-  }, 0) / secondHalf.length;
+  }, 0) / secondHalf.length; // Promedio por sesión
 
   if (firstHalfAvg1RM === 0) return 0;
 
@@ -221,62 +176,32 @@ const calculateWeightProgression = (categoryRecords: WorkoutRecord[]): number =>
 /**
  * Calcula la progresión de volumen para una categoría
  */
+/**
+ * Calcula la progresión de volumen para una categoría
+ * CORREGIDO: Comparación justa de volumen promedio por sesión entre períodos
+ */
 const calculateVolumeProgression = (categoryRecords: WorkoutRecord[]): number => {
   if (categoryRecords.length < 2) return 0;
 
-  // Agrupar por semanas para detectar cuántas semanas de datos tenemos
-  const weeklyData = new Map<string, WorkoutRecord[]>();
+  const sortedRecords = [...categoryRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  categoryRecords.forEach(record => {
-    const date = new Date(record.date);
-    const monday = new Date(date);
-    monday.setDate(date.getDate() - date.getDay() + 1);
-    const weekKey = monday.toISOString().split('T')[0];
+  // Dividir en primera mitad vs segunda mitad para comparación justa
+  const midpoint = Math.floor(sortedRecords.length / 2);
+  const firstHalf = sortedRecords.slice(0, midpoint);
+  const secondHalf = sortedRecords.slice(midpoint);
 
-    if (!weeklyData.has(weekKey)) {
-      weeklyData.set(weekKey, []);
-    }
-    weeklyData.get(weekKey)!.push(record);
-  });
+  if (firstHalf.length === 0 || secondHalf.length === 0) return 0;
 
-  const weeksWithData = weeklyData.size;
+  // **CORRECCIÓN CLAVE**: Usar volumen promedio por sesión para comparación justa
+  const firstHalfAvgVolume = firstHalf.reduce((sum, r) =>
+    sum + (r.weight * r.reps * r.sets), 0) / firstHalf.length; // Promedio por sesión
 
-  // Si tenemos 3 semanas o menos, comparar primera mitad vs segunda mitad de registros
-  if (weeksWithData <= 3) {
-    const sortedRecords = [...categoryRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-    const midpoint = Math.floor(sortedRecords.length / 2);
-    const firstHalf = sortedRecords.slice(0, midpoint);
-    const secondHalf = sortedRecords.slice(midpoint);
+  const secondHalfAvgVolume = secondHalf.reduce((sum, r) =>
+    sum + (r.weight * r.reps * r.sets), 0) / secondHalf.length; // Promedio por sesión
 
-    if (firstHalf.length === 0 || secondHalf.length === 0) return 0;
+  if (firstHalfAvgVolume === 0) return 0;
 
-    const firstHalfVolume = firstHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-    const secondHalfVolume = secondHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-
-    if (firstHalfVolume === 0) return 0;
-
-    return Math.round(((secondHalfVolume - firstHalfVolume) / firstHalfVolume) * 100);
-  }
-
-  // Para usuarios con más semanas de datos, usar la lógica original
-  const now = new Date();
-  const twoWeeksAgo = new Date(now.getTime() - (14 * 24 * 60 * 60 * 1000));
-  const fourWeeksAgo = new Date(now.getTime() - (28 * 24 * 60 * 60 * 1000));
-
-  const recentRecords = categoryRecords.filter(r => new Date(r.date) >= twoWeeksAgo);
-  const olderRecords = categoryRecords.filter(r => {
-    const date = new Date(r.date);
-    return date >= fourWeeksAgo && date < twoWeeksAgo;
-  });
-
-  if (recentRecords.length === 0 || olderRecords.length === 0) return 0;
-
-  const recentVolume = recentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-  const olderVolume = olderRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-
-  if (olderVolume === 0) return 0;
-
-  return Math.round(((recentVolume - olderVolume) / olderVolume) * 100);
+  return Math.round(((secondHalfAvgVolume - firstHalfAvgVolume) / firstHalfAvgVolume) * 100);
 };
 
 /**

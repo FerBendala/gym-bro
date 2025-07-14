@@ -62,28 +62,6 @@ export const getTimeFilterLabel = (timeFilter: TimeFilter, referenceDate?: Date)
 }
 
 /**
- * Función de debug para mostrar fechas en consola
- */
-export const debugDateComparison = (workoutRecords: WorkoutRecord[]): void => {
-  const today = new Date();
-  console.log('🔍 DEBUG: Comparación de fechas');
-  console.log('📅 Hoy es:', format(today, 'yyyy-MM-dd EEEE', { locale: es }));
-  console.log('📅 Hoy (ISO):', today.toISOString());
-
-  workoutRecords.slice(0, 5).forEach((record, index) => {
-    console.log(`📊 Registro ${index + 1}:`, {
-      exerciseId: record.exerciseId,
-      exerciseName: record.exercise?.name || 'Sin nombre',
-      date: record.date,
-      dateFormatted: format(record.date, 'yyyy-MM-dd EEEE', { locale: es }),
-      dateISO: record.date.toISOString(),
-      isSameDay: isSameDay(record.date, today),
-      dayOfWeek: record.dayOfWeek
-    });
-  });
-};
-
-/**
  * Verifica si un ejercicio se entrenó hoy (fecha exacta usando isSameDay)
  * Mejorada para usar comparación de días exacta sin dependencia de horas
  */
@@ -106,29 +84,15 @@ export const isExerciseTrainedToday = (exerciseId: string, workoutRecords: Worko
 export const getExercisesTrainedToday = (workoutRecords: WorkoutRecord[]): string[] => {
   const today = startOfDay(new Date()); // Normalizar a inicio del día
 
-  // Debug: mostrar información de comparación
-  if (workoutRecords.length > 0) {
-    console.log('🔍 DEBUG: getExercisesTrainedToday');
-    debugDateComparison(workoutRecords);
-  }
-
   const trainedToday = workoutRecords
     .filter(record => {
       const recordDay = startOfDay(record.date);
       const isSame = isSameDay(recordDay, today);
-
-      if (isSame) {
-        console.log(`✅ Ejercicio entrenado hoy: ${record.exercise?.name || record.exerciseId}`);
-      }
-
       return isSame;
     })
     .map(record => record.exerciseId);
 
-  // Remover duplicados
   const uniqueIds = [...new Set(trainedToday)];
-  console.log('📋 Ejercicios únicos entrenados hoy:', uniqueIds);
-
   return uniqueIds;
 };
 
@@ -152,21 +116,13 @@ export const isExerciseTrainedTodayAndCorrectDay = (
 ): boolean => {
   const todayDayOfWeek = getCurrentDayOfWeek();
 
-  // Debug: mostrar información de verificación
-  console.log('🔍 Verificando ejercicio:', exerciseId);
-  console.log('📅 Hoy es:', todayDayOfWeek);
-  console.log('📋 Tab actual:', currentTabDay);
-  console.log('✅ ¿Tab correcto?:', todayDayOfWeek === currentTabDay);
-
   // Solo marcar verde si estamos en el tab del día correcto
   if (todayDayOfWeek !== currentTabDay) {
-    console.log('❌ No es el tab correcto, no marcar verde');
     return false;
   }
 
   // Y además debe haberse entrenado hoy
   const trainedToday = isExerciseTrainedToday(exerciseId, workoutRecords);
-  console.log('💪 ¿Entrenado hoy?:', trainedToday);
 
   return trainedToday;
 };

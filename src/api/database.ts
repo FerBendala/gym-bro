@@ -92,39 +92,22 @@ export const deleteExercise = async (exerciseId: string) => {
 // Exercise Assignments
 export const createExerciseAssignment = async (assignment: Omit<ExerciseAssignment, 'id'>) => {
   try {
-    // DEBUG: Log para verificar qué se está guardando
-    console.log('🔍 DEBUG: Creando asignación de ejercicio:');
-    console.log('📊 Datos a guardar:', assignment);
-    console.log('📅 Día asignado:', assignment.dayOfWeek);
-    console.log('🏋️ ID del ejercicio:', assignment.exerciseId);
-
     const docRef = await addDoc(collection(db, 'exerciseAssignments'), assignment);
 
-    console.log('✅ Asignación creada con ID:', docRef.id);
     return docRef.id;
   } catch (error) {
-    console.error('❌ Error creando asignación:', error);
     handleFirebaseError(error, 'crear asignación de ejercicio');
   }
 };
 
 export const getAssignmentsByDay = async (dayOfWeek: DayOfWeek): Promise<ExerciseAssignment[]> => {
   try {
-    // DEBUG: Log para verificar qué día se está filtrando
-    console.log('🔍 DEBUG: Obteniendo asignaciones para:', dayOfWeek);
-
     const q = query(
       collection(db, 'exerciseAssignments'),
       where('dayOfWeek', '==', dayOfWeek)
     );
     const querySnapshot = await getDocs(q);
     const assignments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ExerciseAssignment));
-
-    // DEBUG: Log de resultados
-    console.log('📊 Asignaciones encontradas para', dayOfWeek, ':', assignments.length);
-    assignments.forEach((assignment, index) => {
-      console.log(`  ${index + 1}. ID: ${assignment.id}, Ejercicio: ${assignment.exerciseId}, Día: ${assignment.dayOfWeek}`);
-    });
 
     return assignments;
   } catch (error) {
@@ -232,14 +215,8 @@ export const updateWorkoutRecord = async (recordId: string, updates: Partial<Wor
 
 export const deleteWorkoutRecord = async (recordId: string) => {
   try {
-    // DEBUG: Log para verificar qué se está eliminando
-    console.log('🗑️ DEBUG: Eliminando entrenamiento con ID:', recordId);
-
     await deleteDoc(doc(db, 'workoutRecords', recordId));
-
-    console.log('✅ Entrenamiento eliminado exitosamente');
   } catch (error) {
-    console.error('❌ Error eliminando entrenamiento:', error);
     handleFirebaseError(error, 'eliminar registro de entrenamiento');
   }
 };
@@ -247,8 +224,6 @@ export const deleteWorkoutRecord = async (recordId: string) => {
 // Función de migración para actualizar ejercicios con category a categories
 export const migrateExercisesToMultipleCategories = async () => {
   try {
-    console.log('🔄 Iniciando migración de categorías...');
-
     const exercises = await getExercises();
     const batch = writeBatch(db);
     let migratedCount = 0;
@@ -267,9 +242,6 @@ export const migrateExercisesToMultipleCategories = async () => {
 
     if (migratedCount > 0) {
       await batch.commit();
-      console.log(`✅ Migración completada: ${migratedCount} ejercicio(s) actualizado(s)`);
-    } else {
-      console.log('ℹ️ No hay ejercicios para migrar');
     }
 
     return migratedCount;

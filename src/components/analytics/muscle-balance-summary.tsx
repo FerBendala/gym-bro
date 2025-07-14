@@ -1,28 +1,13 @@
-import { Activity, AlertTriangle, Award, BarChart3, Dumbbell, Footprints, Hexagon, RotateCcw, Shield, Target, TrendingDown, TrendingUp, Triangle, Users } from 'lucide-react';
+import { Activity, BarChart3, Calendar, Target, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
-import { calculateCategoryEffortDistribution, getIdealVolumePercentage } from '../../constants/exercise-categories';
+import { IDEAL_VOLUME_DISTRIBUTION } from '../../constants/exercise-categories';
 import { MUSCLE_GROUPS } from '../../constants/muscle-groups';
 import type { WorkoutRecord } from '../../interfaces';
-import { formatNumber } from '../../utils/functions';
+import { calculateExerciseProgress, formatNumber } from '../../utils/functions';
 import { Card, CardContent, CardHeader } from '../card';
 import { InfoTooltip } from '../tooltip';
 
-interface MuscleBalanceSummaryProps {
-  records: WorkoutRecord[];
-  selectedCategory?: string;
-}
-
-// Iconos más específicos para cada categoría muscular
-const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-  'Pecho': Hexagon,        // Hexágono representa la forma de los pectorales
-  'Espalda': Shield,       // Escudo representa la protección/soporte de la espalda
-  'Piernas': Footprints,   // Huellas representan el movimiento de piernas
-  'Hombros': Triangle,     // Triángulo representa la forma de los deltoides
-  'Brazos': Dumbbell,      // Mancuerna es el icono más representativo para brazos
-  'Core': RotateCcw        // Rotación representa los movimientos de core/abdominales
-};
-
-interface CategoryMetrics {
+interface MuscleGroupData {
   name: string;
   icon: string;
   color: string;
@@ -30,238 +15,139 @@ interface CategoryMetrics {
   exercises: number;
   frequency: number;
   avgWeight: number;
-  maxWeight: number;
-  progress: number;
-  progressPercent: number;
   percentage: number;
+  idealPercentage: number;
   balanceScore: number;
-  lastWorkout: Date;
-  recommendations: string[];
+  progressPercent: number;
+  recommendation: string;
 }
 
-interface BalanceAnalysis {
-  categories: CategoryMetrics[];
-  overallBalance: number;
-  dominantCategory: CategoryMetrics | null;
-  weakestCategory: CategoryMetrics | null;
-  recommendations: string[];
-  riskFactors: string[];
+interface MuscleBalanceSummaryProps {
+  records: WorkoutRecord[];
 }
 
-/**
- * Componente mejorado para el resumen de balance muscular
- */
-export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
-  records,
-  selectedCategory = 'all'
-}) => {
-  const analysis = useMemo((): BalanceAnalysis => {
-    // Filtrar registros válidos con información de ejercicio
-    const validRecords = records.filter(record =>
-      record.exercise && record.exercise.name && record.exercise.name !== 'Ejercicio desconocido'
-    );
+export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({ records }) => {
+  const muscleGroupData = useMemo((): MuscleGroupData[] => {
+    if (records.length === 0) return [];
 
-    if (validRecords.length === 0) {
-      return {
-        categories: [],
-        overallBalance: 0,
-        dominantCategory: null,
-        weakestCategory: null,
-        recommendations: [],
-        riskFactors: []
-      };
-    }
-
-    // Filtrar por categoría si se especifica
-    const filteredRecords = selectedCategory === 'all'
-      ? validRecords
-      : validRecords.filter(record =>
-        record.exercise?.categories?.includes(selectedCategory)
-      );
-
-    // Agrupar por categoría usando volumen relativo al esfuerzo
-    const categoryData: Record<string, {
-      volume: number;
+    // Agrupar por categoría muscular
+    const groupedData: Record<string, {
+      totalVolume: number;
       exercises: Set<string>;
+      frequency: number;
+      totalWeight: number;
       records: WorkoutRecord[];
-      weights: number[];
     }> = {};
 
-    filteredRecords.forEach(record => {
+    records.forEach(record => {
       const categories = record.exercise?.categories || ['Sin categoría'];
-      const totalVolume = record.weight * record.reps * record.sets;
 
-      if (categories.length === 0 || categories.includes('Sin categoría')) {
-        // Sin categorías
-        const category = 'Sin categoría';
-        if (!categoryData[category]) {
-          categoryData[category] = {
-            volume: 0,
+      categories.forEach(category => {
+        if (!groupedData[category]) {
+          groupedData[category] = {
+            totalVolume: 0,
             exercises: new Set(),
-            records: [],
-            weights: []
+            frequency: 0,
+            totalWeight: 0,
+            records: []
           };
         }
-        categoryData[category].volume += totalVolume;
-        categoryData[category].exercises.add(record.exercise!.name);
-        categoryData[category].records.push(record);
-        categoryData[category].weights.push(record.weight);
-      } else {
-        // OPCIÓN 2: Volumen Relativo al Esfuerzo
-        // Calcular la distribución de esfuerzo entre categorías
-        const effortDistribution = calculateCategoryEffortDistribution(categories);
 
-        categories.forEach(category => {
-          if (!categoryData[category]) {
-            categoryData[category] = {
-              volume: 0,
-              exercises: new Set(),
-              records: [],
-              weights: []
-            };
-          }
-
-          // Asignar volumen basado en el esfuerzo relativo de cada categoría
-          categoryData[category].volume += totalVolume * (effortDistribution[category] || 0);
-          categoryData[category].exercises.add(record.exercise!.name);
-          categoryData[category].records.push(record);
-          categoryData[category].weights.push(record.weight);
-        });
-      }
+        const volume = record.weight * record.reps * record.sets;
+        groupedData[category].totalVolume += volume;
+        groupedData[category].exercises.add(record.exercise?.name || 'Desconocido');
+        groupedData[category].frequency += 1;
+        groupedData[category].totalWeight += record.weight;
+        groupedData[category].records.push(record);
+      });
     });
 
-    const totalVolume = Object.values(categoryData).reduce((sum, data) => sum + data.volume, 0);
-    const totalDays = new Set(validRecords.map(r => r.date.toDateString())).size;
+    const totalVolume = Object.values(groupedData).reduce((sum, group) => sum + group.totalVolume, 0);
 
-    // Crear métricas por categoría
-    const categories: CategoryMetrics[] = Object.entries(categoryData).map(([categoryName, data]) => {
-      // Buscar información del grupo muscular
-      const muscleGroup = Object.values(MUSCLE_GROUPS).find(group =>
-        group.categories.some(cat => cat === categoryName) || group.name === categoryName
-      );
-
-      const icon = muscleGroup?.icon || '💪';
-      const color = muscleGroup?.color || 'gray';
-
-      // Calcular métricas básicas usando volumen relativo al esfuerzo
-      const percentage = totalVolume > 0 ? (data.volume / totalVolume) * 100 : 0;
-      const exerciseCount = data.exercises.size;
-      const frequency = data.records.length;
-      const avgWeight = data.weights.reduce((sum, w) => sum + w, 0) / data.weights.length;
-      const maxWeight = Math.max(...data.weights);
-
-      // Calcular progreso temporal
-      const sortedRecords = data.records.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-      const firstRecord = sortedRecords[0];
-      const lastRecord = sortedRecords[sortedRecords.length - 1];
-
-      let progress = 0;
-      let progressPercent = 0;
-
-      if (sortedRecords.length > 1) {
-        const first1RM = firstRecord.weight * (1 + Math.min(firstRecord.reps, 20) / 30);
-        const last1RM = lastRecord.weight * (1 + Math.min(lastRecord.reps, 20) / 30);
-        progress = last1RM - first1RM;
-        progressPercent = first1RM > 0 ? (progress / first1RM) * 100 : 0;
-      }
-
-      // Calcular score de balance (0-100)
-      const idealPercentage = getIdealVolumePercentage(categoryName);
-      const balanceDeviation = Math.abs(percentage - idealPercentage);
-      const balanceScore = Math.max(0, 100 - (balanceDeviation * 3));
-
-      // Fecha del último entrenamiento
-      const lastWorkout = new Date(Math.max(...data.records.map(r => new Date(r.date).getTime())));
-
-      // Generar recomendaciones específicas
-      const recommendations = generateCategoryRecommendations(categoryName, {
-        percentage,
-        idealPercentage,
-        frequency,
-        progressPercent,
-        balanceScore
-      });
-
-      return {
-        name: categoryName,
-        icon,
-        color,
-        volume: data.volume,
-        exercises: exerciseCount,
-        frequency,
-        avgWeight,
-        maxWeight,
-        progress,
-        progressPercent,
-        percentage,
-        balanceScore,
-        lastWorkout,
-        recommendations
-      };
-    }).sort((a, b) => b.volume - a.volume);
-
-    // Análisis general de balance
-    const overallBalance = categories.length > 0
-      ? categories.reduce((sum, cat) => sum + cat.balanceScore, 0) / categories.length
-      : 0;
-
-    const dominantCategory = categories[0] || null;
-    const weakestCategory = categories[categories.length - 1] || null;
-
-    // Generar recomendaciones generales
-    const recommendations = generateGeneralRecommendations(categories, overallBalance);
-    const riskFactors = identifyRiskFactors(categories);
-
-    return {
-      categories,
-      overallBalance,
-      dominantCategory,
-      weakestCategory,
-      recommendations,
-      riskFactors
+    // Función para obtener porcentaje ideal según categoría
+    const getIdealVolumePercentage = (categoryName: string): number => {
+      return IDEAL_VOLUME_DISTRIBUTION[categoryName as keyof typeof IDEAL_VOLUME_DISTRIBUTION] || 16.67;
     };
-  }, [records, selectedCategory]);
+
+    return Object.entries(groupedData)
+      .map(([categoryName, group]) => {
+        const muscleGroup = MUSCLE_GROUPS[categoryName as keyof typeof MUSCLE_GROUPS];
+
+        // **FUNCIÓN UNIFICADA**: Usar la función utilitaria para calcular progreso
+        const { percentProgress: progressPercent } = calculateExerciseProgress(group.records);
+
+        const percentage = totalVolume > 0 ? (group.totalVolume / totalVolume) * 100 : 0;
+        const idealPercentage = getIdealVolumePercentage(categoryName);
+        const balanceScore = Math.max(0, 100 - Math.abs(percentage - idealPercentage) * 2);
+
+        return {
+          name: categoryName,
+          icon: muscleGroup?.icon || '💪',
+          color: muscleGroup?.color || 'gray',
+          volume: group.totalVolume,
+          exercises: group.exercises.size,
+          frequency: group.frequency,
+          avgWeight: group.totalWeight / Math.max(1, group.frequency),
+          percentage,
+          idealPercentage,
+          balanceScore,
+          progressPercent,
+          recommendation: generateRecommendation(categoryName, percentage, idealPercentage, balanceScore)
+        };
+      })
+      .sort((a, b) => b.volume - a.volume);
+  }, [records]);
+
+  const generateRecommendation = (categoryName: string, percentage: number, idealPercentage: number, balanceScore: number): string => {
+    const diff = percentage - idealPercentage;
+
+    if (Math.abs(diff) < 2) {
+      return 'Volumen óptimo - mantén el equilibrio actual';
+    } else if (diff > 5) {
+      return `Reduce volumen en ${Math.round(diff)}% - está sobrentrenado`;
+    } else if (diff < -5) {
+      return `Aumenta volumen en ${Math.round(Math.abs(diff))}% - necesita más trabajo`;
+    } else {
+      return 'Ajustar ligeramente el volumen para mejor balance';
+    }
+  };
 
   const getColorClasses = (color: string) => {
     const colorMap: Record<string, string> = {
-      blue: 'text-blue-400 bg-blue-900/20 border-blue-500/30',
-      green: 'text-green-400 bg-green-900/20 border-green-500/30',
-      purple: 'text-purple-400 bg-purple-900/20 border-purple-500/30',
-      red: 'text-red-400 bg-red-900/20 border-red-500/30',
-      yellow: 'text-yellow-400 bg-yellow-900/20 border-yellow-500/30',
-      indigo: 'text-indigo-400 bg-indigo-900/20 border-indigo-500/30',
-      orange: 'text-orange-400 bg-orange-900/20 border-orange-500/30',
-      pink: 'text-pink-400 bg-pink-900/20 border-pink-500/30',
-      teal: 'text-teal-400 bg-teal-900/20 border-teal-500/30',
+      red: 'bg-red-500/20 text-red-400 border-red-500/30',
+      blue: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
+      green: 'bg-green-500/20 text-green-400 border-green-500/30',
+      purple: 'bg-purple-500/20 text-purple-400 border-purple-500/30',
+      orange: 'bg-orange-500/20 text-orange-400 border-orange-500/30',
+      indigo: 'bg-indigo-500/20 text-indigo-400 border-indigo-500/30',
+      gray: 'bg-gray-500/20 text-gray-400 border-gray-500/30'
     };
-    return colorMap[color] || 'text-gray-400 bg-gray-900/20 border-gray-500/30';
+    return colorMap[color] || colorMap.gray;
   };
 
   const getBalanceColor = (score: number) => {
-    if (score >= 80) return 'text-green-400 bg-green-900/20';
-    if (score >= 60) return 'text-blue-400 bg-blue-900/20';
-    if (score >= 40) return 'text-yellow-400 bg-yellow-900/20';
-    return 'text-red-400 bg-red-900/20';
+    if (score >= 80) return 'text-green-400';
+    if (score >= 60) return 'text-yellow-400';
+    return 'text-red-400';
   };
 
   const getBalanceIcon = (score: number) => {
-    if (score >= 80) return <Shield className="w-4 h-4" />;
-    if (score >= 60) return <Target className="w-4 h-4" />;
-    if (score >= 40) return <Activity className="w-4 h-4" />;
-    return <AlertTriangle className="w-4 h-4" />;
+    if (score >= 80) return Activity;
+    if (score >= 60) return Target;
+    return Zap;
   };
 
-  if (analysis.categories.length === 0) {
+  if (records.length === 0) {
     return (
       <Card>
         <CardContent>
-          <div className="text-center py-12">
-            <Users className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <div className="text-center py-8">
+            <Calendar className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-300 mb-2">
               Sin datos de balance muscular
             </h3>
             <p className="text-gray-500">
-              Registra entrenamientos para ver el análisis de balance entre grupos musculares
+              Registra entrenamientos para ver el balance entre grupos musculares
             </p>
           </div>
         </CardContent>
@@ -271,190 +157,198 @@ export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Header con métricas generales */}
+      {/* Resumen general */}
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <div className="p-2 bg-purple-600/20 rounded-lg">
-                <Users className="w-6 h-6 text-purple-400" />
-              </div>
-              <div>
-                <h3 className="text-xl font-semibold text-white">Balance Muscular</h3>
-                <p className="text-gray-400">Análisis de distribución y equilibrio entre grupos musculares</p>
-              </div>
-            </div>
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <BarChart3 className="w-5 h-5 mr-2" />
+            Balance Muscular General
             <InfoTooltip
-              content="Evaluación del equilibrio en el desarrollo de diferentes grupos musculares para prevenir desequilibrios y optimizar el rendimiento."
-              position="left"
+              content="Análisis del equilibrio entre diferentes grupos musculares basado en volumen de entrenamiento y frecuencia."
+              position="top"
+              className="ml-2"
             />
-          </div>
+          </h3>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className={`p-4 rounded-lg border ${getBalanceColor(analysis.overallBalance)}`}>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-white">
-                    {Math.round(analysis.overallBalance)}%
-                  </p>
-                  <p className="text-sm text-gray-400">Balance General</p>
-                </div>
-                {getBalanceIcon(analysis.overallBalance)}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="text-center">
+              <div className={`text-3xl font-bold mb-2 ${getBalanceColor(muscleGroupData.reduce((sum, cat) => sum + cat.balanceScore, 0) / muscleGroupData.length)}`}>
+                {muscleGroupData.length > 0 ? (muscleGroupData.reduce((sum, cat) => sum + cat.balanceScore, 0) / muscleGroupData.length).toFixed(1) : 0}%
               </div>
+              <div className="text-sm text-gray-400">Balance General</div>
             </div>
 
-            <div className="p-4 rounded-lg border border-gray-700 bg-gray-800/30">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-white">
-                    {analysis.categories.length}
-                  </p>
-                  <p className="text-sm text-gray-400">Grupos Activos</p>
-                </div>
-                <BarChart3 className="w-4 h-4 text-blue-400" />
+            <div className="text-center">
+              <div className="text-3xl font-bold text-blue-400 mb-2">
+                {muscleGroupData.length}
               </div>
+              <div className="text-sm text-gray-400">Grupos Activos</div>
             </div>
 
-            <div className="p-4 rounded-lg border border-gray-700 bg-gray-800/30">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-yellow-400">
-                    {analysis.dominantCategory?.name.slice(0, 8) || 'N/A'}
-                  </p>
-                  <p className="text-sm text-gray-400">Dominante</p>
-                </div>
-                <Award className="w-4 h-4 text-yellow-400" />
+            <div className="text-center">
+              <div className="text-3xl font-bold text-purple-400 mb-2">
+                {muscleGroupData.length > 0 ? muscleGroupData[0].name : 'N/A'}
               </div>
-            </div>
-
-            <div className="p-4 rounded-lg border border-gray-700 bg-gray-800/30">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-2xl font-bold text-red-400">
-                    {analysis.weakestCategory?.name.slice(0, 8) || 'N/A'}
-                  </p>
-                  <p className="text-sm text-gray-400">Más Débil</p>
-                </div>
-                <TrendingDown className="w-4 h-4 text-red-400" />
-              </div>
+              <div className="text-sm text-gray-400">Grupo Dominante</div>
             </div>
           </div>
+
+          {/* Recomendaciones generales */}
+          {muscleGroupData.length > 0 && (
+            <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-4 mb-4">
+              <h4 className="text-sm font-medium text-blue-300 mb-2">
+                Recomendaciones Generales
+              </h4>
+              <ul className="text-sm text-blue-200 space-y-1">
+                {muscleGroupData.map((cat, index) => (
+                  <li key={index} className="flex items-start">
+                    <span className="text-blue-400 mr-2">•</span>
+                    {cat.recommendation}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
+          {/* Factores de riesgo */}
+          {muscleGroupData.length > 0 && (
+            <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
+              <h4 className="text-sm font-medium text-red-300 mb-2">
+                Factores de Riesgo
+              </h4>
+              <ul className="text-sm text-red-200 space-y-1">
+                {muscleGroupData.map((cat, index) => (
+                  <li key={index} className="flex items-start">
+                    <Zap className="w-4 h-4 text-red-400 mr-2 mt-0.5 flex-shrink-0" />
+                    {cat.recommendation}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Análisis detallado por categoría */}
+      {/* Análisis por categoría */}
       <Card>
         <CardHeader>
-          <h3 className="text-lg font-semibold text-white">Análisis Detallado por Categoría</h3>
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <Target className="w-5 h-5 mr-2" />
+            Análisis por Categoría
+            {/* selectedCategory !== 'all' && (
+              <span className="ml-2 text-sm font-normal text-blue-400">
+                - {selectedCategory}
+              </span>
+            ) */}
+          </h3>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {analysis.categories.map((category, index) => {
-              // Obtener el componente de icono específico
-              const IconComponent = categoryIcons[category.name] || Dumbbell;
+            {muscleGroupData.map((category) => {
+              const BalanceIcon = getBalanceIcon(category.balanceScore);
+              const IconComponent = getCategoryIcon(category.name);
 
               return (
                 <div
                   key={category.name}
-                  className={`p-4 rounded-lg border transition-all duration-200 hover:border-opacity-80 ${getColorClasses(category.color)}`}
+                  className={`p-4 rounded-lg border-2 transition-all duration-200 ${category.balanceScore >= 80
+                    ? 'bg-green-900/20 border-green-500/30'
+                    : category.balanceScore >= 60
+                      ? 'bg-yellow-900/20 border-yellow-500/30'
+                      : 'bg-red-900/20 border-red-500/30'
+                    }`}
                 >
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center space-x-3">
-                      <div className="flex items-center justify-center w-10 h-10 bg-gray-800 rounded-lg">
-                        <IconComponent className="w-5 h-5 text-gray-300" />
+                      <div className={`p-2 rounded-lg ${getColorClasses(category.color)}`}>
+                        <IconComponent className="w-5 h-5" />
                       </div>
                       <div>
-                        <h4 className="font-semibold text-white flex items-center">
-                          {category.name}
-                          <span className="ml-2 text-xs bg-gray-700 px-2 py-1 rounded-full">
-                            #{index + 1}
-                          </span>
-                        </h4>
-                        <p className="text-sm text-gray-400">
-                          {category.exercises} ejercicio{category.exercises !== 1 ? 's' : ''} • {category.frequency} sesiones
-                        </p>
+                        <h4 className="font-medium text-white">{category.name}</h4>
+                        <div className="flex items-center space-x-2 text-sm text-gray-400">
+                          <span>{category.exercises} ejercicios</span>
+                          <span>•</span>
+                          <span>{category.frequency} sesiones</span>
+                        </div>
                       </div>
                     </div>
 
                     <div className="text-right">
-                      <p className="text-xl font-bold text-white">
-                        {formatNumber(category.volume)} kg
-                      </p>
-                      <p className="text-sm text-gray-400">
-                        {category.percentage.toFixed(1)}% del total
-                      </p>
+                      <div className="flex items-center space-x-2">
+                        <BalanceIcon className={`w-4 h-4 ${getBalanceColor(category.balanceScore)}`} />
+                        <span className={`text-sm font-medium ${getBalanceColor(category.balanceScore)}`}>
+                          {category.balanceScore.toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        Balance
+                      </div>
                     </div>
                   </div>
 
-                  {/* Barra de progreso mejorada */}
+                  {/* Métricas principales */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+                    <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                      <div className="text-lg font-bold text-white">
+                        {formatNumber(category.volume)}
+                      </div>
+                      <div className="text-xs text-gray-400">Volumen (kg)</div>
+                    </div>
+
+                    <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                      <div className="text-lg font-bold text-white">
+                        {category.percentage.toFixed(1)}%
+                      </div>
+                      <div className="text-xs text-gray-400">% del total</div>
+                    </div>
+
+                    <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                      <div className="text-lg font-bold text-white">
+                        {formatNumber(category.avgWeight)}
+                      </div>
+                      <div className="text-xs text-gray-400">Peso promedio</div>
+                    </div>
+
+                    <div className="bg-gray-800/50 rounded-lg p-3 text-center">
+                      <div className={`text-lg font-bold ${category.progressPercent > 0 ? 'text-green-400' :
+                        category.progressPercent < 0 ? 'text-red-400' : 'text-gray-400'
+                        }`}>
+                        {category.progressPercent > 0 ? '+' : ''}{category.progressPercent.toFixed(1)}%
+                      </div>
+                      <div className="text-xs text-gray-400">Progreso</div>
+                    </div>
+                  </div>
+
+                  {/* Barra de progreso del balance */}
                   <div className="mb-4">
-                    <div className="flex justify-between text-xs text-gray-400 mb-1">
-                      <span>{category.name}</span>
-                      <span>{category.percentage.toFixed(1)}%</span>
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="text-sm text-gray-400">
+                        Balance: {category.percentage.toFixed(1)}%
+                      </span>
+                      <span className="text-sm text-gray-400">
+                        Ideal: {category.idealPercentage}%
+                      </span>
                     </div>
                     <div className="w-full bg-gray-700 rounded-full h-2">
                       <div
-                        className={`h-2 rounded-full transition-all duration-300 ${getColorClasses(category.color).split(' ')[0]} bg-current`}
-                        style={{ width: `${Math.min(category.percentage, 100)}%` }}
+                        className={`h-2 rounded-full transition-all duration-300 ${category.balanceScore >= 80 ? 'bg-green-500' :
+                          category.balanceScore >= 60 ? 'bg-yellow-500' : 'bg-red-500'
+                          }`}
+                        style={{
+                          width: `${Math.min(100, category.percentage)}%`
+                        }}
                       />
                     </div>
                   </div>
 
-                  {/* Métricas específicas */}
-                  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-4">
-                    <div className="text-center p-3 bg-gray-800/50 rounded-lg">
-                      <p className="text-lg font-bold text-white">
-                        {formatNumber(category.avgWeight)}kg
-                      </p>
-                      <p className="text-xs text-gray-400">Peso Promedio</p>
-                    </div>
-
-                    <div className="text-center p-3 bg-gray-800/50 rounded-lg">
-                      <p className="text-lg font-bold text-white">
-                        {formatNumber(category.maxWeight)}kg
-                      </p>
-                      <p className="text-xs text-gray-400">Peso Máximo</p>
-                    </div>
-
-                    <div className="text-center p-3 bg-gray-800/50 rounded-lg">
-                      <div className="flex items-center justify-center space-x-1">
-                        <p className={`text-lg font-bold ${category.progressPercent > 0 ? 'text-green-400' :
-                          category.progressPercent < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                          {category.progressPercent > 0 ? '+' : ''}{category.progressPercent.toFixed(1)}%
-                        </p>
-                        {category.progressPercent !== 0 && (
-                          category.progressPercent > 0 ?
-                            <TrendingUp className="w-4 h-4 text-green-400" /> :
-                            <TrendingDown className="w-4 h-4 text-red-400" />
-                        )}
-                      </div>
-                      <p className="text-xs text-gray-400">Progreso</p>
-                    </div>
-
-                    <div className="text-center p-3 bg-gray-800/50 rounded-lg">
-                      <div className="flex items-center justify-center space-x-1">
-                        <p className={`text-lg font-bold ${getBalanceColor(category.balanceScore).split(' ')[0]}`}>
-                          {Math.round(category.balanceScore)}
-                        </p>
-                        {getBalanceIcon(category.balanceScore)}
-                      </div>
-                      <p className="text-xs text-gray-400">Balance Score</p>
-                    </div>
-                  </div>
-
-                  {/* Recomendaciones por categoría */}
-                  {category.recommendations.length > 0 && (
-                    <div className="border-t border-gray-700 pt-3">
-                      <h5 className="text-sm font-medium text-gray-300 mb-2">Recomendaciones:</h5>
-                      <div className="space-y-1">
-                        {category.recommendations.slice(0, 2).map((rec, recIndex) => (
-                          <p key={recIndex} className="text-xs text-gray-400 flex items-start">
-                            <span className="text-blue-400 mr-1">•</span>
-                            {rec}
-                          </p>
-                        ))}
-                      </div>
+                  {/* Recomendaciones específicas */}
+                  {category.recommendation && (
+                    <div className="bg-gray-800/30 rounded-lg p-3">
+                      <h5 className="text-sm font-medium text-gray-300 mb-2">
+                        Recomendación
+                      </h5>
+                      <p className="text-sm text-gray-400">{category.recommendation}</p>
                     </div>
                   )}
                 </div>
@@ -463,166 +357,12 @@ export const MuscleBalanceSummary: React.FC<MuscleBalanceSummaryProps> = ({
           </div>
         </CardContent>
       </Card>
-
-      {/* Análisis y recomendaciones */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recomendaciones generales */}
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-white flex items-center">
-              <Target className="w-5 h-5 mr-2" />
-              Recomendaciones de Balance
-              <InfoTooltip
-                content="Sugerencias para mejorar el equilibrio muscular y prevenir desequilibrios."
-                position="top"
-                className="ml-2"
-              />
-            </h3>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              {analysis.recommendations.map((recommendation, index) => (
-                <div
-                  key={index}
-                  className="flex items-start space-x-3 p-3 bg-blue-900/20 rounded-lg border border-blue-500/30"
-                >
-                  <div className="flex-shrink-0 w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-sm font-bold">
-                    {index + 1}
-                  </div>
-                  <p className="text-sm text-gray-300">{recommendation}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Factores de riesgo */}
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-white flex items-center">
-              <AlertTriangle className="w-5 h-5 mr-2" />
-              Factores de Riesgo
-              <InfoTooltip
-                content="Identificación de posibles desequilibrios que podrían llevar a lesiones."
-                position="top"
-                className="ml-2"
-              />
-            </h3>
-          </CardHeader>
-          <CardContent>
-            {analysis.riskFactors.length > 0 ? (
-              <div className="space-y-3">
-                {analysis.riskFactors.map((risk, index) => (
-                  <div
-                    key={index}
-                    className="flex items-start space-x-3 p-3 bg-red-900/20 rounded-lg border border-red-500/30"
-                  >
-                    <AlertTriangle className="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-gray-300">{risk}</p>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <Shield className="w-12 h-12 text-green-400 mx-auto mb-3" />
-                <p className="text-green-400 font-medium">Sin factores de riesgo detectados</p>
-                <p className="text-sm text-gray-400 mt-1">
-                  Tu balance muscular actual parece saludable
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
-      </div>
     </div>
   );
 };
 
-// Funciones auxiliares
-const generateCategoryRecommendations = (
-  categoryName: string,
-  metrics: { percentage: number; idealPercentage: number; frequency: number; progressPercent: number; balanceScore: number }
-): string[] => {
-  const recommendations: string[] = [];
-  const { percentage, idealPercentage, frequency, progressPercent, balanceScore } = metrics;
-
-  if (percentage < idealPercentage - 5) {
-    recommendations.push(`Aumentar volumen de ${categoryName.toLowerCase()} en un ${(idealPercentage - percentage).toFixed(1)}%`);
-  }
-
-  if (frequency < 2) {
-    recommendations.push(`Entrenar ${categoryName.toLowerCase()} al menos 2 veces por semana`);
-  }
-
-  if (progressPercent < 0) {
-    recommendations.push(`Revisar progresión en ${categoryName.toLowerCase()} - hay una tendencia descendente`);
-  }
-
-  if (balanceScore < 60) {
-    recommendations.push(`Priorizar equilibrio en ${categoryName.toLowerCase()} para evitar desequilibrios`);
-  }
-
-  return recommendations.slice(0, 3);
-};
-
-const generateGeneralRecommendations = (
-  categories: CategoryMetrics[],
-  overallBalance: number
-): string[] => {
-  const recommendations: string[] = [];
-
-  if (overallBalance < 60) {
-    recommendations.push('Balance general mejorable - redistribuir volumen entre grupos musculares');
-  }
-
-  const lowBalanceCategories = categories.filter(cat => cat.balanceScore < 50);
-  if (lowBalanceCategories.length > 0) {
-    recommendations.push(`Priorizar: ${lowBalanceCategories.map(cat => cat.name).join(', ')}`);
-  }
-
-  const underrepresentedCategories = categories.filter(cat => cat.percentage < 5);
-  if (underrepresentedCategories.length > 0) {
-    recommendations.push(`Incluir más ejercicios de: ${underrepresentedCategories.map(cat => cat.name).join(', ')}`);
-  }
-
-  const dominantCategories = categories.filter(cat => cat.percentage > 40);
-  if (dominantCategories.length > 0) {
-    recommendations.push(`Reducir énfasis en: ${dominantCategories.map(cat => cat.name).join(', ')}`);
-  }
-
-  if (recommendations.length === 0) {
-    recommendations.push('Mantener el balance actual - distribución saludable entre grupos musculares');
-  }
-
-  return recommendations.slice(0, 4);
-};
-
-const identifyRiskFactors = (categories: CategoryMetrics[]): string[] => {
-  const riskFactors: string[] = [];
-
-  // Desequilibrios críticos
-  const criticalImbalances = categories.filter(cat => cat.balanceScore < 30);
-  if (criticalImbalances.length > 0) {
-    riskFactors.push(`Desequilibrios críticos en: ${criticalImbalances.map(cat => cat.name).join(', ')}`);
-  }
-
-  // Progreso negativo
-  const decliningCategories = categories.filter(cat => cat.progressPercent < -10);
-  if (decliningCategories.length > 0) {
-    riskFactors.push(`Pérdida de fuerza en: ${decliningCategories.map(cat => cat.name).join(', ')}`);
-  }
-
-  // Grupos dominantes excesivos
-  const overDominant = categories.filter(cat => cat.percentage > 50);
-  if (overDominant.length > 0) {
-    riskFactors.push(`Sobreentrenamiento posible en: ${overDominant.map(cat => cat.name).join(', ')}`);
-  }
-
-  // Grupos completamente abandonados
-  const abandoned = categories.filter(cat => cat.frequency === 0);
-  if (abandoned.length > 2) {
-    riskFactors.push(`Múltiples grupos musculares sin entrenar: ${abandoned.map(cat => cat.name).join(', ')}`);
-  }
-
-  return riskFactors.slice(0, 3);
+// Funciones auxiliares (mantener igual)
+const getCategoryIcon = (categoryName: string) => {
+  const muscleGroup = MUSCLE_GROUPS[categoryName as keyof typeof MUSCLE_GROUPS];
+  return muscleGroup?.icon || '💪';
 }; 

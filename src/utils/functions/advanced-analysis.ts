@@ -352,10 +352,14 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
     return recordDate >= older2WeeksStart && recordDate <= older2WeeksEnd;
   });
 
+  // **CORRECCIÓN CLAVE**: Calcular tanto volumen total (para stress) como promedio por sesión (para comparación justa)
   const recentVolume = recentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
   const olderVolume = olderRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
 
-  const volumeChange = olderVolume > 0 ? ((recentVolume - olderVolume) / olderVolume) * 100 : 0;
+  const recentAvgVolume = recentRecords.length > 0 ? recentVolume / recentRecords.length : 0;
+  const olderAvgVolume = olderRecords.length > 0 ? olderVolume / olderRecords.length : 0;
+
+  const volumeChange = olderAvgVolume > 0 ? ((recentAvgVolume - olderAvgVolume) / olderAvgVolume) * 100 : 0;
   const volumeDropIndicators = volumeChange < -15; // Caída > 15%
 
   // Calcular días desde último entrenamiento
@@ -498,12 +502,19 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
 export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => {
   if (records.length === 0) return [];
 
+  // **DETECCIÓN DE DATOS INSUFICIENTES**: Verificar rango temporal de datos
+  const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const firstDate = new Date(sortedRecords[0].date);
+  const lastDate = new Date(sortedRecords[sortedRecords.length - 1].date);
+  const totalDays = Math.ceil((lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
+
   const now = new Date();
   const periods = [
     {
       name: 'Esta semana',
       getRecords: () => getThisWeekRecords(records),
-      getPrevRecords: () => getLastWeekRecords(records)
+      getPrevRecords: () => getLastWeekRecords(records),
+      minDaysRequired: 14 // Necesita al menos 2 semanas de datos
     },
     {
       name: 'Últimas 2 semanas',
@@ -522,7 +533,8 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
           const recordDate = new Date(r.date);
           return recordDate >= prevTwoWeeksStart && recordDate <= prevTwoWeeksEnd;
         });
-      }
+      },
+      minDaysRequired: 28 // Necesita al menos 4 semanas de datos
     },
     {
       name: 'Último mes',
@@ -541,7 +553,8 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
           const recordDate = new Date(r.date);
           return recordDate >= prevMonthStart && recordDate <= prevMonthEnd;
         });
-      }
+      },
+      minDaysRequired: 56 // Necesita al menos 8 semanas de datos
     },
     {
       name: 'Últimos 3 meses',
@@ -560,57 +573,72 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
           const recordDate = new Date(r.date);
           return recordDate >= prevThreeMonthsStart && recordDate <= prevThreeMonthsEnd;
         });
-      }
+      },
+      minDaysRequired: 168 // Necesita al menos 24 semanas de datos
     }
   ];
 
-  const comparisons: PeriodComparison[] = [];
+  return periods.map(period => {
+    const currentRecords = period.getRecords();
+    const prevRecords = period.getPrevRecords();
 
-  periods.forEach((period) => {
-    const periodRecords = period.getRecords();
+    // Validación silenciosa de datos
 
-    if (periodRecords.length > 0) {
-      const totalVolume = periodRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-      const avgWeight = periodRecords.reduce((sum, r) => sum + r.weight, 0) / periodRecords.length;
+    const currentWorkouts = currentRecords.length;
+    const prevWorkouts = prevRecords.length;
 
-      // Calcular promedio de 1RM estimado para mejor comparación de fuerza
-      const avg1RM = periodRecords.reduce((sum, r) => {
+    let totalVolume = 0;
+    let avgWeight = 0;
+    let volumeChange = 0;
+    let strengthChange = 0;
+    let improvement = 0;
+
+    // **VALIDACIÓN DE DATOS SUFICIENTES**
+    const hasEnoughData = totalDays >= period.minDaysRequired;
+    const hasValidComparison = currentRecords.length >= 2 && prevRecords.length >= 2;
+
+    if (currentRecords.length > 0) {
+      totalVolume = currentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+      avgWeight = currentRecords.reduce((sum, r) => {
         const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
         return sum + oneRM;
-      }, 0) / periodRecords.length;
+      }, 0) / currentRecords.length;
 
-      // Comparar con período anterior del mismo tamaño
-      const prevRecords = period.getPrevRecords();
+      // **CORRECCIÓN CLAVE**: Solo calcular tendencias si hay datos suficientes
+      if (hasEnoughData && hasValidComparison) {
+        const currentAvgVolumePerSession = totalVolume / currentRecords.length;
 
-      let improvement = 0;
-      let volumeChange = 0;
-      let strengthChange = 0;
-
-      if (prevRecords.length > 0) {
         const prevVolume = prevRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+        const prevAvgVolumePerSession = prevVolume / prevRecords.length;
+
         const prevAvg1RM = prevRecords.reduce((sum, r) => {
           const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
           return sum + oneRM;
         }, 0) / prevRecords.length;
 
-        volumeChange = prevVolume > 0 ? ((totalVolume - prevVolume) / prevVolume) * 100 : 0;
-        strengthChange = prevAvg1RM > 0 ? ((avg1RM - prevAvg1RM) / prevAvg1RM) * 100 : 0;
+        volumeChange = prevAvgVolumePerSession > 0 ? ((currentAvgVolumePerSession - prevAvgVolumePerSession) / prevAvgVolumePerSession) * 100 : 0;
+        strengthChange = prevAvg1RM > 0 ? ((avgWeight - prevAvg1RM) / prevAvg1RM) * 100 : 0;
         improvement = (volumeChange + strengthChange) / 2;
+
+        // Comparación válida realizada
+      } else {
+        // No calcular cambios si no hay datos suficientes
+        volumeChange = 0;
+        strengthChange = 0;
+        improvement = 0;
       }
-
-      comparisons.push({
-        periodName: period.name,
-        workouts: periodRecords.length,
-        totalVolume: Math.round(totalVolume),
-        avgWeight: Math.round(avgWeight * 100) / 100,
-        improvement: Math.round(improvement),
-        volumeChange: Math.round(volumeChange),
-        strengthChange: Math.round(strengthChange)
-      });
     }
-  });
 
-  return comparisons;
+    return {
+      periodName: period.name,
+      workouts: currentWorkouts,
+      totalVolume,
+      avgWeight,
+      improvement,
+      volumeChange,
+      strengthChange
+    };
+  });
 };
 
 /**
@@ -618,8 +646,7 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
  * Elimina duplicación y unifica toda la lógica
  */
 export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction => {
-  // LOG TEMPORAL PARA VERIFICAR FUNCIÓN EJECUTADA
-  console.log('🔍 FUNCIÓN UNIFICADA: predictProgress con', records.length, 'registros');
+  // Función unificada de predicción de progreso
 
   // Validación inicial
   if (records.length === 0) {
@@ -664,8 +691,6 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
   const experienceLevel = validRecords.length < 10 ? 'beginner' :
     validRecords.length < 30 ? 'intermediate' : 'advanced';
 
-  console.log('🔍 NIVEL DETECTADO:', experienceLevel);
-
   // Calcular métricas básicas (común para todos los niveles)
   const sortedRecords = [...validRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   const totalVolume = validRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
@@ -681,6 +706,32 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
   const first1RM = firstRecord.weight * (1 + Math.min(firstRecord.reps, 20) / 30);
   const last1RM = lastRecord.weight * (1 + Math.min(lastRecord.reps, 20) / 30);
   const overallProgress = first1RM > 0 ? ((last1RM - first1RM) / first1RM) * 100 : 0;
+
+  // **VALIDACIÓN DE DATOS SUFICIENTES PARA PREDICCIONES**
+  const hasEnoughTimeData = daysBetween >= 14; // Al menos 2 semanas
+  const hasEnoughVolumeData = validRecords.length >= 6; // Al menos 6 entrenamientos
+
+  // Si no hay datos suficientes, usar valores conservadores
+  if (!hasEnoughTimeData || !hasEnoughVolumeData) {
+
+    return {
+      nextWeekVolume: avgVolume * 1.02, // 2% de crecimiento conservador
+      nextWeekWeight: avgWeight * 1.01, // 1% de crecimiento conservador
+      monthlyGrowthRate: 2,
+      predictedPR: { weight: maxWeight * 1.05, confidence: 30 },
+      plateauRisk: 20,
+      trendAnalysis: 'insuficiente',
+      timeToNextPR: 8,
+      confidenceLevel: 25,
+      volumeTrend: avgVolume * 0.02,
+      strengthTrend: avgWeight * 0.01,
+      recommendations: [
+        'Continúa registrando entrenamientos para obtener predicciones más precisas',
+        'Mantén la consistencia en tu rutina durante al menos 2 semanas',
+        'Enfócate en progresión gradual: 2.5-5% de aumento semanal'
+      ]
+    };
+  }
 
   // Calcular tendencias basadas en nivel de experiencia
   let volumeTrend = 0;
@@ -901,19 +952,7 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
     recommendations: recommendations.slice(0, 5)
   };
 
-  // LOG TEMPORAL PARA VERIFICAR CORRECCIONES
-  console.log('🔧 FUNCIÓN UNIFICADA - VALORES FINALES:', {
-    experienceLevel,
-    dataPoints: validRecords.length,
-    weeklyDataLength,
-    strengthTrend: result.strengthTrend,
-    volumeTrend: result.volumeTrend,
-    monthlyGrowthRate: result.monthlyGrowthRate,
-    timeToNextPR: result.timeToNextPR,
-    nextWeekWeight: result.nextWeekWeight,
-    predictedPRWeight: result.predictedPR.weight,
-    message: 'Todos los valores están dentro de rangos realistas'
-  });
+  // Valores finales calculados
 
   return result;
 };
@@ -1147,6 +1186,23 @@ export const calculateAdvancedAnalysis = (records: WorkoutRecord[]): AdvancedAna
  */
 export const generateAdvancedOptimizationSuggestions = (records: WorkoutRecord[]): string[] => {
   if (records.length === 0) return [];
+
+  // **VALIDACIÓN DE DATOS TEMPORALES**
+  const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const firstDate = new Date(sortedRecords[0].date);
+  const lastDate = new Date(sortedRecords[sortedRecords.length - 1].date);
+  const totalDays = Math.ceil((lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
+
+  // Validación silenciosa de rango temporal
+
+  // Si hay menos de 2 semanas de datos, dar sugerencias básicas
+  if (totalDays < 14) {
+    return [
+      'Sigue entrenando de forma consistente durante al menos 2 semanas para recibir análisis detallados',
+      'Registra todos tus entrenamientos para obtener métricas más precisas',
+      'Mantén un patrón de entrenamiento regular para mejorar el análisis temporal'
+    ];
+  }
 
   const suggestions: string[] = [];
 

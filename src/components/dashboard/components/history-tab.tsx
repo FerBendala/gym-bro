@@ -1,10 +1,12 @@
 import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ArrowDown, ArrowUp, History, Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import { ArrowDown, ArrowUp, Calendar, Clock, History, Minus, TrendingDown, TrendingUp, Trophy, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
+import Chart from 'react-apexcharts';
 import type { WorkoutRecord } from '../../../interfaces';
-import { formatNumber } from '../../../utils/functions';
+import { calculateTotalGrowth, formatNumber } from '../../../utils/functions';
 import { Card, CardContent, CardHeader } from '../../card';
+import { StatCard } from '../../stat-card';
 import { InfoTooltip } from '../../tooltip';
 
 /**
@@ -15,7 +17,7 @@ interface HistoryTabProps {
 }
 
 /**
- * Interfaz para puntos del historial
+ * Interfaz para los datos de timeline del historial
  */
 interface HistoryPoint {
   date: Date;
@@ -33,6 +35,16 @@ interface HistoryPoint {
   changePercent: number;
   trend: 'up' | 'down' | 'stable';
 }
+
+/**
+ * Función helper para manejar valores numéricos seguros
+ */
+const safeNumber = (value: any, defaultValue: number = 0): number => {
+  if (value === null || value === undefined || isNaN(value)) {
+    return defaultValue;
+  }
+  return Number(value);
+};
 
 /**
  * Tab del dashboard para mostrar el historial de entrenamientos con evolución temporal
@@ -109,7 +121,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
       }))
       .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-    // Calcular cambios y tendencias
+    // **CORRECCIÓN CLAVE**: Calcular cambios usando volumen promedio por sesión
     return sortedData.map((point, index) => {
       const weekNumber = index + 1;
       let change = 0;
@@ -118,8 +130,14 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
 
       if (index > 0) {
         const previousPoint = sortedData[index - 1];
-        change = point.value - previousPoint.value;
-        changePercent = previousPoint.value > 0 ? (change / previousPoint.value) * 100 : 0;
+
+        // Calcular volumen promedio por sesión para comparación justa
+        const currentAvgVolume = point.totalWorkouts > 0 ? point.value / point.totalWorkouts : 0;
+        const previousAvgVolume = previousPoint.totalWorkouts > 0 ? previousPoint.value / previousPoint.totalWorkouts : 0;
+
+        // Usar volumen promedio por sesión para el cambio
+        change = Math.round(currentAvgVolume - previousAvgVolume);
+        changePercent = previousAvgVolume > 0 ? ((currentAvgVolume - previousAvgVolume) / previousAvgVolume) * 100 : 0;
 
         if (Math.abs(changePercent) < 5) {
           trend = 'stable';
@@ -140,13 +158,144 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
     });
   }, [records]);
 
-  const maxValue = Math.max(...historyData.map(point => point.value));
+  // Preparar datos para ApexCharts
+  const chartData = useMemo(() => {
+    const series = [{
+      name: 'Volumen Semanal',
+      data: historyData.map(point => ({
+        x: `Semana ${point.weekNumber}`,
+        y: point.value,
+        details: point.details,
+        date: point.date.toLocaleDateString('es-ES', {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric'
+        })
+      }))
+    }];
+
+    const options = {
+      chart: {
+        type: 'area' as const,
+        height: 300,
+        background: 'transparent',
+        toolbar: {
+          show: false
+        },
+        animations: {
+          enabled: true,
+          easing: 'easeinout',
+          speed: 800
+        }
+      },
+      theme: {
+        mode: 'dark' as const
+      },
+      colors: ['#3b82f6'],
+      stroke: {
+        curve: 'smooth' as const,
+        width: 3
+      },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shade: 'dark',
+          gradientToColors: ['#1d4ed8'],
+          shadeIntensity: 1,
+          type: 'vertical',
+          opacityFrom: 0.7,
+          opacityTo: 0.1,
+          stops: [0, 100]
+        }
+      },
+      grid: {
+        borderColor: '#374151',
+        strokeDashArray: 4,
+        xaxis: {
+          lines: {
+            show: true
+          }
+        },
+        yaxis: {
+          lines: {
+            show: true
+          }
+        }
+      },
+      xaxis: {
+        categories: historyData.map(point => `Semana ${point.weekNumber}`),
+        labels: {
+          style: {
+            colors: '#9ca3af',
+            fontSize: '12px'
+          }
+        },
+        axisBorder: {
+          color: '#374151'
+        },
+        axisTicks: {
+          color: '#374151'
+        }
+      },
+      yaxis: {
+        labels: {
+          style: {
+            colors: '#9ca3af',
+            fontSize: '12px'
+          },
+          formatter: (value: number) => `${formatNumber(value)} kg`
+        }
+      },
+      tooltip: {
+        theme: 'dark',
+        style: {
+          fontSize: '12px'
+        },
+        custom: ({ series, seriesIndex, dataPointIndex }: any) => {
+          const point = historyData[dataPointIndex];
+          if (!point) return '';
+
+          return `
+            <div class="bg-gray-800 border border-gray-600 rounded-lg p-3 shadow-lg">
+              <div class="font-semibold text-white mb-1">Semana ${point.weekNumber}</div>
+              <div class="text-gray-300 text-sm mb-2">${point.date.toLocaleDateString('es-ES', {
+            day: 'numeric',
+            month: 'short',
+            year: 'numeric'
+          })}</div>
+              <div class="space-y-1">
+                <div class="text-blue-400 font-medium">${formatNumber(point.value)} kg</div>
+                <div class="text-gray-400 text-xs">${point.totalWorkouts} entrenamientos</div>
+                <div class="text-gray-400 text-xs">Peso máximo: ${formatNumber(point.maxWeight)} kg</div>
+                <div class="text-gray-400 text-xs">${point.uniqueExercises} ejercicios únicos</div>
+              </div>
+            </div>
+          `;
+        }
+      },
+      markers: {
+        size: 6,
+        colors: ['#3b82f6'],
+        strokeColors: '#ffffff',
+        strokeWidth: 2,
+        hover: {
+          size: 8
+        }
+      },
+      dataLabels: {
+        enabled: false
+      }
+    };
+
+    return { series, options };
+  }, [historyData]);
 
   // Calcular estadísticas de comparativa
-  const totalGrowth = historyData.length > 1 ?
-    historyData[historyData.length - 1].value - historyData[0].value : 0;
-  const totalGrowthPercent = historyData.length > 1 && historyData[0].value > 0 ?
-    (totalGrowth / historyData[0].value) * 100 : 0;
+  const maxValue = historyData.length > 0 ? Math.max(...historyData.map(point => point.value)) : 0;
+  const avgValue = historyData.length > 0 ? historyData.reduce((sum, p) => sum + p.value, 0) / historyData.length : 0;
+
+  // **FUNCIÓN UNIFICADA**: Usar la función utilitaria para calcular crecimiento
+  const { absoluteGrowth: totalGrowth, percentGrowth: totalGrowthPercent } = calculateTotalGrowth(historyData);
 
   const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
@@ -166,224 +315,233 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
 
   if (records.length === 0) {
     return (
-      <Card>
-        <CardContent>
-          <div className="text-center py-12">
-            <History className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-300 mb-2">
-              Sin historial de entrenamientos
-            </h3>
-            <p className="text-gray-500">
-              Registra entrenamientos durante varias semanas para ver tu historial
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center py-12">
+        <div className="p-4 bg-gray-800 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+          <History className="w-8 h-8 text-gray-400" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-300 mb-2">
+          Sin historial de entrenamientos
+        </h3>
+        <p className="text-gray-500">
+          Registra entrenamientos durante varias semanas para ver tu historial
+        </p>
+      </div>
     );
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <h3 className="text-lg font-semibold text-white flex items-center">
-          <History className="w-5 h-5 mr-2" />
-          Historial de Entrenamientos
-          <InfoTooltip
-            content="Evolución semanal detallada de tu progreso con métricas completas y comparativas entre períodos."
-            position="top"
-            className="ml-2"
-          />
-        </h3>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-6">
-          {/* Estadísticas generales con comparativas */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
-              <p className="text-2xl font-bold text-blue-400">
-                {historyData.length}
-              </p>
-              <p className="text-sm text-gray-400">Semanas registradas</p>
-            </div>
+    <div className="space-y-6">
+      {/* Métricas principales del historial */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <StatCard
+          title="Semanas Registradas"
+          value={historyData.length.toString()}
+          icon={Calendar}
+          variant="indigo"
+          tooltip="Número total de semanas con entrenamientos registrados."
+          tooltipPosition="top"
+        />
 
-            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
-              <p className="text-2xl font-bold text-green-400">
-                {historyData.length > 0 ? formatNumber(Math.max(...historyData.map(p => p.value))) : 0} kg
-              </p>
-              <p className="text-sm text-gray-400">Mejor semana</p>
-            </div>
+        <StatCard
+          title="Mejor Semana"
+          value={`${formatNumber(maxValue)} kg`}
+          icon={Trophy}
+          variant="success"
+          tooltip="Semana con mayor volumen total de entrenamiento."
+          tooltipPosition="top"
+        />
 
-            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
-              <p className="text-2xl font-bold text-purple-400">
-                {historyData.length > 0 ? formatNumber(historyData.reduce((sum, p) => sum + p.value, 0) / historyData.length) : 0} kg
-              </p>
-              <p className="text-sm text-gray-400">Promedio semanal</p>
-            </div>
+        <StatCard
+          title="Promedio Semanal"
+          value={`${formatNumber(avgValue)} kg`}
+          icon={Zap}
+          variant="warning"
+          tooltip="Volumen promedio por semana durante todo el período."
+          tooltipPosition="top"
+        />
 
-            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
-              <div className="flex items-center justify-center space-x-2">
-                <p className={`text-2xl font-bold ${totalGrowthPercent > 0 ? 'text-green-400' : totalGrowthPercent < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                  {totalGrowthPercent > 0 ? '+' : ''}{totalGrowthPercent.toFixed(1)}%
-                </p>
-                {totalGrowthPercent > 0 ? (
-                  <TrendingUp className="w-5 h-5 text-green-400" />
-                ) : totalGrowthPercent < 0 ? (
-                  <TrendingDown className="w-5 h-5 text-red-400" />
-                ) : (
-                  <Minus className="w-5 h-5 text-gray-400" />
-                )}
-              </div>
-              <p className="text-sm text-gray-400">Crecimiento total</p>
-            </div>
+        <StatCard
+          title="Crecimiento Total"
+          value={`${totalGrowthPercent >= 0 ? '+' : ''}${safeNumber(totalGrowthPercent, 0).toFixed(1)}%`}
+          icon={totalGrowthPercent >= 0 ? TrendingUp : TrendingDown}
+          variant={totalGrowthPercent >= 10 ? 'success' : totalGrowthPercent >= 0 ? 'warning' : 'danger'}
+          tooltip="Cambio porcentual en volumen promedio por sesión comparando las primeras semanas con las últimas semanas (más estable que primera vs última)."
+          tooltipPosition="top"
+        />
+
+        <StatCard
+          title="Duración Promedio"
+          value={`${Math.round(historyData.reduce((sum, p) => sum + p.totalWorkouts, 0) / Math.max(historyData.length, 1))} ent/sem`}
+          icon={Clock}
+          variant="indigo"
+          tooltip="Número promedio de entrenamientos por semana."
+          tooltipPosition="top"
+        />
+      </div>
+
+      {/* Gráfico de evolución temporal con ApexCharts */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <History className="w-5 h-5 mr-2" />
+            Evolución Temporal del Volumen
+            <InfoTooltip
+              content="Gráfico interactivo que muestra la evolución semanal del volumen de entrenamiento con tooltips detallados."
+              position="top"
+              className="ml-2"
+            />
+          </h3>
+        </CardHeader>
+        <CardContent>
+          <div className="h-80">
+            <Chart
+              options={chartData.options}
+              series={chartData.series}
+              type="area"
+              height="100%"
+            />
           </div>
+        </CardContent>
+      </Card>
 
-          {/* Gráfico de línea simple */}
-          <div className="relative h-64 bg-gray-900/50 rounded-lg p-4">
-            <svg className="w-full h-full" viewBox="0 0 800 200">
-              {/* Grid lines */}
-              <defs>
-                <pattern id="grid" width="40" height="20" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 20" fill="none" stroke="rgb(55, 65, 81)" strokeWidth="0.5" opacity="0.3" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
+      {/* Datos semanales detallados */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <Calendar className="w-5 h-5 mr-2" />
+            Historial Semanal Detallado
+            <InfoTooltip
+              content="Desglose detallado de cada semana con métricas completas y comparativas."
+              position="top"
+              className="ml-2"
+            />
+          </h3>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {historyData.slice().reverse().map((point, index) => {
+              const TrendIcon = getTrendIcon(point.trend);
+              const trendColor = getTrendColor(point.trend);
 
-              {/* Línea de progreso */}
-              {historyData.length > 1 && (
-                <path
-                  d={historyData.map((point, index) => {
-                    const x = (index / (historyData.length - 1)) * 760 + 20;
-                    const y = 180 - ((point.value / maxValue) * 160);
-                    return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-                  }).join(' ')}
-                  fill="none"
-                  stroke="rgb(59, 130, 246)"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              )}
+              const getTrendBadge = () => {
+                switch (point.trend) {
+                  case 'up': return { text: 'Mejorando', color: 'bg-green-500 text-white', icon: TrendingUp };
+                  case 'down': return { text: 'Declinando', color: 'bg-red-500 text-white', icon: TrendingDown };
+                  default: return { text: 'Estable', color: 'bg-gray-500 text-white', icon: null };
+                }
+              };
 
-              {/* Área bajo la línea */}
-              {historyData.length > 1 && (
-                <path
-                  d={historyData.map((point, index) => {
-                    const x = (index / (historyData.length - 1)) * 760 + 20;
-                    const y = 180 - ((point.value / maxValue) * 160);
-                    if (index === 0) return `M ${x} 180 L ${x} ${y}`;
-                    if (index === historyData.length - 1) return `L ${x} ${y} L ${x} 180 Z`;
-                    return `L ${x} ${y}`;
-                  }).join(' ')}
-                  fill="url(#gradient)"
-                  opacity="0.2"
-                />
-              )}
+              const trendBadge = getTrendBadge();
 
-              {/* Gradiente para el área */}
-              <defs>
-                <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.8" />
-                  <stop offset="100%" stopColor="rgb(59, 130, 246)" stopOpacity="0.1" />
-                </linearGradient>
-              </defs>
-
-              {/* Puntos */}
-              {historyData.map((point, index) => {
-                const x = (index / Math.max(1, historyData.length - 1)) * 760 + 20;
-                const y = 180 - ((point.value / maxValue) * 160);
-
-                return (
-                  <g key={index}>
-                    <circle
-                      cx={x}
-                      cy={y}
-                      r="6"
-                      fill="rgb(59, 130, 246)"
-                      stroke="white"
-                      strokeWidth="2"
-                      className="cursor-pointer hover:r-8 transition-all"
-                    />
-                    <title>{point.details}</title>
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
-
-          {/* Datos semanales detallados con comparativas */}
-          <div className="space-y-3">
-            <h4 className="text-sm font-medium text-gray-300">Historial Semanal Detallado</h4>
-            <div className="space-y-3 max-h-96 overflow-y-auto">
-              {historyData.slice().reverse().map((point, index) => {
-                const TrendIcon = getTrendIcon(point.trend);
-                const trendColor = getTrendColor(point.trend);
-
-                return (
-                  <div key={index} className="p-4 bg-gray-800/30 rounded-lg border border-gray-700/50">
-                    <div className="flex items-center justify-between mb-3">
-                      <div className="flex items-center space-x-3">
-                        <span className="text-lg font-bold text-white">
+              return (
+                <div
+                  key={index}
+                  className="relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-blue-500/20 hover:border-blue-500/40 transition-all duration-200"
+                >
+                  {/* Header con semana, fecha y estado */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                      <div className="p-2 sm:p-3 rounded-lg bg-gradient-to-br from-blue-500/80 to-blue-600/80">
+                        <Calendar className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white">
                           Semana {point.weekNumber}
-                        </span>
-                        <span className="text-sm text-gray-400">
-                          {point.date.toLocaleDateString('es-ES', {
-                            day: 'numeric',
-                            month: 'short',
-                            year: 'numeric'
-                          })}
-                        </span>
-                      </div>
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xl font-bold text-blue-400">
-                          {formatNumber(point.value)} kg
-                        </span>
-                        {point.weekNumber > 1 && (
-                          <div className={`flex items-center space-x-1 ${trendColor}`}>
-                            <TrendIcon className="w-4 h-4" />
-                            <span className="text-sm font-medium">
-                              {point.changePercent > 0 ? '+' : ''}{point.changePercent.toFixed(1)}%
-                            </span>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                      <div>
-                        <span className="text-gray-400">Entrenamientos:</span>
-                        <span className="ml-2 font-medium text-white">{point.totalWorkouts}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-400">Peso máximo:</span>
-                        <span className="ml-2 font-medium text-white">{formatNumber(point.maxWeight)} kg</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-400">Series totales:</span>
-                        <span className="ml-2 font-medium text-white">{point.totalSets}</span>
-                      </div>
-                      <div>
-                        <span className="text-gray-400">Ejercicios únicos:</span>
-                        <span className="ml-2 font-medium text-white">{point.uniqueExercises}</span>
-                      </div>
-                    </div>
-
-                    {point.weekNumber > 1 && (
-                      <div className="mt-3 pt-3 border-t border-gray-700/50 text-sm">
-                        <div className="flex items-center space-x-4">
-                          <span className="text-gray-400">Cambio vs semana anterior:</span>
-                          <span className={`font-medium ${point.change > 0 ? 'text-green-400' : point.change < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                            {point.change > 0 ? '+' : ''}{formatNumber(point.change)} kg
+                        </h4>
+                        <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
+                          <span className="text-xs sm:text-sm text-gray-400">
+                            {point.date.toLocaleDateString('es-ES', {
+                              day: 'numeric',
+                              month: 'short',
+                              year: 'numeric'
+                            })}
                           </span>
+                          {point.weekNumber > 1 && (
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${trendBadge.color}`}>
+                              {trendBadge.text}
+                            </span>
+                          )}
+                          {point.weekNumber > 1 && trendBadge.icon && (
+                            <trendBadge.icon className={`w-3 h-3 sm:w-4 sm:h-4 ${point.trend === 'down' ? 'text-red-400' : 'text-green-400'}`} />
+                          )}
                         </div>
                       </div>
-                    )}
+                    </div>
+
+                    {/* Volumen principal y cambio */}
+                    <div className="text-right flex-shrink-0">
+                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-400">
+                        {formatNumber(point.value)} kg
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        volumen total
+                      </div>
+                      {point.weekNumber > 1 && (
+                        <div className="text-xs text-gray-500 mt-1">
+                          <span className={`font-medium ${point.change > 0 ? 'text-green-400' : point.change < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                            {point.change > 0 ? '+' : ''}{point.changePercent.toFixed(1)}%
+                          </span>
+                        </div>
+                      )}
+                    </div>
                   </div>
-                );
-              })}
-            </div>
+
+                  {/* Métricas principales en grid */}
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
+                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                      <div className="text-xs text-gray-400 mb-1">Entrenamientos</div>
+                      <div className="text-sm sm:text-lg font-semibold text-white">
+                        {point.totalWorkouts}
+                      </div>
+                      <div className="text-xs text-gray-500">sesiones</div>
+                    </div>
+
+                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                      <div className="text-xs text-gray-400 mb-1">Peso Máximo</div>
+                      <div className="text-sm sm:text-lg font-semibold text-white">
+                        {formatNumber(point.maxWeight)}
+                      </div>
+                      <div className="text-xs text-gray-500">kg</div>
+                    </div>
+
+                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                      <div className="text-xs text-gray-400 mb-1">Series</div>
+                      <div className="text-sm sm:text-lg font-semibold text-white">
+                        {point.totalSets}
+                      </div>
+                      <div className="text-xs text-gray-500">totales</div>
+                    </div>
+
+                    <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                      <div className="text-xs text-gray-400 mb-1">Ejercicios</div>
+                      <div className="text-sm sm:text-lg font-semibold text-white">
+                        {point.uniqueExercises}
+                      </div>
+                      <div className="text-xs text-gray-500">únicos</div>
+                    </div>
+                  </div>
+
+                  {/* Información de cambio vs semana anterior */}
+                  {point.weekNumber > 1 && (
+                    <div className="bg-gray-800/30 rounded-lg p-3">
+                      <h5 className="text-xs font-medium text-gray-300 mb-2 flex items-center gap-1">
+                        <TrendIcon className={`w-3 h-3 ${trendColor}`} />
+                        Cambio vs Semana Anterior
+                      </h5>
+                      <div className="flex justify-between items-center">
+                        <span className="text-xs text-gray-400">Volumen/sesión:</span>
+                        <span className={`text-xs font-medium ${point.change > 0 ? 'text-green-400' : point.change < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                          {point.change > 0 ? '+' : ''}{formatNumber(point.change)} kg ({point.changePercent > 0 ? '+' : ''}{point.changePercent.toFixed(1)}%)
+                        </span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </div>
   );
 }; 

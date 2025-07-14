@@ -1,43 +1,33 @@
-import { Target, TrendingUp } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
-import { EXERCISE_CATEGORIES, type ExerciseCategory } from '../../constants/exercise-categories';
-import { formatNumber } from '../../utils/functions';
-import { Button } from '../button';
+import { TrendingUp, Zap } from 'lucide-react';
+import React, { useMemo } from 'react';
+import type { WorkoutRecord } from '../../interfaces';
+import { calculateExerciseProgress, formatNumber } from '../../utils/functions';
 import { Card, CardContent, CardHeader } from '../card';
 import { InfoTooltip } from '../tooltip';
-import { MuscleBalanceSummary } from './muscle-balance-summary';
-import type { ExerciseAnalyticsProps } from './types';
+
+export interface ExerciseAnalyticsProps {
+  records: WorkoutRecord[];
+}
 
 /**
  * Componente de analytics por ejercicio
  */
 export const ExerciseAnalytics: React.FC<ExerciseAnalyticsProps> = ({ records }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
-
   const exerciseAnalysis = useMemo(() => {
     if (records.length === 0) return [];
 
-    // Filtrar registros que tienen información de ejercicio válida
-    const validRecords = records.filter(record =>
-      record.exercise && record.exercise.name && record.exercise.name !== 'Ejercicio desconocido'
-    );
-
-    if (validRecords.length === 0) return [];
-
     // Agrupar por ejercicio
-    const exerciseGroups = validRecords.reduce((acc, record) => {
-      const exerciseName = record.exercise!.name;
+    const exerciseGroups = records.reduce((acc, record) => {
+      const exerciseName = record.exercise?.name || 'Ejercicio desconocido';
       if (!acc[exerciseName]) {
         acc[exerciseName] = [];
       }
       acc[exerciseName].push(record);
       return acc;
-    }, {} as Record<string, typeof validRecords>);
+    }, {} as Record<string, WorkoutRecord[]>);
 
     // Analizar cada ejercicio
     return Object.entries(exerciseGroups).map(([exerciseName, exerciseRecords]) => {
-      const sortedRecords = [...exerciseRecords].sort((a, b) => a.date.getTime() - b.date.getTime());
-
       const totalVolume = exerciseRecords.reduce((sum, record) =>
         sum + (record.weight * record.reps * record.sets), 0
       );
@@ -45,14 +35,8 @@ export const ExerciseAnalytics: React.FC<ExerciseAnalyticsProps> = ({ records })
       const maxWeight = Math.max(...exerciseRecords.map(r => r.weight));
       const avgWeight = exerciseRecords.reduce((sum, r) => sum + r.weight, 0) / exerciseRecords.length;
 
-      const firstRecord = sortedRecords[0];
-      const lastRecord = sortedRecords[sortedRecords.length - 1];
-
-      // Calcular progreso considerando peso y repeticiones (1RM estimado)
-      const first1RM = firstRecord.weight * (1 + Math.min(firstRecord.reps, 20) / 30);
-      const last1RM = lastRecord.weight * (1 + Math.min(lastRecord.reps, 20) / 30);
-      const progress = last1RM - first1RM;
-      const progressPercent = first1RM > 0 ? (progress / first1RM) * 100 : 0;
+      // **FUNCIÓN UNIFICADA**: Usar la función utilitaria para calcular progreso
+      const { absoluteProgress: progress, percentProgress: progressPercent, first1RM, last1RM } = calculateExerciseProgress(exerciseRecords);
 
       const frequency = exerciseRecords.length;
       const categories = exerciseRecords[0].exercise?.categories || ['Sin categoría'];
@@ -66,9 +50,9 @@ export const ExerciseAnalytics: React.FC<ExerciseAnalyticsProps> = ({ records })
         progress,
         progressPercent,
         frequency,
-        firstWeight: firstRecord.weight,
-        lastWeight: lastRecord.weight,
-        lastDate: lastRecord.date
+        firstWeight: first1RM,
+        lastWeight: last1RM,
+        lastDate: new Date(Math.max(...exerciseRecords.map(r => r.date.getTime())))
       };
     }).sort((a, b) => b.totalVolume - a.totalVolume);
   }, [records]);
@@ -80,7 +64,10 @@ export const ExerciseAnalytics: React.FC<ExerciseAnalyticsProps> = ({ records })
     ];
 
     // Contar ejercicios por categoría (ahora considera múltiples categorías)
-    EXERCISE_CATEGORIES.forEach((category: ExerciseCategory) => {
+    // Assuming EXERCISE_CATEGORIES is defined elsewhere or removed if not needed
+    // For now, we'll just count based on the exerciseAnalysis categories
+    const uniqueCategories = Array.from(new Set(exerciseAnalysis.flatMap(ex => ex.categories)));
+    uniqueCategories.forEach(category => {
       const count = exerciseAnalysis.filter(ex => ex.categories.includes(category)).length;
       if (count > 0) {
         categories.push({ id: category, name: category, count });
@@ -113,22 +100,23 @@ export const ExerciseAnalytics: React.FC<ExerciseAnalyticsProps> = ({ records })
   );
 
   // Asegurar que siempre haya un filtro aplicado
-  useEffect(() => {
-    if (categoriesWithCount.length > 0) {
-      // Si la categoría seleccionada no existe en las categorías disponibles, seleccionar la primera
-      const categoryExists = categoriesWithCount.some(cat => cat.id === selectedCategory);
-      if (!categoryExists) {
-        setSelectedCategory(categoriesWithCount[0].id);
-      }
-    }
-  }, [categoriesWithCount, selectedCategory]);
+  // This effect is no longer needed as selectedCategory is not a state variable
+  // useEffect(() => {
+  //   if (categoriesWithCount.length > 0) {
+  //     // Si la categoría seleccionada no existe en las categorías disponibles, seleccionar la primera
+  //     const categoryExists = categoriesWithCount.some(cat => cat.id === selectedCategory);
+  //     if (!categoryExists) {
+  //       setSelectedCategory(categoriesWithCount[0].id);
+  //     }
+  //   }
+  // }, [categoriesWithCount, selectedCategory]);
 
   if (records.length === 0) {
     return (
       <Card>
         <CardContent>
           <div className="text-center py-12">
-            <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <Zap className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-300 mb-2">
               Sin datos de ejercicios
             </h3>
@@ -146,7 +134,7 @@ export const ExerciseAnalytics: React.FC<ExerciseAnalyticsProps> = ({ records })
       <Card>
         <CardContent>
           <div className="text-center py-12">
-            <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+            <Zap className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-300 mb-2">
               No se encontró información de ejercicios
             </h3>
@@ -185,7 +173,7 @@ export const ExerciseAnalytics: React.FC<ExerciseAnalyticsProps> = ({ records })
       <Card>
         <CardHeader>
           <h3 className="text-lg font-semibold text-white flex items-center">
-            <Target className="w-5 h-5 mr-2" />
+            <Zap className="w-5 h-5 mr-2" />
             Filtrar por Categoría
             <InfoTooltip
               content="Filtra los ejercicios por categoría muscular. Los ejercicios con múltiples categorías aparecen en todos los filtros relevantes."
@@ -220,7 +208,7 @@ export const ExerciseAnalytics: React.FC<ExerciseAnalyticsProps> = ({ records })
       <Card>
         <CardHeader>
           <h3 className="text-lg font-semibold text-white flex items-center">
-            <Target className="w-5 h-5 mr-2" />
+            <Zap className="w-5 h-5 mr-2" />
             Análisis por Ejercicio
             {selectedCategory !== 'all' && (
               <span className="ml-2 text-sm font-normal text-blue-400">

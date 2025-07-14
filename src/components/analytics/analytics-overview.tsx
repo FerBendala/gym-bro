@@ -1,6 +1,6 @@
 import { Activity, BarChart3, Calendar, Target, TrendingDown, TrendingUp, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
-import { formatNumber } from '../../utils/functions';
+import { calculateWeightProgress, formatNumber } from '../../utils/functions';
 import { Card, CardContent } from '../card';
 import { InfoTooltip } from '../tooltip';
 import type { AnalyticsMetric, AnalyticsOverviewProps } from './types';
@@ -60,38 +60,8 @@ export const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ records })
       ? Array.from(weeklyData.values()).reduce((sum, daysSet) => sum + daysSet.size, 0) / weeklyData.size
       : 0;
 
-    // Mantener variables necesarias para el cálculo de progreso
-    const sortedDates = validRecords.map(r => r.date).sort((a, b) => a.getTime() - b.getTime());
-    const firstDate = sortedDates[0];
-    const lastDate = sortedDates[sortedDates.length - 1];
-
-    // Calcular progreso (comparar primera y última semana)
-    const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
-    const firstWeekRecords = validRecords.filter(r =>
-      r.date.getTime() <= firstDate.getTime() + oneWeekMs
-    );
-    const lastWeekRecords = validRecords.filter(r =>
-      r.date.getTime() >= lastDate.getTime() - oneWeekMs
-    );
-
-    // Calcular progreso usando 1RM estimado para mayor precisión
-    const firstWeekAvg1RM = firstWeekRecords.length > 0
-      ? firstWeekRecords.reduce((sum, r) => {
-        const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-        return sum + oneRM;
-      }, 0) / firstWeekRecords.length
-      : 0;
-    const lastWeekAvg1RM = lastWeekRecords.length > 0
-      ? lastWeekRecords.reduce((sum, r) => {
-        const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-        return sum + oneRM;
-      }, 0) / lastWeekRecords.length
-      : 0;
-
-    const weightProgress = lastWeekAvg1RM - firstWeekAvg1RM;
-    const weightProgressPercent = firstWeekAvg1RM > 0
-      ? (weightProgress / firstWeekAvg1RM) * 100
-      : 0;
+    // **FUNCIÓN UNIFICADA**: Usar la función utilitaria para calcular progreso de peso
+    const { absoluteProgress: weightProgress, percentProgress: weightProgressPercent } = calculateWeightProgress(validRecords);
 
     return [
       {

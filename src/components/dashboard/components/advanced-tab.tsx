@@ -1,3 +1,5 @@
+import { startOfWeek } from 'date-fns';
+import { es } from 'date-fns/locale';
 import {
   Activity, AlertTriangle, Award,
   Brain, Calendar, CheckCircle,
@@ -256,18 +258,22 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
       });
     }
 
-    // 6. ANÁLISIS DE VOLUMEN PERSONAL
+    // 6. ANÁLISIS DE VOLUMEN PERSONAL (corregido - usar promedio por sesión)
     const recentVolume = thisWeekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
     const lastWeekVolume = lastWeekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
 
-    if (recentVolume > 0 && lastWeekVolume > 0) {
-      const volumeChange = ((recentVolume - lastWeekVolume) / lastWeekVolume) * 100;
+    // Solo mostrar indicadores si hay datos suficientes y no es una semana muy incompleta
+    if (recentVolume > 0 && lastWeekVolume > 0 && weeklyFrequency >= 2 && lastWeekFrequency >= 2) {
+      const recentAvgVolume = recentVolume / weeklyFrequency;
+      const lastWeekAvgVolume = lastWeekVolume / lastWeekFrequency;
+      const volumeChange = ((recentAvgVolume - lastWeekAvgVolume) / lastWeekAvgVolume) * 100;
+
       if (volumeChange > 20) {
         indicators.push({
           type: 'excellent',
           icon: Activity,
           title: 'Volumen en Alza',
-          description: `+${Math.round(volumeChange)}% volumen vs semana pasada`,
+          description: `+${Math.round(volumeChange)}% volumen/sesión vs semana pasada`,
           value: `+${Math.round(volumeChange)}%`,
           progress: Math.min(100, volumeChange * 2)
         });
@@ -276,7 +282,7 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
           type: 'warning',
           icon: Activity,
           title: 'Volumen Reducido',
-          description: `${Math.round(volumeChange)}% volumen vs semana pasada`,
+          description: `${Math.round(volumeChange)}% volumen/sesión vs semana pasada`,
           value: `${Math.round(volumeChange)}%`,
           progress: Math.max(0, 100 + volumeChange)
         });
@@ -387,6 +393,12 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
       action: string;
     }> = [];
 
+    // **DETECCIÓN DE SEMANA INCOMPLETA**
+    const now = new Date();
+    const weekStart = startOfWeek(now, { locale: es });
+    const daysSinceWeekStart = Math.floor((now.getTime() - weekStart.getTime()) / (1000 * 60 * 60 * 24));
+    const isWeekIncomplete = daysSinceWeekStart < 3; // Si han pasado menos de 3 días desde el lunes
+
     // 1. ANÁLISIS DE FRECUENCIA (corregido - contar días únicos)
     const thisWeekRecords = getThisWeekRecords(records);
     const lastWeekRecords = getLastWeekRecords(records);
@@ -394,64 +406,98 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
     const weeklyFrequency = new Set(thisWeekRecords.map(r => r.date.toDateString())).size;
     const lastWeekFrequency = new Set(lastWeekRecords.map(r => r.date.toDateString())).size;
 
-    if (weeklyFrequency === 0) {
-      suggestions.push({
-        category: 'frequency',
-        priority: 'high',
-        icon: AlertTriangle,
-        title: 'Retomar Entrenamientos',
-        description: 'No has entrenado esta semana - la consistencia es clave',
-        action: 'Programa al menos 2 sesiones esta semana para retomar el hábito'
-      });
-    } else if (weeklyFrequency === 1) {
-      suggestions.push({
-        category: 'frequency',
-        priority: 'high',
-        icon: Calendar,
-        title: 'Aumentar Frecuencia Mínima',
-        description: 'Solo 1 entrenamiento esta semana - insuficiente para progreso',
-        action: 'Añade al menos 1-2 sesiones más para alcanzar el mínimo efectivo'
-      });
-    } else if (weeklyFrequency === 2) {
-      suggestions.push({
-        category: 'frequency',
-        priority: 'medium',
-        icon: Calendar,
-        title: 'Incrementar a Frecuencia Óptima',
-        description: '2 entrenamientos semanales - puedes mejorar significativamente',
-        action: 'Planifica 3-4 sesiones semanales para maximizar resultados'
-      });
-    } else if (weeklyFrequency > 6) {
-      suggestions.push({
-        category: 'frequency',
-        priority: 'medium',
-        icon: Shield,
-        title: 'Moderar Frecuencia Excesiva',
-        description: `${weeklyFrequency} entrenamientos pueden ser contraproducentes`,
-        action: 'Incluye 1-2 días de descanso completo para optimizar recuperación'
-      });
-    } else if (weeklyFrequency >= 5) {
-      suggestions.push({
-        category: 'frequency',
-        priority: 'low',
-        icon: Award,
-        title: 'Excelente Frecuencia',
-        description: `${weeklyFrequency} entrenamientos semanales - frecuencia ideal`,
-        action: 'Mantén esta consistencia y monitorea señales de fatiga'
-      });
-    }
+    // **ANÁLISIS DE FRECUENCIA INTELIGENTE** - Evitar comparaciones injustas en semanas incompletas
+    if (isWeekIncomplete) {
+      // Para semanas incompletas (lunes-miércoles), dar sugerencias de planificación
+      if (weeklyFrequency === 0) {
+        suggestions.push({
+          category: 'frequency',
+          priority: 'high',
+          icon: Calendar,
+          title: 'Planificar Entrenamientos',
+          description: `Día ${daysSinceWeekStart + 1} de la semana - aún no has entrenado`,
+          action: 'Programa al menos 2-3 sesiones para esta semana'
+        });
+      } else if (weeklyFrequency === 1 && daysSinceWeekStart >= 2) {
+        suggestions.push({
+          category: 'frequency',
+          priority: 'medium',
+          icon: Calendar,
+          title: 'Continuar Rutina Semanal',
+          description: '1 entrenamiento realizado - buen inicio de semana',
+          action: 'Programa 1-2 sesiones más para completar la semana'
+        });
+      } else if (weeklyFrequency >= 2 && daysSinceWeekStart <= 2) {
+        suggestions.push({
+          category: 'frequency',
+          priority: 'low',
+          icon: Award,
+          title: 'Excelente Inicio de Semana',
+          description: `${weeklyFrequency} entrenamientos en ${daysSinceWeekStart + 1} días - muy buen ritmo`,
+          action: 'Mantén este ritmo y distribuye el resto de sesiones'
+        });
+      }
+    } else {
+      // Para semanas completas o casi completas, usar análisis normal
+      if (weeklyFrequency === 0) {
+        suggestions.push({
+          category: 'frequency',
+          priority: 'high',
+          icon: AlertTriangle,
+          title: 'Retomar Entrenamientos',
+          description: 'No has entrenado esta semana - la consistencia es clave',
+          action: 'Programa al menos 2 sesiones esta semana para retomar el hábito'
+        });
+      } else if (weeklyFrequency === 1) {
+        suggestions.push({
+          category: 'frequency',
+          priority: 'high',
+          icon: Calendar,
+          title: 'Aumentar Frecuencia Mínima',
+          description: 'Solo 1 entrenamiento esta semana - insuficiente para progreso',
+          action: 'Añade al menos 1-2 sesiones más para alcanzar el mínimo efectivo'
+        });
+      } else if (weeklyFrequency === 2) {
+        suggestions.push({
+          category: 'frequency',
+          priority: 'medium',
+          icon: Calendar,
+          title: 'Incrementar a Frecuencia Óptima',
+          description: '2 entrenamientos semanales - puedes mejorar significativamente',
+          action: 'Planifica 3-4 sesiones semanales para maximizar resultados'
+        });
+      } else if (weeklyFrequency > 6) {
+        suggestions.push({
+          category: 'frequency',
+          priority: 'medium',
+          icon: Shield,
+          title: 'Moderar Frecuencia Excesiva',
+          description: `${weeklyFrequency} entrenamientos pueden ser contraproducentes`,
+          action: 'Incluye 1-2 días de descanso completo para optimizar recuperación'
+        });
+      } else if (weeklyFrequency >= 5) {
+        suggestions.push({
+          category: 'frequency',
+          priority: 'low',
+          icon: Award,
+          title: 'Excelente Frecuencia',
+          description: `${weeklyFrequency} entrenamientos semanales - frecuencia ideal`,
+          action: 'Mantén esta consistencia y monitorea señales de fatiga'
+        });
+      }
 
-    // Análisis de tendencia de frecuencia
-    if (weeklyFrequency < lastWeekFrequency && lastWeekFrequency >= 3) {
-      const decline = lastWeekFrequency - weeklyFrequency;
-      suggestions.push({
-        category: 'frequency',
-        priority: 'medium',
-        icon: TrendingUp,
-        title: 'Mantener Consistencia',
-        description: `Bajaste ${decline} entrenamientos vs semana pasada`,
-        action: 'Identifica obstáculos y planifica sesiones fijas en tu calendario'
-      });
+      // Análisis de tendencia de frecuencia - SOLO para semanas completas
+      if (weeklyFrequency < lastWeekFrequency && lastWeekFrequency >= 3) {
+        const decline = lastWeekFrequency - weeklyFrequency;
+        suggestions.push({
+          category: 'frequency',
+          priority: 'medium',
+          icon: TrendingUp,
+          title: 'Mantener Consistencia',
+          description: `Bajaste ${decline} entrenamientos vs semana pasada`,
+          action: 'Identifica obstáculos y planifica sesiones fijas en tu calendario'
+        });
+      }
     }
 
     // 2. ANÁLISIS DE INTENSIDAD (expandido)
@@ -612,49 +658,84 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
       });
     }
 
-    // 6. ANÁLISIS DE VOLUMEN (mejorado)
+    // 6. ANÁLISIS DE VOLUMEN (corregido - usar volumen promedio por sesión)
     const recentVolume = thisWeekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
     const lastWeekVolume = lastWeekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
 
-    if (recentVolume > 0 && lastWeekVolume > 0) {
-      const volumeChange = ((recentVolume - lastWeekVolume) / lastWeekVolume) * 100;
-      if (volumeChange < -25) {
+    // Calcular volumen promedio por sesión para comparaciones justas
+    const recentAvgVolume = weeklyFrequency > 0 ? recentVolume / weeklyFrequency : 0;
+    const lastWeekAvgVolume = lastWeekFrequency > 0 ? lastWeekVolume / lastWeekFrequency : 0;
+
+    // **ANÁLISIS DE VOLUMEN INTELIGENTE** - Evitar comparaciones injustas en semanas incompletas
+    if (!isWeekIncomplete) {
+      // Solo hacer comparaciones si hay datos suficientes y la semana está completa
+      if (recentAvgVolume > 0 && lastWeekAvgVolume > 0 && weeklyFrequency >= 1 && lastWeekFrequency >= 1) {
+        const volumeChange = ((recentAvgVolume - lastWeekAvgVolume) / lastWeekAvgVolume) * 100;
+        if (volumeChange < -25) {
+          suggestions.push({
+            category: 'intensity',
+            priority: 'medium',
+            icon: Activity,
+            title: 'Volumen Reducido Significativamente',
+            description: `${Math.abs(Math.round(volumeChange))}% menos volumen/sesión que la semana pasada`,
+            action: 'Evalúa si es planificado o necesitas retomar intensidad gradualmente'
+          });
+        } else if (volumeChange > 40) {
+          suggestions.push({
+            category: 'recovery',
+            priority: 'medium',
+            icon: Shield,
+            title: 'Aumento Súbito de Volumen',
+            description: `+${Math.round(volumeChange)}% más volumen/sesión - monitorea recuperación`,
+            action: 'Asegúrate de descansar adecuadamente y observa señales de fatiga'
+          });
+        }
+      } else if (recentVolume > 0 && lastWeekVolume === 0) {
         suggestions.push({
-          category: 'intensity',
-          priority: 'medium',
-          icon: Activity,
-          title: 'Volumen Reducido Significativamente',
-          description: `${Math.abs(Math.round(volumeChange))}% menos volumen que la semana pasada`,
-          action: 'Evalúa si es planificado o necesitas retomar intensidad gradualmente'
+          category: 'frequency',
+          priority: 'low',
+          icon: TrendingUp,
+          title: 'Retorno al Entrenamiento',
+          description: 'Has retomado los entrenamientos después de descanso',
+          action: 'Comienza gradualmente y aumenta intensidad progresivamente'
         });
-      } else if (volumeChange > 40) {
+      } else if (recentVolume === 0 && lastWeekVolume > 0) {
         suggestions.push({
-          category: 'recovery',
-          priority: 'medium',
-          icon: Shield,
-          title: 'Aumento Súbito de Volumen',
-          description: `+${Math.round(volumeChange)}% más volumen - monitorea recuperación`,
-          action: 'Asegúrate de descansar adecuadamente y observa señales de fatiga'
+          category: 'frequency',
+          priority: 'high',
+          icon: AlertTriangle,
+          title: 'Pausa en Entrenamiento',
+          description: 'Has dejado de entrenar esta semana',
+          action: 'Retoma los entrenamientos lo antes posible para mantener progreso'
         });
       }
-    } else if (recentVolume > 0 && lastWeekVolume === 0) {
-      suggestions.push({
-        category: 'frequency',
-        priority: 'low',
-        icon: TrendingUp,
-        title: 'Retorno al Entrenamiento',
-        description: 'Has retomado los entrenamientos después de descanso',
-        action: 'Comienza gradualmente y aumenta intensidad progresivamente'
-      });
-    } else if (recentVolume === 0 && lastWeekVolume > 0) {
-      suggestions.push({
-        category: 'frequency',
-        priority: 'high',
-        icon: AlertTriangle,
-        title: 'Pausa en Entrenamiento',
-        description: 'Has dejado de entrenar esta semana',
-        action: 'Retoma los entrenamientos lo antes posible para mantener progreso'
-      });
+    } else {
+      // Para semanas incompletas, dar sugerencias de planificación de volumen
+      if (recentAvgVolume > 0 && lastWeekAvgVolume > 0) {
+        const currentPace = recentAvgVolume;
+        const expectedWeeklyVolume = currentPace * 7 / (daysSinceWeekStart + 1);
+        const lastWeekTotalVolume = lastWeekAvgVolume * lastWeekFrequency;
+
+        if (expectedWeeklyVolume > lastWeekTotalVolume * 1.2) {
+          suggestions.push({
+            category: 'recovery',
+            priority: 'low',
+            icon: Shield,
+            title: 'Ritmo Intenso Detectado',
+            description: 'Tu ritmo actual sugiere una semana de alto volumen',
+            action: 'Monitorea fatiga y considera días de descanso estratégicos'
+          });
+        } else if (expectedWeeklyVolume < lastWeekTotalVolume * 0.8) {
+          suggestions.push({
+            category: 'intensity',
+            priority: 'low',
+            icon: Activity,
+            title: 'Oportunidad de Aumentar Volumen',
+            description: 'Tu ritmo actual sugiere una semana de menor volumen',
+            action: 'Considera añadir más series o ejercicios en próximas sesiones'
+          });
+        }
+      }
     }
 
     // 7. ANÁLISIS DE EFICIENCIA (nuevo)
@@ -678,21 +759,48 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
       });
     }
 
-    // 8. ANÁLISIS DE BALANCE (nuevo)
-    const densityTrend = analysis.trainingDensity;
-    if (densityTrend.length >= 2) {
-      const currentDensity = densityTrend[0];
-      const prevDensity = densityTrend[1];
+    // 8. ANÁLISIS DE DENSIDAD DE ENTRENAMIENTO (corregido para semanas incompletas)
+    if (!isWeekIncomplete) {
+      // Solo analizar densidad para semanas completas
+      const densityTrend = analysis.trainingDensity;
+      if (densityTrend.length >= 2) {
+        const currentDensity = densityTrend[0];
+        const prevDensity = densityTrend[1];
 
-      if (currentDensity.workoutsPerWeek < prevDensity.workoutsPerWeek * 0.7) {
-        suggestions.push({
-          category: 'balance',
-          priority: 'medium',
-          icon: TrendingUp,
-          title: 'Decline en Densidad de Entrenamiento',
-          description: `Reducción significativa en sesiones por semana`,
-          action: 'Revisa agenda y elimina obstáculos para mantener consistencia'
-        });
+        if (currentDensity.workoutsPerWeek < prevDensity.workoutsPerWeek * 0.7) {
+          suggestions.push({
+            category: 'balance',
+            priority: 'medium',
+            icon: TrendingUp,
+            title: 'Decline en Densidad de Entrenamiento',
+            description: `Reducción significativa en sesiones por semana`,
+            action: 'Revisa agenda y elimina obstáculos para mantener consistencia'
+          });
+        }
+      }
+    } else {
+      // Para semanas incompletas, dar sugerencias de planificación de densidad
+      if (weeklyFrequency > 0) {
+        const projectedWeeklyFrequency = weeklyFrequency * 7 / (daysSinceWeekStart + 1);
+        if (projectedWeeklyFrequency > 6) {
+          suggestions.push({
+            category: 'balance',
+            priority: 'low',
+            icon: Shield,
+            title: 'Ritmo de Entrenamiento Intenso',
+            description: `${weeklyFrequency} sesiones en ${daysSinceWeekStart + 1} días - ritmo muy activo`,
+            action: 'Planifica días de descanso para evitar sobrecarga'
+          });
+        } else if (projectedWeeklyFrequency < 2) {
+          suggestions.push({
+            category: 'balance',
+            priority: 'low',
+            icon: Calendar,
+            title: 'Oportunidad de Aumentar Actividad',
+            description: `Ritmo actual sugiere baja frecuencia semanal`,
+            action: 'Considera añadir más sesiones durante la semana'
+          });
+        }
       }
     }
 

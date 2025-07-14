@@ -2,7 +2,7 @@ import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ArrowDown, ArrowUp, Calendar, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import React, { useMemo } from 'react';
-import { formatNumber } from '../../utils/functions';
+import { calculateTotalGrowth, formatNumber } from '../../utils/functions';
 import { Card, CardContent, CardHeader } from '../card';
 import { InfoTooltip } from '../tooltip';
 import type { ProgressTimelineProps, TimelinePoint } from './types';
@@ -98,7 +98,7 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
       }))
       .sort((a, b) => a.date.getTime() - b.date.getTime());
 
-    // Calcular cambios y tendencias
+    // Calcular cambios y tendencias - CORREGIDO: usar volumen promedio por sesión
     return sortedData.map((point, index) => {
       const weekNumber = index + 1;
       let change = 0;
@@ -107,8 +107,13 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
 
       if (index > 0) {
         const previousPoint = sortedData[index - 1];
-        change = point.value - previousPoint.value;
-        changePercent = previousPoint.value > 0 ? (change / previousPoint.value) * 100 : 0;
+
+        // **CORRECCIÓN CLAVE**: Usar volumen promedio por sesión para comparación justa
+        const currentAvgVolume = point.totalWorkouts > 0 ? point.value / point.totalWorkouts : 0;
+        const previousAvgVolume = previousPoint.totalWorkouts > 0 ? previousPoint.value / previousPoint.totalWorkouts : 0;
+
+        change = Math.round(currentAvgVolume - previousAvgVolume);
+        changePercent = previousAvgVolume > 0 ? ((currentAvgVolume - previousAvgVolume) / previousAvgVolume) * 100 : 0;
 
         if (Math.abs(changePercent) < 5) {
           trend = 'stable';
@@ -131,11 +136,8 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
 
   const maxValue = Math.max(...timelineData.map(point => point.value));
 
-  // Calcular estadísticas de comparativa
-  const totalGrowth = timelineData.length > 1 ?
-    timelineData[timelineData.length - 1].value - timelineData[0].value : 0;
-  const totalGrowthPercent = timelineData.length > 1 && timelineData[0].value > 0 ?
-    (totalGrowth / timelineData[0].value) * 100 : 0;
+  // **FUNCIÓN UNIFICADA**: Usar la función utilitaria para calcular crecimiento
+  const { absoluteGrowth: totalGrowth, percentGrowth: totalGrowthPercent } = calculateTotalGrowth(timelineData);
 
   const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
@@ -175,10 +177,10 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
     <Card>
       <CardHeader>
         <h3 className="text-lg font-semibold text-white flex items-center">
-          <TrendingUp className="w-5 h-5 mr-2" />
-          Timeline de Progreso
+          <Calendar className="w-5 h-5 mr-2" />
+          Línea de Tiempo de Progreso
           <InfoTooltip
-            content="Evolución semanal detallada con números exactos y comparativas entre semanas."
+            content="Visualización cronológica de tu progreso semanal con detalles de cada período y comparativas entre semanas."
             position="top"
             className="ml-2"
           />
@@ -186,120 +188,50 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
       </CardHeader>
       <CardContent>
         <div className="space-y-6">
-          {/* Estadísticas generales con comparativas */}
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
-              <p className="text-2xl font-bold text-blue-400">
-                {timelineData.length}
-              </p>
-              <p className="text-sm text-gray-400">Semanas registradas</p>
-            </div>
-
-            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
-              <p className="text-2xl font-bold text-green-400">
-                {timelineData.length > 0 ? formatNumber(Math.max(...timelineData.map(p => p.value))) : 0} kg
-              </p>
-              <p className="text-sm text-gray-400">Mejor semana</p>
-            </div>
-
-            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
-              <p className="text-2xl font-bold text-purple-400">
-                {timelineData.length > 0 ? formatNumber(timelineData.reduce((sum, p) => sum + p.value, 0) / timelineData.length) : 0} kg
-              </p>
-              <p className="text-sm text-gray-400">Promedio semanal</p>
-            </div>
-
-            <div className="text-center p-4 bg-gray-800/50 rounded-lg">
-              <div className="flex items-center justify-center space-x-2">
-                <p className={`text-2xl font-bold ${totalGrowthPercent > 0 ? 'text-green-400' : totalGrowthPercent < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                  {totalGrowthPercent > 0 ? '+' : ''}{totalGrowthPercent.toFixed(1)}%
-                </p>
-                {totalGrowthPercent > 0 ? (
-                  <TrendingUp className="w-5 h-5 text-green-400" />
-                ) : totalGrowthPercent < 0 ? (
-                  <TrendingDown className="w-5 h-5 text-red-400" />
-                ) : (
-                  <Minus className="w-5 h-5 text-gray-400" />
-                )}
+          {/* Estadísticas generales */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-gray-800/50 rounded-lg p-4">
+              <div className="text-center">
+                <div className="flex items-center justify-center">
+                  <TrendingUp className="w-6 h-6 text-blue-400 mr-2" />
+                  <p className="text-3xl font-bold text-blue-400">
+                    {timelineData.length}
+                  </p>
+                </div>
+                <p className="text-sm text-gray-400">Semanas registradas</p>
               </div>
-              <p className="text-sm text-gray-400">Crecimiento total</p>
+            </div>
+            <div className="bg-gray-800/50 rounded-lg p-4">
+              <div className="text-center">
+                <div className="flex items-center justify-center">
+                  <Calendar className="w-6 h-6 text-green-400 mr-2" />
+                  <p className="text-3xl font-bold text-green-400">
+                    {formatNumber(maxValue)} kg
+                  </p>
+                </div>
+                <p className="text-sm text-gray-400">Mejor semana</p>
+              </div>
+            </div>
+            <div className="bg-gray-800/50 rounded-lg p-4">
+              <div className="text-center">
+                <div className="flex items-center justify-center">
+                  {totalGrowthPercent > 0 ? (
+                    <TrendingUp className="w-6 h-6 text-green-400 mr-2" />
+                  ) : totalGrowthPercent < 0 ? (
+                    <TrendingDown className="w-6 h-6 text-red-400 mr-2" />
+                  ) : (
+                    <Minus className="w-6 h-6 text-gray-400 mr-2" />
+                  )}
+                  <p className={`text-3xl font-bold ${totalGrowthPercent > 0 ? 'text-green-400' : totalGrowthPercent < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                    {totalGrowthPercent > 0 ? '+' : ''}{totalGrowthPercent.toFixed(1)}%
+                  </p>
+                </div>
+                <p className="text-sm text-gray-400">Crecimiento total (múltiples semanas)</p>
+              </div>
             </div>
           </div>
 
-          {/* Gráfico de línea simple */}
-          <div className="relative h-64 bg-gray-900/50 rounded-lg p-4">
-            <svg className="w-full h-full" viewBox="0 0 800 200">
-              {/* Grid lines */}
-              <defs>
-                <pattern id="grid" width="40" height="20" patternUnits="userSpaceOnUse">
-                  <path d="M 40 0 L 0 0 0 20" fill="none" stroke="rgb(55, 65, 81)" strokeWidth="0.5" opacity="0.3" />
-                </pattern>
-              </defs>
-              <rect width="100%" height="100%" fill="url(#grid)" />
-
-              {/* Línea de progreso */}
-              {timelineData.length > 1 && (
-                <path
-                  d={timelineData.map((point, index) => {
-                    const x = (index / (timelineData.length - 1)) * 760 + 20;
-                    const y = 180 - ((point.value / maxValue) * 160);
-                    return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-                  }).join(' ')}
-                  fill="none"
-                  stroke="rgb(59, 130, 246)"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              )}
-
-              {/* Área bajo la línea */}
-              {timelineData.length > 1 && (
-                <path
-                  d={timelineData.map((point, index) => {
-                    const x = (index / (timelineData.length - 1)) * 760 + 20;
-                    const y = 180 - ((point.value / maxValue) * 160);
-                    if (index === 0) return `M ${x} 180 L ${x} ${y}`;
-                    if (index === timelineData.length - 1) return `L ${x} ${y} L ${x} 180 Z`;
-                    return `L ${x} ${y}`;
-                  }).join(' ')}
-                  fill="url(#gradient)"
-                  opacity="0.2"
-                />
-              )}
-
-              {/* Gradiente para el área */}
-              <defs>
-                <linearGradient id="gradient" x1="0%" y1="0%" x2="0%" y2="100%">
-                  <stop offset="0%" stopColor="rgb(59, 130, 246)" stopOpacity="0.8" />
-                  <stop offset="100%" stopColor="rgb(59, 130, 246)" stopOpacity="0.1" />
-                </linearGradient>
-              </defs>
-
-              {/* Puntos */}
-              {timelineData.map((point, index) => {
-                const x = (index / Math.max(1, timelineData.length - 1)) * 760 + 20;
-                const y = 180 - ((point.value / maxValue) * 160);
-
-                return (
-                  <g key={index}>
-                    <circle
-                      cx={x}
-                      cy={y}
-                      r="6"
-                      fill="rgb(59, 130, 246)"
-                      stroke="white"
-                      strokeWidth="2"
-                      className="cursor-pointer hover:r-8 transition-all"
-                    />
-                    <title>{point.details}</title>
-                  </g>
-                );
-              })}
-            </svg>
-          </div>
-
-          {/* Datos semanales detallados con comparativas */}
+          {/* Timeline detallada */}
           <div className="space-y-3">
             <h4 className="text-sm font-medium text-gray-300">Progreso Semanal Detallado</h4>
             <div className="space-y-3 max-h-96 overflow-y-auto">
@@ -359,9 +291,9 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
                     {point.weekNumber > 1 && (
                       <div className="mt-3 pt-3 border-t border-gray-700/50 text-sm">
                         <div className="flex items-center space-x-4">
-                          <span className="text-gray-400">Cambio vs semana anterior:</span>
+                          <span className="text-gray-400">Cambio vs semana anterior (promedio/sesión):</span>
                           <span className={`font-medium ${point.change > 0 ? 'text-green-400' : point.change < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                            {point.change > 0 ? '+' : ''}{formatNumber(point.change)} kg
+                            {point.change > 0 ? '+' : ''}{formatNumber(point.change)} kg ({point.changePercent > 0 ? '+' : ''}{point.changePercent.toFixed(1)}%)
                           </span>
                         </div>
                       </div>

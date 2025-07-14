@@ -30,7 +30,7 @@ export const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ records }) => 
 
   const handleDayClick = (dayData: any) => {
     // Funcionalidad futura: abrir modal con detalles del día
-    console.log('Día seleccionado:', dayData);
+    console.info('Día seleccionado:', dayData);
   };
 
   return (

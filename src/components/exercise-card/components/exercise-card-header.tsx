@@ -1,26 +1,7 @@
-import { Activity, Dumbbell, Footprints, Hexagon, Plus, RotateCcw, Shield, Triangle, WifiOff } from 'lucide-react';
+import { Plus, WifiOff } from 'lucide-react';
 import React from 'react';
+import { getCategoryColor, getCategoryIcon } from '../../../constants/exercise-categories';
 import type { ExerciseCardHeaderProps } from '../types';
-
-// Iconos más específicos para cada categoría muscular
-const categoryIcons: Record<string, React.FC<any>> = {
-  'Pecho': Hexagon,        // Hexágono representa la forma de los pectorales
-  'Espalda': Shield,       // Escudo representa la protección/soporte de la espalda
-  'Piernas': Footprints,   // Huellas representan el movimiento de piernas
-  'Hombros': Triangle,     // Triángulo representa la forma de los deltoides
-  'Brazos': Dumbbell,      // Mancuerna es el icono más representativo para brazos
-  'Core': RotateCcw        // Rotación representa los movimientos de core/abdominales
-};
-
-// Colores para cada categoría
-const categoryColors: Record<string, string> = {
-  'Pecho': 'from-red-500/80 to-pink-500/80',
-  'Espalda': 'from-blue-500/80 to-cyan-500/80',
-  'Piernas': 'from-green-500/80 to-emerald-500/80',
-  'Hombros': 'from-purple-500/80 to-violet-500/80',
-  'Brazos': 'from-orange-500/80 to-amber-500/80',
-  'Core': 'from-indigo-500/80 to-blue-500/80'
-};
 
 /**
  * Header del ExerciseCard con título, categorías y botones de acción
@@ -34,8 +15,8 @@ export const ExerciseCardHeader: React.FC<ExerciseCardHeaderProps> = ({
 }) => {
   // Obtener la primera categoría para determinar el color y el icono
   const primaryCategory = assignment.exercise?.categories?.[0] || 'Pecho';
-  const Icon = categoryIcons[primaryCategory] || Dumbbell;
-  const colorGradient = categoryColors[primaryCategory] || 'from-gray-500/80 to-gray-600/80';
+  const Icon = getCategoryIcon(primaryCategory);
+  const colorGradient = getCategoryColor(primaryCategory);
 
   return (
     <div className="flex items-start justify-between mb-4">
@@ -54,8 +35,8 @@ export const ExerciseCardHeader: React.FC<ExerciseCardHeaderProps> = ({
           {assignment.exercise?.categories && assignment.exercise.categories.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mt-2">
               {assignment.exercise.categories.map((category) => {
-                const CategoryIcon = categoryIcons[category] || Activity;
-                const categoryGradient = categoryColors[category] || 'from-gray-500/80 to-gray-600/80';
+                const CategoryIcon = getCategoryIcon(category);
+                const categoryGradient = getCategoryColor(category);
 
                 return (
                   <span

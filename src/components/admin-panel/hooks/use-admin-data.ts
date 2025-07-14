@@ -159,14 +159,6 @@ export const useAdminData = (selectedDay: DayOfWeek, isOnline: boolean) => {
     setLoading(true);
     try {
       const exercise = exercises.find(ex => ex.id === exerciseId);
-
-      // DEBUG: Verificar qué datos se están enviando
-      console.log('🔍 DEBUG: handleCreateAssignment llamado con:');
-      console.log('🏋️ Ejercicio ID:', exerciseId);
-      console.log('📅 Día de la semana:', dayOfWeek);
-      console.log('📋 selectedDay actual:', selectedDay);
-      console.log('🏃 Ejercicio encontrado:', exercise?.name || 'No encontrado');
-
       const newAssignment = await createExerciseAssignment({
         exerciseId,
         dayOfWeek

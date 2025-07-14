@@ -1,4 +1,3 @@
-import { useOfflineData } from '../hooks/use-offline-data';
 import type { Exercise, WorkoutRecord } from '../interfaces';
 import type {
   DatabaseResult,
@@ -12,16 +11,7 @@ import type {
  */
 
 class OfflineDatabaseAPI {
-  private offlineData: ReturnType<typeof useOfflineData> | null = null;
-
   constructor() {
-    // Inicializar cuando se tenga acceso a React hooks
-  }
-
-  // Inicialización manual para usar fuera de componentes React
-  async initialize() {
-    // Esta función sería llamada al inicializar la app
-    console.log('Offline Database API inicializada');
   }
 
   // Exercises
@@ -289,11 +279,6 @@ class OfflineDatabaseAPI {
       pendingOperations: 0,
       lastSync: Date.now()
     };
-  }
-
-  async forceSync() {
-    // Placeholder para forzar sincronización
-    console.log('Forzando sincronización...');
   }
 }
 
