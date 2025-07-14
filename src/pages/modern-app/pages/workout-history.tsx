@@ -1,4 +1,4 @@
-import { Calendar, Clock, Dumbbell, Edit, Filter, Footprints, Hexagon, RotateCcw, Search, Shield, Target, Trash2, TrendingDown, TrendingUp, Triangle, Zap } from 'lucide-react';
+import { Calendar, Clock, Dumbbell, Edit, Filter, Search, Target, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { deleteWorkoutRecord, getExercises, getWorkoutRecords, updateWorkoutRecord } from '../../../api/database';
 import { Button } from '../../../components/button';
@@ -8,30 +8,10 @@ import { Input } from '../../../components/input';
 import { LoadingSpinner } from '../../../components/loading-spinner';
 import { ModernPage, ModernSection } from '../../../components/modern-ui';
 import { Select } from '../../../components/select';
-import { EXERCISE_CATEGORIES } from '../../../constants/exercise-categories';
+import { EXERCISE_CATEGORIES, getCategoryColor, getCategoryIcon } from '../../../constants/exercise-categories';
 import { useNotification } from '../../../context/notification-context';
 import type { Exercise, WorkoutRecord } from '../../../interfaces';
 import { formatNumber } from '../../../utils/functions';
-
-// Iconos más específicos para cada categoría muscular
-const categoryIcons: Record<string, React.FC<any>> = {
-  'Pecho': Hexagon,        // Hexágono representa la forma de los pectorales
-  'Espalda': Shield,       // Escudo representa la protección/soporte de la espalda
-  'Piernas': Footprints,   // Huellas representan el movimiento de piernas
-  'Hombros': Triangle,     // Triángulo representa la forma de los deltoides
-  'Brazos': Dumbbell,      // Mancuerna es el icono más representativo para brazos
-  'Core': RotateCcw        // Rotación representa los movimientos de core/abdominales
-};
-
-// Colores para cada categoría
-const categoryColors: Record<string, string> = {
-  'Pecho': 'from-red-500/80 to-pink-500/80',
-  'Espalda': 'from-blue-500/80 to-cyan-500/80',
-  'Piernas': 'from-green-500/80 to-emerald-500/80',
-  'Hombros': 'from-purple-500/80 to-violet-500/80',
-  'Brazos': 'from-orange-500/80 to-amber-500/80',
-  'Core': 'from-indigo-500/80 to-blue-500/80'
-};
 
 /**
  * Página del historial de entrenamientos con filtros avanzados y edición
@@ -242,9 +222,10 @@ export const WorkoutHistory: React.FC = () => {
           weight: editWeight,
           reps: editReps,
           sets: editSets,
-          date: editDate,
-          individualSets: undefined // Limpiar series individuales si cambia a modo simple
+          date: editDate
         };
+        // Omitir individualSets completamente en lugar de undefined para Firebase
+        delete updatedRecord.individualSets;
       }
 
       await updateWorkoutRecord(editingRecord.id, updatedRecord);
@@ -328,69 +309,8 @@ export const WorkoutHistory: React.FC = () => {
       title="Historial de Entrenamientos"
       subtitle="Gestiona y revisa tus entrenamientos realizados"
     >
-      {/* Estadísticas generales mejoradas */}
-      <ModernSection>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <Card className="bg-gradient-to-br from-blue-900/20 to-blue-800/20 border-blue-700/30 hover:border-blue-600/50 transition-all duration-200">
-            <CardContent className="p-6 text-center">
-              <div className="flex items-center justify-center mb-2">
-                <div className="p-2 bg-blue-600/20 rounded-lg">
-                  <Target className="w-6 h-6 text-blue-400" />
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-blue-400">
-                {stats.total}
-              </p>
-              <p className="text-sm text-gray-400">Entrenamientos</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-green-900/20 to-green-800/20 border-green-700/30 hover:border-green-600/50 transition-all duration-200">
-            <CardContent className="p-6 text-center">
-              <div className="flex items-center justify-center mb-2">
-                <div className="p-2 bg-green-600/20 rounded-lg">
-                  <Zap className="w-6 h-6 text-green-400" />
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-green-400">
-                {formatNumber(stats.totalVolume)} kg
-              </p>
-              <p className="text-sm text-gray-400">Volumen total</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-purple-900/20 to-purple-800/20 border-purple-700/30 hover:border-purple-600/50 transition-all duration-200">
-            <CardContent className="p-6 text-center">
-              <div className="flex items-center justify-center mb-2">
-                <div className="p-2 bg-purple-600/20 rounded-lg">
-                  <Dumbbell className="w-6 h-6 text-purple-400" />
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-purple-400">
-                {formatNumber(stats.avgWeight)} kg
-              </p>
-              <p className="text-sm text-gray-400">Peso promedio</p>
-            </CardContent>
-          </Card>
-
-          <Card className="bg-gradient-to-br from-yellow-900/20 to-yellow-800/20 border-yellow-700/30 hover:border-yellow-600/50 transition-all duration-200">
-            <CardContent className="p-6 text-center">
-              <div className="flex items-center justify-center mb-2">
-                <div className="p-2 bg-yellow-600/20 rounded-lg">
-                  <Calendar className="w-6 h-6 text-yellow-400" />
-                </div>
-              </div>
-              <p className="text-2xl font-bold text-yellow-400">
-                {stats.exercises}
-              </p>
-              <p className="text-sm text-gray-400">Ejercicios únicos</p>
-            </CardContent>
-          </Card>
-        </div>
-      </ModernSection>
-
       {/* Filtros mejorados con diseño visual */}
-      <ModernSection title="Filtros y Búsqueda">
+      <ModernSection>
         {/* Resumen de filtros activos */}
         {hasActiveFilters && (
           <div className="mb-4 p-4 bg-gradient-to-r from-blue-900/30 to-indigo-900/30 border border-blue-700/30 rounded-xl">
@@ -422,69 +342,11 @@ export const WorkoutHistory: React.FC = () => {
                 Limpiar todos
               </Button>
             </div>
-
-            {/* Tags de filtros activos */}
-            <div className="flex flex-wrap gap-2 mt-3">
-              {searchTerm && (
-                <span className="inline-flex items-center px-3 py-1 bg-blue-600/20 text-blue-300 text-xs rounded-full border border-blue-500/30">
-                  <Search className="w-3 h-3 mr-1" />
-                  Búsqueda: "{searchTerm}"
-                  <button
-                    onClick={() => setSearchTerm('')}
-                    className="ml-2 hover:text-blue-200"
-                  >
-                    ×
-                  </button>
-                </span>
-              )}
-
-              {selectedExercise !== 'all' && (
-                <span className="inline-flex items-center px-3 py-1 bg-purple-600/20 text-purple-300 text-xs rounded-full border border-purple-500/30">
-                  <Dumbbell className="w-3 h-3 mr-1" />
-                  {exercises.find(ex => ex.id === selectedExercise)?.name || 'Ejercicio'}
-                  <button
-                    onClick={() => setSelectedExercise('all')}
-                    className="ml-2 hover:text-purple-200"
-                  >
-                    ×
-                  </button>
-                </span>
-              )}
-
-              {selectedCategory !== 'all' && (
-                <span className="inline-flex items-center px-3 py-1 bg-green-600/20 text-green-300 text-xs rounded-full border border-green-500/30">
-                  <Target className="w-3 h-3 mr-1" />
-                  {selectedCategory}
-                  <button
-                    onClick={() => setSelectedCategory('all')}
-                    className="ml-2 hover:text-green-200"
-                  >
-                    ×
-                  </button>
-                </span>
-              )}
-
-              {(dateFrom || dateTo) && (
-                <span className="inline-flex items-center px-3 py-1 bg-yellow-600/20 text-yellow-300 text-xs rounded-full border border-yellow-500/30">
-                  <Calendar className="w-3 h-3 mr-1" />
-                  Fechas seleccionadas
-                  <button
-                    onClick={() => {
-                      setDateFrom(undefined);
-                      setDateTo(undefined);
-                    }}
-                    className="ml-2 hover:text-yellow-200"
-                  >
-                    ×
-                  </button>
-                </span>
-              )}
-            </div>
           </div>
         )}
 
         {/* Cards de filtros organizados */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
 
           {/* Card de Búsqueda y Selección */}
           <Card className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/30 hover:border-gray-600/50 transition-all duration-200">
@@ -507,7 +369,7 @@ export const WorkoutHistory: React.FC = () => {
                     placeholder="Ej: press banca, sentadillas..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    className="bg-gray-700/50 border-gray-600/50 focus:border-blue-500 focus:bg-gray-700"
+                    className="border-gray-600/50 focus:border-blue-500 focus:bg-gray-700"
                   />
                 </div>
 
@@ -524,7 +386,7 @@ export const WorkoutHistory: React.FC = () => {
                       { value: 'all', label: 'Todos los ejercicios' },
                       ...exercises.map(ex => ({ value: ex.id, label: ex.name }))
                     ]}
-                    className="bg-gray-700/50 border-gray-600/50 focus:border-purple-500"
+                    className="border-gray-600/50 focus:border-purple-500"
                   />
                 </div>
 
@@ -544,7 +406,7 @@ export const WorkoutHistory: React.FC = () => {
                         label: cat
                       }))
                     ]}
-                    className="bg-gray-700/50 border-gray-600/50 focus:border-green-500"
+                    className="border-gray-600/50 focus:border-green-500"
                   />
                 </div>
               </div>
@@ -571,7 +433,7 @@ export const WorkoutHistory: React.FC = () => {
                     <DatePicker
                       value={dateFrom}
                       onChange={setDateFrom}
-                      className="bg-gray-700/50 border-gray-600/50 focus:border-yellow-500"
+                      className="border-gray-600/50 focus:border-yellow-500"
                     />
                   </div>
                   <div>
@@ -581,7 +443,7 @@ export const WorkoutHistory: React.FC = () => {
                     <DatePicker
                       value={dateTo}
                       onChange={setDateTo}
-                      className="bg-gray-700/50 border-gray-600/50 focus:border-orange-500"
+                      className="border-gray-600/50 focus:border-orange-500"
                     />
                   </div>
                 </div>
@@ -602,7 +464,7 @@ export const WorkoutHistory: React.FC = () => {
                         { value: 'weight', label: '⚖️ Peso' },
                         { value: 'volume', label: '📊 Volumen' }
                       ]}
-                      className="bg-gray-700/50 border-gray-600/50 focus:border-indigo-500"
+                      className="border-gray-600/50 focus:border-indigo-500"
                     />
                   </div>
 
@@ -618,7 +480,7 @@ export const WorkoutHistory: React.FC = () => {
                         { value: 'desc', label: '⬇️ Descendente' },
                         { value: 'asc', label: '⬆️ Ascendente' }
                       ]}
-                      className="bg-gray-700/50 border-gray-600/50 focus:border-teal-500"
+                      className="border-gray-600/50 focus:border-teal-500"
                     />
                   </div>
                 </div>
@@ -657,39 +519,10 @@ export const WorkoutHistory: React.FC = () => {
             </CardContent>
           </Card>
         </div>
-
-        {/* Información de resultados */}
-        <div className="mt-4">
-          <Card className="bg-gradient-to-r from-gray-800/30 to-gray-700/30 border-gray-600/30">
-            <CardContent className="p-4">
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center space-x-3 text-gray-300">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-2 h-2 bg-blue-400 rounded-full"></div>
-                    <span>
-                      {hasActiveFilters ? (
-                        `${displayRecords.length} entrenamientos encontrados de ${records.length} totales`
-                      ) : (
-                        `Mostrando ${displayRecords.length}${records.length > 20 ? ' de ' + records.length : ''} entrenamientos${records.length > 20 ? ' (últimos 20)' : ''}`
-                      )}
-                    </span>
-                  </div>
-                </div>
-
-                {!hasActiveFilters && records.length > 20 && (
-                  <div className="flex items-center space-x-2 text-xs text-yellow-400 bg-yellow-500/10 px-3 py-1 rounded-full border border-yellow-500/20">
-                    <Calendar className="w-3 h-3" />
-                    <span>Usa filtros para ver todos los registros</span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        </div>
       </ModernSection>
 
       {/* Lista de entrenamientos con diseño del balance muscular */}
-      <ModernSection title="Entrenamientos">
+      <ModernSection>
         <Card>
           <CardContent>
             {displayRecords.length === 0 ? (
@@ -706,8 +539,8 @@ export const WorkoutHistory: React.FC = () => {
               <div className="space-y-4">
                 {displayRecords.map((record) => {
                   const primaryCategory = record.exercise?.categories?.[0] || 'Pecho';
-                  const Icon = categoryIcons[primaryCategory] || Dumbbell;
-                  const colorGradient = categoryColors[primaryCategory] || 'from-gray-500/80 to-gray-600/80';
+                  const Icon = getCategoryIcon(primaryCategory);
+                  const colorGradient = getCategoryColor(primaryCategory);
                   const volume = record.weight * record.reps * record.sets;
 
                   if (editingRecord?.id === record.id) {
@@ -802,7 +635,7 @@ export const WorkoutHistory: React.FC = () => {
 
                             <div className="space-y-2 mb-4">
                               {editIndividualSets.map((set, index) => (
-                                <div key={index} className="grid grid-cols-3 gap-2 p-3 bg-gray-700/50 rounded-lg">
+                                <div key={index} className="grid grid-cols-3 gap-2 p-3 rounded-lg">
                                   <div>
                                     <label className="text-xs text-gray-400">Peso (kg)</label>
                                     <Input
@@ -916,8 +749,8 @@ export const WorkoutHistory: React.FC = () => {
                             {record.exercise?.categories && (
                               <div className="flex flex-wrap gap-1.5 mb-2">
                                 {record.exercise.categories.map((category) => {
-                                  const CategoryIcon = categoryIcons[category] || Dumbbell;
-                                  const categoryGradient = categoryColors[category] || 'from-gray-500/80 to-gray-600/80';
+                                  const CategoryIcon = getCategoryIcon(category);
+                                  const categoryGradient = getCategoryColor(category);
 
                                   return (
                                     <span
@@ -1010,7 +843,7 @@ export const WorkoutHistory: React.FC = () => {
                             {record.individualSets!.map((set, index) => (
                               <div
                                 key={index}
-                                className="bg-gray-700/50 rounded-lg p-3 border border-gray-600/30"
+                                className="rounded-lg p-3 border border-gray-600/30"
                               >
                                 <div className="flex items-center justify-between">
                                   <span className="text-xs text-gray-400">Serie {index + 1}</span>

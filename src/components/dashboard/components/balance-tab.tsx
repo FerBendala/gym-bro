@@ -1,5 +1,6 @@
-import { Activity, AlertTriangle, BarChart, CheckCircle, Dumbbell, Footprints, Hexagon, RotateCcw, Scale, Shield, Timer, TrendingDown, TrendingUp, Triangle, Trophy, XCircle, Zap } from 'lucide-react';
+import { Activity, AlertTriangle, BarChart, CheckCircle, Dumbbell, Scale, Timer, TrendingDown, TrendingUp, Trophy, XCircle, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
+import { getCategoryColor, getCategoryIcon } from '../../../constants/exercise-categories';
 import type { WorkoutRecord } from '../../../interfaces';
 import { formatNumber } from '../../../utils/functions';
 import { analyzeMuscleBalance, calculateBalanceScore, calculateCategoryAnalysis } from '../../../utils/functions/category-analysis';
@@ -12,26 +13,6 @@ import { InfoTooltip } from '../../tooltip';
 interface BalanceTabProps {
   records: WorkoutRecord[];
 }
-
-// Iconos más específicos para cada categoría muscular
-const categoryIcons: Record<string, React.FC<any>> = {
-  'Pecho': Hexagon,        // Hexágono representa la forma de los pectorales
-  'Espalda': Shield,       // Escudo representa la protección/soporte de la espalda
-  'Piernas': Footprints,   // Huellas representan el movimiento de piernas
-  'Hombros': Triangle,     // Triángulo representa la forma de los deltoides
-  'Brazos': Dumbbell,      // Mancuerna es el icono más representativo para brazos
-  'Core': RotateCcw        // Rotación representa los movimientos de core/abdominales
-};
-
-// Colores para cada categoría
-const categoryColors: Record<string, string> = {
-  'Pecho': 'from-red-500/80 to-pink-500/80',
-  'Espalda': 'from-blue-500/80 to-cyan-500/80',
-  'Piernas': 'from-green-500/80 to-emerald-500/80',
-  'Hombros': 'from-purple-500/80 to-violet-500/80',
-  'Brazos': 'from-orange-500/80 to-amber-500/80',
-  'Core': 'from-indigo-500/80 to-blue-500/80'
-};
 
 // Función utilitaria para validar valores numéricos
 const safeNumber = (value: any, defaultValue: number = 0): number => {
@@ -133,8 +114,8 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
             {muscleBalance
               .filter(balance => balance.volume > 0 || balance.priorityLevel === 'critical')
               .map((balance) => {
-                const Icon = categoryIcons[balance.category] || Activity;
-                const colorGradient = categoryColors[balance.category] || 'from-gray-500/80 to-gray-600/80';
+                const Icon = getCategoryIcon(balance.category);
+                const colorGradient = getCategoryColor(balance.category);
 
                 // Obtener métricas detalladas de la categoría
                 const categoryMetric = categoryAnalysis.categoryMetrics.find(m => m.category === balance.category);

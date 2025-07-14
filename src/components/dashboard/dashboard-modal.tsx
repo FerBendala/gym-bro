@@ -17,7 +17,7 @@ import { useDashboardData } from './hooks';
 import type { DashboardProps, DashboardTab } from './types';
 
 export const Dashboard: React.FC<DashboardProps> = ({ onClose }) => {
-  const { workoutRecords, exercises, loading, isOnline, handleDeleteRecord } = useDashboardData();
+  const { workoutRecords, loading, isOnline } = useDashboardData();
   const [activeTab, setActiveTab] = useState<DashboardTab>(DEFAULT_DASHBOARD_TAB);
 
   if (loading) {

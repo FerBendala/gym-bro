@@ -17,6 +17,7 @@ import type { WorkoutRecord } from '../../../interfaces';
 import { formatNumber } from '../../../utils/functions';
 import { calculateTrendsAnalysis } from '../../../utils/functions/trends-analysis';
 import { Card, CardContent, CardHeader } from '../../card';
+import { StatCard } from '../../stat-card';
 import { InfoTooltip } from '../../tooltip';
 
 interface TrendsTabProps {
@@ -102,70 +103,49 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
         </Card>
       )}
 
-      {/* Evolución Temporal */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-white flex items-center">
-            <TrendingUp className="w-5 h-5 mr-2" />
-            Evolución Temporal
-            <InfoTooltip
-              content="Análisis avanzado de tu progreso temporal con predicciones, volatilidad y comparaciones por períodos."
-              position="top"
-              className="ml-2"
-            />
-          </h3>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {/* Métricas de tendencia general */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <TrendingUp className={`w-5 h-5 ${analysis.temporalEvolution.overallTrend === 'Mejorando' ? 'text-green-400' :
-                    analysis.temporalEvolution.overallTrend === 'Declinando' ? 'text-red-400' : 'text-gray-400'}`} />
-                </div>
-                <div className="text-sm text-gray-400 mb-1">Tendencia</div>
-                <div className={`text-lg font-semibold ${analysis.temporalEvolution.overallTrend === 'Mejorando' ? 'text-green-400' :
-                  analysis.temporalEvolution.overallTrend === 'Declinando' ? 'text-red-400' : 'text-gray-400'}`}>
-                  {analysis.temporalEvolution.overallTrend}
-                </div>
-              </div>
+      {/* Evolución Temporal - StatCards horizontales */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard
+          title="Tendencia"
+          value={analysis.temporalEvolution.overallTrend}
+          icon={analysis.temporalEvolution.overallTrend === 'Mejorando' ? TrendingUp :
+            analysis.temporalEvolution.overallTrend === 'Declinando' ? TrendingDown : Activity}
+          variant={analysis.temporalEvolution.overallTrend === 'Mejorando' ? 'success' :
+            analysis.temporalEvolution.overallTrend === 'Declinando' ? 'danger' : 'warning'}
+          tooltip="Evaluación de la dirección general de tu progreso basado en patrones temporales y volumen de entrenamiento."
+          tooltipPosition="top"
+        />
 
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Target className="w-5 h-5 text-blue-400" />
-                </div>
-                <div className="text-sm text-gray-400 mb-1">Crecimiento</div>
-                <div className="text-lg font-semibold text-blue-400">
-                  {analysis.temporalEvolution.growthRate > 0 ? '+' : ''}{analysis.temporalEvolution.growthRate}%
-                </div>
-              </div>
+        <StatCard
+          title="Crecimiento"
+          value={`${analysis.temporalEvolution.growthRate > 0 ? '+' : ''}${analysis.temporalEvolution.growthRate}%`}
+          icon={Target}
+          variant={analysis.temporalEvolution.growthRate > 0 ? 'success' :
+            analysis.temporalEvolution.growthRate < 0 ? 'danger' : 'warning'}
+          tooltip="Porcentaje de crecimiento en tu rendimiento durante el período analizado. Valores positivos indican progreso."
+          tooltipPosition="top"
+        />
 
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Activity className={`w-5 h-5 ${analysis.temporalEvolution.volatility < 20 ? 'text-green-400' :
-                    analysis.temporalEvolution.volatility < 40 ? 'text-yellow-400' : 'text-red-400'}`} />
-                </div>
-                <div className="text-sm text-gray-400 mb-1">Volatilidad</div>
-                <div className={`text-lg font-semibold ${analysis.temporalEvolution.volatility < 20 ? 'text-green-400' :
-                  analysis.temporalEvolution.volatility < 40 ? 'text-yellow-400' : 'text-red-400'}`}>
-                  {analysis.temporalEvolution.volatility}%
-                </div>
-              </div>
+        <StatCard
+          title="Volatilidad"
+          value={`${analysis.temporalEvolution.volatility}%`}
+          icon={Activity}
+          variant={analysis.temporalEvolution.volatility < 20 ? 'success' :
+            analysis.temporalEvolution.volatility < 40 ? 'warning' : 'danger'}
+          tooltip="Medida de la variabilidad en tu rendimiento. Valores bajos (<20%) indican consistencia, valores altos (>40%) sugieren fluctuaciones importantes."
+          tooltipPosition="top"
+        />
 
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Brain className="w-5 h-5 text-purple-400" />
-                </div>
-                <div className="text-sm text-gray-400 mb-1">Confianza</div>
-                <div className="text-lg font-semibold text-purple-400">
-                  {Math.round(analysis.temporalEvolution.predictions.confidence * 100)}%
-                </div>
-              </div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+        <StatCard
+          title="Confianza"
+          value={`${Math.round(analysis.temporalEvolution.predictions.confidence * 100)}%`}
+          icon={Brain}
+          variant={analysis.temporalEvolution.predictions.confidence >= 0.7 ? 'success' :
+            analysis.temporalEvolution.predictions.confidence >= 0.5 ? 'warning' : 'danger'}
+          tooltip="Nivel de confianza en las predicciones basado en la calidad y cantidad de datos. Valores altos (>70%) indican predicciones más fiables."
+          tooltipPosition="top"
+        />
+      </div>
 
       {/* Análisis por Día de la Semana */}
       <Card>
@@ -281,14 +261,14 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
                         <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                           <div className="text-xs text-gray-400 mb-1">Peso Máximo</div>
                           <div className="text-sm sm:text-lg font-semibold text-white">
-                            {day.maxWeight} kg
+                            {formatNumber(day.maxWeight)} kg
                           </div>
                         </div>
 
                         <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                           <div className="text-xs text-gray-400 mb-1">Ejercicios</div>
                           <div className="text-sm sm:text-lg font-semibold text-white">
-                            {day.uniqueExercises}
+                            {formatNumber(day.uniqueExercises)}
                           </div>
                         </div>
 
@@ -302,7 +282,7 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
                         <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                           <div className="text-xs text-gray-400 mb-1">Peso Promedio</div>
                           <div className="text-sm sm:text-lg font-semibold text-white">
-                            {day.avgWeight} kg
+                            {formatNumber(day.avgWeight)} kg
                           </div>
                         </div>
                       </div>
@@ -338,103 +318,6 @@ export const TrendsTab: React.FC<TrendsTabProps> = ({ records }) => {
                 </div>
               );
             })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Análisis de Hábitos */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-white flex items-center">
-            <Activity className="w-5 h-5 mr-2" />
-            Análisis de Hábitos
-            <InfoTooltip
-              content="Análisis completo de tus patrones de entrenamiento, rachas y recomendaciones personalizadas."
-              position="top"
-              className="ml-2"
-            />
-          </h3>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
-            {/* Métricas de hábitos */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Clock className="w-5 h-5 text-blue-400" />
-                </div>
-                <div className="text-lg font-semibold text-white">
-                  {analysis.workoutHabits.avgSessionDuration} min
-                </div>
-                <div className="text-xs text-gray-400">Duración promedio</div>
-              </div>
-
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Calendar className="w-5 h-5 text-purple-400" />
-                </div>
-                <div className="text-lg font-semibold text-white">
-                  {analysis.workoutHabits.weeklyFrequency}
-                </div>
-                <div className="text-xs text-gray-400">Entrenamientos/semana</div>
-              </div>
-
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Trophy className="w-5 h-5 text-orange-400" />
-                </div>
-                <div className="text-lg font-semibold text-white">
-                  {analysis.workoutHabits.workoutStreaks.longest}
-                </div>
-                <div className="text-xs text-gray-400">Racha más larga</div>
-              </div>
-
-              <div className="bg-gray-800/50 rounded-lg p-3 text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <Target className="w-5 h-5 text-green-400" />
-                </div>
-                <div className="text-lg font-semibold text-white">
-                  {analysis.workoutHabits.workoutStreaks.current}
-                </div>
-                <div className="text-xs text-gray-400">Racha actual</div>
-              </div>
-            </div>
-
-            {/* Recomendaciones */}
-            {analysis.workoutHabits.recommendations.length > 0 && (
-              <div className="bg-green-900/20 border border-green-500/30 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-green-300 mb-3 flex items-center">
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Recomendaciones Personalizadas
-                </h4>
-                <div className="space-y-2">
-                  {analysis.workoutHabits.recommendations.slice(0, 3).map((rec, index) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <Zap className="w-4 h-4 text-green-400 mt-0.5 flex-shrink-0" />
-                      <p className="text-sm text-gray-300 break-words">{rec}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* Factores de riesgo */}
-            {analysis.workoutHabits.riskFactors.length > 0 && (
-              <div className="bg-red-900/20 border border-red-500/30 rounded-lg p-4">
-                <h4 className="text-sm font-medium text-red-300 mb-3 flex items-center">
-                  <AlertTriangle className="w-4 h-4 mr-2" />
-                  Factores de Riesgo
-                </h4>
-                <div className="space-y-2">
-                  {analysis.workoutHabits.riskFactors.slice(0, 3).map((risk, index) => (
-                    <div key={index} className="flex items-start gap-2">
-                      <AlertTriangle className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
-                      <p className="text-sm text-gray-300 break-words">{risk}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>

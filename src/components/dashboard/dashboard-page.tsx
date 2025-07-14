@@ -20,7 +20,7 @@ import type { DashboardTab } from './types';
  * Optimizado para mobile-first con navegación de tabs moderna
  */
 export const DashboardPage: React.FC = () => {
-  const { workoutRecords, exercises, loading, isOnline, handleDeleteRecord } = useDashboardData();
+  const { workoutRecords, loading, isOnline } = useDashboardData();
   const [activeTab, setActiveTab] = useState<DashboardTab>(DEFAULT_DASHBOARD_TAB);
 
   if (loading) {
@@ -67,7 +67,6 @@ export const DashboardPage: React.FC = () => {
       <DashboardTabNavigation
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        timeFilterLabel="Todos los datos"
       />
 
       {/* Contenido principal */}

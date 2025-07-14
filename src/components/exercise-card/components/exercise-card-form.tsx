@@ -62,17 +62,21 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
   const handleModeChange = (mode: 'simple' | 'advanced') => {
     setIsAdvancedMode(mode === 'advanced');
 
-    if (mode === 'advanced' && fields.length === 0) {
-      // Si cambia a modo avanzado y no tiene series, crear series basadas en los datos simples
+    if (mode === 'advanced') {
+      // CORREGIDO: Siempre transferir datos del formulario simple al avanzado
       const simpleData = formMethods.getValues();
-      const series = [];
-      for (let i = 0; i < (simpleData.sets || 1); i++) {
-        series.push({ weight: simpleData.weight || 0, reps: simpleData.reps || 1 });
-      }
 
-      // Limpiar series existentes y agregar las nuevas
-      remove();
-      series.forEach(set => append(set));
+      // Solo transferir si hay datos válidos en el formulario simple
+      if (simpleData.weight > 0 || simpleData.reps > 0 || simpleData.sets > 0) {
+        const series = [];
+        for (let i = 0; i < (simpleData.sets || 1); i++) {
+          series.push({ weight: simpleData.weight || 0, reps: simpleData.reps || 1 });
+        }
+
+        // Limpiar series existentes y agregar las nuevas
+        remove();
+        series.forEach(set => append(set));
+      }
     } else if (mode === 'simple' && fields.length > 0) {
       // Si cambia a modo simple, calcular promedios de las series individuales
       const watchedSets = advancedWatch("sets");
@@ -310,6 +314,35 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
                 />
               </div>
             </div>
+
+            {/* Estadísticas en tiempo real para modo rápido */}
+            {(() => {
+              const simpleData = formMethods.watch(['weight', 'reps', 'sets']);
+              const [weight, reps, sets] = simpleData;
+
+              if (weight > 0 || reps > 0 || sets > 0) {
+                const totalReps = (reps || 0) * (sets || 0);
+                const totalVolume = (weight || 0) * totalReps;
+
+                return (
+                  <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div className="bg-blue-600/10 rounded-lg p-3 text-center border border-blue-500/20">
+                      <p className="text-lg font-bold text-blue-400">{sets || 0}</p>
+                      <p className="text-xs text-blue-300">Series</p>
+                    </div>
+                    <div className="bg-green-600/10 rounded-lg p-3 text-center border border-green-500/20">
+                      <p className="text-lg font-bold text-green-400">{totalReps}</p>
+                      <p className="text-xs text-green-300">Reps totales</p>
+                    </div>
+                    <div className="bg-purple-600/10 rounded-lg p-3 text-center border border-purple-500/20">
+                      <p className="text-lg font-bold text-purple-400">{formatNumber(totalVolume)} kg</p>
+                      <p className="text-xs text-purple-300">Volumen</p>
+                    </div>
+                  </div>
+                );
+              }
+              return null;
+            })()}
           </div>
 
           {/* Fecha del entrenamiento */}
@@ -332,7 +365,19 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
               loading={loading}
               className="flex-1 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800"
             >
-              {loading ? 'Registrando...' : 'Registrar Entrenamiento'}
+              {(() => {
+                if (loading) return 'Registrando...';
+
+                const simpleData = formMethods.watch(['weight', 'reps', 'sets']);
+                const [weight, reps, sets] = simpleData;
+
+                if (weight > 0 && reps > 0 && sets > 0) {
+                  const totalVolume = weight * reps * sets;
+                  return `Registrar (${formatNumber(totalVolume)} kg)`;
+                }
+
+                return 'Registrar Entrenamiento';
+              })()}
             </Button>
             <Button
               type="button"

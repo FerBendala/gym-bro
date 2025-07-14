@@ -1,10 +1,11 @@
-import { Target, TrendingUp } from 'lucide-react';
-import React, { useEffect, useMemo, useState } from 'react';
-import { EXERCISE_CATEGORIES, type ExerciseCategory } from '../../../constants/exercise-categories';
+import { Calendar, Target, TrendingDown, TrendingUp, Trophy, Zap } from 'lucide-react';
+import React, { useMemo, useState } from 'react';
+import { getCategoryColor, getCategoryIcon } from '../../../constants/exercise-categories';
 import type { WorkoutRecord } from '../../../interfaces';
-import { formatNumber } from '../../../utils/functions';
+import { calculateExerciseProgress, formatNumber } from '../../../utils/functions';
 import { Button } from '../../button';
 import { Card, CardContent, CardHeader } from '../../card';
+import { StatCard } from '../../stat-card';
 import { InfoTooltip } from '../../tooltip';
 
 /**
@@ -15,35 +16,36 @@ interface ExercisesTabProps {
 }
 
 /**
- * Tab del dashboard para análisis detallado por ejercicio
+ * Función helper para manejar valores numéricos seguros
+ */
+const safeNumber = (value: any, defaultValue: number = 0): number => {
+  if (value === null || value === undefined || isNaN(value)) {
+    return defaultValue;
+  }
+  return Number(value);
+};
+
+/**
+ * Tab del dashboard para mostrar análisis por ejercicio
  */
 export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [selectedCategory, setSelectedCategory] = useState('all');
 
   const exerciseAnalysis = useMemo(() => {
     if (records.length === 0) return [];
 
-    // Filtrar registros que tienen información de ejercicio válida
-    const validRecords = records.filter(record =>
-      record.exercise && record.exercise.name && record.exercise.name !== 'Ejercicio desconocido'
-    );
-
-    if (validRecords.length === 0) return [];
-
     // Agrupar por ejercicio
-    const exerciseGroups = validRecords.reduce((acc, record) => {
-      const exerciseName = record.exercise!.name;
+    const exerciseGroups = records.reduce((acc, record) => {
+      const exerciseName = record.exercise?.name || 'Ejercicio desconocido';
       if (!acc[exerciseName]) {
         acc[exerciseName] = [];
       }
       acc[exerciseName].push(record);
       return acc;
-    }, {} as Record<string, typeof validRecords>);
+    }, {} as Record<string, WorkoutRecord[]>);
 
     // Analizar cada ejercicio
     return Object.entries(exerciseGroups).map(([exerciseName, exerciseRecords]) => {
-      const sortedRecords = [...exerciseRecords].sort((a, b) => a.date.getTime() - b.date.getTime());
-
       const totalVolume = exerciseRecords.reduce((sum, record) =>
         sum + (record.weight * record.reps * record.sets), 0
       );
@@ -51,14 +53,8 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
       const maxWeight = Math.max(...exerciseRecords.map(r => r.weight));
       const avgWeight = exerciseRecords.reduce((sum, r) => sum + r.weight, 0) / exerciseRecords.length;
 
-      const firstRecord = sortedRecords[0];
-      const lastRecord = sortedRecords[sortedRecords.length - 1];
-
-      // Calcular progreso considerando peso y repeticiones (1RM estimado)
-      const first1RM = firstRecord.weight * (1 + Math.min(firstRecord.reps, 20) / 30);
-      const last1RM = lastRecord.weight * (1 + Math.min(lastRecord.reps, 20) / 30);
-      const progress = last1RM - first1RM;
-      const progressPercent = first1RM > 0 ? (progress / first1RM) * 100 : 0;
+      // **FUNCIÓN UNIFICADA**: Usar la función utilitaria para calcular progreso
+      const { absoluteProgress: progress, percentProgress: progressPercent } = calculateExerciseProgress(exerciseRecords);
 
       const frequency = exerciseRecords.length;
       const categories = exerciseRecords[0].exercise?.categories || ['Sin categoría'];
@@ -72,9 +68,9 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
         progress,
         progressPercent,
         frequency,
-        firstWeight: firstRecord.weight,
-        lastWeight: lastRecord.weight,
-        lastDate: lastRecord.date
+        firstWeight: exerciseRecords[0].weight,
+        lastWeight: exerciseRecords[exerciseRecords.length - 1].weight,
+        lastDate: new Date(Math.max(...exerciseRecords.map(r => r.date.getTime())))
       };
     }).sort((a, b) => b.totalVolume - a.totalVolume);
   }, [records]);
@@ -86,18 +82,13 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
     ];
 
     // Contar ejercicios por categoría (ahora considera múltiples categorías)
-    EXERCISE_CATEGORIES.forEach((category: ExerciseCategory) => {
+    const uniqueCategories = Array.from(new Set(exerciseAnalysis.flatMap(ex => ex.categories)));
+    uniqueCategories.forEach(category => {
       const count = exerciseAnalysis.filter(ex => ex.categories.includes(category)).length;
       if (count > 0) {
         categories.push({ id: category, name: category, count });
       }
     });
-
-    // Añadir categoría "Sin categoría" si existen ejercicios sin categoría
-    const uncategorizedCount = exerciseAnalysis.filter(ex => ex.categories.includes('Sin categoría')).length;
-    if (uncategorizedCount > 0) {
-      categories.push({ id: 'Sin categoría', name: 'Sin categoría', count: uncategorizedCount });
-    }
 
     return categories;
   }, [exerciseAnalysis]);
@@ -118,58 +109,74 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
     !record.exercise || !record.exercise.name || record.exercise.name === 'Ejercicio desconocido'
   );
 
+  // Calcular métricas globales para StatCards
+  const globalMetrics = useMemo(() => {
+    const totalVolume = allExercises.reduce((sum, ex) => sum + ex.totalVolume, 0);
+    const avgProgress = allExercises.length > 0 ? allExercises.reduce((sum, ex) => sum + ex.progressPercent, 0) / allExercises.length : 0;
+    const exercisesImproving = allExercises.filter(ex => ex.progressPercent > 0).length;
+    const maxWeightExercise = allExercises.reduce((max, ex) => ex.maxWeight > max.maxWeight ? ex : max, { maxWeight: 0, name: 'N/A' });
+    const totalSessions = allExercises.reduce((sum, ex) => sum + ex.frequency, 0);
+
+    return {
+      totalVolume,
+      avgProgress,
+      exercisesImproving,
+      maxWeightExercise,
+      totalSessions
+    };
+  }, [allExercises]);
+
   // Asegurar que siempre haya un filtro aplicado
-  useEffect(() => {
-    if (categoriesWithCount.length > 0) {
-      // Si la categoría seleccionada no existe en las categorías disponibles, seleccionar la primera
-      const categoryExists = categoriesWithCount.some(cat => cat.id === selectedCategory);
-      if (!categoryExists) {
-        setSelectedCategory(categoriesWithCount[0].id);
-      }
-    }
-  }, [categoriesWithCount, selectedCategory]);
+  // This useEffect is no longer needed as categoriesWithCount is always populated
+  // and filteredExercises will always have at least one category if 'all' is not selected.
+  // Keeping it for now, but it might become redundant.
+  // useEffect(() => {
+  //   if (categoriesWithCount.length > 0) {
+  //     // Si la categoría seleccionada no existe en las categorías disponibles, seleccionar la primera
+  //     const categoryExists = categoriesWithCount.some(cat => cat.id === selectedCategory);
+  //     if (!categoryExists) {
+  //       setSelectedCategory(categoriesWithCount[0].id);
+  //     }
+  //   }
+  // }, [categoriesWithCount, selectedCategory]);
 
   if (records.length === 0) {
     return (
-      <Card>
-        <CardContent>
-          <div className="text-center py-12">
-            <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-300 mb-2">
-              Sin datos para análisis de ejercicios
-            </h3>
-            <p className="text-gray-500">
-              Registra entrenamientos para ver análisis detallado por ejercicio
-            </p>
-          </div>
-        </CardContent>
-      </Card>
+      <div className="text-center py-12">
+        <div className="p-4 bg-gray-800 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+          <Target className="w-8 h-8 text-gray-400" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-300 mb-2">
+          Sin datos para análisis de ejercicios
+        </h3>
+        <p className="text-gray-500">
+          Registra entrenamientos para ver análisis detallado por ejercicio
+        </p>
+      </div>
     );
   }
 
   if (exerciseAnalysis.length === 0) {
     return (
-      <Card>
-        <CardContent>
-          <div className="text-center py-12">
-            <Target className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-300 mb-2">
-              No se encontró información de ejercicios
-            </h3>
-            <p className="text-gray-500 mb-4">
-              Los registros de entrenamientos no tienen información de ejercicios asociada
+      <div className="text-center py-12">
+        <div className="p-4 bg-gray-800 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+          <Target className="w-8 h-8 text-gray-400" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-300 mb-2">
+          No se encontró información de ejercicios
+        </h3>
+        <p className="text-gray-500 mb-4">
+          Los registros de entrenamientos no tienen información de ejercicios asociada
+        </p>
+        {unknownRecords.length > 0 && (
+          <div className="p-3 bg-yellow-900/20 border border-yellow-700/50 rounded-lg text-sm">
+            <p className="text-yellow-300">
+              Se encontraron {unknownRecords.length} registros sin información de ejercicio.
+              Verifica que los ejercicios estén correctamente configurados.
             </p>
-            {unknownRecords.length > 0 && (
-              <div className="p-3 bg-yellow-900/20 border border-yellow-700/50 rounded-lg text-sm">
-                <p className="text-yellow-300">
-                  Se encontraron {unknownRecords.length} registros sin información de ejercicio.
-                  Verifica que los ejercicios estén correctamente configurados.
-                </p>
-              </div>
-            )}
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
     );
   }
 
@@ -186,6 +193,54 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
           </div>
         </div>
       )}
+
+      {/* Métricas principales */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
+        <StatCard
+          title="Volumen Total"
+          value={formatNumber(globalMetrics.totalVolume)}
+          icon={Zap}
+          variant="success"
+          tooltip="Volumen total de todos los ejercicios en la categoría seleccionada."
+          tooltipPosition="top"
+        />
+
+        <StatCard
+          title="Ejercicios Analizados"
+          value={allExercises.length.toString()}
+          icon={Target}
+          variant="indigo"
+          tooltip="Número total de ejercicios únicos en la categoría seleccionada."
+          tooltipPosition="top"
+        />
+
+        <StatCard
+          title="Mejorando"
+          value={`${globalMetrics.exercisesImproving}/${allExercises.length}`}
+          icon={TrendingUp}
+          variant={globalMetrics.exercisesImproving > allExercises.length / 2 ? 'success' : 'warning'}
+          tooltip="Número de ejercicios que muestran progreso positivo en 1RM estimado."
+          tooltipPosition="top"
+        />
+
+        <StatCard
+          title="Progreso Promedio"
+          value={`${globalMetrics.avgProgress > 0 ? '+' : ''}${safeNumber(globalMetrics.avgProgress, 0).toFixed(1)}%`}
+          icon={Calendar}
+          variant={globalMetrics.avgProgress > 0 ? 'success' : globalMetrics.avgProgress < 0 ? 'danger' : 'warning'}
+          tooltip="Progreso promedio de todos los ejercicios basado en 1RM estimado."
+          tooltipPosition="top"
+        />
+
+        <StatCard
+          title="Sesiones Totales"
+          value={globalMetrics.totalSessions.toString()}
+          icon={Trophy}
+          variant="purple"
+          tooltip="Número total de sesiones de entrenamiento sumando todos los ejercicios."
+          tooltipPosition="top"
+        />
+      </div>
 
       {/* Filtros por categorías */}
       <Card>
@@ -223,11 +278,12 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
         </CardContent>
       </Card>
 
+      {/* Análisis detallado de ejercicios */}
       <Card>
         <CardHeader>
           <h3 className="text-lg font-semibold text-white flex items-center">
-            <Target className="w-5 h-5 mr-2" />
-            Análisis de Ejercicios
+            <Calendar className="w-5 h-5 mr-2" />
+            Análisis Detallado de Ejercicios
             {selectedCategory !== 'all' && (
               <span className="ml-2 text-sm font-normal text-blue-400">
                 - {categoriesWithCount.find(cat => cat.id === selectedCategory)?.name}
@@ -252,103 +308,134 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
                 </p>
               </div>
             ) : (
-              allExercises.map((exercise, index) => (
-                <div key={exercise.name} className="p-4 bg-gray-800/30 rounded-lg">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex-1">
-                      <div className="flex items-center space-x-3">
+              allExercises.map((exercise, index) => {
+                const primaryCategory = exercise.categories[0] || 'Sin categoría';
+                const Icon = getCategoryIcon(primaryCategory);
+                const colorGradient = getCategoryColor(primaryCategory);
+
+                const getProgressBadge = () => {
+                  if (exercise.progressPercent > 5) return { text: 'Excelente', color: 'bg-green-500 text-white', icon: TrendingUp };
+                  if (exercise.progressPercent > 0) return { text: 'Mejorando', color: 'bg-green-500 text-white', icon: TrendingUp };
+                  if (exercise.progressPercent < -5) return { text: 'Declinando', color: 'bg-red-500 text-white', icon: TrendingDown };
+                  return { text: 'Estable', color: 'bg-gray-500 text-white', icon: null };
+                };
+
+                const progressBadge = getProgressBadge();
+
+                return (
+                  <div
+                    key={exercise.name}
+                    className={`relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/50 hover:border-gray-600/50 transition-all duration-200`}
+                  >
+                    {/* Header con posición, ícono y estado */}
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
                         <div className="flex items-center justify-center w-8 h-8 bg-blue-600/20 rounded-lg text-blue-400 font-bold text-sm">
                           #{index + 1}
                         </div>
-                        <div>
-                          <h4 className="font-medium text-white">{exercise.name}</h4>
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {exercise.categories.map((category) => (
-                              <span
-                                key={category}
-                                className={`text-xs px-2 py-1 rounded-full font-medium border ${selectedCategory === category
-                                  ? 'text-blue-200 bg-blue-500/25 border-blue-400/50'
-                                  : 'text-gray-300 bg-gray-600/30 border-gray-500/30'
-                                  }`}
-                              >
-                                {category}
-                              </span>
-                            ))}
+                        <div className={`p-2 sm:p-3 rounded-lg bg-gradient-to-br ${colorGradient}`}>
+                          <Icon className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h4 className="text-sm sm:text-base font-semibold text-white truncate">
+                            {exercise.name}
+                          </h4>
+                          <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${progressBadge.color}`}>
+                              {progressBadge.text}
+                            </span>
+                            {progressBadge.icon && (
+                              <progressBadge.icon className={`w-3 h-3 ${exercise.progressPercent < 0 ? 'text-red-400' : 'text-green-400'}`} />
+                            )}
                           </div>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {exercise.categories.map((category) => {
+                              const CategoryIcon = getCategoryIcon(category);
+                              const categoryGradient = getCategoryColor(category);
+
+                              return (
+                                <span
+                                  key={category}
+                                  className={`inline-flex items-center space-x-1 text-xs text-white bg-gradient-to-r ${categoryGradient} px-2 py-1 rounded-full font-medium shadow-sm border border-white/20`}
+                                >
+                                  <CategoryIcon className="w-3 h-3" />
+                                  <span>{category}</span>
+                                </span>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Volumen total */}
+                      <div className="text-right flex-shrink-0">
+                        <div className="text-lg sm:text-xl font-bold text-blue-400">
+                          {formatNumber(exercise.totalVolume)}
+                        </div>
+                        <div className="text-xs text-gray-400">
+                          kg totales
                         </div>
                       </div>
                     </div>
 
-                    <div className="text-right">
-                      <p className="text-lg font-bold text-blue-400">
-                        {formatNumber(exercise.totalVolume)} kg
-                      </p>
-                      <p className="text-xs text-gray-400">Volumen total</p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div className="text-center">
-                      <p className="text-sm font-bold text-white">
-                        {formatNumber(exercise.maxWeight)} kg
-                      </p>
-                      <p className="text-xs text-gray-400">Peso máximo</p>
-                    </div>
-
-                    <div className="text-center">
-                      <p className="text-sm font-bold text-white">
-                        {formatNumber(exercise.avgWeight)} kg
-                      </p>
-                      <p className="text-xs text-gray-400">Peso promedio</p>
-                    </div>
-
-                    <div className="text-center">
-                      <div className="flex items-center justify-center space-x-1">
-                        <p className={`text-sm font-bold ${exercise.progress > 0 ? 'text-green-400' :
-                          exercise.progress < 0 ? 'text-red-400' : 'text-gray-400'
-                          }`}>
-                          {exercise.progress > 0 ? '+' : ''}{formatNumber(exercise.progress)} kg
-                        </p>
-                        {exercise.progress !== 0 && (
-                          <TrendingUp className={`w-3 h-3 ${exercise.progress > 0 ? 'text-green-400' : 'text-red-400 rotate-180'
-                            }`} />
-                        )}
+                    {/* Métricas principales */}
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
+                      <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                        <div className="text-xs text-gray-400 mb-1">Peso Máximo</div>
+                        <div className="text-sm sm:text-lg font-semibold text-white">
+                          {formatNumber(exercise.maxWeight)}
+                        </div>
+                        <div className="text-xs text-gray-500">kg</div>
                       </div>
-                      <p className="text-xs text-gray-400">Progreso (1RM)</p>
+
+                      <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                        <div className="text-xs text-gray-400 mb-1">Peso Promedio</div>
+                        <div className="text-sm sm:text-lg font-semibold text-white">
+                          {formatNumber(exercise.avgWeight)}
+                        </div>
+                        <div className="text-xs text-gray-500">kg</div>
+                      </div>
+
+                      <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                        <div className="text-xs text-gray-400 mb-1">Progreso 1RM</div>
+                        <div className={`text-sm sm:text-lg font-semibold ${exercise.progress > 0 ? 'text-green-400' : exercise.progress < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                          {exercise.progress > 0 ? '+' : ''}{formatNumber(exercise.progress)}
+                        </div>
+                        <div className="text-xs text-gray-500">kg</div>
+                      </div>
+
+                      <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                        <div className="text-xs text-gray-400 mb-1">Sesiones</div>
+                        <div className="text-sm sm:text-lg font-semibold text-white">
+                          {exercise.frequency}
+                        </div>
+                        <div className="text-xs text-gray-500">entrenamientos</div>
+                      </div>
                     </div>
 
-                    <div className="text-center">
-                      <p className="text-sm font-bold text-white">
-                        {exercise.frequency}
-                      </p>
-                      <p className="text-xs text-gray-400">Sesiones</p>
+                    {/* Barra de progreso y evolución */}
+                    <div className="mb-4">
+                      <div className="flex justify-between text-xs text-gray-400 mb-2">
+                        <span>Evolución: {formatNumber(exercise.firstWeight)} kg → {formatNumber(exercise.lastWeight)} kg</span>
+                        <span className={`font-medium ${exercise.progressPercent > 0 ? 'text-green-400' : exercise.progressPercent < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                          {exercise.progressPercent > 0 ? '+' : ''}{safeNumber(exercise.progressPercent, 0).toFixed(1)}%
+                        </span>
+                      </div>
+                      <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">
+                        <div
+                          className={`relative h-full bg-gradient-to-r ${exercise.progressPercent > 0 ? 'from-green-500/80 to-green-600/80' : exercise.progressPercent < 0 ? 'from-red-500/80 to-red-600/80' : 'from-gray-500/80 to-gray-600/80'} transition-all duration-300`}
+                          style={{ width: `${Math.min(100, Math.max(5, Math.abs(safeNumber(exercise.progressPercent, 0)) * 2))}%` }}
+                        >
+                          <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                        </div>
+                      </div>
+                      <div className="text-xs text-gray-500 mt-1">
+                        Progreso basado en 1RM estimado (peso + repeticiones)
+                      </div>
                     </div>
                   </div>
-
-                  {/* Barra de progreso */}
-                  <div className="mt-3">
-                    <div className="flex justify-between text-xs text-gray-400 mb-1">
-                      <span>Evolución: {formatNumber(exercise.firstWeight)} kg → {formatNumber(exercise.lastWeight)} kg</span>
-                      <span className={exercise.progressPercent > 0 ? 'text-green-400' : exercise.progressPercent < 0 ? 'text-red-400' : 'text-gray-400'}>
-                        {exercise.progressPercent > 0 ? '+' : ''}{exercise.progressPercent.toFixed(1)}%
-                      </span>
-                    </div>
-                    <div className="text-xs text-gray-500 mb-1">
-                      Progreso basado en 1RM estimado (peso + repeticiones)
-                    </div>
-                    <div className="w-full bg-gray-700 rounded-full h-2">
-                      <div
-                        className={`h-2 rounded-full transition-all duration-300 ${exercise.progressPercent > 0 ? 'bg-green-600' :
-                          exercise.progressPercent < 0 ? 'bg-red-600' : 'bg-gray-600'
-                          }`}
-                        style={{
-                          width: `${Math.min(100, Math.abs(exercise.progressPercent) * 2)}%`
-                        }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              ))
+                );
+              })
             )}
           </div>
         </CardContent>

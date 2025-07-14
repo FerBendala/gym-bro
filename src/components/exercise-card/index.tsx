@@ -1,5 +1,6 @@
 import { WifiOff } from 'lucide-react';
 import React from 'react';
+import { getCategoryColor } from '../../constants/exercise-categories';
 import type { WorkoutRecord } from '../../interfaces';
 import { Card, CardContent } from '../card';
 import { OfflineWarning } from '../offline-warning';
@@ -8,16 +9,6 @@ import { ExerciseCardHeader, ExerciseModal } from './components';
 import { LastWorkoutSummary } from './components/last-workout-summary';
 import { useExerciseCard } from './hooks';
 import type { ExerciseCardProps } from './types';
-
-// Colores para cada categoría
-const categoryColors: Record<string, string> = {
-  'Pecho': 'from-red-500/80 to-pink-500/80',
-  'Espalda': 'from-blue-500/80 to-cyan-500/80',
-  'Piernas': 'from-green-500/80 to-emerald-500/80',
-  'Hombros': 'from-purple-500/80 to-violet-500/80',
-  'Brazos': 'from-orange-500/80 to-amber-500/80',
-  'Core': 'from-indigo-500/80 to-blue-500/80'
-};
 
 /**
  * Componente principal del ExerciseCard
@@ -49,7 +40,7 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignmen
 
   // Obtener la primera categoría para determinar el color
   const primaryCategory = assignment.exercise?.categories?.[0] || 'Pecho';
-  const colorGradient = categoryColors[primaryCategory] || 'from-gray-500/80 to-gray-600/80';
+  const colorGradient = getCategoryColor(primaryCategory);
 
   return (
     <>
@@ -112,20 +103,8 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignmen
         onSubmit={onSubmitForm}
         formMethods={formMethods}
         advancedFormMethods={advancedFormMethods}
-        lastRecord={lastRecord}
         lastWorkoutSeries={lastWorkoutSeries}
       />
-
-      {/* Modal de vista previa completa */}
-      {
-        showPreview && assignment.exercise?.url && (
-          <URLPreview
-            url={assignment.exercise.url}
-            showFullPreview={true}
-            onClose={() => setShowPreview(false)}
-          />
-        )
-      }
     </>
   );
 };

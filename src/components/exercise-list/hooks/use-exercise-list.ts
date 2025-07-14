@@ -47,21 +47,6 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
       // Determinar qué ejercicios se entrenaron hoy Y están en el tab correcto
       const trainedToday = getExercisesTrainedTodayForCurrentDay(workoutRecords, dayOfWeek);
       setExercisesTrainedToday(trainedToday);
-
-      // DEBUG TEMPORAL: Mostrar información detallada
-      console.log('🚨 DEBUG TEMPORAL - Datos cargados:');
-      console.log('📅 Hoy es:', new Date().toISOString().split('T')[0]);
-      console.log('📋 Tab actual:', dayOfWeek);
-      console.log('📊 Total registros de entrenamientos:', workoutRecords.length);
-      console.log('🏋️ Assignments para', dayOfWeek, ':', assignmentsData.length);
-      console.log('✅ Ejercicios marcados como entrenados hoy (tab correcto):', trainedToday);
-
-      if (workoutRecords.length > 0) {
-        console.log('📋 Últimos 3 entrenamientos:');
-        workoutRecords.slice(0, 3).forEach((record, i) => {
-          console.log(`  ${i + 1}. ${record.exercise?.name || 'Sin nombre'} - ${record.date.toISOString().split('T')[0]} (${record.dayOfWeek})`);
-        });
-      }
     } catch (error: any) {
       showNotification(error.message || 'Error al cargar los ejercicios', 'error');
     } finally {
@@ -165,8 +150,6 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
   useEffect(() => {
     const handleDataChange = (event: CustomEvent) => {
       const { type, data } = event.detail;
-
-      console.log('🔄 Cambio de datos detectado:', type, data);
 
       // Solo recargar si es relevante para este componente
       if (type === 'exercises' || type === 'assignments') {

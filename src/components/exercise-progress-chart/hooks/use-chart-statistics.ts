@@ -37,6 +37,17 @@ export const useChartStatistics = (records: WorkoutRecord[]): ChartStatistics =>
     // Calcular progreso por ejercicio considerando peso y repeticiones
     const exerciseProgress = Object.entries(exerciseGroups).map(([exerciseName, exerciseRecords]) => {
       const sortedRecords = [...exerciseRecords].sort((a, b) => a.date.getTime() - b.date.getTime());
+
+      // CORREGIDO: Solo calcular progreso si hay al menos 2 registros
+      if (sortedRecords.length < 2) {
+        return {
+          exercise: exerciseName,
+          improvement: 0,
+          hasProgress: false,
+          recordCount: sortedRecords.length
+        };
+      }
+
       const firstRecord = sortedRecords[0];
       const lastRecord = sortedRecords[sortedRecords.length - 1];
 

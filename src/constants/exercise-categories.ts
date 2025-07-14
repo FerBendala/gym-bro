@@ -1,3 +1,5 @@
+import { Activity, Dumbbell, Footprints, Hexagon, RotateCcw, Shield, Triangle } from 'lucide-react';
+
 /**
  * Categorías disponibles para ejercicios
  */
@@ -11,6 +13,74 @@ export const EXERCISE_CATEGORIES = [
 ] as const;
 
 export type ExerciseCategory = typeof EXERCISE_CATEGORIES[number];
+
+/**
+ * Iconos específicos para cada categoría muscular
+ * Centralizados para mantener consistencia en toda la aplicación
+ */
+export const CATEGORY_ICONS: Record<string, React.FC<any>> = {
+  'Pecho': Hexagon,        // Hexágono representa la forma de los pectorales
+  'Espalda': Shield,       // Escudo representa la protección/soporte de la espalda
+  'Piernas': Footprints,   // Huellas representan el movimiento de piernas
+  'Hombros': Triangle,     // Triángulo representa la forma de los deltoides
+  'Brazos': Dumbbell,      // Mancuerna es el icono más representativo para brazos
+  'Core': RotateCcw,       // Rotación representa los movimientos de core/abdominales
+  'Sin categoría': Activity // Icono genérico para ejercicios sin categoría
+};
+
+/**
+ * Colores de gradiente para cada categoría muscular
+ * Centralizados para mantener consistencia en toda la aplicación
+ */
+export const CATEGORY_COLORS: Record<string, string> = {
+  'Pecho': 'from-red-500/80 to-pink-500/80',
+  'Espalda': 'from-blue-500/80 to-cyan-500/80',
+  'Piernas': 'from-green-500/80 to-emerald-500/80',
+  'Hombros': 'from-purple-500/80 to-violet-500/80',
+  'Brazos': 'from-orange-500/80 to-amber-500/80',
+  'Core': 'from-indigo-500/80 to-blue-500/80',
+  'Sin categoría': 'from-gray-500/80 to-gray-600/80'
+};
+
+/**
+ * Utilidad para obtener el icono de una categoría
+ */
+export const getCategoryIcon = (category: string): React.FC<any> => {
+  return CATEGORY_ICONS[category] || Activity;
+};
+
+/**
+ * Utilidad para obtener el color de gradiente de una categoría
+ */
+export const getCategoryColor = (category: string): string => {
+  return CATEGORY_COLORS[category] || 'from-gray-500/80 to-gray-600/80';
+};
+
+/**
+ * Utilidad para crear un tag de categoría con diseño consistente
+ */
+export const createCategoryTag = (category: string, size: 'sm' | 'md' = 'sm') => {
+  const Icon = getCategoryIcon(category);
+  const colorGradient = getCategoryColor(category);
+
+  const sizeClasses = {
+    sm: {
+      container: 'text-xs px-2 py-1',
+      icon: 'w-3 h-3'
+    },
+    md: {
+      container: 'text-sm px-3 py-1.5',
+      icon: 'w-4 h-4'
+    }
+  };
+
+  return {
+    Icon,
+    colorGradient,
+    containerClasses: `inline-flex items-center space-x-1 ${sizeClasses[size].container} text-white bg-gradient-to-r ${colorGradient} rounded-full font-medium shadow-sm border border-white/20`,
+    iconClasses: sizeClasses[size].icon
+  };
+};
 
 /**
  * Distribución ideal de volumen por categoría muscular (porcentajes recomendados)
