@@ -314,19 +314,15 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                               <TrendingUp className="w-3 h-3" />
                             )}
                             Progresión y PRs
-                            <InfoTooltip
-                              content="Progreso en peso y volumen comparando períodos anteriores, más récords personales logrados"
-                              position="top"
-                            />
                           </h5>
                           <div className="space-y-1">
                             <div className="flex justify-between items-center">
                               <span className="text-xs text-gray-400 flex items-center gap-1">
-                                Peso:
                                 <InfoTooltip
                                   content="Cambio porcentual en peso promedio vs período anterior"
                                   position="top"
                                 />
+                                Peso:
                               </span>
                               <span className={`text-xs font-medium ${categoryMetric.weightProgression > 0 ? 'text-green-400' : categoryMetric.weightProgression < 0 ? 'text-red-400' : 'text-gray-400'}`}>
                                 {categoryMetric.weightProgression > 0 ? '+' : ''}{categoryMetric.weightProgression}%
@@ -334,18 +330,24 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-xs text-gray-400 flex items-center gap-1">
-                                Volumen:
                                 <InfoTooltip
                                   content="Cambio porcentual en volumen total (peso × reps × series) vs período anterior"
                                   position="top"
                                 />
+                                Volumen:
                               </span>
                               <span className={`text-xs font-medium ${categoryMetric.volumeProgression > 0 ? 'text-green-400' : categoryMetric.volumeProgression < 0 ? 'text-red-400' : 'text-gray-400'}`}>
                                 {categoryMetric.volumeProgression > 0 ? '+' : ''}{categoryMetric.volumeProgression}%
                               </span>
                             </div>
                             <div className="flex justify-between items-center">
-                              <span className="text-xs text-gray-400">PRs:</span>
+                              <span className="text-xs text-gray-400 flex items-center gap-1">
+                                <InfoTooltip
+                                  content="Record personal logrado en este grupo muscular"
+                                  position="top"
+                                />
+                                PRs:
+                              </span>
                               <span className="text-xs font-medium text-purple-400">
                                 {categoryMetric.personalRecords}
                               </span>
@@ -358,19 +360,15 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                           <h5 className="text-xs font-medium text-gray-300 mb-2 flex items-center gap-1">
                             <Timer className="w-3 h-3" />
                             Actividad y Consistencia
-                            <InfoTooltip
-                              content="Recencia del último entrenamiento, regularidad y eficiencia del entrenamiento de este grupo muscular"
-                              position="top"
-                            />
                           </h5>
                           <div className="space-y-1">
                             <div className="flex justify-between items-center">
                               <span className="text-xs text-gray-400 flex items-center gap-1">
-                                Último entreno:
                                 <InfoTooltip
                                   content="Días transcurridos desde el último entrenamiento de este grupo muscular. Verde ≤3 días, amarillo ≤7 días, naranja ≤14 días, rojo >14 días"
                                   position="top"
                                 />
+                                Último entreno:
                               </span>
                               <span className={`text-xs font-medium ${getDaysColor(categoryMetric?.daysSinceLastWorkout || 0)}`}>
                                 {(categoryMetric?.daysSinceLastWorkout || 0) === 0 ? 'Hoy' :
@@ -380,11 +378,11 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-xs text-gray-400 flex items-center gap-1">
-                                Consistencia:
                                 <InfoTooltip
                                   content="Regularidad del entrenamiento. Mide qué tan constante eres entrenando este grupo muscular a lo largo del tiempo"
                                   position="top"
                                 />
+                                Consistencia:
                               </span>
                               <span className="text-xs font-medium text-orange-400">
                                 {safeNumber(categoryMetric?.consistencyScore, 0)}%
@@ -392,11 +390,11 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                             </div>
                             <div className="flex justify-between items-center">
                               <span className="text-xs text-gray-400 flex items-center gap-1">
-                                Eficiencia:
                                 <InfoTooltip
                                   content="Relación entre el volumen entrenado y el tiempo invertido. Mayor eficiencia = más volumen en menos tiempo"
                                   position="top"
                                 />
+                                Eficiencia:
                               </span>
                               <span className="text-xs font-medium text-blue-400">
                                 {safeNumber(categoryMetric?.efficiencyScore, 0)}%

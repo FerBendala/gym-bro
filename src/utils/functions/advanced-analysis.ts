@@ -3,6 +3,200 @@ import { es } from 'date-fns/locale';
 import type { WorkoutRecord } from '../../interfaces';
 import { calculateIntensityScore } from './category-analysis';
 
+// ========================================
+// CONSTANTES PARA CÁLCULOS DE PREDICCIÓN
+// ========================================
+
+/** Constantes para cálculos de 1RM */
+export const ONE_RM_CONSTANTS = {
+  /** Factor Epley para cálculo de 1RM: peso * (1 + reps/30) */
+  EPLEY_FACTOR: 30,
+  /** Factor Brzycki A: 1.0278 */
+  BRZYCKI_A: 1.0278,
+  /** Factor Brzycki B: 0.0278 */
+  BRZYCKI_B: 0.0278,
+  /** Máximo número de repeticiones para cálculo confiable de 1RM */
+  MAX_REPS_FOR_1RM: 20
+} as const;
+
+/** Constantes temporales */
+export const TIME_CONSTANTS = {
+  /** Semanas por mes (52 semanas / 12 meses) */
+  WEEKS_PER_MONTH: 52 / 12,
+  /** Días por semana */
+  DAYS_PER_WEEK: 7,
+  /** Milisegundos por día */
+  MS_PER_DAY: 1000 * 60 * 60 * 24,
+  /** Días mínimos para análisis temporal */
+  MIN_DAYS_FOR_ANALYSIS: 14,
+  /** Entrenamientos mínimos para predicciones confiables */
+  MIN_WORKOUTS_FOR_PREDICTIONS: 6
+} as const;
+
+/** Constantes para validación de progreso */
+export const PROGRESS_CONSTANTS = {
+  /** Umbral mínimo para considerar un PR (2.5%) */
+  PR_THRESHOLD_PERCENT: 0.025,
+  /** Máximo crecimiento semanal realista en kg */
+  MAX_WEEKLY_STRENGTH_GAIN: 2,
+  /** Máximo crecimiento mensual realista en kg */
+  MAX_MONTHLY_GROWTH: 8,
+  /** Máximo cambio de volumen semanal en kg */
+  MAX_WEEKLY_VOLUME_CHANGE: 100,
+  /** Porcentaje máximo de incremento de peso en 2 semanas (seguridad) */
+  MAX_SAFE_WEIGHT_INCREASE_2WEEKS: 20
+} as const;
+
+/** Constantes para niveles de experiencia */
+export const EXPERIENCE_CONSTANTS = {
+  /** Umbral de entrenamientos para principiante */
+  BEGINNER_WORKOUT_THRESHOLD: 10,
+  /** Umbral de entrenamientos para intermedio */
+  INTERMEDIATE_WORKOUT_THRESHOLD: 30,
+  /** Umbral de semanas para principiante */
+  BEGINNER_WEEKS_THRESHOLD: 12,
+  /** Umbral de semanas para intermedio */
+  INTERMEDIATE_WEEKS_THRESHOLD: 52,
+  /** Peso máximo umbral para principiante */
+  BEGINNER_WEIGHT_THRESHOLD: 40,
+  /** Peso máximo umbral para intermedio */
+  INTERMEDIATE_WEIGHT_THRESHOLD: 80,
+  /** Variedad de ejercicios umbral para principiante */
+  BEGINNER_EXERCISE_VARIETY: 5,
+  /** Variedad de ejercicios umbral para intermedio */
+  INTERMEDIATE_EXERCISE_VARIETY: 12
+} as const;
+
+/** Constantes para cálculos de confianza */
+export const CONFIDENCE_CONSTANTS = {
+  /** Confianza base mínima */
+  BASE_CONFIDENCE_MIN: 10 as number,
+  /** Confianza base máxima */
+  BASE_CONFIDENCE_MAX: 95 as number,
+  /** Penalización máxima por volatilidad */
+  MAX_VOLATILITY_PENALTY: 20 as number,
+  /** Incremento de confianza por datos adicionales (principiantes) */
+  BEGINNER_CONFIDENCE_PER_WORKOUT: 5 as number,
+  /** Incremento de confianza por datos adicionales (intermedios) */
+  INTERMEDIATE_CONFIDENCE_PER_WORKOUT: 2 as number,
+  /** Incremento de confianza por datos semanales */
+  WEEKLY_DATA_CONFIDENCE_BONUS: 5 as number
+};
+
+// ========================================
+// FUNCIONES UTILITARIAS MEJORADAS
+// ========================================
+
+/**
+ * Calcula el 1RM usando la fórmula de Epley (estándar de la industria)
+ * Fórmula: peso * (1 + repeticiones/30)
+ * Válida para 1-20 repeticiones
+ */
+export const calculate1RMEpley = (weight: number, reps: number): number => {
+  if (weight <= 0 || reps <= 0) return 0;
+  const cappedReps = Math.min(reps, ONE_RM_CONSTANTS.MAX_REPS_FOR_1RM);
+  return weight * (1 + cappedReps / ONE_RM_CONSTANTS.EPLEY_FACTOR);
+};
+
+/**
+ * Calcula el 1RM usando la fórmula de Brzycki (alternativa más precisa para altas repeticiones)
+ * Fórmula: peso / (1.0278 - 0.0278 * repeticiones)
+ * Válida para 2-20 repeticiones
+ */
+export const calculate1RMBrzycki = (weight: number, reps: number): number => {
+  if (weight <= 0 || reps <= 1) return weight; // Para 1 rep, el 1RM es el peso mismo
+  const cappedReps = Math.min(reps, ONE_RM_CONSTANTS.MAX_REPS_FOR_1RM);
+  const denominator = ONE_RM_CONSTANTS.BRZYCKI_A - (ONE_RM_CONSTANTS.BRZYCKI_B * cappedReps);
+  return denominator > 0 ? weight / denominator : weight;
+};
+
+/**
+ * Calcula el 1RM usando el método más apropiado según las repeticiones
+ * - 1-5 reps: Epley
+ * - 6+ reps: Brzycki (más preciso para altas repeticiones)
+ */
+export const calculateOptimal1RM = (weight: number, reps: number): number => {
+  if (weight <= 0 || reps <= 0) return 0;
+
+  // Para repeticiones bajas, usar Epley
+  if (reps <= 5) {
+    return calculate1RMEpley(weight, reps);
+  }
+
+  // Para repeticiones altas, usar Brzycki
+  return calculate1RMBrzycki(weight, reps);
+};
+
+/**
+ * Valida que un registro de entrenamiento sea válido para cálculos
+ */
+export const isValidRecord = (record: WorkoutRecord): boolean => {
+  // Validaciones básicas
+  if (!(record.weight > 0 &&
+    record.reps > 0 &&
+    record.sets > 0 &&
+    isFinite(record.weight) &&
+    isFinite(record.reps) &&
+    isFinite(record.sets) &&
+    record.date instanceof Date &&
+    !isNaN(record.date.getTime()))) {
+    return false;
+  }
+
+  // CORRECCIÓN: Rechazar fechas futuras que distorsionan cálculos
+  const now = new Date();
+  const tolerance = 24 * 60 * 60 * 1000; // 1 día de tolerancia para zona horaria
+
+  if (record.date.getTime() > now.getTime() + tolerance) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn(`⚠️ Registro con fecha futura ignorado: ${record.date.toISOString().split('T')[0]} (peso: ${record.weight}kg)`);
+    }
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Filtra registros válidos y los ordena cronológicamente
+ */
+export const getValidSortedRecords = (records: WorkoutRecord[]): WorkoutRecord[] => {
+  return records
+    .filter(isValidRecord)
+    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+};
+
+/**
+ * Determina el nivel de experiencia basado en múltiples factores
+ */
+export const determineExperienceLevel = (records: WorkoutRecord[]): 'beginner' | 'intermediate' | 'advanced' => {
+  const validRecords = getValidSortedRecords(records);
+
+  if (validRecords.length === 0) return 'beginner';
+
+  const totalWeeks = Math.max(1, validRecords.length / 3); // Estimación: ~3 entrenamientos por semana
+  const maxWeight = Math.max(...validRecords.map(r => r.weight));
+  const exerciseVariety = new Set(validRecords.map(r => r.exercise?.name || 'unknown')).size;
+
+  // Criterios para principiante
+  const isBeginner = validRecords.length < EXPERIENCE_CONSTANTS.BEGINNER_WORKOUT_THRESHOLD ||
+    totalWeeks < EXPERIENCE_CONSTANTS.BEGINNER_WEEKS_THRESHOLD ||
+    maxWeight < EXPERIENCE_CONSTANTS.BEGINNER_WEIGHT_THRESHOLD ||
+    exerciseVariety < EXPERIENCE_CONSTANTS.BEGINNER_EXERCISE_VARIETY;
+
+  if (isBeginner) return 'beginner';
+
+  // Criterios para intermedio
+  const isIntermediate = validRecords.length < EXPERIENCE_CONSTANTS.INTERMEDIATE_WORKOUT_THRESHOLD ||
+    totalWeeks < EXPERIENCE_CONSTANTS.INTERMEDIATE_WEEKS_THRESHOLD ||
+    maxWeight < EXPERIENCE_CONSTANTS.INTERMEDIATE_WEIGHT_THRESHOLD ||
+    exerciseVariety < EXPERIENCE_CONSTANTS.INTERMEDIATE_EXERCISE_VARIETY;
+
+  if (isIntermediate) return 'intermediate';
+
+  return 'advanced';
+};
+
 /**
  * Interfaz para densidad de entrenamiento
  */
@@ -104,7 +298,6 @@ export interface AdvancedAnalysis {
   periodComparisons: PeriodComparison[];
   progressPrediction: ProgressPrediction;
   intensityMetrics: IntensityMetrics;
-  predictionAccuracy: PredictionAccuracyAnalysis;
   peakPerformanceIndicators: Array<{
     type: 'excellent' | 'good' | 'warning' | 'critical';
     icon: string;
@@ -116,295 +309,6 @@ export interface AdvancedAnalysis {
   }>;
   optimizationSuggestions: string[];
 }
-
-/**
- * Interfaz para análisis de precisión de predicciones
- */
-export interface PredictionAccuracyAnalysis {
-  // Métricas de precisión generales
-  overallAccuracy: number; // 0-100, qué tan precisas han sido las predicciones
-  weightPredictionAccuracy: number; // Precisión específica para peso
-  volumePredictionAccuracy: number; // Precisión específica para volumen
-  totalPredictionsAnalyzed: number; // Número de predicciones evaluadas
-
-  // Análisis detallado por período
-  weeklyPredictions: Array<{
-    weekStart: Date;
-    predictedWeight: number;
-    actualWeight: number;
-    predictedVolume: number;
-    actualVolume: number;
-    weightAccuracy: number; // % de precisión para peso
-    volumeAccuracy: number; // % de precisión para volumen
-    overallAccuracy: number; // % de precisión general
-  }>;
-
-  // Tendencias de precisión
-  accuracyTrend: 'improving' | 'stable' | 'declining';
-  bestPredictionWeek: {
-    week: Date;
-    accuracy: number;
-  };
-  worstPredictionWeek: {
-    week: Date;
-    accuracy: number;
-  };
-
-  // Insights sobre la calidad del modelo
-  modelQuality: {
-    reliability: 'high' | 'medium' | 'low';
-    strengthArea: 'weight' | 'volume' | 'balanced';
-    weaknessArea: 'weight' | 'volume' | 'none';
-    improvementSuggestion: string;
-  };
-}
-
-/**
- * Calcula la precisión de las predicciones comparando resultados históricos
- */
-export const calculatePredictionAccuracy = (records: WorkoutRecord[]): PredictionAccuracyAnalysis => {
-  // Necesitamos al menos 4 semanas de datos para hacer predicciones y validarlas
-  if (records.length < 20) {
-    return {
-      overallAccuracy: 0,
-      weightPredictionAccuracy: 0,
-      volumePredictionAccuracy: 0,
-      totalPredictionsAnalyzed: 0,
-      weeklyPredictions: [],
-      accuracyTrend: 'stable',
-      bestPredictionWeek: { week: new Date(), accuracy: 0 },
-      worstPredictionWeek: { week: new Date(), accuracy: 0 },
-      modelQuality: {
-        reliability: 'low',
-        strengthArea: 'balanced',
-        weaknessArea: 'none',
-        improvementSuggestion: 'Necesitas más datos para evaluar la precisión del modelo'
-      }
-    };
-  }
-
-  const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-
-  // Agrupar datos por semanas para análisis
-  const weeklyData = groupRecordsByWeekForAccuracy(sortedRecords);
-  const weeklyPredictions: PredictionAccuracyAnalysis['weeklyPredictions'] = [];
-
-  // Necesitamos al menos 6 semanas para hacer predicciones retroactivas
-  if (weeklyData.length < 6) {
-    return {
-      overallAccuracy: 0,
-      weightPredictionAccuracy: 0,
-      volumePredictionAccuracy: 0,
-      totalPredictionsAnalyzed: 0,
-      weeklyPredictions: [],
-      accuracyTrend: 'stable',
-      bestPredictionWeek: { week: new Date(), accuracy: 0 },
-      worstPredictionWeek: { week: new Date(), accuracy: 0 },
-      modelQuality: {
-        reliability: 'low',
-        strengthArea: 'balanced',
-        weaknessArea: 'none',
-        improvementSuggestion: 'Continúa entrenando consistentemente para mejorar las predicciones'
-      }
-    };
-  }
-
-  // Para cada semana (desde la 4ta hasta la penúltima), hacer predicción y compararla
-  for (let i = 3; i < weeklyData.length - 1; i++) {
-    const weekToPredict = weeklyData[i + 1]; // Semana que queremos predecir
-    const trainingDataUntilWeek = weeklyData.slice(0, i + 1); // Datos disponibles hasta esa semana
-
-    // Simular predicción usando solo datos disponibles hasta ese momento
-    const historicalRecords = sortedRecords.filter(record => {
-      const recordDate = new Date(record.date);
-      const lastAvailableWeek = weeklyData[i];
-      return recordDate <= lastAvailableWeek.weekEnd;
-    });
-
-    if (historicalRecords.length < 3) continue;
-
-    // Hacer predicción para la próxima semana usando datos históricos disponibles
-    const prediction = predictProgress(historicalRecords);
-
-    // Calcular valores reales de la semana predicha
-    const actualWeight = weekToPredict.weight;
-    const actualVolume = weekToPredict.volume;
-
-    // Calcular precisión para peso (usar 1RM estimado para mejor comparación)
-    const actualAvg1RM = weekToPredict.records.reduce((sum: number, r: WorkoutRecord) => {
-      return sum + (r.weight * (1 + Math.min(r.reps, 20) / 30));
-    }, 0) / weekToPredict.records.length;
-
-    const predictedWeight = prediction.nextWeekWeight;
-    const weightError = Math.abs(predictedWeight - actualAvg1RM) / Math.max(actualAvg1RM, 1);
-    const weightAccuracy = Math.max(0, 100 - (weightError * 100));
-
-    // Calcular precisión para volumen
-    const predictedVolume = prediction.nextWeekVolume;
-    const volumeError = Math.abs(predictedVolume - actualVolume) / Math.max(actualVolume, 1);
-    const volumeAccuracy = Math.max(0, 100 - (volumeError * 100));
-
-    // Precisión general (promedio ponderado)
-    const overallAccuracy = (weightAccuracy * 0.6 + volumeAccuracy * 0.4);
-
-    weeklyPredictions.push({
-      weekStart: weekToPredict.weekStart,
-      predictedWeight,
-      actualWeight: actualAvg1RM,
-      predictedVolume,
-      actualVolume,
-      weightAccuracy: Math.round(weightAccuracy * 100) / 100,
-      volumeAccuracy: Math.round(volumeAccuracy * 100) / 100,
-      overallAccuracy: Math.round(overallAccuracy * 100) / 100
-    });
-  }
-
-  if (weeklyPredictions.length === 0) {
-    return {
-      overallAccuracy: 0,
-      weightPredictionAccuracy: 0,
-      volumePredictionAccuracy: 0,
-      totalPredictionsAnalyzed: 0,
-      weeklyPredictions: [],
-      accuracyTrend: 'stable',
-      bestPredictionWeek: { week: new Date(), accuracy: 0 },
-      worstPredictionWeek: { week: new Date(), accuracy: 0 },
-      modelQuality: {
-        reliability: 'low',
-        strengthArea: 'balanced',
-        weaknessArea: 'none',
-        improvementSuggestion: 'Datos insuficientes para análisis de precisión'
-      }
-    };
-  }
-
-  // Calcular métricas generales
-  const totalPredictionsAnalyzed = weeklyPredictions.length;
-  const overallAccuracy = weeklyPredictions.reduce((sum, p) => sum + p.overallAccuracy, 0) / totalPredictionsAnalyzed;
-  const weightPredictionAccuracy = weeklyPredictions.reduce((sum, p) => sum + p.weightAccuracy, 0) / totalPredictionsAnalyzed;
-  const volumePredictionAccuracy = weeklyPredictions.reduce((sum, p) => sum + p.volumeAccuracy, 0) / totalPredictionsAnalyzed;
-
-  // Encontrar mejor y peor predicción
-  const bestPrediction = weeklyPredictions.reduce((best, current) =>
-    current.overallAccuracy > best.overallAccuracy ? current : best
-  );
-  const worstPrediction = weeklyPredictions.reduce((worst, current) =>
-    current.overallAccuracy < worst.overallAccuracy ? current : worst
-  );
-
-  // Analizar tendencia de precisión (primera mitad vs segunda mitad)
-  const halfPoint = Math.floor(weeklyPredictions.length / 2);
-  const firstHalf = weeklyPredictions.slice(0, halfPoint);
-  const secondHalf = weeklyPredictions.slice(halfPoint);
-
-  const firstHalfAccuracy = firstHalf.reduce((sum, p) => sum + p.overallAccuracy, 0) / firstHalf.length;
-  const secondHalfAccuracy = secondHalf.reduce((sum, p) => sum + p.overallAccuracy, 0) / secondHalf.length;
-
-  let accuracyTrend: 'improving' | 'stable' | 'declining';
-  const trendDifference = secondHalfAccuracy - firstHalfAccuracy;
-  if (trendDifference > 5) accuracyTrend = 'improving';
-  else if (trendDifference < -5) accuracyTrend = 'declining';
-  else accuracyTrend = 'stable';
-
-  // Analizar calidad del modelo
-  let reliability: 'high' | 'medium' | 'low';
-  if (overallAccuracy >= 80) reliability = 'high';
-  else if (overallAccuracy >= 60) reliability = 'medium';
-  else reliability = 'low';
-
-  const strengthArea = weightPredictionAccuracy > volumePredictionAccuracy + 10 ? 'weight' :
-    volumePredictionAccuracy > weightPredictionAccuracy + 10 ? 'volume' : 'balanced';
-
-  const weaknessArea = weightPredictionAccuracy < volumePredictionAccuracy - 15 ? 'weight' :
-    volumePredictionAccuracy < weightPredictionAccuracy - 15 ? 'volume' : 'none';
-
-  let improvementSuggestion: string;
-  if (reliability === 'high') {
-    improvementSuggestion = 'Excelente precisión del modelo. Continúa con tu rutina consistente.';
-  } else if (reliability === 'medium') {
-    if (weaknessArea === 'weight') {
-      improvementSuggestion = 'Mejora la consistencia en progresión de peso para predicciones más precisas.';
-    } else if (weaknessArea === 'volume') {
-      improvementSuggestion = 'Mantén un volumen más consistente para mejorar las predicciones.';
-    } else {
-      improvementSuggestion = 'Aumenta la consistencia en tu entrenamiento para mejores predicciones.';
-    }
-  } else {
-    improvementSuggestion = 'Necesitas más consistencia en tu entrenamiento para predicciones confiables.';
-  }
-
-  return {
-    overallAccuracy: Math.round(overallAccuracy * 100) / 100,
-    weightPredictionAccuracy: Math.round(weightPredictionAccuracy * 100) / 100,
-    volumePredictionAccuracy: Math.round(volumePredictionAccuracy * 100) / 100,
-    totalPredictionsAnalyzed,
-    weeklyPredictions,
-    accuracyTrend,
-    bestPredictionWeek: {
-      week: bestPrediction.weekStart,
-      accuracy: bestPrediction.overallAccuracy
-    },
-    worstPredictionWeek: {
-      week: worstPrediction.weekStart,
-      accuracy: worstPrediction.overallAccuracy
-    },
-    modelQuality: {
-      reliability,
-      strengthArea,
-      weaknessArea,
-      improvementSuggestion
-    }
-  };
-};
-
-/**
- * Función auxiliar para agrupar registros por semanas para análisis de precisión
- */
-const groupRecordsByWeekForAccuracy = (sortedRecords: WorkoutRecord[]) => {
-  const weeklyData: Array<{
-    weekStart: Date;
-    weekEnd: Date;
-    records: WorkoutRecord[];
-    volume: number;
-    weight: number;
-  }> = [];
-
-  const recordsByWeek = new Map<string, WorkoutRecord[]>();
-
-  // Agrupar por semanas
-  sortedRecords.forEach(record => {
-    const recordDate = new Date(record.date);
-    const monday = startOfWeek(recordDate, { locale: es });
-    const weekKey = monday.toISOString().split('T')[0];
-
-    if (!recordsByWeek.has(weekKey)) {
-      recordsByWeek.set(weekKey, []);
-    }
-    recordsByWeek.get(weekKey)!.push(record);
-  });
-
-  // Convertir a formato final
-  recordsByWeek.forEach((records, weekKey) => {
-    const weekStart = new Date(weekKey);
-    const weekEnd = endOfWeek(weekStart, { locale: es });
-
-    const volume = records.reduce((sum: number, r: WorkoutRecord) => sum + (r.weight * r.reps * r.sets), 0);
-    const avgWeight = records.reduce((sum: number, r: WorkoutRecord) => {
-      const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-      return sum + oneRM;
-    }, 0) / records.length;
-
-    weeklyData.push({
-      weekStart,
-      weekEnd,
-      records,
-      volume,
-      weight: avgWeight
-    });
-  });
-
-  return weeklyData.sort((a, b) => a.weekStart.getTime() - b.weekStart.getTime());
-};
 
 /**
  * Obtiene registros de la semana actual (lunes a domingo)
@@ -626,25 +530,64 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
     };
   }
 
-  // Calcular tendencia de volumen (últimas 2 semanas vs anteriores)
+  // OPCIÓN A: Usar semanas completas (excluyendo semana actual) para consistencia temporal
   const now = new Date();
-  const recent2WeeksStart = startOfWeek(subWeeks(now, 1), { locale: es });
-  const recent2WeeksEnd = endOfWeek(now, { locale: es });
+  const currentWeekStart = startOfWeek(now, { locale: es });
+
+  // Semana anterior completa (base de referencia)
+  const lastWeekStart = startOfWeek(subWeeks(now, 1), { locale: es });
+  const lastWeekEnd = endOfWeek(subWeeks(now, 1), { locale: es });
   const recentRecords = records.filter(r => {
     const recordDate = new Date(r.date);
-    return recordDate >= recent2WeeksStart && recordDate <= recent2WeeksEnd;
+    return recordDate >= lastWeekStart && recordDate <= lastWeekEnd;
   });
 
-  const older2WeeksStart = startOfWeek(subWeeks(now, 3), { locale: es });
-  const older2WeeksEnd = endOfWeek(subWeeks(now, 2), { locale: es });
+  // Semana anterior a la anterior (para comparación)
+  const previousWeekStart = startOfWeek(subWeeks(now, 2), { locale: es });
+  const previousWeekEnd = endOfWeek(subWeeks(now, 2), { locale: es });
   const olderRecords = records.filter(r => {
     const recordDate = new Date(r.date);
-    return recordDate >= older2WeeksStart && recordDate <= older2WeeksEnd;
+    return recordDate >= previousWeekStart && recordDate <= previousWeekEnd;
   });
 
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[OPCIÓN A] 🔄 Análisis Recuperación:`);
+    console.log(`📅 Semana anterior: ${lastWeekStart.toISOString().split('T')[0]} - ${lastWeekEnd.toISOString().split('T')[0]} (${recentRecords.length} registros)`);
+    console.log(`📅 Semana previa: ${previousWeekStart.toISOString().split('T')[0]} - ${previousWeekEnd.toISOString().split('T')[0]} (${olderRecords.length} registros)`);
+    console.log(`📅 Excluida semana actual: desde ${currentWeekStart.toISOString().split('T')[0]}`);
+  }
+
   // **CORRECCIÓN CLAVE**: Calcular tanto volumen total (para stress) como promedio por sesión (para comparación justa)
-  const recentVolume = recentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-  const olderVolume = olderRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  let recentVolume = recentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  let olderVolume = olderRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+
+  // OPCIÓN A: Fallback si no hay datos en semanas anteriores completas
+  if (recentRecords.length === 0 || olderRecords.length === 0) {
+    // Usar últimos 7-14 días como fallback
+    const recent7Days = records.filter(r => {
+      const daysDiff = differenceInDays(now, new Date(r.date));
+      return daysDiff >= 0 && daysDiff <= 7;
+    });
+    const older7Days = records.filter(r => {
+      const daysDiff = differenceInDays(now, new Date(r.date));
+      return daysDiff >= 7 && daysDiff <= 14;
+    });
+
+    if (recentRecords.length === 0 && recent7Days.length > 0) {
+      recentVolume = recent7Days.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+      // Actualizar recentRecords para cálculos posteriores
+      recentRecords.length = 0;
+      recentRecords.push(...recent7Days);
+    }
+
+    if (olderRecords.length === 0 && older7Days.length > 0) {
+      olderVolume = older7Days.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+    }
+
+    if (process.env.NODE_ENV === 'development' && (recent7Days.length > 0 || older7Days.length > 0)) {
+      console.log(`[OPCIÓN A] ⚠️ Fallback recuperación: usando últimos 7-14 días`);
+    }
+  }
 
   const recentAvgVolume = recentRecords.length > 0 ? recentVolume / recentRecords.length : 0;
   const olderAvgVolume = olderRecords.length > 0 ? olderVolume / olderRecords.length : 0;
@@ -656,10 +599,9 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   const lastWorkout = new Date(Math.max(...records.map(r => new Date(r.date).getTime())));
   const recoveryDays = differenceInDays(new Date(), lastWorkout);
 
-  // Índice de fatiga basado en frecuencia y volumen
-  const thisWeekRecords = getThisWeekRecords(records);
-  // Calcular días únicos en lugar de registros individuales
-  const weeklyFrequency = new Set(thisWeekRecords.map(r => r.date.toDateString())).size;
+  // OPCIÓN A: Índice de fatiga basado en semana anterior completa (no semana actual)
+  // Usar recentRecords (semana anterior) en lugar de semana actual
+  const weeklyFrequency = new Set(recentRecords.map(r => r.date.toDateString())).size;
   const frequencyFactor = weeklyFrequency > 5 ? 30 : weeklyFrequency > 3 ? 15 : 0;
   const volumeFactor = volumeDropIndicators ? 25 : 0;
   const recoveryFactor = recoveryDays === 0 ? 20 : recoveryDays > 3 ? -10 : 0;
@@ -759,15 +701,49 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   }
 
   // Tiempo estimado de recuperación más realista
-  const predictedRecoveryTime = Math.max(8, Math.min(72,
+  const predictedRecoveryTime = Math.round(Math.max(8, Math.min(72,
     (fatigueIndex / 100) * 48 + (recoveryDays === 0 ? 12 : 0)
-  ));
+  )));
 
-  // Análisis de historial de recuperación (corregido - lógica estaba invertida)
+  // Análisis de historial de fatiga usando semanas completas CON CONTEXTO
+  // CORRECCIÓN: Considerar si el aumento es progreso controlado o deterioro
+  let trend: FatigueAnalysis['fatigueHistory']['trend'];
+
+  if (volumeChange > 25) {
+    trend = 'Empeorando'; // Aumento excesivo >25%
+  } else if (volumeChange > 15) {
+    // Aumento moderado 15-25%: evaluar contexto
+    // Si hay otros indicadores positivos, interpretar como progreso
+    if (fatigueIndex < 50 && recoveryDays <= 2) {
+      trend = 'Mejorando'; // Progreso acelerado controlado
+    } else {
+      trend = 'Empeorando'; // Aumento problemático
+    }
+  } else if (volumeChange < -15) {
+    trend = 'Mejorando'; // Reducción significativa
+  } else {
+    trend = 'Estable'; // Cambio normal ±15%
+  }
+
   const fatigueHistory: FatigueAnalysis['fatigueHistory'] = {
-    trend: volumeChange > 15 ? 'Mejorando' : volumeChange < -15 ? 'Empeorando' : 'Estable',
-    consistency: Math.min(100, Math.max(0, 100 - Math.abs(volumeChange)))
+    trend,
+    consistency: Math.round(Math.min(100, Math.max(0, 100 - Math.abs(volumeChange))) * 10) / 10
   };
+
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[OPCIÓN A] 📊 Resultados Recuperación:`);
+    console.log(`⏱️ Tiempo recuperación: ${predictedRecoveryTime}h`);
+    console.log(`📉 Cambio volumen: ${volumeChange.toFixed(1)}% (${fatigueHistory.trend})`);
+    console.log(`🎯 Consistencia: ${fatigueHistory.consistency}%`);
+    console.log(`💪 Índice fatiga: ${fatigueIndex} (${fatigueIndex < 50 ? 'BAJO' : 'ALTO'})`);
+    console.log(`😴 Días recuperación: ${recoveryDays} (${recoveryDays <= 2 ? 'RECIENTE' : 'EXTENDIDO'})`);
+    console.log(`🧠 Contexto: Vol+${volumeChange.toFixed(1)}% + Fatiga=${fatigueIndex} + Recup=${recoveryDays}d → ${fatigueHistory.trend}`);
+    console.log(`📅 Frecuencia semanal: ${weeklyFrequency} días únicos`);
+    console.log(`🔍 Vol reciente: ${recentVolume}kg, Vol anterior: ${olderVolume}kg`);
+    console.log(`📊 Promedio reciente: ${recentAvgVolume.toFixed(1)}kg/sesión vs ${olderAvgVolume.toFixed(1)}kg/sesión`);
+  }
+
+
 
   return {
     fatigueIndex,
@@ -890,7 +866,7 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
     if (currentRecords.length > 0) {
       totalVolume = currentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
       avgWeight = currentRecords.reduce((sum, r) => {
-        const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+        const oneRM = calculateOptimal1RM(r.weight, r.reps);
         return sum + oneRM;
       }, 0) / currentRecords.length;
 
@@ -902,7 +878,7 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
         const prevAvgVolumePerSession = prevVolume / prevRecords.length;
 
         const prevAvg1RM = prevRecords.reduce((sum, r) => {
-          const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+          const oneRM = calculateOptimal1RM(r.weight, r.reps);
           return sum + oneRM;
         }, 0) / prevRecords.length;
 
@@ -931,99 +907,146 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
   });
 };
 
+// ========================================
+// FUNCIONES AUXILIARES PARA PREDICCIONES
+// ========================================
+
 /**
- * Función unificada para predicciones de progreso
- * Elimina duplicación y unifica toda la lógica
+ * Valida que hay suficientes datos para hacer predicciones confiables
  */
-export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction => {
-  // Función unificada de predicción de progreso
-
-  // Validación inicial
-  if (records.length === 0) {
-    return {
-      nextWeekVolume: 0,
-      nextWeekWeight: 0,
-      monthlyGrowthRate: 0,
-      predictedPR: { weight: 0, confidence: 0 },
-      plateauRisk: 0,
-      trendAnalysis: 'insuficiente',
-      timeToNextPR: 0,
-      confidenceLevel: 0,
-      volumeTrend: 0,
-      strengthTrend: 0,
-      recommendations: ['Comienza registrando tus entrenamientos para obtener predicciones']
-    };
-  }
-
-  // Filtrar registros válidos
-  const validRecords = records.filter(r =>
-    r.weight > 0 && r.reps > 0 && r.sets > 0 &&
-    isFinite(r.weight) && isFinite(r.reps) && isFinite(r.sets)
-  );
+const validateDataSufficiency = (records: WorkoutRecord[]): {
+  isValid: boolean;
+  validRecords: WorkoutRecord[];
+  hasTimeData: boolean;
+  hasVolumeData: boolean;
+  daysBetween: number;
+  experienceLevel: 'beginner' | 'intermediate' | 'advanced';
+} => {
+  const validRecords = getValidSortedRecords(records);
 
   if (validRecords.length === 0) {
     return {
-      nextWeekVolume: 0,
-      nextWeekWeight: 0,
-      monthlyGrowthRate: 0,
-      predictedPR: { weight: 0, confidence: 0 },
-      plateauRisk: 0,
-      trendAnalysis: 'insuficiente',
-      timeToNextPR: 0,
-      confidenceLevel: 0,
-      volumeTrend: 0,
-      strengthTrend: 0,
-      recommendations: ['Revisa la calidad de los datos registrados']
+      isValid: false,
+      validRecords: [],
+      hasTimeData: false,
+      hasVolumeData: false,
+      daysBetween: 0,
+      experienceLevel: 'beginner'
     };
   }
 
-  // Determinar nivel de usuario y método de cálculo
-  const experienceLevel = validRecords.length < 10 ? 'beginner' :
-    validRecords.length < 30 ? 'intermediate' : 'advanced';
+  const firstDate = validRecords[0].date;
+  const lastDate = validRecords[validRecords.length - 1].date;
+  const daysBetween = Math.max(1, (lastDate.getTime() - firstDate.getTime()) / TIME_CONSTANTS.MS_PER_DAY);
 
-  // Calcular métricas básicas (común para todos los niveles)
-  const sortedRecords = [...validRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const hasTimeData = daysBetween >= TIME_CONSTANTS.MIN_DAYS_FOR_ANALYSIS;
+  const hasVolumeData = validRecords.length >= TIME_CONSTANTS.MIN_WORKOUTS_FOR_PREDICTIONS;
+  const experienceLevel = determineExperienceLevel(validRecords);
+
+  return {
+    isValid: hasTimeData && hasVolumeData,
+    validRecords,
+    hasTimeData,
+    hasVolumeData,
+    daysBetween,
+    experienceLevel
+  };
+};
+
+/**
+ * Obtiene registros de la última semana completa (excluyendo semana actual)
+ */
+const getLastCompleteWeekRecords = (records: WorkoutRecord[]): WorkoutRecord[] => {
+  if (records.length === 0) return [];
+
+  const weekGroups = new Map<string, WorkoutRecord[]>();
+  const now = new Date();
+
+  records.forEach(record => {
+    const date = new Date(record.date);
+    const weekStart = startOfWeek(date, { locale: es });
+    const weekKey = weekStart.toISOString().split('T')[0];
+
+    if (!weekGroups.has(weekKey)) {
+      weekGroups.set(weekKey, []);
+    }
+    weekGroups.get(weekKey)!.push(record);
+  });
+
+  // Ordenar semanas por fecha y excluir la semana actual
+  const sortedWeeks = Array.from(weekGroups.entries())
+    .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
+    .filter(([weekKey]) => {
+      const weekStart = new Date(weekKey);
+      const currentWeekStart = startOfWeek(now, { locale: es });
+      return weekStart.getTime() < currentWeekStart.getTime();
+    });
+
+  // Devolver registros de la última semana completa
+  return sortedWeeks.length > 0 ? sortedWeeks[sortedWeeks.length - 1][1] : [];
+};
+
+/**
+ * Calcula métricas básicas de los registros
+ */
+const calculateBasicMetrics = (validRecords: WorkoutRecord[]) => {
   const totalVolume = validRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
   const avgWeight = validRecords.reduce((sum, r) => sum + r.weight, 0) / validRecords.length;
   const maxWeight = Math.max(...validRecords.map(r => r.weight));
   const avgVolume = totalVolume / validRecords.length;
-  const current1RMMax = Math.max(...validRecords.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30)));
 
-  // Calcular progresión general
-  const firstRecord = sortedRecords[0];
-  const lastRecord = sortedRecords[sortedRecords.length - 1];
-  const daysBetween = Math.max(1, (lastRecord.date.getTime() - firstRecord.date.getTime()) / (1000 * 60 * 60 * 24));
-  const first1RM = firstRecord.weight * (1 + Math.min(firstRecord.reps, 20) / 30);
-  const last1RM = lastRecord.weight * (1 + Math.min(lastRecord.reps, 20) / 30);
-  const overallProgress = first1RM > 0 ? ((last1RM - first1RM) / first1RM) * 100 : 0;
+  // OPCIÓN A: Usar última semana completa (excluyendo semana actual)
+  const lastCompleteWeekRecords = getLastCompleteWeekRecords(validRecords);
 
-  // **VALIDACIÓN DE DATOS SUFICIENTES PARA PREDICCIONES**
-  const hasEnoughTimeData = daysBetween >= 14; // Al menos 2 semanas
-  const hasEnoughVolumeData = validRecords.length >= 6; // Al menos 6 entrenamientos
-
-  // Si no hay datos suficientes, usar valores conservadores
-  if (!hasEnoughTimeData || !hasEnoughVolumeData) {
-
-    return {
-      nextWeekVolume: avgVolume * 1.02, // 2% de crecimiento conservador
-      nextWeekWeight: avgWeight * 1.01, // 1% de crecimiento conservador
-      monthlyGrowthRate: 2,
-      predictedPR: { weight: maxWeight * 1.05, confidence: 30 },
-      plateauRisk: 20,
-      trendAnalysis: 'insuficiente',
-      timeToNextPR: 8,
-      confidenceLevel: 25,
-      volumeTrend: avgVolume * 0.02,
-      strengthTrend: avgWeight * 0.01,
-      recommendations: [
-        'Continúa registrando entrenamientos para obtener predicciones más precisas',
-        'Mantén la consistencia en tu rutina durante al menos 2 semanas',
-        'Enfócate en progresión gradual: 2.5-5% de aumento semanal'
-      ]
-    };
+  let current1RMMax = 0;
+  if (lastCompleteWeekRecords.length > 0) {
+    // Usar 1RM promedio de la última semana completa
+    const lastWeek1RMs = lastCompleteWeekRecords.map(r => calculateOptimal1RM(r.weight, r.reps));
+    current1RMMax = lastWeek1RMs.reduce((sum, rm) => sum + rm, 0) / lastWeek1RMs.length;
+  } else {
+    // Fallback: si no hay semana completa anterior, usar últimos 5 entrenamientos
+    const recentRecords = validRecords.slice(-5);
+    if (recentRecords.length > 0) {
+      const recent1RMs = recentRecords.map(r => calculateOptimal1RM(r.weight, r.reps));
+      current1RMMax = recent1RMs.reduce((sum, rm) => sum + rm, 0) / recent1RMs.length;
+    }
   }
 
-  // Calcular tendencias basadas en nivel de experiencia
+  return {
+    totalVolume,
+    avgWeight,
+    maxWeight,
+    avgVolume,
+    current1RMMax
+  };
+};
+
+/**
+ * Calcula progresión general entre primer y último registro
+ */
+const calculateOverallProgress = (validRecords: WorkoutRecord[], daysBetween: number) => {
+  const firstRecord = validRecords[0];
+  const lastRecord = validRecords[validRecords.length - 1];
+
+  const first1RM = calculateOptimal1RM(firstRecord.weight, firstRecord.reps);
+  const last1RM = calculateOptimal1RM(lastRecord.weight, lastRecord.reps);
+
+  const overallProgress = first1RM > 0 ? ((last1RM - first1RM) / first1RM) * 100 : 0;
+
+  return { first1RM, last1RM, overallProgress };
+};
+
+/**
+ * Calcula tendencias de fuerza y volumen basadas en el nivel de experiencia
+ */
+const calculateTrends = (
+  validRecords: WorkoutRecord[],
+  experienceLevel: 'beginner' | 'intermediate' | 'advanced',
+  overallProgress: number,
+  avgVolume: number,
+  avgWeight: number,
+  daysBetween: number
+): { volumeTrend: number; strengthTrend: number; weeklyDataLength: number } => {
   let volumeTrend = 0;
   let strengthTrend = 0;
   let weeklyDataLength = 0;
@@ -1033,8 +1056,8 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
     const beginnerGrowthRate = validRecords.length >= 3 ?
       Math.max(0.5, Math.min(2, overallProgress * 0.1)) : 1;
 
-    strengthTrend = beginnerGrowthRate * 0.25; // 25% del crecimiento semanal
-    volumeTrend = avgVolume * 0.05; // 5% de crecimiento conservador
+    strengthTrend = beginnerGrowthRate * 0.25;
+    volumeTrend = avgVolume * 0.05;
 
   } else if (experienceLevel === 'intermediate') {
     // Para intermedios: calcular basado en datos semanales si están disponibles
@@ -1043,131 +1066,349 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
 
     if (weeklyData.length >= 2) {
       const recentData = weeklyData.slice(-2);
-      const recentVolume = recentData[1].volume;
-      const previousVolume = recentData[0].volume;
+
+      // CORRECCIÓN CRÍTICA: Detectar semanas incompletas
+      const now = new Date();
+      const recentWeekStart = new Date(recentData[1].date);
+      const recentWeekEnd = endOfWeek(recentWeekStart, { locale: es });
+
+      // CORRECCIÓN: Detectar semana incompleta basándose en los datos reales
+      // En lugar de usar la fecha del sistema, usar la fecha del último registro
+      const lastRecordDate = new Date(validRecords[validRecords.length - 1].date);
+      const daysSinceLastRecord = Math.ceil((now.getTime() - lastRecordDate.getTime()) / (1000 * 60 * 60 * 24));
+
+      // Si el último registro es muy reciente (≤2 días) y la semana no está en el pasado lejano, 
+      // entonces probablemente es una semana incompleta
+      const isCurrentWeekIncomplete = daysSinceLastRecord <= 2 &&
+        Math.abs(recentWeekStart.getTime() - now.getTime()) < (30 * 24 * 60 * 60 * 1000); // Menos de 30 días de diferencia
+
+      // Calcular volumen promedio por sesión directamente desde datos agrupados
+      const avgWorkoutsPerWeek = validRecords.length / weeklyData.length;
+
+      let recentVolumePerSession: number;
+      let previousVolumePerSession: number;
+
+      if (isCurrentWeekIncomplete) {
+        // SEMANA ACTUAL INCOMPLETA: Usar enfoque alternativo
+        // Calcular días únicos de entrenamiento en la semana reciente
+        const recentWeekRecordsCount = validRecords.filter(r => {
+          const rDate = new Date(r.date);
+          return rDate >= recentWeekStart && rDate <= recentWeekEnd;
+        }).length;
+
+        const uniqueDaysInRecentWeek = new Set(
+          validRecords
+            .filter(r => {
+              const rDate = new Date(r.date);
+              return rDate >= recentWeekStart && rDate <= recentWeekEnd;
+            })
+            .map(r => new Date(r.date).toDateString())
+        ).size;
+
+        // Si hay pocos días únicos comparado con el promedio, probablemente está incompleta
+        const avgDaysPerWeek = Math.max(3, avgWorkoutsPerWeek / 2); // Estimar días únicos por semana
+        const projectedMultiplier = Math.max(1, avgDaysPerWeek / Math.max(1, uniqueDaysInRecentWeek));
+        const projectedRecentVolume = recentData[1].volume * Math.min(3, projectedMultiplier); // Límite x3 máximo
+
+        recentVolumePerSession = projectedRecentVolume / avgWorkoutsPerWeek;
+        previousVolumePerSession = recentData[0].volume / avgWorkoutsPerWeek;
+      } else {
+        // AMBAS SEMANAS COMPLETAS: Comparación normal
+        recentVolumePerSession = recentData[1].volume / avgWorkoutsPerWeek;
+        previousVolumePerSession = recentData[0].volume / avgWorkoutsPerWeek;
+      }
+
       const recentWeight = recentData[1].weight;
       const previousWeight = recentData[0].weight;
 
-      volumeTrend = recentVolume - previousVolume;
-      strengthTrend = recentWeight - previousWeight;
+      // CORRECCIÓN CRÍTICA: Tendencia de volumen realista
+      // La diferencia directa puede ser excesiva, especialmente con semanas incompletas
+      const rawVolumeTrend = recentVolumePerSession - previousVolumePerSession;
+
+      // Aplicar límites realistas inmediatamente
+      volumeTrend = Math.max(-50, Math.min(50, rawVolumeTrend)); // Máximo ±50kg/sem
+
+      // Si la tendencia es extrema, usar enfoque más conservador
+      if (Math.abs(rawVolumeTrend) > 100) {
+        // Usar porcentaje del volumen total en lugar de diferencia absoluta
+        const percentageChange = (recentVolumePerSession - previousVolumePerSession) / previousVolumePerSession;
+        volumeTrend = Math.max(-20, Math.min(20, previousVolumePerSession * Math.max(-0.2, Math.min(0.2, percentageChange))));
+      }
+
+      strengthTrend = Math.max(-5, Math.min(5, recentWeight - previousWeight)); // Máximo ±5kg/sem
     } else {
-      // Estimación basada en progresión general
       const weeklyStrengthChange = overallProgress > 0 ?
-        (overallProgress * 0.01 * avgWeight) / Math.max(1, daysBetween / 7) : 0;
+        (overallProgress * 0.01 * avgWeight) / Math.max(1, daysBetween / TIME_CONSTANTS.DAYS_PER_WEEK) : 0;
       strengthTrend = weeklyStrengthChange;
       volumeTrend = avgVolume * 0.05;
     }
 
   } else { // advanced
-    // Para avanzados: usar regresión lineal con datos semanales
+    // Para avanzados: usar regresión lineal con VOLUMEN PROMEDIO POR SESIÓN
     const weeklyData = groupRecordsByWeek(validRecords);
     weeklyDataLength = weeklyData.length;
 
     if (weeklyData.length >= 4) {
-      const volumeValues = weeklyData.map(d => d.volume);
+      // CORRECCIÓN CRÍTICA: Calcular volumen promedio por sesión para cada semana
+      const volumePerSessionValues: number[] = [];
       const weightValues = weeklyData.map(d => d.weight);
 
-      volumeTrend = calculateLinearTrend(volumeValues);
-      strengthTrend = calculateLinearTrend(weightValues);
+      weeklyData.forEach(weekData => {
+        // Contar entrenamientos de esta semana específica
+        const weekStart = new Date(weekData.date);
+        const weekRecordsCount = validRecords.filter(r => {
+          const recordWeekStart = startOfWeek(new Date(r.date), { locale: es });
+          return recordWeekStart.getTime() === weekStart.getTime();
+        }).length;
+
+        // Calcular volumen promedio por sesión para esta semana
+        const volumePerSession = weekRecordsCount > 0 ? weekData.volume / weekRecordsCount : 0;
+        volumePerSessionValues.push(volumePerSession);
+      });
+
+      // Aplicar regresión lineal a VOLUMEN PROMEDIO POR SESIÓN
+      const rawVolumeTrend = calculateLinearTrend(volumePerSessionValues);
+      const rawStrengthTrend = calculateLinearTrend(weightValues);
+
+      // Limitar inmediatamente los resultados de regresión lineal
+      volumeTrend = Math.max(-avgVolume * 0.2, Math.min(avgVolume * 0.2, rawVolumeTrend));
+      strengthTrend = Math.max(-1, Math.min(1, rawStrengthTrend));
     } else {
-      // Fallback a método intermedio
       strengthTrend = overallProgress > 0 ?
-        (overallProgress * 0.01 * avgWeight) / Math.max(1, daysBetween / 7) : 0;
-      volumeTrend = avgVolume * 0.03; // Más conservador para avanzados
+        (overallProgress * 0.01 * avgWeight) / Math.max(1, daysBetween / TIME_CONSTANTS.DAYS_PER_WEEK) : 0;
+      volumeTrend = avgVolume * 0.03;
     }
   }
 
-  // APLICAR LÍMITES REALISTAS (común para todos los niveles)
-  volumeTrend = Math.max(-100, Math.min(100, volumeTrend));
-  strengthTrend = Math.max(-2, Math.min(2, strengthTrend));
+  // Aplicar límites realistas más conservadores
+  // Limitar cambios de volumen a un rango más realista basado en el volumen actual
+  const maxVolumeChange = Math.max(20, avgVolume * 0.15); // Máximo 15% del volumen promedio o 20kg
+  volumeTrend = Math.max(-maxVolumeChange, Math.min(maxVolumeChange, volumeTrend));
 
-  // Análisis de tendencia unificado
+  // Mantener límites de fuerza pero más conservadores
+  strengthTrend = Math.max(-PROGRESS_CONSTANTS.MAX_WEEKLY_STRENGTH_GAIN,
+    Math.min(PROGRESS_CONSTANTS.MAX_WEEKLY_STRENGTH_GAIN, strengthTrend));
+
+  // Validación adicional: Si no hay suficientes datos, ser más conservador
+  if (validRecords.length < 10) {
+    volumeTrend = Math.max(-10, Math.min(10, volumeTrend));
+    strengthTrend = Math.max(-0.5, Math.min(0.5, strengthTrend));
+  }
+
+  return { volumeTrend, strengthTrend, weeklyDataLength };
+};
+
+/**
+ * Determina el análisis de tendencia general
+ */
+const determineTrendAnalysis = (
+  validRecords: WorkoutRecord[],
+  strengthTrend: number,
+  volumeTrend: number,
+  avgWeight: number,
+  avgVolume: number
+): 'mejorando' | 'estable' | 'empeorando' | 'insuficiente' => {
+  if (validRecords.length < 3) {
+    return 'insuficiente';
+  }
+
   const normalizedStrengthTrend = avgWeight > 0 ? (strengthTrend / avgWeight) * 100 : 0;
   const normalizedVolumeTrend = avgVolume > 0 ? (volumeTrend / avgVolume) * 100 : 0;
   const weightedTrend = (normalizedStrengthTrend * 0.7) + (normalizedVolumeTrend * 0.3);
 
-  let trendAnalysis: 'mejorando' | 'estable' | 'empeorando' | 'insuficiente';
-
-  if (validRecords.length < 3) {
-    trendAnalysis = 'insuficiente';
-  } else if (weightedTrend > 1.5) {
-    trendAnalysis = 'mejorando';
-  } else if (weightedTrend < -1.5) {
-    trendAnalysis = 'empeorando';
-  } else {
-    trendAnalysis = 'estable';
-  }
-
   // Override por fuerza clara
-  if (strengthTrend >= 1.5) trendAnalysis = 'mejorando';
-  else if (strengthTrend <= -1.5) trendAnalysis = 'empeorando';
+  if (strengthTrend >= 1.5) return 'mejorando';
+  if (strengthTrend <= -1.5) return 'empeorando';
 
-  // Predicciones para próxima semana
-  // CORREGIDO: Usar peso representativo en lugar de promedio crudo que incluye calentamientos
-  const recentWeights = sortedRecords.slice(-10).map(r => r.weight); // Últimos 10 registros
-  const representativeWeight = recentWeights.length > 0 ?
-    recentWeights.reduce((sum, w) => sum + w, 0) / recentWeights.length : avgWeight;
+  if (weightedTrend > 1.5) return 'mejorando';
+  if (weightedTrend < -1.5) return 'empeorando';
 
-  // Usar percentil 75 para peso más representativo del trabajo real
-  const sortedRecentWeights = [...recentWeights].sort((a, b) => b - a);
-  const workingWeight = sortedRecentWeights.length > 3 ?
-    sortedRecentWeights[Math.floor(sortedRecentWeights.length * 0.25)] : representativeWeight;
+  return 'estable';
+};
 
-  const nextWeekWeight = Math.max(
-    workingWeight,
-    workingWeight + strengthTrend
-  );
-
-  const nextWeekVolume = Math.max(
-    avgVolume * 0.8,
-    avgVolume + volumeTrend
-  );
-
-  // Crecimiento mensual
-  const monthlyGrowthRate = strengthTrend * 4.33; // 4.33 semanas por mes
-
-  // Predicción de PR
-  const predictedPRWeight = Math.max(
-    current1RMMax * 1.025,
-    current1RMMax + (strengthTrend * 4)
-  );
-
-  // Tiempo hasta PR
-  const prThreshold = current1RMMax * 1.025;
-  const timeToNextPR = strengthTrend > 0 ?
-    Math.ceil(Math.max(0, (prThreshold - current1RMMax) / strengthTrend)) : 0;
-
-  // Nivel de confianza adaptativo
-  let baseConfidence = 30;
+/**
+ * Calcula el nivel de confianza basado en múltiples factores
+ */
+const calculateConfidenceLevel = (
+  experienceLevel: 'beginner' | 'intermediate' | 'advanced',
+  validRecords: WorkoutRecord[],
+  weeklyDataLength: number,
+  avgWeight: number
+): number => {
+  let baseConfidence = CONFIDENCE_CONSTANTS.BASE_CONFIDENCE_MIN;
 
   if (experienceLevel === 'beginner') {
-    baseConfidence = Math.min(80, Math.max(30, 25 + (validRecords.length * 5)));
+    baseConfidence = Math.min(80, Math.max(30, 25 + (validRecords.length * CONFIDENCE_CONSTANTS.BEGINNER_CONFIDENCE_PER_WORKOUT)));
   } else if (experienceLevel === 'intermediate') {
-    baseConfidence = Math.min(70, Math.max(40, 30 + (validRecords.length * 2) + (weeklyDataLength * 5)));
+    baseConfidence = Math.min(70, Math.max(40, 30 + (validRecords.length * CONFIDENCE_CONSTANTS.INTERMEDIATE_CONFIDENCE_PER_WORKOUT) + (weeklyDataLength * CONFIDENCE_CONSTANTS.WEEKLY_DATA_CONFIDENCE_BONUS)));
   } else {
-    baseConfidence = Math.min(90, Math.max(50, 40 + (validRecords.length * 1) + (weeklyDataLength * 8)));
+    baseConfidence = Math.min(90, Math.max(50, 40 + validRecords.length + (weeklyDataLength * 8)));
   }
 
   // Ajustar confianza por consistencia de datos
   const weightVariance = validRecords.length > 1 ?
     validRecords.reduce((sum, r) => sum + Math.pow(r.weight - avgWeight, 2), 0) / validRecords.length : 0;
-  const volatilityPenalty = Math.min(20, Math.sqrt(weightVariance));
+  const volatilityPenalty = Math.min(CONFIDENCE_CONSTANTS.MAX_VOLATILITY_PENALTY, Math.sqrt(weightVariance));
 
-  const confidenceLevel = Math.max(10, Math.min(95, baseConfidence - volatilityPenalty));
+  return Math.max(CONFIDENCE_CONSTANTS.BASE_CONFIDENCE_MIN,
+    Math.min(CONFIDENCE_CONSTANTS.BASE_CONFIDENCE_MAX, baseConfidence - volatilityPenalty));
+};
 
-  // Confianza específica para PR
-  let prConfidence = confidenceLevel;
-  if (strengthTrend > 0) prConfidence = Math.min(95, prConfidence + 10);
-  else if (strengthTrend < 0) prConfidence = Math.max(5, prConfidence - 20);
+/**
+ * Calcula las predicciones para la próxima semana
+ * CORREGIDO: Distinción clara entre peso de trabajo y 1RM
+ */
+const calculateNextWeekPredictions = (
+  validRecords: WorkoutRecord[],
+  strengthTrend: number,
+  volumeTrend: number,
+  avgVolume: number,
+  current1RMMax: number
+): { nextWeekWeight: number; nextWeekVolume: number } => {
+  // CORRECCIÓN: Usar misma base temporal que calculateBasicMetrics (última semana completa)
+  const lastCompleteWeekRecords = getLastCompleteWeekRecords(validRecords);
 
-  // Ajustar por tiempo hasta PR
-  if (timeToNextPR > 0) {
-    if (timeToNextPR <= 2) prConfidence = Math.min(95, prConfidence + 5);
-    else if (timeToNextPR <= 8) prConfidence = Math.max(20, prConfidence - 5);
-    else prConfidence = Math.max(10, prConfidence - 15);
+  let avgRecentWorking = 0;
+  let maxRecentWorking = 0;
+
+  if (lastCompleteWeekRecords.length > 0) {
+    // Usar peso de trabajo promedio de la última semana completa
+    const lastWeekWorkingWeights = lastCompleteWeekRecords.map(r => r.weight);
+    avgRecentWorking = lastWeekWorkingWeights.reduce((sum, w) => sum + w, 0) / lastWeekWorkingWeights.length;
+    maxRecentWorking = Math.max(...lastWeekWorkingWeights);
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log(`[OPCIÓN A] 🏋️ Peso trabajo semana anterior: ${avgRecentWorking.toFixed(1)}kg (promedio), ${maxRecentWorking}kg (máximo)`);
+    }
+  } else {
+    // Fallback: últimos 5 entrenamientos si no hay semana anterior completa
+    const recentWorkingWeights = validRecords.slice(-5).map(r => r.weight);
+    if (recentWorkingWeights.length > 0) {
+      avgRecentWorking = recentWorkingWeights.reduce((sum, w) => sum + w, 0) / recentWorkingWeights.length;
+      maxRecentWorking = Math.max(...recentWorkingWeights);
+
+      if (process.env.NODE_ENV === 'development') {
+        console.log(`[OPCIÓN A] ⚠️ Fallback peso trabajo: ${avgRecentWorking.toFixed(1)}kg (últimos 5 entrenamientos)`);
+      }
+    }
   }
 
-  // Riesgo de meseta adaptativo
+  // Predicción conservadora de peso de trabajo para próxima semana
+  // Máximo incremento realista: 2.5kg/semana para principiantes, menos para avanzados
+  const maxWeeklyIncrease = Math.max(0, Math.min(2.5, strengthTrend));
+
+  let nextWeekWeight = Math.max(
+    avgRecentWorking, // Nunca menos que el promedio actual
+    avgRecentWorking + maxWeeklyIncrease
+  );
+
+  // Validación adicional: no más del 105% del peso máximo reciente
+  nextWeekWeight = Math.min(nextWeekWeight, maxRecentWorking * 1.05);
+
+  // Validación final: el peso no debe diferir más del 15% del promedio reciente
+  const maxReasonableChange = avgRecentWorking * 0.15;
+  nextWeekWeight = Math.max(
+    avgRecentWorking - maxReasonableChange,
+    Math.min(avgRecentWorking + maxReasonableChange, nextWeekWeight)
+  );
+
+  // Predicción de volumen con validación más estricta
+  const nextWeekVolume = Math.max(
+    avgVolume * 0.9, // Mínimo 90% del volumen promedio
+    Math.min(
+      avgVolume * 1.15, // Máximo 115% del volumen promedio
+      avgVolume + Math.max(-20, Math.min(20, volumeTrend)) // Limitar cambio a ±20kg
+    )
+  );
+
+  return {
+    nextWeekWeight: Math.round(nextWeekWeight * 100) / 100,
+    nextWeekVolume: Math.round(nextWeekVolume)
+  };
+};
+
+/**
+ * Calcula la predicción de récord personal
+ * CORREGIDO: Mejores límites, redondeo y validación
+ */
+const calculatePRPrediction = (
+  current1RMMax: number,
+  strengthTrend: number,
+  confidenceLevel: number
+): { weight: number; confidence: number; timeToNextPR: number } => {
+  // Validar entrada
+  if (current1RMMax <= 0) {
+    return { weight: 0, confidence: 0, timeToNextPR: 0 };
+  }
+
+  // Calcular PR predicho con límites más realistas
+  const minImprovement = current1RMMax * PROGRESS_CONSTANTS.PR_THRESHOLD_PERCENT; // 2.5%
+  const trendBasedImprovement = Math.max(0, strengthTrend * 4); // Solo tendencias positivas
+
+  // Limitar mejora máxima a 15% del 1RM actual (realista)
+  const maxRealisticImprovement = current1RMMax * 0.15;
+
+  const predictedPRWeight = current1RMMax + Math.min(
+    Math.max(minImprovement, trendBasedImprovement),
+    maxRealisticImprovement
+  );
+
+  // Tiempo hasta PR más realista
+  const prThreshold = current1RMMax + minImprovement;
+  let timeToNextPR = 0;
+
+  if (strengthTrend > 0) {
+    timeToNextPR = Math.ceil((prThreshold - current1RMMax) / strengthTrend);
+    // Limitar a rango realista: entre 1 y 12 semanas
+    timeToNextPR = Math.max(1, Math.min(12, timeToNextPR));
+  } else {
+    // Sin tendencia positiva = tiempo indefinido, pero conservador
+    timeToNextPR = 8;
+  }
+
+  // Confianza específica para PR con lógica mejorada
+  let prConfidence = confidenceLevel;
+
+  // Ajustar por calidad de tendencia
+  if (strengthTrend > 1) {
+    prConfidence += 15; // Tendencia fuerte = mayor confianza
+  } else if (strengthTrend > 0.5) {
+    prConfidence += 10; // Tendencia moderada
+  } else if (strengthTrend > 0) {
+    prConfidence += 5; // Tendencia leve
+  } else {
+    prConfidence -= 20; // Sin progreso = menor confianza
+  }
+
+  // Ajustar por tiempo hasta PR
+  if (timeToNextPR <= 2) {
+    prConfidence += 5; // PR cercano = más confianza
+  } else if (timeToNextPR >= 10) {
+    prConfidence -= 10; // PR lejano = menos confianza
+  }
+
+  // Ajustar por tamaño de la mejora predicha
+  const improvementPercent = ((predictedPRWeight - current1RMMax) / current1RMMax) * 100;
+  if (improvementPercent > 10) {
+    prConfidence -= 15; // Mejoras muy grandes = menos confianza
+  }
+
+  return {
+    weight: Math.round(predictedPRWeight * 100) / 100, // Redondeo a 2 decimales
+    confidence: Math.max(5, Math.min(95, Math.round(prConfidence))),
+    timeToNextPR: timeToNextPR
+  };
+};
+
+/**
+ * Calcula el riesgo de meseta
+ */
+const calculatePlateauRisk = (
+  experienceLevel: 'beginner' | 'intermediate' | 'advanced',
+  validRecords: WorkoutRecord[],
+  overallProgress: number,
+  strengthTrend: number
+): number => {
   let plateauRisk = 50;
 
   if (experienceLevel === 'beginner') {
@@ -1186,9 +1427,19 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
   if (strengthTrend > 0) plateauRisk -= Math.min(20, strengthTrend * 5);
   else if (strengthTrend < 0) plateauRisk += Math.min(20, Math.abs(strengthTrend) * 5);
 
-  plateauRisk = Math.max(10, Math.min(90, plateauRisk));
+  return Math.max(10, Math.min(90, plateauRisk));
+};
 
-  // Recomendaciones adaptativas
+/**
+ * Genera recomendaciones adaptativas basadas en el análisis
+ */
+const generateRecommendations = (
+  experienceLevel: 'beginner' | 'intermediate' | 'advanced',
+  validRecords: WorkoutRecord[],
+  trendAnalysis: 'mejorando' | 'estable' | 'empeorando' | 'insuficiente',
+  weeklyDataLength: number,
+  plateauRisk: number
+): string[] => {
   const recommendations: string[] = [];
 
   if (experienceLevel === 'beginner') {
@@ -1224,27 +1475,289 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
     recommendations.push('Alto riesgo de meseta - varía ejercicios o metodología');
   }
 
-  // Aplicar límites finales y crear resultado
-  const result = {
-    nextWeekVolume: Math.round(nextWeekVolume),
-    nextWeekWeight: Math.round(nextWeekWeight * 100) / 100,
-    monthlyGrowthRate: Math.max(-8, Math.min(8, Math.round(monthlyGrowthRate * 100) / 100)),
-    predictedPR: {
-      weight: Math.round(predictedPRWeight * 100) / 100,
-      confidence: Math.max(0, Math.min(100, Math.round(prConfidence)))
-    },
+  return recommendations.slice(0, 5);
+};
+
+/**
+ * Valida y corrige predicciones para asegurar coherencia
+ */
+const validateAndCorrectPredictions = (
+  prediction: ProgressPrediction,
+  basicMetrics: ReturnType<typeof calculateBasicMetrics>,
+  validRecords: WorkoutRecord[]
+): ProgressPrediction => {
+  const correctedPrediction = { ...prediction };
+
+  // 1. CORREGIDO: Validar peso de trabajo próxima semana vs datos reales
+  // El peso próxima semana debe ser peso de trabajo realista, no % del 1RM
+  const recentWorkingWeights = validRecords.slice(-5).map(r => r.weight);
+  const avgRecentWorking = recentWorkingWeights.reduce((sum, w) => sum + w, 0) / recentWorkingWeights.length;
+  const maxRecentWorking = Math.max(...recentWorkingWeights);
+
+  // Límites realistas para peso de trabajo: entre 95% y 105% del peso actual
+  const minReasonableNextWeekWeight = avgRecentWorking * 0.95;
+  const maxReasonableNextWeekWeight = Math.min(maxRecentWorking * 1.05, avgRecentWorking * 1.10);
+
+  if (correctedPrediction.nextWeekWeight < minReasonableNextWeekWeight) {
+    correctedPrediction.nextWeekWeight = Math.round(minReasonableNextWeekWeight * 100) / 100;
+  } else if (correctedPrediction.nextWeekWeight > maxReasonableNextWeekWeight) {
+    correctedPrediction.nextWeekWeight = Math.round(maxReasonableNextWeekWeight * 100) / 100;
+  }
+
+  // 2. Validar que el PR no sea excesivamente mayor al 1RM actual
+  const current1RM = basicMetrics.current1RMMax;
+  const maxReasonablePRIncrease = current1RM * 1.15; // Máximo 15% de mejora
+  if (correctedPrediction.predictedPR.weight > maxReasonablePRIncrease) {
+    correctedPrediction.predictedPR.weight = Math.round(maxReasonablePRIncrease * 100) / 100;
+    // Reducir confianza si tuvimos que corregir
+    correctedPrediction.predictedPR.confidence = Math.max(5, correctedPrediction.predictedPR.confidence - 20);
+  }
+
+  // 3. Validar volumen próxima semana vs tendencia
+  const avgRecentVolume = validRecords.slice(-5).reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / Math.min(5, validRecords.length);
+  const minReasonableNextWeekVolume = avgRecentVolume * 0.85; // Máximo 15% de caída
+  const maxReasonableNextWeekVolume = avgRecentVolume * 1.15; // Máximo 15% de aumento
+
+  if (correctedPrediction.nextWeekVolume < minReasonableNextWeekVolume) {
+    correctedPrediction.nextWeekVolume = Math.round(minReasonableNextWeekVolume);
+  } else if (correctedPrediction.nextWeekVolume > maxReasonableNextWeekVolume) {
+    correctedPrediction.nextWeekVolume = Math.round(maxReasonableNextWeekVolume);
+  }
+
+  // CORRECCIÓN: Tendencias de volumen más estrictas y realistas
+  if (Math.abs(correctedPrediction.volumeTrend) > 20) {
+    // Tendencias de volumen realistas: máximo ±20kg/semana
+    correctedPrediction.volumeTrend = Math.max(-20, Math.min(20, correctedPrediction.volumeTrend));
+    // Recalcular volumen próxima semana basado en tendencia corregida
+    correctedPrediction.nextWeekVolume = Math.round(avgRecentVolume + correctedPrediction.volumeTrend);
+  }
+
+  // 4. Validar tendencias vs crecimiento mensual
+  const impliedMonthlyFromStrength = correctedPrediction.strengthTrend * 4.345; // Semanas por mes exactas
+  if (Math.abs(correctedPrediction.monthlyGrowthRate - impliedMonthlyFromStrength) > 2) {
+    // Si hay discrepancia > 2kg, usar el valor más conservador
+    correctedPrediction.monthlyGrowthRate = Math.sign(correctedPrediction.monthlyGrowthRate) *
+      Math.min(Math.abs(correctedPrediction.monthlyGrowthRate), Math.abs(impliedMonthlyFromStrength));
+  }
+
+  // 5. Ajustar confianza basado en las correcciones realizadas
+  let confidencePenalty = 0;
+  const corrections: string[] = [];
+
+  if (prediction.nextWeekWeight !== correctedPrediction.nextWeekWeight) {
+    confidencePenalty += 10;
+    corrections.push(`Peso próxima semana: ${prediction.nextWeekWeight}kg → ${correctedPrediction.nextWeekWeight}kg`);
+  }
+  if (prediction.predictedPR.weight !== correctedPrediction.predictedPR.weight) {
+    confidencePenalty += 15;
+    corrections.push(`PR predicho: ${prediction.predictedPR.weight}kg → ${correctedPrediction.predictedPR.weight}kg`);
+  }
+  if (prediction.nextWeekVolume !== correctedPrediction.nextWeekVolume) {
+    confidencePenalty += 5;
+    corrections.push(`Volumen próxima semana: ${prediction.nextWeekVolume}kg → ${correctedPrediction.nextWeekVolume}kg`);
+  }
+  if (Math.abs(correctedPrediction.volumeTrend - prediction.volumeTrend) > 1) {
+    corrections.push(`Tendencia volumen: ${prediction.volumeTrend}kg/sem → ${correctedPrediction.volumeTrend}kg/sem`);
+  }
+
+  // Solo en desarrollo - mostrar correcciones realizadas
+  if (corrections.length > 0 && process.env.NODE_ENV === 'development') {
+    console.warn(`[Predicciones] ${corrections.length} correcciones aplicadas:`, corrections);
+  }
+
+  if (confidencePenalty > 0) {
+    correctedPrediction.confidenceLevel = Math.max(5, correctedPrediction.confidenceLevel - confidencePenalty);
+    correctedPrediction.predictedPR.confidence = Math.max(5, correctedPrediction.predictedPR.confidence - confidencePenalty);
+  }
+
+  // 6. Validar tiempo hasta PR vs tendencia
+  if (correctedPrediction.strengthTrend > 0) {
+    const impliedTimeToNextPR = ((correctedPrediction.predictedPR.weight - current1RM) / correctedPrediction.strengthTrend);
+    if (Math.abs(correctedPrediction.timeToNextPR - impliedTimeToNextPR) > 4) {
+      correctedPrediction.timeToNextPR = Math.max(1, Math.min(12, Math.round(impliedTimeToNextPR)));
+    }
+  }
+
+  // 7. VALIDACIONES FINALES ESTRICTAS: Asegurar rangos absolutamente realistas
+
+  // Peso próxima semana: debe estar en rango razonable para cualquier usuario
+  correctedPrediction.nextWeekWeight = Math.max(10, Math.min(300, correctedPrediction.nextWeekWeight));
+
+  // Volumen próxima semana: debe estar en rango humano razonable
+  correctedPrediction.nextWeekVolume = Math.max(100, Math.min(50000, correctedPrediction.nextWeekVolume));
+
+  // PR predicho: no puede ser más de 2x el peso actual máximo
+  const maxReasonablePR = Math.max(...recentWorkingWeights) * 2;
+  correctedPrediction.predictedPR.weight = Math.min(correctedPrediction.predictedPR.weight, maxReasonablePR);
+
+  // Tendencias: rangos absolutamente máximos
+  correctedPrediction.strengthTrend = Math.max(-10, Math.min(10, correctedPrediction.strengthTrend));
+  correctedPrediction.volumeTrend = Math.max(-100, Math.min(100, correctedPrediction.volumeTrend));
+
+  // Crecimiento mensual: máximo realista
+  correctedPrediction.monthlyGrowthRate = Math.max(-10, Math.min(20, correctedPrediction.monthlyGrowthRate));
+
+  // Riesgo meseta: debe estar entre 0-100%
+  correctedPrediction.plateauRisk = Math.max(0, Math.min(100, correctedPrediction.plateauRisk));
+
+  // Confianza: debe estar entre 5-95%
+  correctedPrediction.confidenceLevel = Math.max(5, Math.min(95, correctedPrediction.confidenceLevel));
+  correctedPrediction.predictedPR.confidence = Math.max(5, Math.min(95, correctedPrediction.predictedPR.confidence));
+
+  // Tiempo hasta PR: entre 1-52 semanas
+  correctedPrediction.timeToNextPR = Math.max(1, Math.min(52, correctedPrediction.timeToNextPR));
+
+  return correctedPrediction;
+};
+
+/**
+ * Función principal refactorizada para predicciones de progreso
+ */
+export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction => {
+  // Validación inicial
+  if (records.length === 0) {
+    return {
+      nextWeekVolume: 0,
+      nextWeekWeight: 0,
+      monthlyGrowthRate: 0,
+      predictedPR: { weight: 0, confidence: 0 },
+      plateauRisk: 0,
+      trendAnalysis: 'insuficiente',
+      timeToNextPR: 0,
+      confidenceLevel: 0,
+      volumeTrend: 0,
+      strengthTrend: 0,
+      recommendations: ['Comienza registrando tus entrenamientos para obtener predicciones']
+    };
+  }
+
+  // Validar datos y obtener información básica
+  const validation = validateDataSufficiency(records);
+
+  if (validation.validRecords.length === 0) {
+    return {
+      nextWeekVolume: 0,
+      nextWeekWeight: 0,
+      monthlyGrowthRate: 0,
+      predictedPR: { weight: 0, confidence: 0 },
+      plateauRisk: 0,
+      trendAnalysis: 'insuficiente',
+      timeToNextPR: 0,
+      confidenceLevel: 0,
+      volumeTrend: 0,
+      strengthTrend: 0,
+      recommendations: ['Revisa la calidad de los datos registrados']
+    };
+  }
+
+  // Si no hay datos suficientes, usar valores conservadores
+  if (!validation.isValid) {
+    const basicMetrics = calculateBasicMetrics(validation.validRecords);
+
+    return {
+      nextWeekVolume: Math.round(basicMetrics.avgVolume * 1.02), // 2% conservador
+      nextWeekWeight: Math.round((basicMetrics.avgWeight * 1.01) * 100) / 100, // 1% conservador
+      monthlyGrowthRate: 2,
+      predictedPR: { weight: Math.round((basicMetrics.maxWeight * 1.05) * 100) / 100, confidence: 30 },
+      plateauRisk: 20,
+      trendAnalysis: 'insuficiente',
+      timeToNextPR: 8,
+      confidenceLevel: 25,
+      volumeTrend: Math.round(basicMetrics.avgVolume * 0.02),
+      strengthTrend: Math.round((basicMetrics.avgWeight * 0.01) * 100) / 100,
+      recommendations: [
+        'Continúa registrando entrenamientos para obtener predicciones más precisas',
+        'Mantén la consistencia en tu rutina durante al menos 2 semanas',
+        'Enfócate en progresión gradual: 2.5-5% de aumento semanal'
+      ]
+    };
+  }
+
+  // Calcular métricas básicas usando funciones auxiliares
+  const basicMetrics = calculateBasicMetrics(validation.validRecords);
+  const overallProgressData = calculateOverallProgress(validation.validRecords, validation.daysBetween);
+
+  // Calcular tendencias usando la función auxiliar
+  const trendsData = calculateTrends(
+    validation.validRecords,
+    validation.experienceLevel,
+    overallProgressData.overallProgress,
+    basicMetrics.avgVolume,
+    basicMetrics.avgWeight,
+    validation.daysBetween
+  );
+
+  // Determinar análisis de tendencia
+  const trendAnalysis = determineTrendAnalysis(
+    validation.validRecords,
+    trendsData.strengthTrend,
+    trendsData.volumeTrend,
+    basicMetrics.avgWeight,
+    basicMetrics.avgVolume
+  );
+
+  // Calcular nivel de confianza
+  const confidenceLevel = calculateConfidenceLevel(
+    validation.experienceLevel,
+    validation.validRecords,
+    trendsData.weeklyDataLength,
+    basicMetrics.avgWeight
+  );
+
+  // Calcular predicciones para próxima semana
+  const nextWeekPredictions = calculateNextWeekPredictions(
+    validation.validRecords,
+    trendsData.strengthTrend,
+    trendsData.volumeTrend,
+    basicMetrics.avgVolume,
+    basicMetrics.current1RMMax
+  );
+
+  // Calcular predicción de PR
+  const prPrediction = calculatePRPrediction(
+    basicMetrics.current1RMMax,
+    trendsData.strengthTrend,
+    confidenceLevel
+  );
+
+  // Calcular riesgo de meseta
+  const plateauRisk = calculatePlateauRisk(
+    validation.experienceLevel,
+    validation.validRecords,
+    overallProgressData.overallProgress,
+    trendsData.strengthTrend
+  );
+
+  // Generar recomendaciones
+  const recommendations = generateRecommendations(
+    validation.experienceLevel,
+    validation.validRecords,
+    trendAnalysis,
+    trendsData.weeklyDataLength,
+    plateauRisk
+  );
+
+  // Ensamblar resultado final con validación de rangos
+  const result: ProgressPrediction = {
+    nextWeekVolume: Math.round(nextWeekPredictions.nextWeekVolume),
+    nextWeekWeight: Math.round(nextWeekPredictions.nextWeekWeight * 100) / 100,
+    monthlyGrowthRate: Math.max(-PROGRESS_CONSTANTS.MAX_MONTHLY_GROWTH,
+      Math.min(PROGRESS_CONSTANTS.MAX_MONTHLY_GROWTH,
+        Math.round((trendsData.strengthTrend * TIME_CONSTANTS.WEEKS_PER_MONTH) * 100) / 100)),
+    predictedPR: prPrediction,
     plateauRisk: Math.round(plateauRisk),
     trendAnalysis,
-    timeToNextPR: Math.max(0, Math.min(12, timeToNextPR)),
-    confidenceLevel: Math.max(0, Math.min(100, Math.round(confidenceLevel))),
-    volumeTrend: Math.round(volumeTrend),
-    strengthTrend: Math.round(strengthTrend * 100) / 100,
-    recommendations: recommendations.slice(0, 5)
+    timeToNextPR: prPrediction.timeToNextPR,
+    confidenceLevel: Math.round(confidenceLevel),
+    volumeTrend: Math.round(trendsData.volumeTrend),
+    strengthTrend: Math.round(trendsData.strengthTrend * 100) / 100,
+    recommendations
   };
 
-  // Valores finales calculados
+  // Validación final de coherencia
+  const validatedResult = validateAndCorrectPredictions(result, basicMetrics, validation.validRecords);
 
-  return result;
+  return validatedResult;
 };
 
 // Funciones auxiliares para la función unificada
@@ -1253,9 +1766,9 @@ const groupRecordsByWeek = (records: WorkoutRecord[]): { volume: number; weight:
 
   records.forEach(record => {
     const date = new Date(record.date);
-    const monday = new Date(date);
-    monday.setDate(date.getDate() - date.getDay() + 1);
-    const weekKey = monday.toISOString().split('T')[0];
+    // CORRECCIÓN: Usar date-fns con locale español (consistente con el resto del código)
+    const weekStart = startOfWeek(date, { locale: es });
+    const weekKey = weekStart.toISOString().split('T')[0];
 
     if (!weekGroups.has(weekKey)) {
       weekGroups.set(weekKey, []);
@@ -1269,7 +1782,7 @@ const groupRecordsByWeek = (records: WorkoutRecord[]): { volume: number; weight:
     .map(([weekKey, weekRecords]) => {
       const volume = weekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
       const avg1RM = weekRecords.reduce((sum, r) => {
-        const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+        const oneRM = calculateOptimal1RM(r.weight, r.reps);
         return sum + oneRM;
       }, 0) / weekRecords.length;
 
@@ -1411,7 +1924,6 @@ export const calculateAdvancedAnalysis = (records: WorkoutRecord[]): AdvancedAna
   const trainingDensity = calculateTrainingDensity(records);
   const fatigueAnalysis = analyzeFatigue(records);
   const intensityMetrics = analyzeIntensityMetrics(records);
-  const predictionAccuracy = calculatePredictionAccuracy(records);
 
   // Indicadores de rendimiento pico mejorados
   const peakPerformanceIndicators = generateEnhancedPerformanceIndicators(records);
@@ -1467,7 +1979,6 @@ export const calculateAdvancedAnalysis = (records: WorkoutRecord[]): AdvancedAna
     periodComparisons: comparePeriods(records),
     progressPrediction: prediction,
     intensityMetrics,
-    predictionAccuracy,
     peakPerformanceIndicators,
     optimizationSuggestions: Array.from(new Set(optimizationSuggestions)).slice(0, 6) // Eliminar duplicados y limitar a 6
   };
@@ -1630,15 +2141,7 @@ const analyzeDailyTrainingPatterns = (records: WorkoutRecord[]) => {
   return dailyPatterns;
 };
 
-const determineExperienceLevel = (records: WorkoutRecord[]): 'beginner' | 'intermediate' | 'advanced' => {
-  const totalWeeks = Math.max(1, Math.floor(records.length / 10));
-  const maxWeight = Math.max(...records.map(r => r.weight));
-  const exerciseVariety = new Set(records.map(r => r.exercise)).size;
-
-  if (totalWeeks < 12 || maxWeight < 40 || exerciseVariety < 5) return 'beginner';
-  if (totalWeeks < 52 || maxWeight < 80 || exerciseVariety < 12) return 'intermediate';
-  return 'advanced';
-};
+// Función eliminada - ahora se usa la nueva función exportada determineExperienceLevel
 
 const calculateProgressionRate = (records: WorkoutRecord[]): number => {
   if (records.length < 4) return 0;
@@ -2299,6 +2802,93 @@ export const validatePredictionCoherence = (records: WorkoutRecord[], prediction
 };
 
 /**
+ * Función de testing mejorada para verificar la coherencia de predicciones
+ * Detecta y reporta problemas específicos como los mencionados por el usuario
+ */
+export const testPredictionCoherence = (records: WorkoutRecord[]): {
+  valid: boolean;
+  issues: string[];
+  corrections: string[];
+  originalPrediction: ProgressPrediction;
+  correctedPrediction: ProgressPrediction;
+} => {
+  if (records.length === 0) {
+    return {
+      valid: true,
+      issues: [],
+      corrections: [],
+      originalPrediction: predictProgress(records),
+      correctedPrediction: predictProgress(records)
+    };
+  }
+
+  const originalPrediction = predictProgress(records);
+  const basicMetrics = calculateBasicMetrics(getValidSortedRecords(records));
+  const issues: string[] = [];
+  const corrections: string[] = [];
+
+  // 1. Verificar inconsistencia peso próxima semana vs PR
+  const weightToPRRatio = originalPrediction.nextWeekWeight / originalPrediction.predictedPR.weight;
+  if (weightToPRRatio > 0.85) {
+    issues.push(`Peso próxima semana muy alto vs PR: ${originalPrediction.nextWeekWeight}kg (${(weightToPRRatio * 100).toFixed(1)}% del PR)`);
+    corrections.push('Peso próxima semana ajustado al 85% del PR máximo');
+  } else if (weightToPRRatio < 0.4) {
+    issues.push(`Peso próxima semana muy bajo vs PR: ${originalPrediction.nextWeekWeight}kg (${(weightToPRRatio * 100).toFixed(1)}% del PR)`);
+    corrections.push('Posible inconsistencia entre métricas de trabajo y 1RM');
+  }
+
+  // 2. Verificar decimales excesivos
+  const prDecimals = (originalPrediction.predictedPR.weight.toString().split('.')[1] || '').length;
+  if (prDecimals > 2) {
+    issues.push(`PR con decimales excesivos: ${originalPrediction.predictedPR.weight}kg (${prDecimals} decimales)`);
+    corrections.push('Redondeo a 2 decimales aplicado');
+  }
+
+  // 3. Verificar tendencias irreales (límites más estrictos)
+  if (Math.abs(originalPrediction.volumeTrend) >= 50) {
+    issues.push(`Tendencia de volumen irreal: ${originalPrediction.volumeTrend}kg/semana (debe estar entre ±50kg)`);
+    corrections.push('Tendencia de volumen limitada a rangos realistas');
+  }
+
+  if (Math.abs(originalPrediction.strengthTrend) >= 1.5) {
+    issues.push(`Tendencia de fuerza irreal: ${originalPrediction.strengthTrend}kg/semana (debe estar entre ±1.5kg)`);
+    corrections.push('Tendencia de fuerza limitada a ±1.5kg/semana');
+  }
+
+  // 4. Verificar mejora de PR vs 1RM actual
+  const current1RM = basicMetrics.current1RMMax;
+  const prImprovement = originalPrediction.predictedPR.weight - current1RM;
+  const improvementPercent = (prImprovement / current1RM) * 100;
+
+  if (improvementPercent > 15) {
+    issues.push(`Mejora de PR excesiva: +${prImprovement.toFixed(1)}kg (${improvementPercent.toFixed(1)}%)`);
+    corrections.push('Mejora de PR limitada al 15% del 1RM actual');
+  }
+
+  // 5. Verificar coherencia tiempo hasta PR
+  if (originalPrediction.strengthTrend > 0) {
+    const impliedWeeks = prImprovement / originalPrediction.strengthTrend;
+    const timeDifference = Math.abs(originalPrediction.timeToNextPR - impliedWeeks);
+
+    if (timeDifference > 4) {
+      issues.push(`Tiempo hasta PR incoherente: ${originalPrediction.timeToNextPR} semanas vs ${impliedWeeks.toFixed(1)} semanas implícitas`);
+      corrections.push('Tiempo hasta PR recalculado basado en tendencia');
+    }
+  }
+
+  // Generar predicción corregida para comparación
+  const correctedPrediction = predictProgress(records); // Ya incluye todas las correcciones
+
+  return {
+    valid: issues.length === 0,
+    issues,
+    corrections,
+    originalPrediction,
+    correctedPrediction
+  };
+};
+
+/**
  * Función de testing para verificar que las predicciones están en rangos realistas
  * Solo para desarrollo y debug - no afecta la producción
  */
@@ -2322,7 +2912,7 @@ export const testPredictionRanges = (records: WorkoutRecord[]): { valid: boolean
   }
 
   // Verificar PR predicho
-  const current1RM = Math.max(...records.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30)));
+  const current1RM = Math.max(...records.map(r => calculateOptimal1RM(r.weight, r.reps)));
   const prIncrease = prediction.predictedPR.weight - current1RM;
   if (prIncrease > current1RM * 0.15) {
     issues.push(`Mejora de PR irreal: +${prIncrease.toFixed(1)}kg (máximo: 15% del actual)`);
