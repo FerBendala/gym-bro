@@ -1,5 +1,4 @@
-import { endOfWeek, startOfWeek, subWeeks } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { subWeeks } from 'date-fns';
 import {
   Activity,
   AlertTriangle,
@@ -27,24 +26,29 @@ interface PredictionsTabProps {
   records: WorkoutRecord[];
 }
 
-// Interfaz para validación de predicciones
-interface PredictionValidation {
+// Interfaz para validación de tendencias y patrones
+interface TrendValidation {
   periodName: string;
-  predictionDate: Date;
-  actualData: {
-    maxWeight: number;
-    totalVolume: number;
-    averageWeight: number;
+  baselineDate: Date;
+  validationDate: Date;
+  baseline: {
+    avgWeight: number;
+    avgVolume: number;
+    trend: 'mejorando' | 'estable' | 'empeorando' | 'insuficiente';
+    strengthTrend: number;
+    volumeTrend: number;
+  };
+  actual: {
+    avgWeight: number;
+    avgVolume: number;
+    actualStrengthChange: number;
+    actualVolumeChange: number;
     workouts: number;
   };
-  predictions: {
-    predictedWeight: number;
-    predictedVolume: number;
-    confidence: number;
-  };
-  accuracy: {
-    weightAccuracy: number; // % de precisión
-    volumeAccuracy: number; // % de precisión
+  validation: {
+    trendAccuracy: number; // % de precisión de la tendencia
+    strengthAccuracy: number; // % de precisión de cambio de fuerza
+    volumeAccuracy: number; // % de precisión de cambio de volumen
     overallAccuracy: number; // % promedio
   };
   status: 'accurate' | 'moderate' | 'inaccurate';
@@ -61,79 +65,113 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
     return value;
   };
 
-  // Calcular validación de predicciones históricas
-  const predictionValidations = useMemo((): PredictionValidation[] => {
-    if (records.length < 10) return [];
+  // Calcular validación de tendencias históricas usando funciones existentes correctas
+  const trendValidations = useMemo((): TrendValidation[] => {
+    if (records.length < 15) return []; // Necesitamos más datos para validación seria
 
-    const validations: PredictionValidation[] = [];
+    const validations: TrendValidation[] = [];
     const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // Validar predicciones para diferentes períodos pasados
+    // Períodos de validación más realistas
     const validationPeriods = [
-      { weeks: 1, name: 'Semana Pasada' },
-      { weeks: 2, name: 'Hace 2 Semanas' },
-      { weeks: 4, name: 'Hace 1 Mes' },
-      { weeks: 8, name: 'Hace 2 Meses' }
+      { baseWeeks: 6, validationWeeks: 2, name: 'Tendencia Última Quincena' },
+      { baseWeeks: 8, validationWeeks: 4, name: 'Tendencia Último Mes' },
+      { baseWeeks: 12, validationWeeks: 6, name: 'Tendencia Últimas 6 Semanas' }
     ];
 
-    validationPeriods.forEach(({ weeks, name }) => {
-      const predictionDate = subWeeks(new Date(), weeks);
-      const targetWeekStart = startOfWeek(predictionDate, { locale: es });
-      const targetWeekEnd = endOfWeek(predictionDate, { locale: es });
+    validationPeriods.forEach(({ baseWeeks, validationWeeks, name }) => {
+      // Fecha límite para el período base
+      const baselineEndDate = subWeeks(new Date(), validationWeeks);
+      const baselineStartDate = subWeeks(baselineEndDate, baseWeeks);
 
-      // Obtener registros hasta la fecha de predicción (para simular la predicción)
-      const recordsUntilPrediction = sortedRecords.filter(r =>
-        new Date(r.date) < predictionDate
-      );
+      // Período de validación (las últimas semanas)
+      const validationStartDate = baselineEndDate;
+      const validationEndDate = new Date();
 
-      // Obtener registros del período objetivo (los datos reales)
-      const actualPeriodRecords = sortedRecords.filter(r => {
+      // Obtener registros del período base
+      const baselineRecords = sortedRecords.filter(r => {
         const recordDate = new Date(r.date);
-        return recordDate >= targetWeekStart && recordDate <= targetWeekEnd;
+        return recordDate >= baselineStartDate && recordDate < baselineEndDate;
       });
 
-      if (recordsUntilPrediction.length >= 5 && actualPeriodRecords.length > 0) {
-        // Simular predicción con datos disponibles hasta esa fecha
-        const predictionAnalysis = calculateAdvancedAnalysis(recordsUntilPrediction);
+      // Obtener registros del período de validación
+      const validationRecords = sortedRecords.filter(r => {
+        const recordDate = new Date(r.date);
+        return recordDate >= validationStartDate && recordDate <= validationEndDate;
+      });
 
-        // Datos reales del período
-        const actualMaxWeight = Math.max(...actualPeriodRecords.map(r => r.weight));
-        const actualTotalVolume = actualPeriodRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-        const actualAverageWeight = actualPeriodRecords.reduce((sum, r) => sum + r.weight, 0) / actualPeriodRecords.length;
-        const actualWorkouts = actualPeriodRecords.length;
+      if (baselineRecords.length >= 5 && validationRecords.length >= 3) {
+        // Calcular métricas del período base usando funciones existentes
+        const baselineAnalysis = calculateAdvancedAnalysis(baselineRecords);
 
-        // Predicciones que se habrían hecho
-        const predictedWeight = predictionAnalysis.progressPrediction.nextWeekWeight;
-        const predictedVolume = predictionAnalysis.progressPrediction.nextWeekVolume;
-        const confidence = predictionAnalysis.progressPrediction.confidenceLevel;
+        // Calcular métricas reales del período base
+        const baseline1RM = baselineRecords.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30));
+        const baselineAvgWeight = baseline1RM.reduce((sum, w) => sum + w, 0) / baseline1RM.length;
+        const baselineAvgVolume = baselineRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / baselineRecords.length;
 
-        // Calcular precisión
-        const weightAccuracy = Math.max(0, 100 - Math.abs(((predictedWeight - actualMaxWeight) / Math.max(actualMaxWeight, predictedWeight)) * 100));
-        const volumeAccuracy = Math.max(0, 100 - Math.abs(((predictedVolume - actualTotalVolume) / Math.max(actualTotalVolume, predictedVolume)) * 100));
-        const overallAccuracy = (weightAccuracy + volumeAccuracy) / 2;
+        // Calcular métricas reales del período de validación  
+        const validation1RM = validationRecords.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30));
+        const validationAvgWeight = validation1RM.reduce((sum, w) => sum + w, 0) / validation1RM.length;
+        const validationAvgVolume = validationRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / validationRecords.length;
+
+        // Cambios reales observados
+        const actualStrengthChange = validationAvgWeight - baselineAvgWeight;
+        const actualVolumeChange = validationAvgVolume - baselineAvgVolume;
+
+        // Tendencias predichas del análisis base
+        const predictedStrengthTrend = baselineAnalysis.progressPrediction.strengthTrend * validationWeeks;
+        const predictedVolumeTrend = baselineAnalysis.progressPrediction.volumeTrend * validationWeeks;
+        const predictedTrend = baselineAnalysis.progressPrediction.trendAnalysis;
+
+        // Calcular precisión de las tendencias
+        const strengthAccuracy = predictedStrengthTrend !== 0 ?
+          Math.max(0, 100 - Math.abs(((actualStrengthChange - predictedStrengthTrend) / Math.max(Math.abs(actualStrengthChange), Math.abs(predictedStrengthTrend))) * 100)) :
+          (Math.abs(actualStrengthChange) < 1 ? 95 : 50); // Si no se predijo cambio y no hubo cambio significativo, alta precisión
+
+        const volumeAccuracy = predictedVolumeTrend !== 0 ?
+          Math.max(0, 100 - Math.abs(((actualVolumeChange - predictedVolumeTrend) / Math.max(Math.abs(actualVolumeChange), Math.abs(predictedVolumeTrend))) * 100)) :
+          (Math.abs(actualVolumeChange) < 50 ? 95 : 50);
+
+        // Validar si la tendencia general fue correcta
+        let actualTrendPattern: 'mejorando' | 'estable' | 'empeorando';
+        const overallChange = (actualStrengthChange + (actualVolumeChange / 100)) / 2; // Normalizar volumen
+        if (overallChange > 0.5) actualTrendPattern = 'mejorando';
+        else if (overallChange < -0.5) actualTrendPattern = 'empeorando';
+        else actualTrendPattern = 'estable';
+
+        const trendAccuracy = predictedTrend === actualTrendPattern ? 90 :
+          (predictedTrend === 'estable' && Math.abs(overallChange) < 1) ? 75 :
+            (predictedTrend !== 'insuficiente') ? 40 : 20;
+
+        const overallAccuracy = (strengthAccuracy + volumeAccuracy + trendAccuracy) / 3;
 
         // Determinar estado
         let status: 'accurate' | 'moderate' | 'inaccurate';
-        if (overallAccuracy >= 80) status = 'accurate';
-        else if (overallAccuracy >= 60) status = 'moderate';
+        if (overallAccuracy >= 75) status = 'accurate';
+        else if (overallAccuracy >= 55) status = 'moderate';
         else status = 'inaccurate';
 
         validations.push({
           periodName: name,
-          predictionDate,
-          actualData: {
-            maxWeight: actualMaxWeight,
-            totalVolume: actualTotalVolume,
-            averageWeight: actualAverageWeight,
-            workouts: actualWorkouts
+          baselineDate: baselineEndDate,
+          validationDate: validationEndDate,
+          baseline: {
+            avgWeight: Math.round(baselineAvgWeight * 100) / 100,
+            avgVolume: Math.round(baselineAvgVolume),
+            trend: predictedTrend,
+            strengthTrend: Math.round(baselineAnalysis.progressPrediction.strengthTrend * 100) / 100,
+            volumeTrend: Math.round(baselineAnalysis.progressPrediction.volumeTrend)
           },
-          predictions: {
-            predictedWeight,
-            predictedVolume,
-            confidence
+          actual: {
+            avgWeight: Math.round(validationAvgWeight * 100) / 100,
+            avgVolume: Math.round(validationAvgVolume),
+            actualStrengthChange: Math.round(actualStrengthChange * 100) / 100,
+            actualVolumeChange: Math.round(actualVolumeChange),
+            workouts: validationRecords.length
           },
-          accuracy: {
-            weightAccuracy: Math.round(weightAccuracy),
+          validation: {
+            trendAccuracy: Math.round(trendAccuracy),
+            strengthAccuracy: Math.round(strengthAccuracy),
             volumeAccuracy: Math.round(volumeAccuracy),
             overallAccuracy: Math.round(overallAccuracy)
           },
@@ -142,44 +180,44 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
       }
     });
 
-    return validations.sort((a, b) => a.predictionDate.getTime() - b.predictionDate.getTime());
+    return validations.sort((a, b) => b.baselineDate.getTime() - a.baselineDate.getTime());
   }, [records]);
 
-  // Calcular estadísticas generales de precisión
-  const overallPredictionStats = useMemo(() => {
-    if (predictionValidations.length === 0) {
+  // Calcular estadísticas generales de precisión de tendencias
+  const overallTrendStats = useMemo(() => {
+    if (trendValidations.length === 0) {
       return {
         averageAccuracy: 0,
         accurateCount: 0,
-        totalPredictions: 0,
+        totalValidations: 0,
         bestAccuracy: 0,
         worstAccuracy: 0,
         modelReliability: 'insuficiente' as const
       };
     }
 
-    const accuracies = predictionValidations.map(v => v.accuracy.overallAccuracy);
+    const accuracies = trendValidations.map(v => v.validation.overallAccuracy);
     const averageAccuracy = accuracies.reduce((sum, acc) => sum + acc, 0) / accuracies.length;
-    const accurateCount = predictionValidations.filter(v => v.status === 'accurate').length;
+    const accurateCount = trendValidations.filter(v => v.status === 'accurate').length;
     const bestAccuracy = Math.max(...accuracies);
     const worstAccuracy = Math.min(...accuracies);
 
     let modelReliability: 'excelente' | 'buena' | 'moderada' | 'baja' | 'insuficiente';
-    if (averageAccuracy >= 85) modelReliability = 'excelente';
-    else if (averageAccuracy >= 75) modelReliability = 'buena';
-    else if (averageAccuracy >= 65) modelReliability = 'moderada';
-    else if (averageAccuracy >= 50) modelReliability = 'baja';
+    if (averageAccuracy >= 80) modelReliability = 'excelente';
+    else if (averageAccuracy >= 70) modelReliability = 'buena';
+    else if (averageAccuracy >= 60) modelReliability = 'moderada';
+    else if (averageAccuracy >= 45) modelReliability = 'baja';
     else modelReliability = 'insuficiente';
 
     return {
       averageAccuracy: Math.round(averageAccuracy),
       accurateCount,
-      totalPredictions: predictionValidations.length,
+      totalValidations: trendValidations.length,
       bestAccuracy: Math.round(bestAccuracy),
       worstAccuracy: Math.round(worstAccuracy),
       modelReliability
     };
-  }, [predictionValidations]);
+  }, [trendValidations]);
 
   if (records.length === 0) {
     return (
@@ -596,22 +634,22 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
         <CardHeader>
           <h3 className="text-lg font-semibold text-white flex items-center">
             <BarChart3 className="w-5 h-5 mr-2" />
-            Precisión de Predicciones
+            Validación de Tendencias
             <InfoTooltip
-              content="Análisis de qué tan precisas han sido las predicciones anteriores comparándolas con los resultados reales."
+              content="Análisis de qué tan precisas han sido las tendencias y patrones identificados comparándolos con el progreso real observado."
               position="top"
               className="ml-2"
             />
           </h3>
         </CardHeader>
         <CardContent>
-          {predictionValidations.length === 0 ? (
+          {trendValidations.length === 0 ? (
             <div className="text-center py-8">
               <div className="p-3 bg-gray-800 rounded-full w-12 h-12 mx-auto mb-3 flex items-center justify-center">
                 <Calendar className="w-6 h-6 text-gray-400" />
               </div>
               <p className="text-gray-400 text-sm">
-                Necesitas más historial de entrenamientos para validar la precisión de las predicciones
+                Necesitas más historial de entrenamientos para validar la precisión de las tendencias
               </p>
             </div>
           ) : (
@@ -620,76 +658,76 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <StatCard
                   title="Precisión Promedio"
-                  value={`${overallPredictionStats.averageAccuracy}%`}
+                  value={`${overallTrendStats.averageAccuracy}%`}
                   icon={Target}
-                  variant={overallPredictionStats.averageAccuracy >= 75 ? 'success' :
-                    overallPredictionStats.averageAccuracy >= 60 ? 'warning' : 'danger'}
-                  tooltip="Precisión promedio de todas las predicciones validadas hasta ahora."
+                  variant={overallTrendStats.averageAccuracy >= 70 ? 'success' :
+                    overallTrendStats.averageAccuracy >= 55 ? 'warning' : 'danger'}
+                  tooltip="Precisión promedio de las validaciones de tendencias realizadas hasta ahora."
                   tooltipPosition="top"
                 />
                 <StatCard
-                  title="Predicciones Precisas"
-                  value={`${overallPredictionStats.accurateCount}/${overallPredictionStats.totalPredictions}`}
+                  title="Tendencias Precisas"
+                  value={`${overallTrendStats.accurateCount}/${overallTrendStats.totalValidations}`}
                   icon={CheckCircle}
-                  variant={overallPredictionStats.accurateCount >= overallPredictionStats.totalPredictions * 0.75 ? 'success' :
-                    overallPredictionStats.accurateCount >= overallPredictionStats.totalPredictions * 0.5 ? 'warning' : 'danger'}
-                  tooltip="Número de predicciones con >80% de precisión vs total de predicciones."
+                  variant={overallTrendStats.accurateCount >= overallTrendStats.totalValidations * 0.7 ? 'success' :
+                    overallTrendStats.accurateCount >= overallTrendStats.totalValidations * 0.5 ? 'warning' : 'danger'}
+                  tooltip="Número de tendencias con >75% de precisión vs total de validaciones."
                   tooltipPosition="top"
                 />
                 <StatCard
-                  title="Mejor Predicción"
-                  value={`${overallPredictionStats.bestAccuracy}%`}
+                  title="Mejor Validación"
+                  value={`${overallTrendStats.bestAccuracy}%`}
                   icon={Trophy}
                   variant="success"
-                  tooltip="La predicción más precisa registrada hasta ahora."
+                  tooltip="La validación de tendencia más precisa registrada hasta ahora."
                   tooltipPosition="top"
                 />
                 <StatCard
-                  title="Confiabilidad del Modelo"
-                  value={overallPredictionStats.modelReliability.charAt(0).toUpperCase() + overallPredictionStats.modelReliability.slice(1)}
+                  title="Confiabilidad Modelo"
+                  value={overallTrendStats.modelReliability.charAt(0).toUpperCase() + overallTrendStats.modelReliability.slice(1)}
                   icon={Zap}
-                  variant={overallPredictionStats.modelReliability === 'excelente' || overallPredictionStats.modelReliability === 'buena' ? 'success' :
-                    overallPredictionStats.modelReliability === 'moderada' ? 'warning' : 'danger'}
-                  tooltip="Evaluación general de la confiabilidad del modelo predictivo basada en el historial."
+                  variant={overallTrendStats.modelReliability === 'excelente' || overallTrendStats.modelReliability === 'buena' ? 'success' :
+                    overallTrendStats.modelReliability === 'moderada' ? 'warning' : 'danger'}
+                  tooltip="Evaluación general de la confiabilidad del modelo para predecir tendencias."
                   tooltipPosition="top"
                 />
               </div>
 
-              {/* Historial de predicciones */}
+              {/* Historial de validaciones */}
               <div className="space-y-4">
                 <h4 className="text-md font-semibold text-white mb-4">Historial de Validaciones</h4>
-                {predictionValidations.map((validation, index) => (
+                {trendValidations.map((validation, index) => (
                   <div
                     key={index}
                     className={`relative p-4 rounded-xl bg-gradient-to-br border transition-all duration-200 ${validation.status === 'accurate'
-                        ? 'from-green-900/20 to-emerald-900/20 border-green-500/30 hover:border-green-400/50'
-                        : validation.status === 'moderate'
-                          ? 'from-yellow-900/20 to-orange-900/20 border-yellow-500/30 hover:border-yellow-400/50'
-                          : 'from-red-900/20 to-pink-900/20 border-red-500/30 hover:border-red-400/50'
+                      ? 'from-green-900/20 to-emerald-900/20 border-green-500/30 hover:border-green-400/50'
+                      : validation.status === 'moderate'
+                        ? 'from-yellow-900/20 to-orange-900/20 border-yellow-500/30 hover:border-yellow-400/50'
+                        : 'from-red-900/20 to-pink-900/20 border-red-500/30 hover:border-red-400/50'
                       }`}
                   >
                     <div className="flex items-start justify-between mb-4">
                       <div className="flex items-center gap-3">
                         <div className={`p-2 rounded-lg bg-gradient-to-br ${validation.status === 'accurate'
-                            ? 'from-green-500/80 to-emerald-500/80'
-                            : validation.status === 'moderate'
-                              ? 'from-yellow-500/80 to-orange-500/80'
-                              : 'from-red-500/80 to-pink-500/80'
+                          ? 'from-green-500/80 to-emerald-500/80'
+                          : validation.status === 'moderate'
+                            ? 'from-yellow-500/80 to-orange-500/80'
+                            : 'from-red-500/80 to-pink-500/80'
                           }`}>
                           <Calendar className="w-4 h-4 text-white" />
                         </div>
                         <div>
                           <h5 className="text-sm font-medium text-white">{validation.periodName}</h5>
                           <p className="text-xs text-gray-400">
-                            {validation.predictionDate.toLocaleDateString('es-ES')}
+                            Validado: {validation.validationDate.toLocaleDateString('es-ES')}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
                         <div className={`text-lg font-bold ${validation.status === 'accurate' ? 'text-green-400' :
-                            validation.status === 'moderate' ? 'text-yellow-400' : 'text-red-400'
+                          validation.status === 'moderate' ? 'text-yellow-400' : 'text-red-400'
                           }`}>
-                          {validation.accuracy.overallAccuracy}%
+                          {validation.validation.overallAccuracy}%
                         </div>
                         <div className="text-xs text-gray-400">precisión</div>
                       </div>
@@ -697,48 +735,51 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
 
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       <div className="bg-gray-800/50 rounded-lg p-3">
-                        <div className="text-xs text-gray-400 mb-1">Peso Predicho</div>
+                        <div className="text-xs text-gray-400 mb-1">Tendencia Fuerza</div>
                         <div className="text-sm font-semibold text-white">
-                          {validation.predictions.predictedWeight}kg
+                          {validation.baseline.trend === 'mejorando' ? '📈' : validation.baseline.trend === 'empeorando' ? '📉' : '➡️'} {validation.baseline.trend}
                         </div>
                         <div className="text-xs text-gray-500">
-                          vs {validation.actualData.maxWeight}kg real
+                          Cambio real: {validation.actual.actualStrengthChange > 0 ? '+' : ''}{validation.actual.actualStrengthChange}kg
                         </div>
                         <div className="text-xs font-medium text-blue-400">
-                          {validation.accuracy.weightAccuracy}% precisión
+                          {validation.validation.trendAccuracy}% precisión
                         </div>
                       </div>
 
                       <div className="bg-gray-800/50 rounded-lg p-3">
-                        <div className="text-xs text-gray-400 mb-1">Volumen Predicho</div>
+                        <div className="text-xs text-gray-400 mb-1">Progreso Peso</div>
                         <div className="text-sm font-semibold text-white">
-                          {formatNumber(validation.predictions.predictedVolume)}kg
+                          Esperado: {validation.baseline.strengthTrend > 0 ? '+' : ''}{validation.baseline.strengthTrend}kg
                         </div>
                         <div className="text-xs text-gray-500">
-                          vs {formatNumber(validation.actualData.totalVolume)}kg real
+                          Real: {validation.actual.actualStrengthChange > 0 ? '+' : ''}{validation.actual.actualStrengthChange}kg
                         </div>
                         <div className="text-xs font-medium text-green-400">
-                          {validation.accuracy.volumeAccuracy}% precisión
+                          {validation.validation.strengthAccuracy}% precisión
                         </div>
                       </div>
 
                       <div className="bg-gray-800/50 rounded-lg p-3">
-                        <div className="text-xs text-gray-400 mb-1">Confianza Modelo</div>
+                        <div className="text-xs text-gray-400 mb-1">Progreso Volumen</div>
                         <div className="text-sm font-semibold text-white">
-                          {validation.predictions.confidence}%
+                          Esperado: {validation.baseline.volumeTrend > 0 ? '+' : ''}{formatNumber(validation.baseline.volumeTrend)}kg
                         </div>
                         <div className="text-xs text-gray-500">
-                          confianza original
+                          Real: {validation.actual.actualVolumeChange > 0 ? '+' : ''}{formatNumber(validation.actual.actualVolumeChange)}kg
+                        </div>
+                        <div className="text-xs font-medium text-purple-400">
+                          {validation.validation.volumeAccuracy}% precisión
                         </div>
                       </div>
 
                       <div className="bg-gray-800/50 rounded-lg p-3">
                         <div className="text-xs text-gray-400 mb-1">Entrenamientos</div>
                         <div className="text-sm font-semibold text-white">
-                          {validation.actualData.workouts}
+                          {validation.actual.workouts}
                         </div>
                         <div className="text-xs text-gray-500">
-                          sesiones reales
+                          en período validado
                         </div>
                       </div>
                     </div>
