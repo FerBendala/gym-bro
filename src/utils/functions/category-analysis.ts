@@ -1490,17 +1490,36 @@ const generateWarnings = (
     if (imbalanceAnalysis.hasImbalance && antagonist) {
       // Solo mostrar advertencia si este grupo debe mostrarla (evitar duplicados)
       if (shouldShowAntagonistWarning(category, antagonist, balance.antagonistRatio, categoryMetrics)) {
-        if (imbalanceAnalysis.type === 'too_much') {
-          warnings.push(`Se entrena demasiado ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()}`);
-        } else if (imbalanceAnalysis.type === 'too_little') {
-          warnings.push(`Se entrena muy poco ${category.toLowerCase()} en comparación con ${antagonist.toLowerCase()}`);
+        // Obtener porcentajes reales para contexto
+        const categoryData = categoryMetrics.find(m => m.category === category);
+        const antagonistData = categoryMetrics.find(m => m.category === antagonist);
+
+        if (categoryData && antagonistData) {
+          const categoryPercent = Math.round(categoryData.percentage * 10) / 10;
+          const antagonistPercent = Math.round(antagonistData.percentage * 10) / 10;
+
+          if (imbalanceAnalysis.type === 'too_much') {
+            warnings.push(`Desequilibrio: ${category.toLowerCase()} ${categoryPercent}% vs ${antagonist.toLowerCase()} ${antagonistPercent}% - considera equilibrar`);
+          } else if (imbalanceAnalysis.type === 'too_little') {
+            // Determinar si el problema es volumen o frecuencia
+            if (balance.weeklyFrequency && balance.weeklyFrequency < 1.5) {
+              warnings.push(`${category.toLowerCase()} (${categoryPercent}%) necesita mayor frecuencia semanal vs ${antagonist.toLowerCase()} (${antagonistPercent}%)`);
+            } else {
+              warnings.push(`${category.toLowerCase()} (${categoryPercent}%) necesita más volumen vs ${antagonist.toLowerCase()} (${antagonistPercent}%)`);
+            }
+          }
         }
       }
     }
   }
 
   if (balance.balanceHistory?.volatility && balance.balanceHistory.volatility > 50) {
-    warnings.push(`Alta volatilidad en entrenamiento de ${category.toLowerCase()}`);
+    const volatilityPercent = Math.round(balance.balanceHistory.volatility);
+    if (volatilityPercent > 70) {
+      warnings.push(`Entrenamiento muy irregular en ${category.toLowerCase()} (${volatilityPercent}% variación) - establece rutina más consistente`);
+    } else {
+      warnings.push(`Entrenamiento irregular en ${category.toLowerCase()} (${volatilityPercent}% variación) - intenta ser más constante`);
+    }
   }
 
   return warnings;

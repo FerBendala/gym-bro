@@ -849,7 +849,7 @@ export const calculateTemporalEvolution = (records: WorkoutRecord[]): TemporalEv
   const overallTrend = avgVolumeGrowth > 0 ? 'Mejorando' : avgVolumeGrowth < 0 ? 'Declinando' : 'Estable';
 
   // Calcular tasa de crecimiento promedio por sesión (no dividir por trends.length)
-  const growthRate = firstWeekAvgVolume > 0 ? Math.round(((avgVolumeGrowth / firstWeekAvgVolume) * 100) * 100) / 100 : 0;
+  const growthRate = firstWeekAvgVolume > 0 ? ((avgVolumeGrowth / firstWeekAvgVolume) * 100) : 0;
 
   // Calcular volatilidad (desviación estándar de cambios porcentuales)
   const changes = trends.slice(1).map(t => t.volumeChangePercent);
@@ -957,7 +957,7 @@ export const calculateTemporalEvolution = (records: WorkoutRecord[]): TemporalEv
   return {
     trends,
     overallTrend,
-    growthRate: Math.round(growthRate * 10000) / 100,
+    growthRate: Math.round(growthRate * 100) / 100,
     volatility: Math.round(volatility * 100) / 100,
     predictions,
     cycles,
