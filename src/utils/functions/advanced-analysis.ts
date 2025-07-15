@@ -104,6 +104,7 @@ export interface AdvancedAnalysis {
   periodComparisons: PeriodComparison[];
   progressPrediction: ProgressPrediction;
   intensityMetrics: IntensityMetrics;
+  predictionAccuracy: PredictionAccuracyAnalysis;
   peakPerformanceIndicators: Array<{
     type: 'excellent' | 'good' | 'warning' | 'critical';
     icon: string;
@@ -115,6 +116,295 @@ export interface AdvancedAnalysis {
   }>;
   optimizationSuggestions: string[];
 }
+
+/**
+ * Interfaz para análisis de precisión de predicciones
+ */
+export interface PredictionAccuracyAnalysis {
+  // Métricas de precisión generales
+  overallAccuracy: number; // 0-100, qué tan precisas han sido las predicciones
+  weightPredictionAccuracy: number; // Precisión específica para peso
+  volumePredictionAccuracy: number; // Precisión específica para volumen
+  totalPredictionsAnalyzed: number; // Número de predicciones evaluadas
+
+  // Análisis detallado por período
+  weeklyPredictions: Array<{
+    weekStart: Date;
+    predictedWeight: number;
+    actualWeight: number;
+    predictedVolume: number;
+    actualVolume: number;
+    weightAccuracy: number; // % de precisión para peso
+    volumeAccuracy: number; // % de precisión para volumen
+    overallAccuracy: number; // % de precisión general
+  }>;
+
+  // Tendencias de precisión
+  accuracyTrend: 'improving' | 'stable' | 'declining';
+  bestPredictionWeek: {
+    week: Date;
+    accuracy: number;
+  };
+  worstPredictionWeek: {
+    week: Date;
+    accuracy: number;
+  };
+
+  // Insights sobre la calidad del modelo
+  modelQuality: {
+    reliability: 'high' | 'medium' | 'low';
+    strengthArea: 'weight' | 'volume' | 'balanced';
+    weaknessArea: 'weight' | 'volume' | 'none';
+    improvementSuggestion: string;
+  };
+}
+
+/**
+ * Calcula la precisión de las predicciones comparando resultados históricos
+ */
+export const calculatePredictionAccuracy = (records: WorkoutRecord[]): PredictionAccuracyAnalysis => {
+  // Necesitamos al menos 4 semanas de datos para hacer predicciones y validarlas
+  if (records.length < 20) {
+    return {
+      overallAccuracy: 0,
+      weightPredictionAccuracy: 0,
+      volumePredictionAccuracy: 0,
+      totalPredictionsAnalyzed: 0,
+      weeklyPredictions: [],
+      accuracyTrend: 'stable',
+      bestPredictionWeek: { week: new Date(), accuracy: 0 },
+      worstPredictionWeek: { week: new Date(), accuracy: 0 },
+      modelQuality: {
+        reliability: 'low',
+        strengthArea: 'balanced',
+        weaknessArea: 'none',
+        improvementSuggestion: 'Necesitas más datos para evaluar la precisión del modelo'
+      }
+    };
+  }
+
+  const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+  // Agrupar datos por semanas para análisis
+  const weeklyData = groupRecordsByWeekForAccuracy(sortedRecords);
+  const weeklyPredictions: PredictionAccuracyAnalysis['weeklyPredictions'] = [];
+
+  // Necesitamos al menos 6 semanas para hacer predicciones retroactivas
+  if (weeklyData.length < 6) {
+    return {
+      overallAccuracy: 0,
+      weightPredictionAccuracy: 0,
+      volumePredictionAccuracy: 0,
+      totalPredictionsAnalyzed: 0,
+      weeklyPredictions: [],
+      accuracyTrend: 'stable',
+      bestPredictionWeek: { week: new Date(), accuracy: 0 },
+      worstPredictionWeek: { week: new Date(), accuracy: 0 },
+      modelQuality: {
+        reliability: 'low',
+        strengthArea: 'balanced',
+        weaknessArea: 'none',
+        improvementSuggestion: 'Continúa entrenando consistentemente para mejorar las predicciones'
+      }
+    };
+  }
+
+  // Para cada semana (desde la 4ta hasta la penúltima), hacer predicción y compararla
+  for (let i = 3; i < weeklyData.length - 1; i++) {
+    const weekToPredict = weeklyData[i + 1]; // Semana que queremos predecir
+    const trainingDataUntilWeek = weeklyData.slice(0, i + 1); // Datos disponibles hasta esa semana
+
+    // Simular predicción usando solo datos disponibles hasta ese momento
+    const historicalRecords = sortedRecords.filter(record => {
+      const recordDate = new Date(record.date);
+      const lastAvailableWeek = weeklyData[i];
+      return recordDate <= lastAvailableWeek.weekEnd;
+    });
+
+    if (historicalRecords.length < 3) continue;
+
+    // Hacer predicción para la próxima semana usando datos históricos disponibles
+    const prediction = predictProgress(historicalRecords);
+
+    // Calcular valores reales de la semana predicha
+    const actualWeight = weekToPredict.weight;
+    const actualVolume = weekToPredict.volume;
+
+    // Calcular precisión para peso (usar 1RM estimado para mejor comparación)
+    const actualAvg1RM = weekToPredict.records.reduce((sum: number, r: WorkoutRecord) => {
+      return sum + (r.weight * (1 + Math.min(r.reps, 20) / 30));
+    }, 0) / weekToPredict.records.length;
+
+    const predictedWeight = prediction.nextWeekWeight;
+    const weightError = Math.abs(predictedWeight - actualAvg1RM) / Math.max(actualAvg1RM, 1);
+    const weightAccuracy = Math.max(0, 100 - (weightError * 100));
+
+    // Calcular precisión para volumen
+    const predictedVolume = prediction.nextWeekVolume;
+    const volumeError = Math.abs(predictedVolume - actualVolume) / Math.max(actualVolume, 1);
+    const volumeAccuracy = Math.max(0, 100 - (volumeError * 100));
+
+    // Precisión general (promedio ponderado)
+    const overallAccuracy = (weightAccuracy * 0.6 + volumeAccuracy * 0.4);
+
+    weeklyPredictions.push({
+      weekStart: weekToPredict.weekStart,
+      predictedWeight,
+      actualWeight: actualAvg1RM,
+      predictedVolume,
+      actualVolume,
+      weightAccuracy: Math.round(weightAccuracy * 100) / 100,
+      volumeAccuracy: Math.round(volumeAccuracy * 100) / 100,
+      overallAccuracy: Math.round(overallAccuracy * 100) / 100
+    });
+  }
+
+  if (weeklyPredictions.length === 0) {
+    return {
+      overallAccuracy: 0,
+      weightPredictionAccuracy: 0,
+      volumePredictionAccuracy: 0,
+      totalPredictionsAnalyzed: 0,
+      weeklyPredictions: [],
+      accuracyTrend: 'stable',
+      bestPredictionWeek: { week: new Date(), accuracy: 0 },
+      worstPredictionWeek: { week: new Date(), accuracy: 0 },
+      modelQuality: {
+        reliability: 'low',
+        strengthArea: 'balanced',
+        weaknessArea: 'none',
+        improvementSuggestion: 'Datos insuficientes para análisis de precisión'
+      }
+    };
+  }
+
+  // Calcular métricas generales
+  const totalPredictionsAnalyzed = weeklyPredictions.length;
+  const overallAccuracy = weeklyPredictions.reduce((sum, p) => sum + p.overallAccuracy, 0) / totalPredictionsAnalyzed;
+  const weightPredictionAccuracy = weeklyPredictions.reduce((sum, p) => sum + p.weightAccuracy, 0) / totalPredictionsAnalyzed;
+  const volumePredictionAccuracy = weeklyPredictions.reduce((sum, p) => sum + p.volumeAccuracy, 0) / totalPredictionsAnalyzed;
+
+  // Encontrar mejor y peor predicción
+  const bestPrediction = weeklyPredictions.reduce((best, current) =>
+    current.overallAccuracy > best.overallAccuracy ? current : best
+  );
+  const worstPrediction = weeklyPredictions.reduce((worst, current) =>
+    current.overallAccuracy < worst.overallAccuracy ? current : worst
+  );
+
+  // Analizar tendencia de precisión (primera mitad vs segunda mitad)
+  const halfPoint = Math.floor(weeklyPredictions.length / 2);
+  const firstHalf = weeklyPredictions.slice(0, halfPoint);
+  const secondHalf = weeklyPredictions.slice(halfPoint);
+
+  const firstHalfAccuracy = firstHalf.reduce((sum, p) => sum + p.overallAccuracy, 0) / firstHalf.length;
+  const secondHalfAccuracy = secondHalf.reduce((sum, p) => sum + p.overallAccuracy, 0) / secondHalf.length;
+
+  let accuracyTrend: 'improving' | 'stable' | 'declining';
+  const trendDifference = secondHalfAccuracy - firstHalfAccuracy;
+  if (trendDifference > 5) accuracyTrend = 'improving';
+  else if (trendDifference < -5) accuracyTrend = 'declining';
+  else accuracyTrend = 'stable';
+
+  // Analizar calidad del modelo
+  let reliability: 'high' | 'medium' | 'low';
+  if (overallAccuracy >= 80) reliability = 'high';
+  else if (overallAccuracy >= 60) reliability = 'medium';
+  else reliability = 'low';
+
+  const strengthArea = weightPredictionAccuracy > volumePredictionAccuracy + 10 ? 'weight' :
+    volumePredictionAccuracy > weightPredictionAccuracy + 10 ? 'volume' : 'balanced';
+
+  const weaknessArea = weightPredictionAccuracy < volumePredictionAccuracy - 15 ? 'weight' :
+    volumePredictionAccuracy < weightPredictionAccuracy - 15 ? 'volume' : 'none';
+
+  let improvementSuggestion: string;
+  if (reliability === 'high') {
+    improvementSuggestion = 'Excelente precisión del modelo. Continúa con tu rutina consistente.';
+  } else if (reliability === 'medium') {
+    if (weaknessArea === 'weight') {
+      improvementSuggestion = 'Mejora la consistencia en progresión de peso para predicciones más precisas.';
+    } else if (weaknessArea === 'volume') {
+      improvementSuggestion = 'Mantén un volumen más consistente para mejorar las predicciones.';
+    } else {
+      improvementSuggestion = 'Aumenta la consistencia en tu entrenamiento para mejores predicciones.';
+    }
+  } else {
+    improvementSuggestion = 'Necesitas más consistencia en tu entrenamiento para predicciones confiables.';
+  }
+
+  return {
+    overallAccuracy: Math.round(overallAccuracy * 100) / 100,
+    weightPredictionAccuracy: Math.round(weightPredictionAccuracy * 100) / 100,
+    volumePredictionAccuracy: Math.round(volumePredictionAccuracy * 100) / 100,
+    totalPredictionsAnalyzed,
+    weeklyPredictions,
+    accuracyTrend,
+    bestPredictionWeek: {
+      week: bestPrediction.weekStart,
+      accuracy: bestPrediction.overallAccuracy
+    },
+    worstPredictionWeek: {
+      week: worstPrediction.weekStart,
+      accuracy: worstPrediction.overallAccuracy
+    },
+    modelQuality: {
+      reliability,
+      strengthArea,
+      weaknessArea,
+      improvementSuggestion
+    }
+  };
+};
+
+/**
+ * Función auxiliar para agrupar registros por semanas para análisis de precisión
+ */
+const groupRecordsByWeekForAccuracy = (sortedRecords: WorkoutRecord[]) => {
+  const weeklyData: Array<{
+    weekStart: Date;
+    weekEnd: Date;
+    records: WorkoutRecord[];
+    volume: number;
+    weight: number;
+  }> = [];
+
+  const recordsByWeek = new Map<string, WorkoutRecord[]>();
+
+  // Agrupar por semanas
+  sortedRecords.forEach(record => {
+    const recordDate = new Date(record.date);
+    const monday = startOfWeek(recordDate, { locale: es });
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (!recordsByWeek.has(weekKey)) {
+      recordsByWeek.set(weekKey, []);
+    }
+    recordsByWeek.get(weekKey)!.push(record);
+  });
+
+  // Convertir a formato final
+  recordsByWeek.forEach((records, weekKey) => {
+    const weekStart = new Date(weekKey);
+    const weekEnd = endOfWeek(weekStart, { locale: es });
+
+    const volume = records.reduce((sum: number, r: WorkoutRecord) => sum + (r.weight * r.reps * r.sets), 0);
+    const avgWeight = records.reduce((sum: number, r: WorkoutRecord) => {
+      const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+      return sum + oneRM;
+    }, 0) / records.length;
+
+    weeklyData.push({
+      weekStart,
+      weekEnd,
+      records,
+      volume,
+      weight: avgWeight
+    });
+  });
+
+  return weeklyData.sort((a, b) => a.weekStart.getTime() - b.weekStart.getTime());
+};
 
 /**
  * Obtiene registros de la semana actual (lunes a domingo)
@@ -1121,6 +1411,7 @@ export const calculateAdvancedAnalysis = (records: WorkoutRecord[]): AdvancedAna
   const trainingDensity = calculateTrainingDensity(records);
   const fatigueAnalysis = analyzeFatigue(records);
   const intensityMetrics = analyzeIntensityMetrics(records);
+  const predictionAccuracy = calculatePredictionAccuracy(records);
 
   // Indicadores de rendimiento pico mejorados
   const peakPerformanceIndicators = generateEnhancedPerformanceIndicators(records);
@@ -1176,6 +1467,7 @@ export const calculateAdvancedAnalysis = (records: WorkoutRecord[]): AdvancedAna
     periodComparisons: comparePeriods(records),
     progressPrediction: prediction,
     intensityMetrics,
+    predictionAccuracy,
     peakPerformanceIndicators,
     optimizationSuggestions: Array.from(new Set(optimizationSuggestions)).slice(0, 6) // Eliminar duplicados y limitar a 6
   };

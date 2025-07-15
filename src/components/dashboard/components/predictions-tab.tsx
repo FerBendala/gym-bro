@@ -2,8 +2,12 @@ import {
   Activity,
   AlertTriangle,
   BarChart,
+  BarChart3,
   Brain,
+  Calendar,
   CheckCircle,
+  Gauge,
+  LineChart,
   Target,
   TrendingDown,
   TrendingUp,
@@ -90,6 +94,220 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
           tooltipPosition="top"
         />
       </div>
+
+      {/* Análisis de Precisión de Predicciones */}
+      {analysis.predictionAccuracy.totalPredictionsAnalyzed > 0 && (
+        <Card>
+          <CardHeader>
+            <h3 className="text-lg font-semibold text-white flex items-center">
+              <BarChart3 className="w-5 h-5 mr-2" />
+              Precisión de Predicciones
+              <InfoTooltip
+                content="Análisis de qué tan precisas han sido las predicciones pasadas comparando predicciones vs resultados reales."
+                position="top"
+                className="ml-2"
+              />
+            </h3>
+          </CardHeader>
+          <CardContent>
+            {/* Métricas de precisión principales */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
+              <StatCard
+                title="Precisión General"
+                value={`${analysis.predictionAccuracy.overallAccuracy.toFixed(1)}%`}
+                icon={Gauge}
+                variant={analysis.predictionAccuracy.overallAccuracy >= 80 ? 'success' :
+                  analysis.predictionAccuracy.overallAccuracy >= 60 ? 'warning' : 'danger'}
+                tooltip="Precisión promedio de todas las predicciones analizadas."
+                tooltipPosition="top"
+              />
+              <StatCard
+                title="Precisión Peso"
+                value={`${analysis.predictionAccuracy.weightPredictionAccuracy.toFixed(1)}%`}
+                icon={Weight}
+                variant={analysis.predictionAccuracy.weightPredictionAccuracy >= 80 ? 'success' :
+                  analysis.predictionAccuracy.weightPredictionAccuracy >= 60 ? 'warning' : 'danger'}
+                tooltip="Qué tan precisas han sido las predicciones de peso/fuerza."
+                tooltipPosition="top"
+              />
+              <StatCard
+                title="Precisión Volumen"
+                value={`${analysis.predictionAccuracy.volumePredictionAccuracy.toFixed(1)}%`}
+                icon={BarChart}
+                variant={analysis.predictionAccuracy.volumePredictionAccuracy >= 80 ? 'success' :
+                  analysis.predictionAccuracy.volumePredictionAccuracy >= 60 ? 'warning' : 'danger'}
+                tooltip="Qué tan precisas han sido las predicciones de volumen de entrenamiento."
+                tooltipPosition="top"
+              />
+              <StatCard
+                title="Predicciones Evaluadas"
+                value={analysis.predictionAccuracy.totalPredictionsAnalyzed.toString()}
+                icon={Calendar}
+                variant="indigo"
+                tooltip="Número total de predicciones que se han podido evaluar con datos reales."
+                tooltipPosition="top"
+              />
+            </div>
+
+            {/* Análisis detallado de la calidad del modelo */}
+            <div className="relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/30 hover:border-gray-600/50 transition-all duration-200 mb-6">
+              <div className="flex items-start justify-between mb-4">
+                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                  <div className={`p-2 sm:p-3 rounded-lg bg-gradient-to-br ${analysis.predictionAccuracy.modelQuality.reliability === 'high' ? 'from-green-500/80 to-emerald-500/80' :
+                    analysis.predictionAccuracy.modelQuality.reliability === 'medium' ? 'from-yellow-500/80 to-orange-500/80' :
+                      'from-red-500/80 to-pink-500/80'}`}>
+                    <LineChart className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white truncate">
+                      Calidad del Modelo IA
+                    </h4>
+                    <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${analysis.predictionAccuracy.modelQuality.reliability === 'high' ? 'bg-green-500 text-white' :
+                        analysis.predictionAccuracy.modelQuality.reliability === 'medium' ? 'bg-yellow-500 text-black' :
+                          'bg-red-500 text-white'}`}>
+                        {analysis.predictionAccuracy.modelQuality.reliability === 'high' ? '🎯 ALTA PRECISIÓN' :
+                          analysis.predictionAccuracy.modelQuality.reliability === 'medium' ? '📊 PRECISIÓN MEDIA' :
+                            '⚠️ PRECISIÓN BAJA'}
+                      </span>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${analysis.predictionAccuracy.accuracyTrend === 'improving' ? 'bg-green-500 text-white' :
+                        analysis.predictionAccuracy.accuracyTrend === 'declining' ? 'bg-red-500 text-white' :
+                          'bg-gray-500 text-white'}`}>
+                        Tendencia: {analysis.predictionAccuracy.accuracyTrend === 'improving' ? 'Mejorando' :
+                          analysis.predictionAccuracy.accuracyTrend === 'declining' ? 'Empeorando' : 'Estable'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <div className="text-right ml-2 sm:ml-4">
+                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">
+                    {analysis.predictionAccuracy.overallAccuracy.toFixed(1)}%
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    precisión general
+                  </div>
+                </div>
+              </div>
+
+              {/* Grid de análisis de fortalezas y debilidades */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                <div className="bg-gray-800/30 rounded-lg p-3">
+                  <h5 className="text-xs font-medium text-gray-300 mb-2 flex items-center gap-1">
+                    <Target className="w-3 h-3" />
+                    Área de Fortaleza
+                  </h5>
+                  <div className="text-sm text-white font-medium">
+                    {analysis.predictionAccuracy.modelQuality.strengthArea === 'weight' ? '🏋️ Predicciones de Peso' :
+                      analysis.predictionAccuracy.modelQuality.strengthArea === 'volume' ? '📊 Predicciones de Volumen' :
+                        '⚖️ Equilibrado'}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {analysis.predictionAccuracy.modelQuality.strengthArea === 'weight' ? 'El modelo predice mejor la progresión de fuerza' :
+                      analysis.predictionAccuracy.modelQuality.strengthArea === 'volume' ? 'El modelo predice mejor el volumen de entrenamiento' :
+                        'El modelo es equilibrado en ambas áreas'}
+                  </div>
+                </div>
+
+                <div className="bg-gray-800/30 rounded-lg p-3">
+                  <h5 className="text-xs font-medium text-gray-300 mb-2 flex items-center gap-1">
+                    <AlertTriangle className="w-3 h-3" />
+                    Área de Mejora
+                  </h5>
+                  <div className="text-sm text-white font-medium">
+                    {analysis.predictionAccuracy.modelQuality.weaknessArea === 'weight' ? '🏋️ Predicciones de Peso' :
+                      analysis.predictionAccuracy.modelQuality.weaknessArea === 'volume' ? '📊 Predicciones de Volumen' :
+                        '✅ Sin debilidades críticas'}
+                  </div>
+                  <div className="text-xs text-gray-400 mt-1">
+                    {analysis.predictionAccuracy.modelQuality.weaknessArea === 'weight' ? 'Necesita más consistencia en progresión de peso' :
+                      analysis.predictionAccuracy.modelQuality.weaknessArea === 'volume' ? 'Necesita más consistencia en volumen' :
+                        'El modelo funciona bien en ambas áreas'}
+                  </div>
+                </div>
+              </div>
+
+              {/* Recomendación para mejorar el modelo */}
+              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
+                <div className="flex items-start gap-2">
+                  <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-blue-300 break-words">
+                      {analysis.predictionAccuracy.modelQuality.improvementSuggestion}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Historial de predicciones más recientes */}
+            <div className="bg-gray-800/50 rounded-lg p-4">
+              <h5 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
+                <Calendar className="w-4 h-4" />
+                Historial de Predicciones Recientes
+                <InfoTooltip
+                  content="Comparación de las últimas predicciones vs resultados reales para validar la precisión del modelo."
+                  position="top"
+                />
+              </h5>
+
+              {analysis.predictionAccuracy.weeklyPredictions.length > 0 ? (
+                <div className="space-y-2">
+                  {analysis.predictionAccuracy.weeklyPredictions.slice(-5).reverse().map((prediction, index) => (
+                    <div key={index} className="bg-gray-700/50 rounded-lg p-3">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm text-gray-300">
+                          Semana del {new Date(prediction.weekStart).toLocaleDateString('es-ES', {
+                            day: 'numeric',
+                            month: 'short'
+                          })}
+                        </span>
+                        <span className={`px-2 py-1 rounded text-xs font-medium ${prediction.overallAccuracy >= 80 ? 'bg-green-500/20 text-green-400' :
+                          prediction.overallAccuracy >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
+                            'bg-red-500/20 text-red-400'}`}>
+                          {prediction.overallAccuracy.toFixed(1)}% precisión
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-3 text-xs">
+                        <div>
+                          <div className="text-gray-400 mb-1">Peso (1RM est.)</div>
+                          <div className="flex justify-between">
+                            <span className="text-blue-400">Predicho: {prediction.predictedWeight.toFixed(1)}kg</span>
+                            <span className="text-white">Real: {prediction.actualWeight.toFixed(1)}kg</span>
+                          </div>
+                          <div className="text-right text-gray-500">
+                            {prediction.weightAccuracy.toFixed(1)}% precisión
+                          </div>
+                        </div>
+
+                        <div>
+                          <div className="text-gray-400 mb-1">Volumen</div>
+                          <div className="flex justify-between">
+                            <span className="text-green-400">Predicho: {formatNumber(prediction.predictedVolume)}kg</span>
+                            <span className="text-white">Real: {formatNumber(prediction.actualVolume)}kg</span>
+                          </div>
+                          <div className="text-right text-gray-500">
+                            {prediction.volumeAccuracy.toFixed(1)}% precisión
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-4">
+                  <div className="text-gray-400 text-sm">
+                    No hay suficientes datos para mostrar comparativas históricas
+                  </div>
+                  <div className="text-gray-500 text-xs mt-1">
+                    Continúa entrenando para generar más predicciones evaluables
+                  </div>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Análisis de Tendencia Principal - Estilo Balance Muscular */}
       <Card>
