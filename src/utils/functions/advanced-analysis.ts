@@ -473,9 +473,9 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
     (fatigueIndex / 100) * 48 + (recoveryDays === 0 ? 12 : 0)
   ));
 
-  // Análisis de historial de fatiga
+  // Análisis de historial de recuperación (corregido - lógica estaba invertida)
   const fatigueHistory: FatigueAnalysis['fatigueHistory'] = {
-    trend: volumeChange > 15 ? 'Empeorando' : volumeChange < -15 ? 'Mejorando' : 'Estable',
+    trend: volumeChange > 15 ? 'Mejorando' : volumeChange < -15 ? 'Empeorando' : 'Estable',
     consistency: Math.min(100, Math.max(0, 100 - Math.abs(volumeChange)))
   };
 
