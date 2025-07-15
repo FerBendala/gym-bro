@@ -1099,7 +1099,7 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                         <div className="flex justify-between items-center">
                           <span className="text-xs text-gray-400">Consistencia:</span>
                           <span className="text-xs font-medium text-blue-400">
-                            {safeNumber(analysis.fatigueAnalysis.fatigueHistory.consistency, 0)}%
+                            {safeNumber(analysis.fatigueAnalysis.fatigueHistory.consistency, 0).toFixed(1)}%
                           </span>
                         </div>
                       </div>
