@@ -234,7 +234,13 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                     {/* Métricas de balance y progreso */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
                       <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                        <div className="text-xs text-gray-400 mb-1">Intensidad</div>
+                        <div className="text-xs text-gray-400 mb-1 flex items-center justify-center gap-1">
+                          Intensidad
+                          <InfoTooltip
+                            content="Porcentaje que indica qué tan intenso entrenas este grupo muscular basado en peso relativo a tu máximo"
+                            position="top"
+                          />
+                        </div>
                         <div className="text-sm sm:text-lg font-semibold text-white">
                           {safeNumber(balance.intensityScore, 0)}%
                         </div>
@@ -247,7 +253,13 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                       </div>
 
                       <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                        <div className="text-xs text-gray-400 mb-1">Simetría</div>
+                        <div className="text-xs text-gray-400 mb-1 flex items-center justify-center gap-1">
+                          Simetría
+                          <InfoTooltip
+                            content="Score que mide el equilibrio del entrenamiento de este grupo muscular en comparación con sus antagonistas"
+                            position="top"
+                          />
+                        </div>
                         <div className="text-sm sm:text-lg font-semibold text-white">
                           {safeNumber(balance.symmetryScore, 0)}%
                         </div>
@@ -260,7 +272,13 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                       </div>
 
                       <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                        <div className="text-xs text-gray-400 mb-1">Frecuencia</div>
+                        <div className="text-xs text-gray-400 mb-1 flex items-center justify-center gap-1">
+                          Frecuencia
+                          <InfoTooltip
+                            content="Número promedio de entrenamientos por semana para este grupo muscular. Ideal: 2-3 veces por semana"
+                            position="top"
+                          />
+                        </div>
                         <div className="text-sm sm:text-lg font-semibold text-white">
                           {safeNumber(balance.weeklyFrequency, 0).toFixed(1)}
                         </div>
@@ -268,7 +286,13 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                       </div>
 
                       <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                        <div className="text-xs text-gray-400 mb-1">Índice Fuerza</div>
+                        <div className="text-xs text-gray-400 mb-1 flex items-center justify-center gap-1">
+                          Índice Fuerza
+                          <InfoTooltip
+                            content="Indicador del nivel de desarrollo de fuerza relativo. Se basa en peso manejado vs tu peso corporal y métricas históricas"
+                            position="top"
+                          />
+                        </div>
                         <div className="text-sm sm:text-lg font-semibold text-white">
                           {safeNumber(balance.strengthIndex, 0)}
                         </div>
@@ -293,19 +317,37 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                           </h5>
                           <div className="space-y-1">
                             <div className="flex justify-between items-center">
-                              <span className="text-xs text-gray-400">Peso:</span>
+                              <span className="text-xs text-gray-400 flex items-center gap-1">
+                                <InfoTooltip
+                                  content="Cambio porcentual en peso promedio vs período anterior"
+                                  position="top"
+                                />
+                                Peso:
+                              </span>
                               <span className={`text-xs font-medium ${categoryMetric.weightProgression > 0 ? 'text-green-400' : categoryMetric.weightProgression < 0 ? 'text-red-400' : 'text-gray-400'}`}>
                                 {categoryMetric.weightProgression > 0 ? '+' : ''}{categoryMetric.weightProgression}%
                               </span>
                             </div>
                             <div className="flex justify-between items-center">
-                              <span className="text-xs text-gray-400">Volumen:</span>
+                              <span className="text-xs text-gray-400 flex items-center gap-1">
+                                <InfoTooltip
+                                  content="Cambio porcentual en volumen total (peso × reps × series) vs período anterior"
+                                  position="top"
+                                />
+                                Volumen:
+                              </span>
                               <span className={`text-xs font-medium ${categoryMetric.volumeProgression > 0 ? 'text-green-400' : categoryMetric.volumeProgression < 0 ? 'text-red-400' : 'text-gray-400'}`}>
                                 {categoryMetric.volumeProgression > 0 ? '+' : ''}{categoryMetric.volumeProgression}%
                               </span>
                             </div>
                             <div className="flex justify-between items-center">
-                              <span className="text-xs text-gray-400">PRs:</span>
+                              <span className="text-xs text-gray-400 flex items-center gap-1">
+                                <InfoTooltip
+                                  content="Record personal logrado en este grupo muscular"
+                                  position="top"
+                                />
+                                PRs:
+                              </span>
                               <span className="text-xs font-medium text-purple-400">
                                 {categoryMetric.personalRecords}
                               </span>
@@ -321,7 +363,13 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                           </h5>
                           <div className="space-y-1">
                             <div className="flex justify-between items-center">
-                              <span className="text-xs text-gray-400">Último entreno:</span>
+                              <span className="text-xs text-gray-400 flex items-center gap-1">
+                                <InfoTooltip
+                                  content="Días transcurridos desde el último entrenamiento de este grupo muscular. Verde ≤3 días, amarillo ≤7 días, naranja ≤14 días, rojo >14 días"
+                                  position="top"
+                                />
+                                Último entreno:
+                              </span>
                               <span className={`text-xs font-medium ${getDaysColor(categoryMetric?.daysSinceLastWorkout || 0)}`}>
                                 {(categoryMetric?.daysSinceLastWorkout || 0) === 0 ? 'Hoy' :
                                   (categoryMetric?.daysSinceLastWorkout || 0) === 1 ? 'Ayer' :
@@ -329,13 +377,25 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
                               </span>
                             </div>
                             <div className="flex justify-between items-center">
-                              <span className="text-xs text-gray-400">Consistencia:</span>
+                              <span className="text-xs text-gray-400 flex items-center gap-1">
+                                <InfoTooltip
+                                  content="Regularidad del entrenamiento. Mide qué tan constante eres entrenando este grupo muscular a lo largo del tiempo"
+                                  position="top"
+                                />
+                                Consistencia:
+                              </span>
                               <span className="text-xs font-medium text-orange-400">
                                 {safeNumber(categoryMetric?.consistencyScore, 0)}%
                               </span>
                             </div>
                             <div className="flex justify-between items-center">
-                              <span className="text-xs text-gray-400">Eficiencia:</span>
+                              <span className="text-xs text-gray-400 flex items-center gap-1">
+                                <InfoTooltip
+                                  content="Relación entre el volumen entrenado y el tiempo invertido. Mayor eficiencia = más volumen en menos tiempo"
+                                  position="top"
+                                />
+                                Eficiencia:
+                              </span>
                               <span className="text-xs font-medium text-blue-400">
                                 {safeNumber(categoryMetric?.efficiencyScore, 0)}%
                               </span>
