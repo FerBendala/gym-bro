@@ -1,3 +1,5 @@
+import { endOfWeek, startOfWeek, subWeeks } from 'date-fns';
+import { es } from 'date-fns/locale';
 import {
   Activity,
   AlertTriangle,
@@ -6,13 +8,12 @@ import {
   Brain,
   Calendar,
   CheckCircle,
-  Gauge,
-  LineChart,
   Target,
   TrendingDown,
   TrendingUp,
   Trophy,
-  Weight
+  Weight,
+  Zap
 } from 'lucide-react';
 import React, { useMemo } from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
@@ -26,6 +27,29 @@ interface PredictionsTabProps {
   records: WorkoutRecord[];
 }
 
+// Interfaz para validación de predicciones
+interface PredictionValidation {
+  periodName: string;
+  predictionDate: Date;
+  actualData: {
+    maxWeight: number;
+    totalVolume: number;
+    averageWeight: number;
+    workouts: number;
+  };
+  predictions: {
+    predictedWeight: number;
+    predictedVolume: number;
+    confidence: number;
+  };
+  accuracy: {
+    weightAccuracy: number; // % de precisión
+    volumeAccuracy: number; // % de precisión
+    overallAccuracy: number; // % promedio
+  };
+  status: 'accurate' | 'moderate' | 'inaccurate';
+}
+
 export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
   const analysis = useMemo(() => calculateAdvancedAnalysis(records), [records]);
 
@@ -36,6 +60,126 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
     }
     return value;
   };
+
+  // Calcular validación de predicciones históricas
+  const predictionValidations = useMemo((): PredictionValidation[] => {
+    if (records.length < 10) return [];
+
+    const validations: PredictionValidation[] = [];
+    const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    // Validar predicciones para diferentes períodos pasados
+    const validationPeriods = [
+      { weeks: 1, name: 'Semana Pasada' },
+      { weeks: 2, name: 'Hace 2 Semanas' },
+      { weeks: 4, name: 'Hace 1 Mes' },
+      { weeks: 8, name: 'Hace 2 Meses' }
+    ];
+
+    validationPeriods.forEach(({ weeks, name }) => {
+      const predictionDate = subWeeks(new Date(), weeks);
+      const targetWeekStart = startOfWeek(predictionDate, { locale: es });
+      const targetWeekEnd = endOfWeek(predictionDate, { locale: es });
+
+      // Obtener registros hasta la fecha de predicción (para simular la predicción)
+      const recordsUntilPrediction = sortedRecords.filter(r =>
+        new Date(r.date) < predictionDate
+      );
+
+      // Obtener registros del período objetivo (los datos reales)
+      const actualPeriodRecords = sortedRecords.filter(r => {
+        const recordDate = new Date(r.date);
+        return recordDate >= targetWeekStart && recordDate <= targetWeekEnd;
+      });
+
+      if (recordsUntilPrediction.length >= 5 && actualPeriodRecords.length > 0) {
+        // Simular predicción con datos disponibles hasta esa fecha
+        const predictionAnalysis = calculateAdvancedAnalysis(recordsUntilPrediction);
+
+        // Datos reales del período
+        const actualMaxWeight = Math.max(...actualPeriodRecords.map(r => r.weight));
+        const actualTotalVolume = actualPeriodRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+        const actualAverageWeight = actualPeriodRecords.reduce((sum, r) => sum + r.weight, 0) / actualPeriodRecords.length;
+        const actualWorkouts = actualPeriodRecords.length;
+
+        // Predicciones que se habrían hecho
+        const predictedWeight = predictionAnalysis.progressPrediction.nextWeekWeight;
+        const predictedVolume = predictionAnalysis.progressPrediction.nextWeekVolume;
+        const confidence = predictionAnalysis.progressPrediction.confidenceLevel;
+
+        // Calcular precisión
+        const weightAccuracy = Math.max(0, 100 - Math.abs(((predictedWeight - actualMaxWeight) / Math.max(actualMaxWeight, predictedWeight)) * 100));
+        const volumeAccuracy = Math.max(0, 100 - Math.abs(((predictedVolume - actualTotalVolume) / Math.max(actualTotalVolume, predictedVolume)) * 100));
+        const overallAccuracy = (weightAccuracy + volumeAccuracy) / 2;
+
+        // Determinar estado
+        let status: 'accurate' | 'moderate' | 'inaccurate';
+        if (overallAccuracy >= 80) status = 'accurate';
+        else if (overallAccuracy >= 60) status = 'moderate';
+        else status = 'inaccurate';
+
+        validations.push({
+          periodName: name,
+          predictionDate,
+          actualData: {
+            maxWeight: actualMaxWeight,
+            totalVolume: actualTotalVolume,
+            averageWeight: actualAverageWeight,
+            workouts: actualWorkouts
+          },
+          predictions: {
+            predictedWeight,
+            predictedVolume,
+            confidence
+          },
+          accuracy: {
+            weightAccuracy: Math.round(weightAccuracy),
+            volumeAccuracy: Math.round(volumeAccuracy),
+            overallAccuracy: Math.round(overallAccuracy)
+          },
+          status
+        });
+      }
+    });
+
+    return validations.sort((a, b) => a.predictionDate.getTime() - b.predictionDate.getTime());
+  }, [records]);
+
+  // Calcular estadísticas generales de precisión
+  const overallPredictionStats = useMemo(() => {
+    if (predictionValidations.length === 0) {
+      return {
+        averageAccuracy: 0,
+        accurateCount: 0,
+        totalPredictions: 0,
+        bestAccuracy: 0,
+        worstAccuracy: 0,
+        modelReliability: 'insuficiente' as const
+      };
+    }
+
+    const accuracies = predictionValidations.map(v => v.accuracy.overallAccuracy);
+    const averageAccuracy = accuracies.reduce((sum, acc) => sum + acc, 0) / accuracies.length;
+    const accurateCount = predictionValidations.filter(v => v.status === 'accurate').length;
+    const bestAccuracy = Math.max(...accuracies);
+    const worstAccuracy = Math.min(...accuracies);
+
+    let modelReliability: 'excelente' | 'buena' | 'moderada' | 'baja' | 'insuficiente';
+    if (averageAccuracy >= 85) modelReliability = 'excelente';
+    else if (averageAccuracy >= 75) modelReliability = 'buena';
+    else if (averageAccuracy >= 65) modelReliability = 'moderada';
+    else if (averageAccuracy >= 50) modelReliability = 'baja';
+    else modelReliability = 'insuficiente';
+
+    return {
+      averageAccuracy: Math.round(averageAccuracy),
+      accurateCount,
+      totalPredictions: predictionValidations.length,
+      bestAccuracy: Math.round(bestAccuracy),
+      worstAccuracy: Math.round(worstAccuracy),
+      modelReliability
+    };
+  }, [predictionValidations]);
 
   if (records.length === 0) {
     return (
@@ -94,220 +238,6 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
           tooltipPosition="top"
         />
       </div>
-
-      {/* Análisis de Precisión de Predicciones */}
-      {analysis.predictionAccuracy.totalPredictionsAnalyzed > 0 && (
-        <Card>
-          <CardHeader>
-            <h3 className="text-lg font-semibold text-white flex items-center">
-              <BarChart3 className="w-5 h-5 mr-2" />
-              Precisión de Predicciones
-              <InfoTooltip
-                content="Análisis de qué tan precisas han sido las predicciones pasadas comparando predicciones vs resultados reales."
-                position="top"
-                className="ml-2"
-              />
-            </h3>
-          </CardHeader>
-          <CardContent>
-            {/* Métricas de precisión principales */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4 mb-6">
-              <StatCard
-                title="Precisión General"
-                value={`${analysis.predictionAccuracy.overallAccuracy.toFixed(1)}%`}
-                icon={Gauge}
-                variant={analysis.predictionAccuracy.overallAccuracy >= 80 ? 'success' :
-                  analysis.predictionAccuracy.overallAccuracy >= 60 ? 'warning' : 'danger'}
-                tooltip="Precisión promedio de todas las predicciones analizadas."
-                tooltipPosition="top"
-              />
-              <StatCard
-                title="Precisión Peso"
-                value={`${analysis.predictionAccuracy.weightPredictionAccuracy.toFixed(1)}%`}
-                icon={Weight}
-                variant={analysis.predictionAccuracy.weightPredictionAccuracy >= 80 ? 'success' :
-                  analysis.predictionAccuracy.weightPredictionAccuracy >= 60 ? 'warning' : 'danger'}
-                tooltip="Qué tan precisas han sido las predicciones de peso/fuerza."
-                tooltipPosition="top"
-              />
-              <StatCard
-                title="Precisión Volumen"
-                value={`${analysis.predictionAccuracy.volumePredictionAccuracy.toFixed(1)}%`}
-                icon={BarChart}
-                variant={analysis.predictionAccuracy.volumePredictionAccuracy >= 80 ? 'success' :
-                  analysis.predictionAccuracy.volumePredictionAccuracy >= 60 ? 'warning' : 'danger'}
-                tooltip="Qué tan precisas han sido las predicciones de volumen de entrenamiento."
-                tooltipPosition="top"
-              />
-              <StatCard
-                title="Predicciones Evaluadas"
-                value={analysis.predictionAccuracy.totalPredictionsAnalyzed.toString()}
-                icon={Calendar}
-                variant="indigo"
-                tooltip="Número total de predicciones que se han podido evaluar con datos reales."
-                tooltipPosition="top"
-              />
-            </div>
-
-            {/* Análisis detallado de la calidad del modelo */}
-            <div className="relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/30 hover:border-gray-600/50 transition-all duration-200 mb-6">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                  <div className={`p-2 sm:p-3 rounded-lg bg-gradient-to-br ${analysis.predictionAccuracy.modelQuality.reliability === 'high' ? 'from-green-500/80 to-emerald-500/80' :
-                    analysis.predictionAccuracy.modelQuality.reliability === 'medium' ? 'from-yellow-500/80 to-orange-500/80' :
-                      'from-red-500/80 to-pink-500/80'}`}>
-                    <LineChart className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white truncate">
-                      Calidad del Modelo IA
-                    </h4>
-                    <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${analysis.predictionAccuracy.modelQuality.reliability === 'high' ? 'bg-green-500 text-white' :
-                        analysis.predictionAccuracy.modelQuality.reliability === 'medium' ? 'bg-yellow-500 text-black' :
-                          'bg-red-500 text-white'}`}>
-                        {analysis.predictionAccuracy.modelQuality.reliability === 'high' ? '🎯 ALTA PRECISIÓN' :
-                          analysis.predictionAccuracy.modelQuality.reliability === 'medium' ? '📊 PRECISIÓN MEDIA' :
-                            '⚠️ PRECISIÓN BAJA'}
-                      </span>
-                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${analysis.predictionAccuracy.accuracyTrend === 'improving' ? 'bg-green-500 text-white' :
-                        analysis.predictionAccuracy.accuracyTrend === 'declining' ? 'bg-red-500 text-white' :
-                          'bg-gray-500 text-white'}`}>
-                        Tendencia: {analysis.predictionAccuracy.accuracyTrend === 'improving' ? 'Mejorando' :
-                          analysis.predictionAccuracy.accuracyTrend === 'declining' ? 'Empeorando' : 'Estable'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right ml-2 sm:ml-4">
-                  <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">
-                    {analysis.predictionAccuracy.overallAccuracy.toFixed(1)}%
-                  </div>
-                  <div className="text-xs text-gray-400">
-                    precisión general
-                  </div>
-                </div>
-              </div>
-
-              {/* Grid de análisis de fortalezas y debilidades */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                <div className="bg-gray-800/30 rounded-lg p-3">
-                  <h5 className="text-xs font-medium text-gray-300 mb-2 flex items-center gap-1">
-                    <Target className="w-3 h-3" />
-                    Área de Fortaleza
-                  </h5>
-                  <div className="text-sm text-white font-medium">
-                    {analysis.predictionAccuracy.modelQuality.strengthArea === 'weight' ? '🏋️ Predicciones de Peso' :
-                      analysis.predictionAccuracy.modelQuality.strengthArea === 'volume' ? '📊 Predicciones de Volumen' :
-                        '⚖️ Equilibrado'}
-                  </div>
-                  <div className="text-xs text-gray-400 mt-1">
-                    {analysis.predictionAccuracy.modelQuality.strengthArea === 'weight' ? 'El modelo predice mejor la progresión de fuerza' :
-                      analysis.predictionAccuracy.modelQuality.strengthArea === 'volume' ? 'El modelo predice mejor el volumen de entrenamiento' :
-                        'El modelo es equilibrado en ambas áreas'}
-                  </div>
-                </div>
-
-                <div className="bg-gray-800/30 rounded-lg p-3">
-                  <h5 className="text-xs font-medium text-gray-300 mb-2 flex items-center gap-1">
-                    <AlertTriangle className="w-3 h-3" />
-                    Área de Mejora
-                  </h5>
-                  <div className="text-sm text-white font-medium">
-                    {analysis.predictionAccuracy.modelQuality.weaknessArea === 'weight' ? '🏋️ Predicciones de Peso' :
-                      analysis.predictionAccuracy.modelQuality.weaknessArea === 'volume' ? '📊 Predicciones de Volumen' :
-                        '✅ Sin debilidades críticas'}
-                  </div>
-                  <div className="text-xs text-gray-400 mt-1">
-                    {analysis.predictionAccuracy.modelQuality.weaknessArea === 'weight' ? 'Necesita más consistencia en progresión de peso' :
-                      analysis.predictionAccuracy.modelQuality.weaknessArea === 'volume' ? 'Necesita más consistencia en volumen' :
-                        'El modelo funciona bien en ambas áreas'}
-                  </div>
-                </div>
-              </div>
-
-              {/* Recomendación para mejorar el modelo */}
-              <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
-                <div className="flex items-start gap-2">
-                  <CheckCircle className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm text-blue-300 break-words">
-                      {analysis.predictionAccuracy.modelQuality.improvementSuggestion}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Historial de predicciones más recientes */}
-            <div className="bg-gray-800/50 rounded-lg p-4">
-              <h5 className="text-sm font-medium text-white mb-4 flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Historial de Predicciones Recientes
-                <InfoTooltip
-                  content="Comparación de las últimas predicciones vs resultados reales para validar la precisión del modelo."
-                  position="top"
-                />
-              </h5>
-
-              {analysis.predictionAccuracy.weeklyPredictions.length > 0 ? (
-                <div className="space-y-2">
-                  {analysis.predictionAccuracy.weeklyPredictions.slice(-5).reverse().map((prediction, index) => (
-                    <div key={index} className="bg-gray-700/50 rounded-lg p-3">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-300">
-                          Semana del {new Date(prediction.weekStart).toLocaleDateString('es-ES', {
-                            day: 'numeric',
-                            month: 'short'
-                          })}
-                        </span>
-                        <span className={`px-2 py-1 rounded text-xs font-medium ${prediction.overallAccuracy >= 80 ? 'bg-green-500/20 text-green-400' :
-                          prediction.overallAccuracy >= 60 ? 'bg-yellow-500/20 text-yellow-400' :
-                            'bg-red-500/20 text-red-400'}`}>
-                          {prediction.overallAccuracy.toFixed(1)}% precisión
-                        </span>
-                      </div>
-
-                      <div className="grid grid-cols-2 gap-3 text-xs">
-                        <div>
-                          <div className="text-gray-400 mb-1">Peso (1RM est.)</div>
-                          <div className="flex justify-between">
-                            <span className="text-blue-400">Predicho: {prediction.predictedWeight.toFixed(1)}kg</span>
-                            <span className="text-white">Real: {prediction.actualWeight.toFixed(1)}kg</span>
-                          </div>
-                          <div className="text-right text-gray-500">
-                            {prediction.weightAccuracy.toFixed(1)}% precisión
-                          </div>
-                        </div>
-
-                        <div>
-                          <div className="text-gray-400 mb-1">Volumen</div>
-                          <div className="flex justify-between">
-                            <span className="text-green-400">Predicho: {formatNumber(prediction.predictedVolume)}kg</span>
-                            <span className="text-white">Real: {formatNumber(prediction.actualVolume)}kg</span>
-                          </div>
-                          <div className="text-right text-gray-500">
-                            {prediction.volumeAccuracy.toFixed(1)}% precisión
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-4">
-                  <div className="text-gray-400 text-sm">
-                    No hay suficientes datos para mostrar comparativas históricas
-                  </div>
-                  <div className="text-gray-500 text-xs mt-1">
-                    Continúa entrenando para generar más predicciones evaluables
-                  </div>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       {/* Análisis de Tendencia Principal - Estilo Balance Muscular */}
       <Card>
@@ -660,6 +590,165 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
           </CardContent>
         </Card>
       )}
+
+      {/* Validación de Predicciones - Nueva Sección */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <BarChart3 className="w-5 h-5 mr-2" />
+            Precisión de Predicciones
+            <InfoTooltip
+              content="Análisis de qué tan precisas han sido las predicciones anteriores comparándolas con los resultados reales."
+              position="top"
+              className="ml-2"
+            />
+          </h3>
+        </CardHeader>
+        <CardContent>
+          {predictionValidations.length === 0 ? (
+            <div className="text-center py-8">
+              <div className="p-3 bg-gray-800 rounded-full w-12 h-12 mx-auto mb-3 flex items-center justify-center">
+                <Calendar className="w-6 h-6 text-gray-400" />
+              </div>
+              <p className="text-gray-400 text-sm">
+                Necesitas más historial de entrenamientos para validar la precisión de las predicciones
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-6">
+              {/* Estadísticas generales de precisión */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <StatCard
+                  title="Precisión Promedio"
+                  value={`${overallPredictionStats.averageAccuracy}%`}
+                  icon={Target}
+                  variant={overallPredictionStats.averageAccuracy >= 75 ? 'success' :
+                    overallPredictionStats.averageAccuracy >= 60 ? 'warning' : 'danger'}
+                  tooltip="Precisión promedio de todas las predicciones validadas hasta ahora."
+                  tooltipPosition="top"
+                />
+                <StatCard
+                  title="Predicciones Precisas"
+                  value={`${overallPredictionStats.accurateCount}/${overallPredictionStats.totalPredictions}`}
+                  icon={CheckCircle}
+                  variant={overallPredictionStats.accurateCount >= overallPredictionStats.totalPredictions * 0.75 ? 'success' :
+                    overallPredictionStats.accurateCount >= overallPredictionStats.totalPredictions * 0.5 ? 'warning' : 'danger'}
+                  tooltip="Número de predicciones con >80% de precisión vs total de predicciones."
+                  tooltipPosition="top"
+                />
+                <StatCard
+                  title="Mejor Predicción"
+                  value={`${overallPredictionStats.bestAccuracy}%`}
+                  icon={Trophy}
+                  variant="success"
+                  tooltip="La predicción más precisa registrada hasta ahora."
+                  tooltipPosition="top"
+                />
+                <StatCard
+                  title="Confiabilidad del Modelo"
+                  value={overallPredictionStats.modelReliability.charAt(0).toUpperCase() + overallPredictionStats.modelReliability.slice(1)}
+                  icon={Zap}
+                  variant={overallPredictionStats.modelReliability === 'excelente' || overallPredictionStats.modelReliability === 'buena' ? 'success' :
+                    overallPredictionStats.modelReliability === 'moderada' ? 'warning' : 'danger'}
+                  tooltip="Evaluación general de la confiabilidad del modelo predictivo basada en el historial."
+                  tooltipPosition="top"
+                />
+              </div>
+
+              {/* Historial de predicciones */}
+              <div className="space-y-4">
+                <h4 className="text-md font-semibold text-white mb-4">Historial de Validaciones</h4>
+                {predictionValidations.map((validation, index) => (
+                  <div
+                    key={index}
+                    className={`relative p-4 rounded-xl bg-gradient-to-br border transition-all duration-200 ${validation.status === 'accurate'
+                        ? 'from-green-900/20 to-emerald-900/20 border-green-500/30 hover:border-green-400/50'
+                        : validation.status === 'moderate'
+                          ? 'from-yellow-900/20 to-orange-900/20 border-yellow-500/30 hover:border-yellow-400/50'
+                          : 'from-red-900/20 to-pink-900/20 border-red-500/30 hover:border-red-400/50'
+                      }`}
+                  >
+                    <div className="flex items-start justify-between mb-4">
+                      <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg bg-gradient-to-br ${validation.status === 'accurate'
+                            ? 'from-green-500/80 to-emerald-500/80'
+                            : validation.status === 'moderate'
+                              ? 'from-yellow-500/80 to-orange-500/80'
+                              : 'from-red-500/80 to-pink-500/80'
+                          }`}>
+                          <Calendar className="w-4 h-4 text-white" />
+                        </div>
+                        <div>
+                          <h5 className="text-sm font-medium text-white">{validation.periodName}</h5>
+                          <p className="text-xs text-gray-400">
+                            {validation.predictionDate.toLocaleDateString('es-ES')}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="text-right">
+                        <div className={`text-lg font-bold ${validation.status === 'accurate' ? 'text-green-400' :
+                            validation.status === 'moderate' ? 'text-yellow-400' : 'text-red-400'
+                          }`}>
+                          {validation.accuracy.overallAccuracy}%
+                        </div>
+                        <div className="text-xs text-gray-400">precisión</div>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                      <div className="bg-gray-800/50 rounded-lg p-3">
+                        <div className="text-xs text-gray-400 mb-1">Peso Predicho</div>
+                        <div className="text-sm font-semibold text-white">
+                          {validation.predictions.predictedWeight}kg
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          vs {validation.actualData.maxWeight}kg real
+                        </div>
+                        <div className="text-xs font-medium text-blue-400">
+                          {validation.accuracy.weightAccuracy}% precisión
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-800/50 rounded-lg p-3">
+                        <div className="text-xs text-gray-400 mb-1">Volumen Predicho</div>
+                        <div className="text-sm font-semibold text-white">
+                          {formatNumber(validation.predictions.predictedVolume)}kg
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          vs {formatNumber(validation.actualData.totalVolume)}kg real
+                        </div>
+                        <div className="text-xs font-medium text-green-400">
+                          {validation.accuracy.volumeAccuracy}% precisión
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-800/50 rounded-lg p-3">
+                        <div className="text-xs text-gray-400 mb-1">Confianza Modelo</div>
+                        <div className="text-sm font-semibold text-white">
+                          {validation.predictions.confidence}%
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          confianza original
+                        </div>
+                      </div>
+
+                      <div className="bg-gray-800/50 rounded-lg p-3">
+                        <div className="text-xs text-gray-400 mb-1">Entrenamientos</div>
+                        <div className="text-sm font-semibold text-white">
+                          {validation.actualData.workouts}
+                        </div>
+                        <div className="text-xs text-gray-500">
+                          sesiones reales
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }; 
