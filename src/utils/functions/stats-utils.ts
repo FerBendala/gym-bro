@@ -1367,38 +1367,51 @@ export const calculateExerciseProgress = (exerciseRecords: WorkoutRecord[]): {
 
   const sortedRecords = [...exerciseRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  // Para ejercicios individuales, usar múltiples registros para mayor estabilidad
+  // **CORRECCIÓN CLAVE**: Agrupar por sesiones/fechas antes de calcular progreso
+  const sessionGroups = new Map<string, WorkoutRecord[]>();
+
+  sortedRecords.forEach(record => {
+    const dateKey = new Date(record.date).toDateString();
+    if (!sessionGroups.has(dateKey)) {
+      sessionGroups.set(dateKey, []);
+    }
+    sessionGroups.get(dateKey)!.push(record);
+  });
+
+  // Calcular 1RM promedio por sesión
+  const sessionAverages = Array.from(sessionGroups.entries())
+    .sort(([dateA], [dateB]) => new Date(dateA).getTime() - new Date(dateB).getTime())
+    .map(([date, sessionRecords]) => {
+      const session1RMs = sessionRecords.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30));
+      const avgSession1RM = session1RMs.reduce((sum, rm) => sum + rm, 0) / session1RMs.length;
+      return { date, avg1RM: avgSession1RM };
+    });
+
+  // Para ejercicios individuales, usar múltiples sesiones para mayor estabilidad
   let first1RM: number;
   let last1RM: number;
 
-  if (sortedRecords.length === 2) {
-    // CORREGIDO: Para 2 sesiones, usar directamente primera y última
-    const firstRecord = sortedRecords[0];
-    const lastRecord = sortedRecords[1];
-
-    first1RM = firstRecord.weight * (1 + Math.min(firstRecord.reps, 20) / 30);
-    last1RM = lastRecord.weight * (1 + Math.min(lastRecord.reps, 20) / 30);
+  if (sessionAverages.length === 1) {
+    // Solo una sesión, no hay progreso
+    return { absoluteProgress: 0, percentProgress: 0, first1RM: sessionAverages[0].avg1RM, last1RM: sessionAverages[0].avg1RM };
+  } else if (sessionAverages.length === 2) {
+    // Para 2 sesiones, usar directamente primera y última
+    first1RM = sessionAverages[0].avg1RM;
+    last1RM = sessionAverages[1].avg1RM;
   } else {
-    // Para 3+ sesiones, usar lógica de períodos
-    const firstPeriodSize = Math.min(3, Math.floor(sortedRecords.length / 3));
-    const lastPeriodSize = Math.min(3, Math.floor(sortedRecords.length / 3));
+    // Para 3+ sesiones, usar lógica de períodos basada en sesiones
+    const firstPeriodSize = Math.min(2, Math.floor(sessionAverages.length / 3));
+    const lastPeriodSize = Math.min(2, Math.floor(sessionAverages.length / 3));
 
     // Asegurar que los períodos tengan al menos 1 elemento
     const actualFirstPeriodSize = Math.max(1, firstPeriodSize);
     const actualLastPeriodSize = Math.max(1, lastPeriodSize);
 
-    const firstPeriod = sortedRecords.slice(0, actualFirstPeriodSize);
-    const lastPeriod = sortedRecords.slice(-actualLastPeriodSize);
+    const firstPeriod = sessionAverages.slice(0, actualFirstPeriodSize);
+    const lastPeriod = sessionAverages.slice(-actualLastPeriodSize);
 
-    first1RM = firstPeriod.reduce((sum, r) => {
-      const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-      return sum + oneRM;
-    }, 0) / firstPeriod.length;
-
-    last1RM = lastPeriod.reduce((sum, r) => {
-      const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-      return sum + oneRM;
-    }, 0) / lastPeriod.length;
+    first1RM = firstPeriod.reduce((sum, session) => sum + session.avg1RM, 0) / firstPeriod.length;
+    last1RM = lastPeriod.reduce((sum, session) => sum + session.avg1RM, 0) / lastPeriod.length;
   }
 
   const absoluteProgress = last1RM - first1RM;
