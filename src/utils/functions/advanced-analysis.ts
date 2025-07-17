@@ -1238,7 +1238,6 @@ const calculateNextWeekPredictions = (
   strengthTrend: number,
   volumeTrend: number,
   avgVolume: number,
-  current1RMMax: number
 ): { nextWeekWeight: number; nextWeekVolume: number } => {
   // CORRECCIÓN: Usar misma base temporal que calculateBasicMetrics (última semana completa)
   const lastCompleteWeekRecords = getLastCompleteWeekRecords(validRecords);
@@ -1677,7 +1676,6 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
     trendsData.strengthTrend,
     trendsData.volumeTrend,
     basicMetrics.avgVolume,
-    basicMetrics.current1RMMax
   );
 
   // Calcular predicción de PR

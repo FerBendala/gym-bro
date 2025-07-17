@@ -1,5 +1,6 @@
-import { Calendar, Clock, Dumbbell, Edit, Filter, Search, Target, Trash2, TrendingDown, TrendingUp } from 'lucide-react';
+import { Calendar, Clock, Dumbbell, Edit, Filter, Search, Target, Trash2, TrendingDown, TrendingUp, X } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { deleteWorkoutRecord, getExercises, getWorkoutRecords, updateWorkoutRecord } from '../../../api/database';
 import { Button } from '../../../components/button';
 import { Card, CardContent } from '../../../components/card';
@@ -10,23 +11,345 @@ import { ModernPage, ModernSection } from '../../../components/modern-ui';
 import { Select } from '../../../components/select';
 import { EXERCISE_CATEGORIES, getCategoryColor, getCategoryIcon } from '../../../constants/exercise-categories';
 import { useNotification } from '../../../context/notification-context';
+import { useModalOverflow } from '../../../hooks';
 import type { Exercise, WorkoutRecord } from '../../../interfaces';
 import { formatNumber } from '../../../utils/functions';
+
+interface WorkoutHistoryProps {
+  initialFilter?: {
+    exerciseId?: string;
+    exerciseName?: string;
+  } | null;
+}
+
+interface FilterModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  exercises: Exercise[];
+  searchTerm: string;
+  selectedExercise: string;
+  selectedCategory: string;
+  dateFrom: Date | undefined;
+  dateTo: Date | undefined;
+  sortBy: 'date' | 'exercise' | 'weight' | 'volume';
+  sortOrder: 'asc' | 'desc';
+  onSearchTermChange: (value: string) => void;
+  onSelectedExerciseChange: (value: string) => void;
+  onSelectedCategoryChange: (value: string) => void;
+  onDateFromChange: (value: Date | undefined) => void;
+  onDateToChange: (value: Date | undefined) => void;
+  onSortByChange: (value: 'date' | 'exercise' | 'weight' | 'volume') => void;
+  onSortOrderChange: (value: 'asc' | 'desc') => void;
+  onClearFilters: () => void;
+}
+
+/**
+ * Modal de filtros para el historial de entrenamientos
+ * Renderizado usando Portal para evitar problemas de posicionamiento
+ */
+const FilterModal: React.FC<FilterModalProps> = ({
+  isOpen,
+  onClose,
+  exercises,
+  searchTerm,
+  selectedExercise,
+  selectedCategory,
+  dateFrom,
+  dateTo,
+  sortBy,
+  sortOrder,
+  onSearchTermChange,
+  onSelectedExerciseChange,
+  onSelectedCategoryChange,
+  onDateFromChange,
+  onDateToChange,
+  onSortByChange,
+  onSortOrderChange,
+  onClearFilters
+}) => {
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+
+  // Hook para manejar overflow del body
+  useModalOverflow(isOpen);
+
+  // Crear o encontrar el contenedor del portal una sola vez
+  useEffect(() => {
+    let container = document.getElementById('modal-root');
+
+    if (!container) {
+      container = document.createElement('div');
+      container.id = 'modal-root';
+      document.body.appendChild(container);
+    }
+
+    setPortalContainer(container);
+
+    // Cleanup: no remover el contenedor ya que puede ser usado por otros modales
+    return () => {
+      // Solo limpiar si es necesario, pero mantener el contenedor
+    };
+  }, []);
+
+  // No renderizar nada si el modal no está abierto o no hay contenedor
+  if (!isOpen || !portalContainer) return null;
+
+  const handleBackdropClick = (e: React.MouseEvent) => {
+    if (e.target === e.currentTarget) {
+      onClose();
+    }
+  };
+
+  const modalContent = (
+    <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[80] p-4" onClick={handleBackdropClick}>
+      <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+        {/* Header del modal */}
+        <div className="relative bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20 border-b border-gray-700/50 p-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl">
+                <Filter className="w-6 h-6 text-white" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-white">Filtros de Historial</h3>
+                <p className="text-gray-400">Personaliza la visualización de tus entrenamientos</p>
+              </div>
+            </div>
+            <button
+              onClick={onClose}
+              className="p-2.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200"
+            >
+              <X className="w-6 h-6" />
+            </button>
+          </div>
+        </div>
+
+        {/* Contenido del modal */}
+        <div className="overflow-y-auto max-h-[calc(90vh-150px)] p-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Card de Búsqueda y Selección */}
+            <Card className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/30">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="p-2 bg-blue-600/20 rounded-lg">
+                    <Search className="w-5 h-5 text-blue-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white">Buscar y Filtrar</h3>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Búsqueda */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-300 mb-2 block">
+                      Buscar por nombre de ejercicio
+                    </label>
+                    <Input
+                      type="text"
+                      placeholder="Ej: press banca, sentadillas..."
+                      value={searchTerm}
+                      onChange={(e) => onSearchTermChange(e.target.value)}
+                      className="border-gray-600/50 focus:border-blue-500 focus:bg-gray-700"
+                    />
+                  </div>
+
+                  {/* Ejercicio específico */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-300 mb-2 block flex items-center">
+                      <Dumbbell className="w-4 h-4 mr-2" />
+                      Ejercicio específico
+                    </label>
+                    <Select
+                      value={selectedExercise}
+                      onChange={(e) => onSelectedExerciseChange(e.target.value)}
+                      options={[
+                        { value: 'all', label: 'Todos los ejercicios' },
+                        ...exercises.map(ex => ({ value: ex.id, label: ex.name }))
+                      ]}
+                      className="border-gray-600/50 focus:border-purple-500"
+                    />
+                  </div>
+
+                  {/* Categoría */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-300 mb-2 block flex items-center">
+                      <Target className="w-4 h-4 mr-2" />
+                      Categoría muscular
+                    </label>
+                    <Select
+                      value={selectedCategory}
+                      onChange={(e) => onSelectedCategoryChange(e.target.value)}
+                      options={[
+                        { value: 'all', label: 'Todas las categorías' },
+                        ...EXERCISE_CATEGORIES.map(cat => ({
+                          value: cat,
+                          label: cat
+                        }))
+                      ]}
+                      className="border-gray-600/50 focus:border-green-500"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Card de Fechas y Ordenamiento */}
+            <Card className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/30">
+              <CardContent className="p-6">
+                <div className="flex items-center space-x-3 mb-4">
+                  <div className="p-2 bg-indigo-600/20 rounded-lg">
+                    <Calendar className="w-5 h-5 text-indigo-400" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-white">Fechas y Ordenamiento</h3>
+                </div>
+
+                <div className="space-y-4">
+                  {/* Rango de fechas */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-300 mb-2 block">
+                        Desde
+                      </label>
+                      <DatePicker
+                        value={dateFrom}
+                        onChange={onDateFromChange}
+                        className="border-gray-600/50 focus:border-yellow-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-gray-300 mb-2 block">
+                        Hasta
+                      </label>
+                      <DatePicker
+                        value={dateTo}
+                        onChange={onDateToChange}
+                        className="border-gray-600/50 focus:border-orange-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Ordenamiento */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-sm font-medium text-gray-300 mb-2 block flex items-center">
+                        <TrendingUp className="w-4 h-4 mr-2" />
+                        Ordenar por
+                      </label>
+                      <Select
+                        value={sortBy}
+                        onChange={(e) => onSortByChange(e.target.value as any)}
+                        options={[
+                          { value: 'date', label: '📅 Fecha' },
+                          { value: 'exercise', label: '🏋️ Ejercicio' },
+                          { value: 'weight', label: '⚖️ Peso' },
+                          { value: 'volume', label: '📊 Volumen' }
+                        ]}
+                        className="border-gray-600/50 focus:border-indigo-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="text-sm font-medium text-gray-300 mb-2 block flex items-center">
+                        {sortOrder === 'desc' ? <TrendingDown className="w-4 h-4 mr-2" /> : <TrendingUp className="w-4 h-4 mr-2" />}
+                        Orden
+                      </label>
+                      <Select
+                        value={sortOrder}
+                        onChange={(e) => onSortOrderChange(e.target.value as any)}
+                        options={[
+                          { value: 'desc', label: '⬇️ Descendente' },
+                          { value: 'asc', label: '⬆️ Ascendente' }
+                        ]}
+                        className="border-gray-600/50 focus:border-teal-500"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Accesos rápidos de fechas */}
+                  <div>
+                    <label className="text-sm font-medium text-gray-300 mb-2 block">
+                      Filtros rápidos
+                    </label>
+                    <div className="grid grid-cols-2 gap-2">
+                      <button
+                        onClick={() => {
+                          const today = new Date();
+                          const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
+                          onDateFromChange(weekAgo);
+                          onDateToChange(today);
+                        }}
+                        className="px-3 py-2 bg-blue-600/20 text-blue-300 rounded-lg text-xs hover:bg-blue-600/30 transition-colors border border-blue-500/30"
+                      >
+                        📅 Última semana
+                      </button>
+                      <button
+                        onClick={() => {
+                          const today = new Date();
+                          const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
+                          onDateFromChange(monthAgo);
+                          onDateToChange(today);
+                        }}
+                        className="px-3 py-2 bg-green-600/20 text-green-300 rounded-lg text-xs hover:bg-green-600/30 transition-colors border border-green-500/30"
+                      >
+                        📆 Último mes
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+
+        {/* Footer del modal */}
+        <div className="border-t border-gray-700/50 p-6 bg-gray-800/30">
+          <div className="flex items-center justify-between">
+            <Button
+              onClick={onClearFilters}
+              variant="secondary"
+              className="bg-red-600/20 hover:bg-red-600/30 border-red-500/30 text-red-300"
+            >
+              <Filter className="w-4 h-4 mr-2" />
+              Limpiar todos los filtros
+            </Button>
+            <div className="flex space-x-3">
+              <Button
+                onClick={onClose}
+                variant="secondary"
+              >
+                Cancelar
+              </Button>
+              <Button
+                onClick={onClose}
+                variant="primary"
+              >
+                Aplicar filtros
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  return createPortal(modalContent, portalContainer);
+};
 
 /**
  * Página del historial de entrenamientos con filtros avanzados y edición
  * Adaptada con el diseño visual del balance muscular de referencia
  */
-export const WorkoutHistory: React.FC = () => {
+export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter }) => {
   const [records, setRecords] = useState<WorkoutRecord[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
   const [editingRecord, setEditingRecord] = useState<WorkoutRecord | null>(null);
   const { showNotification } = useNotification();
 
-  // Estados de filtrado
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedExercise, setSelectedExercise] = useState('all');
+  // Estado del modal de filtros
+  const [showFilterModal, setShowFilterModal] = useState(false);
+
+  // Estados de filtrado - inicializar con filtro si se proporciona
+  const [searchTerm, setSearchTerm] = useState(initialFilter?.exerciseName || '');
+  const [selectedExercise, setSelectedExercise] = useState(initialFilter?.exerciseId || 'all');
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
   const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
@@ -69,6 +392,27 @@ export const WorkoutHistory: React.FC = () => {
 
     loadData();
   }, [showNotification]);
+
+  // Actualizar filtros cuando cambie initialFilter
+  useEffect(() => {
+    if (initialFilter) {
+      if (initialFilter.exerciseName) {
+        setSearchTerm(initialFilter.exerciseName);
+      }
+      if (initialFilter.exerciseId) {
+        setSelectedExercise(initialFilter.exerciseId);
+      }
+    }
+  }, [initialFilter]);
+
+  // Función para limpiar filtros
+  const handleClearFilters = () => {
+    setSearchTerm('');
+    setSelectedExercise('all');
+    setSelectedCategory('all');
+    setDateFrom(undefined);
+    setDateTo(undefined);
+  };
 
   // Filtrar y ordenar records
   const filteredAndSortedRecords = useMemo(() => {
@@ -308,218 +652,48 @@ export const WorkoutHistory: React.FC = () => {
     <ModernPage
       title="Historial de Entrenamientos"
       subtitle="Gestiona y revisa tus entrenamientos realizados"
+      headerActions={
+        <div className="flex items-center space-x-3">
+          {/* Botón para abrir filtros */}
+          <Button
+            onClick={() => setShowFilterModal(true)}
+            variant="secondary"
+            className="bg-blue-600/20 hover:bg-blue-600/30 border-blue-500/30"
+          >
+            <Filter className="w-4 h-4 mr-2" />
+            Filtros
+            {hasActiveFilters && (
+              <span className="ml-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                !
+              </span>
+            )}
+          </Button>
+        </div>
+      }
     >
-      {/* Filtros mejorados con diseño visual */}
-      <ModernSection>
-        {/* Resumen de filtros activos */}
-        {hasActiveFilters && (
-          <div className="mb-4 p-4 bg-gradient-to-r from-blue-900/30 to-indigo-900/30 border border-blue-700/30 rounded-xl">
+      {/* Indicador compacto de filtros activos */}
+      {hasActiveFilters && (
+        <ModernSection>
+          <div className="p-3 bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-700/30 rounded-lg mb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
-                <div className="p-2 bg-blue-600/20 rounded-lg">
-                  <Filter className="w-5 h-5 text-blue-400" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-medium text-blue-300">Filtros activos</h3>
-                  <p className="text-xs text-blue-400">
-                    Mostrando {displayRecords.length} de {records.length} entrenamientos
-                  </p>
-                </div>
+                <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+                <span className="text-sm text-blue-300">
+                  Filtros activos - Mostrando {displayRecords.length} de {records.length} entrenamientos
+                </span>
               </div>
               <Button
-                onClick={() => {
-                  setSearchTerm('');
-                  setSelectedExercise('all');
-                  setSelectedCategory('all');
-                  setDateFrom(undefined);
-                  setDateTo(undefined);
-                }}
-                variant="secondary"
+                onClick={handleClearFilters}
+                variant="ghost"
                 size="sm"
-                className="bg-blue-600/20 hover:bg-blue-600/30 border-blue-500/30"
+                className="text-blue-300 hover:text-white hover:bg-blue-600/20"
               >
-                <Filter className="w-4 h-4 mr-2" />
-                Limpiar todos
+                Limpiar
               </Button>
             </div>
           </div>
-        )}
-
-        {/* Cards de filtros organizados */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-
-          {/* Card de Búsqueda y Selección */}
-          <Card className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/30 hover:border-gray-600/50 transition-all duration-200">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="p-2 bg-blue-600/20 rounded-lg">
-                  <Search className="w-5 h-5 text-blue-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-white">Buscar y Filtrar</h3>
-              </div>
-
-              <div className="space-y-4">
-                {/* Búsqueda */}
-                <div>
-                  <label className="text-sm font-medium text-gray-300 mb-2 block">
-                    Buscar por nombre de ejercicio
-                  </label>
-                  <Input
-                    type="text"
-                    placeholder="Ej: press banca, sentadillas..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="border-gray-600/50 focus:border-blue-500 focus:bg-gray-700"
-                  />
-                </div>
-
-                {/* Ejercicio específico */}
-                <div>
-                  <label className="text-sm font-medium text-gray-300 mb-2 block flex items-center">
-                    <Dumbbell className="w-4 h-4 mr-2" />
-                    Ejercicio específico
-                  </label>
-                  <Select
-                    value={selectedExercise}
-                    onChange={(e) => setSelectedExercise(e.target.value)}
-                    options={[
-                      { value: 'all', label: 'Todos los ejercicios' },
-                      ...exercises.map(ex => ({ value: ex.id, label: ex.name }))
-                    ]}
-                    className="border-gray-600/50 focus:border-purple-500"
-                  />
-                </div>
-
-                {/* Categoría */}
-                <div>
-                  <label className="text-sm font-medium text-gray-300 mb-2 block flex items-center">
-                    <Target className="w-4 h-4 mr-2" />
-                    Categoría muscular
-                  </label>
-                  <Select
-                    value={selectedCategory}
-                    onChange={(e) => setSelectedCategory(e.target.value)}
-                    options={[
-                      { value: 'all', label: 'Todas las categorías' },
-                      ...EXERCISE_CATEGORIES.map(cat => ({
-                        value: cat,
-                        label: cat
-                      }))
-                    ]}
-                    className="border-gray-600/50 focus:border-green-500"
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Card de Fechas y Ordenamiento */}
-          <Card className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/30 hover:border-gray-600/50 transition-all duration-200">
-            <CardContent className="p-6">
-              <div className="flex items-center space-x-3 mb-4">
-                <div className="p-2 bg-indigo-600/20 rounded-lg">
-                  <Calendar className="w-5 h-5 text-indigo-400" />
-                </div>
-                <h3 className="text-lg font-semibold text-white">Fechas y Ordenamiento</h3>
-              </div>
-
-              <div className="space-y-4">
-                {/* Rango de fechas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-sm font-medium text-gray-300 mb-2 block">
-                      Desde
-                    </label>
-                    <DatePicker
-                      value={dateFrom}
-                      onChange={setDateFrom}
-                      className="border-gray-600/50 focus:border-yellow-500"
-                    />
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-gray-300 mb-2 block">
-                      Hasta
-                    </label>
-                    <DatePicker
-                      value={dateTo}
-                      onChange={setDateTo}
-                      className="border-gray-600/50 focus:border-orange-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Ordenamiento */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div>
-                    <label className="text-sm font-medium text-gray-300 mb-2 block flex items-center">
-                      <TrendingUp className="w-4 h-4 mr-2" />
-                      Ordenar por
-                    </label>
-                    <Select
-                      value={sortBy}
-                      onChange={(e) => setSortBy(e.target.value as any)}
-                      options={[
-                        { value: 'date', label: '📅 Fecha' },
-                        { value: 'exercise', label: '🏋️ Ejercicio' },
-                        { value: 'weight', label: '⚖️ Peso' },
-                        { value: 'volume', label: '📊 Volumen' }
-                      ]}
-                      className="border-gray-600/50 focus:border-indigo-500"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="text-sm font-medium text-gray-300 mb-2 block flex items-center">
-                      {sortOrder === 'desc' ? <TrendingDown className="w-4 h-4 mr-2" /> : <TrendingUp className="w-4 h-4 mr-2" />}
-                      Orden
-                    </label>
-                    <Select
-                      value={sortOrder}
-                      onChange={(e) => setSortOrder(e.target.value as any)}
-                      options={[
-                        { value: 'desc', label: '⬇️ Descendente' },
-                        { value: 'asc', label: '⬆️ Ascendente' }
-                      ]}
-                      className="border-gray-600/50 focus:border-teal-500"
-                    />
-                  </div>
-                </div>
-
-                {/* Accesos rápidos de fechas */}
-                <div>
-                  <label className="text-sm font-medium text-gray-300 mb-2 block">
-                    Filtros rápidos
-                  </label>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      onClick={() => {
-                        const today = new Date();
-                        const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-                        setDateFrom(weekAgo);
-                        setDateTo(today);
-                      }}
-                      className="px-3 py-2 bg-blue-600/20 text-blue-300 rounded-lg text-xs hover:bg-blue-600/30 transition-colors border border-blue-500/30"
-                    >
-                      📅 Última semana
-                    </button>
-                    <button
-                      onClick={() => {
-                        const today = new Date();
-                        const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1000);
-                        setDateFrom(monthAgo);
-                        setDateTo(today);
-                      }}
-                      className="px-3 py-2 bg-green-600/20 text-green-300 rounded-lg text-xs hover:bg-green-600/30 transition-colors border border-green-500/30"
-                    >
-                      📆 Último mes
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </ModernSection>
+        </ModernSection>
+      )}
 
       {/* Lista de entrenamientos con diseño del balance muscular */}
       <ModernSection>
@@ -877,6 +1051,28 @@ export const WorkoutHistory: React.FC = () => {
           </CardContent>
         </Card>
       </ModernSection>
+
+      {/* Modal de filtros */}
+      <FilterModal
+        isOpen={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        exercises={exercises}
+        searchTerm={searchTerm}
+        selectedExercise={selectedExercise}
+        selectedCategory={selectedCategory}
+        dateFrom={dateFrom}
+        dateTo={dateTo}
+        sortBy={sortBy}
+        sortOrder={sortOrder}
+        onSearchTermChange={setSearchTerm}
+        onSelectedExerciseChange={setSelectedExercise}
+        onSelectedCategoryChange={setSelectedCategory}
+        onDateFromChange={setDateFrom}
+        onDateToChange={setDateTo}
+        onSortByChange={setSortBy}
+        onSortOrderChange={setSortOrder}
+        onClearFilters={handleClearFilters}
+      />
     </ModernPage>
   );
 }; 

@@ -18,6 +18,9 @@ const ModernAppContent = () => {
   const [navigationType, setNavigationType] = useState<NavigationType>('compact');
   const { showNotification } = useNotification();
 
+  // Estado para el filtro inicial del historial
+  const [historyFilter, setHistoryFilter] = useState<{ exerciseId?: string, exerciseName?: string } | null>(null);
+
   // Ejecutar migración al cargar la aplicación
   useEffect(() => {
     const runMigration = async () => {
@@ -36,6 +39,19 @@ const ModernAppContent = () => {
 
     runMigration();
   }, [showNotification]);
+
+  // Función para navegar al historial con filtro
+  const handleGoToHistory = (exerciseId: string, exerciseName: string) => {
+    setHistoryFilter({ exerciseId, exerciseName });
+    navigateTo('history');
+  };
+
+  // Limpiar filtro cuando cambie de tab (excepto si va a historial)
+  useEffect(() => {
+    if (activeTab !== 'history') {
+      setHistoryFilter(null);
+    }
+  }, [activeTab]);
 
   // Obtener información del día actual
   const getCurrentDayInfo = () => {
@@ -102,6 +118,7 @@ const ModernAppContent = () => {
             activeDay={activeDay}
             onDayChange={setActiveDay}
             onOpenAdmin={() => setShowAdmin(true)}
+            onGoToHistory={handleGoToHistory}
           />
         );
       case 'progress':
@@ -111,13 +128,14 @@ const ModernAppContent = () => {
       case 'settings':
         return <ModernSettings />;
       case 'history':
-        return <WorkoutHistory />;
+        return <WorkoutHistory initialFilter={historyFilter} />;
       default:
         return (
           <ModernHome
             activeDay={activeDay}
             onDayChange={setActiveDay}
             onOpenAdmin={() => setShowAdmin(true)}
+            onGoToHistory={handleGoToHistory}
           />
         );
     }

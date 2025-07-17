@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { THEME_RESPONSIVE } from '../../constants/theme';
 import { useOnlineStatus } from '../../hooks';
 import type { DayOfWeek } from '../../interfaces';
@@ -14,15 +14,21 @@ import { useExerciseList } from './hooks';
 export interface ExerciseListProps {
   dayOfWeek: DayOfWeek;
   onOpenAdmin: () => void;
+  onGoToHistory?: (exerciseId: string, exerciseName: string) => void;
 }
 
 /**
  * Componente principal de lista de ejercicios
  * Responsive design con grid adaptativo y spacing móvil optimizado
  */
-export const ExerciseList: React.FC<ExerciseListProps> = ({ dayOfWeek, onOpenAdmin }) => {
+export const ExerciseList: React.FC<ExerciseListProps> = ({ dayOfWeek, onOpenAdmin, onGoToHistory }) => {
   const isOnline = useOnlineStatus();
+  const [isDragModeActive, setIsDragModeActive] = useState(false);
   const { assignments, loading, handleRecordWorkout, handleReorderAssignments, exercisesTrainedToday, workoutRecords } = useExerciseList(dayOfWeek);
+
+  const handleToggleDragMode = () => {
+    setIsDragModeActive(!isDragModeActive);
+  };
 
   if (loading) {
     return <ExerciseListLoadingState />;
@@ -39,6 +45,8 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ dayOfWeek, onOpenAdm
         isOnline={isOnline}
         onOpenAdmin={onOpenAdmin}
         hasExercises={assignments.length > 0}
+        isDragModeActive={isDragModeActive}
+        onToggleDragMode={handleToggleDragMode}
       />
 
       {assignments.length === 0 ? (
@@ -62,6 +70,8 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ dayOfWeek, onOpenAdm
             onReorder={handleReorderAssignments}
             exercisesTrainedToday={exercisesTrainedToday}
             workoutRecords={workoutRecords}
+            isDragModeActive={isDragModeActive}
+            onGoToHistory={onGoToHistory}
           />
         </div>
       )}
