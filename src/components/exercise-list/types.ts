@@ -6,6 +6,7 @@ import type { DayOfWeek, ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdv
 export interface ExerciseListProps {
   dayOfWeek: DayOfWeek;
   onOpenAdmin: () => void;
+  onGoToHistory?: (exerciseId: string, exerciseName: string) => void;
 }
 
 /**
@@ -16,6 +17,8 @@ export interface ExerciseListHeaderProps {
   isOnline: boolean;
   onOpenAdmin: () => void;
   hasExercises?: boolean;
+  isDragModeActive?: boolean;
+  onToggleDragMode?: () => void;
 }
 
 /**
@@ -37,6 +40,8 @@ export interface ExerciseListContentProps {
   onReorder?: (assignments: ExerciseAssignment[]) => Promise<void>;
   exercisesTrainedToday: string[];
   workoutRecords: WorkoutRecord[];
+  isDragModeActive?: boolean;
+  onGoToHistory?: (exerciseId: string, exerciseName: string) => void;
 }
 
 /**

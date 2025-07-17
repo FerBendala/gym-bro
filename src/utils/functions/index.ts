@@ -8,6 +8,7 @@ export * from './calendar-utils';
 export * from './category-analysis';
 export * from './chart-utils';
 export * from './date-filters';
+export * from './export-utils';
 export * from './filter-utils';
 export * from './notification-utils';
 export * from './select-utils';

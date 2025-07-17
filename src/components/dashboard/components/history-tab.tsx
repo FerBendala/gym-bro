@@ -131,9 +131,47 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
       if (index > 0) {
         const previousPoint = sortedData[index - 1];
 
-        // Calcular volumen promedio por sesión para comparación justa
-        const currentAvgVolume = point.totalWorkouts > 0 ? point.value / point.totalWorkouts : 0;
-        const previousAvgVolume = previousPoint.totalWorkouts > 0 ? previousPoint.value / previousPoint.totalWorkouts : 0;
+        // CORRECCIÓN: Comparación justa temporal - mismo punto en ambas semanas
+        const now = new Date();
+        const currentWeekStart = startOfWeek(point.date, { locale: es });
+        const isCurrentWeekIncomplete = point.date.getTime() >= startOfWeek(now, { locale: es }).getTime();
+
+        let currentAvgVolume: number;
+        let previousAvgVolume: number;
+
+        if (isCurrentWeekIncomplete) {
+          // SEMANA ACTUAL INCOMPLETA: Comparar solo hasta el mismo día de la semana
+          const dayOfWeekToCompare = now.getDay(); // 0=domingo, 1=lunes, etc.
+
+          // Obtener registros de semana actual hasta el día actual
+          const currentWeekRecords = records.filter(r => {
+            const rDate = new Date(r.date);
+            const rWeekStart = startOfWeek(rDate, { locale: es });
+            const dayOfRecord = rDate.getDay();
+            return rWeekStart.getTime() === currentWeekStart.getTime() &&
+              dayOfRecord <= dayOfWeekToCompare;
+          });
+
+          // Obtener registros de semana anterior hasta el mismo día de la semana
+          const previousWeekStart = startOfWeek(previousPoint.date, { locale: es });
+          const previousWeekRecords = records.filter(r => {
+            const rDate = new Date(r.date);
+            const rWeekStart = startOfWeek(rDate, { locale: es });
+            const dayOfRecord = rDate.getDay();
+            return rWeekStart.getTime() === previousWeekStart.getTime() &&
+              dayOfRecord <= dayOfWeekToCompare;
+          });
+
+          const currentPartialVolume = currentWeekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+          const previousPartialVolume = previousWeekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+
+          currentAvgVolume = currentWeekRecords.length > 0 ? currentPartialVolume / currentWeekRecords.length : 0;
+          previousAvgVolume = previousWeekRecords.length > 0 ? previousPartialVolume / previousWeekRecords.length : 0;
+        } else {
+          // SEMANA COMPLETA: Comparación normal
+          currentAvgVolume = point.totalWorkouts > 0 ? point.value / point.totalWorkouts : 0;
+          previousAvgVolume = previousPoint.totalWorkouts > 0 ? previousPoint.value / previousPoint.totalWorkouts : 0;
+        }
 
         // Usar volumen promedio por sesión para el cambio
         change = Math.round(currentAvgVolume - previousAvgVolume);

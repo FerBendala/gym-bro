@@ -8,6 +8,7 @@ import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
 import React from 'react';
 import { useDragAndDrop } from '../../../hooks';
+import type { ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '../../../interfaces';
 import { ExerciseCard } from '../../exercise-card';
 import type { ExerciseListContentProps } from '../types';
 
@@ -15,11 +16,13 @@ import type { ExerciseListContentProps } from '../types';
  * Componente envolvente para hacer cada ExerciseCard draggable
  */
 interface SortableExerciseCardProps {
-  assignment: any;
-  onRecord: any;
+  assignment: ExerciseAssignment;
+  onRecord: (assignmentId: string, data: WorkoutFormData | WorkoutFormDataAdvanced) => Promise<void>;
   disabled?: boolean;
   isTrainedToday?: boolean;
-  workoutRecords: any[];
+  workoutRecords: WorkoutRecord[];
+  isDragModeActive?: boolean;
+  onGoToHistory?: (exerciseId: string, exerciseName: string) => void;
 }
 
 const SortableExerciseCard: React.FC<SortableExerciseCardProps> = ({
@@ -27,7 +30,9 @@ const SortableExerciseCard: React.FC<SortableExerciseCardProps> = ({
   onRecord,
   disabled,
   isTrainedToday = false,
-  workoutRecords
+  workoutRecords,
+  isDragModeActive = false,
+  onGoToHistory
 }) => {
   const {
     attributes,
@@ -49,28 +54,33 @@ const SortableExerciseCard: React.FC<SortableExerciseCardProps> = ({
       style={style}
       className={`relative group ${isDragging ? 'opacity-50 scale-105' : ''} transition-all duration-200`}
     >
-      {/* Handle de drag mejorado para móvil */}
-      <div
-        {...attributes}
-        {...listeners}
-        className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-3 cursor-grab active:cursor-grabbing bg-gradient-to-r from-blue-600/80 to-blue-700/80 rounded-r-lg shadow-lg opacity-0 group-hover:opacity-100 hover:from-blue-600 hover:to-blue-700 transition-all duration-200 backdrop-blur-sm border border-blue-500/30 touch-manipulation"
-        title="Arrastra para reordenar"
-        style={{ touchAction: 'none' }}
-      >
-        <GripVertical className="w-4 h-4 text-white drop-shadow-sm" />
-      </div>
+      {/* Handle de drag mejorado para móvil - solo visible cuando está activo el modo drag */}
+      {isDragModeActive && (
+        <div
+          {...attributes}
+          {...listeners}
+          className="absolute left-0 top-1/2 -translate-y-1/2 z-10 p-3 cursor-grab active:cursor-grabbing bg-gradient-to-r from-blue-600/80 to-blue-700/80 rounded-r-lg shadow-lg opacity-0 group-hover:opacity-100 hover:from-blue-600 hover:to-blue-700 transition-all duration-200 backdrop-blur-sm border border-blue-500/30 touch-manipulation"
+          title="Arrastra para reordenar"
+          style={{ touchAction: 'none' }}
+        >
+          <GripVertical className="w-4 h-4 text-white drop-shadow-sm" />
+        </div>
+      )}
 
-      {/* Indicador visual de que es arrastrable */}
-      <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500/30 rounded-full opacity-0 group-hover:opacity-60 transition-opacity duration-200" />
+      {/* Indicador visual de que es arrastrable - solo visible cuando está activo el modo drag */}
+      {isDragModeActive && (
+        <div className="absolute left-1 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-500/30 rounded-full opacity-0 group-hover:opacity-60 transition-opacity duration-200" />
+      )}
 
-      {/* ExerciseCard con padding left para el handle */}
-      <div className="group-hover:pl-4 transition-all duration-200">
+      {/* ExerciseCard con padding left para el handle solo cuando está activo */}
+      <div className={`${isDragModeActive ? 'group-hover:pl-4' : ''} transition-all duration-200`}>
         <ExerciseCard
           assignment={assignment}
           onRecord={onRecord}
           disabled={disabled}
           isTrainedToday={isTrainedToday}
           workoutRecords={workoutRecords}
+          onGoToHistory={onGoToHistory}
         />
       </div>
     </div>
@@ -87,7 +97,9 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
   onRecord,
   onReorder,
   exercisesTrainedToday,
-  workoutRecords
+  workoutRecords,
+  isDragModeActive = false,
+  onGoToHistory
 }) => {
   // Ordenar assignments por el campo order (si existe)
   const sortedAssignments = [...assignments].sort((a, b) => {
@@ -106,6 +118,7 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
   } = useDragAndDrop({
     items: sortedAssignments,
     getItemId: (item) => item.id,
+    enabled: isDragModeActive, // Solo habilitar cuando el modo esté activo
     onReorder: (reorderedItems) => {
       // Actualizar los números de order
       const updatedAssignments = reorderedItems.map((assignment, index) => ({
@@ -153,6 +166,8 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
                 disabled={!isOnline}
                 isTrainedToday={exercisesTrainedToday.includes(assignment.exerciseId)}
                 workoutRecords={workoutRecords}
+                isDragModeActive={isDragModeActive}
+                onGoToHistory={onGoToHistory}
               />
             ))}
           </div>

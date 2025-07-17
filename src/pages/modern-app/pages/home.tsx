@@ -11,6 +11,7 @@ interface ModernHomeProps {
   activeDay: DayOfWeek;
   onDayChange: (day: DayOfWeek) => void;
   onOpenAdmin: () => void;
+  onGoToHistory?: (exerciseId: string, exerciseName: string) => void;
 }
 
 /**
@@ -20,7 +21,8 @@ interface ModernHomeProps {
 export const ModernHome: React.FC<ModernHomeProps> = ({
   activeDay,
   onDayChange,
-  onOpenAdmin
+  onOpenAdmin,
+  onGoToHistory
 }) => {
   const [showDaySelector, setShowDaySelector] = useState(false);
 
@@ -149,6 +151,7 @@ export const ModernHome: React.FC<ModernHomeProps> = ({
         <ExerciseList
           dayOfWeek={activeDay}
           onOpenAdmin={onOpenAdmin}
+          onGoToHistory={onGoToHistory}
         />
       </ModernSection>
 

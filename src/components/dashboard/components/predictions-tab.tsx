@@ -17,6 +17,7 @@ import { formatNumber } from '../../../utils/functions/stats-utils';
 import { Card, CardContent, CardHeader } from '../../card';
 import { StatCard } from '../../stat-card';
 import { InfoTooltip } from '../../tooltip';
+import { usePredictionMetrics } from '../hooks';
 
 interface PredictionsTabProps {
   records: WorkoutRecord[];
@@ -25,8 +26,14 @@ interface PredictionsTabProps {
 export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
   const analysis = useMemo(() => calculateAdvancedAnalysis(records), [records]);
 
+  // Usar el hook personalizado para calcular métricas de forma optimizada
+  const predictionMetrics = usePredictionMetrics(
+    records,
+    analysis.progressPrediction.predictedPR.weight
+  );
+
   // Función utilitaria para validar valores numéricos
-  const safeNumber = (value: any, defaultValue: number = 0): number => {
+  const safeNumber = (value: number | undefined | null, defaultValue: number = 0): number => {
     if (typeof value !== 'number' || isNaN(value) || !isFinite(value)) {
       return defaultValue;
     }
@@ -326,163 +333,19 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
               </div>
             </div>
 
-            {/* Grid de métricas del PR */}
+            {/* Grid de métricas del PR - Usando el hook optimizado */}
             <div className="grid grid-cols-2 gap-2 sm:gap-3">
               <div className="bg-purple-800/30 rounded-lg p-2 sm:p-3 text-center">
                 <div className="text-xs text-purple-300 mb-1">1RM Semana Anterior</div>
                 <div className="text-sm sm:text-lg font-semibold text-white">
-                  {(() => {
-                    if (records.length === 0) return '0.0';
-                    // OPCIÓN A: Usar última semana completa (misma lógica que en advanced-analysis.ts)
-                    const getLastCompleteWeekRecords = (records: WorkoutRecord[]) => {
-                      const weekGroups = new Map<string, WorkoutRecord[]>();
-                      const now = new Date();
-
-                      records.forEach(record => {
-                        const date = new Date(record.date);
-                        // Simular startOfWeek manualmente (lunes como inicio)
-                        const dayOfWeek = date.getDay();
-                        const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1; // Domingo = 0, Lunes = 1
-                        const weekStart = new Date(date);
-                        weekStart.setDate(date.getDate() - daysToSubtract);
-                        weekStart.setHours(0, 0, 0, 0);
-
-                        const weekKey = weekStart.toISOString().split('T')[0];
-                        if (!weekGroups.has(weekKey)) {
-                          weekGroups.set(weekKey, []);
-                        }
-                        weekGroups.get(weekKey)!.push(record);
-                      });
-
-                      // Obtener semana actual
-                      const currentWeekStart = new Date();
-                      const currentDayOfWeek = currentWeekStart.getDay();
-                      const currentDaysToSubtract = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-                      currentWeekStart.setDate(currentWeekStart.getDate() - currentDaysToSubtract);
-                      currentWeekStart.setHours(0, 0, 0, 0);
-
-                      // Filtrar y ordenar semanas excluyendo la actual
-                      const sortedWeeks = Array.from(weekGroups.entries())
-                        .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
-                        .filter(([weekKey]) => {
-                          const weekStart = new Date(weekKey);
-                          return weekStart.getTime() < currentWeekStart.getTime();
-                        });
-
-                      return sortedWeeks.length > 0 ? sortedWeeks[sortedWeeks.length - 1][1] : [];
-                    };
-
-                    const lastWeekRecords = getLastCompleteWeekRecords(records);
-
-                    if (lastWeekRecords.length === 0) {
-                      // Fallback: últimos 5 entrenamientos si no hay semana completa
-                      const recentRecords = records.slice(-5);
-                      if (recentRecords.length === 0) return '0.0';
-
-                      const calculate1RM = (weight: number, reps: number): number => {
-                        if (weight <= 0 || reps <= 0) return 0;
-                        const cappedReps = Math.min(reps, 20);
-                        if (reps <= 5) {
-                          return weight * (1 + cappedReps / 30);
-                        } else {
-                          const denominator = 1.0278 - (0.0278 * cappedReps);
-                          return denominator > 0 ? weight / denominator : weight;
-                        }
-                      };
-
-                      const recent1RMs = recentRecords.map(r => calculate1RM(r.weight, r.reps));
-                      const avgRecent1RM = recent1RMs.reduce((sum, rm) => sum + rm, 0) / recent1RMs.length;
-                      return avgRecent1RM > 0 ? avgRecent1RM.toFixed(1) : '0.0';
-                    }
-
-                    const calculate1RM = (weight: number, reps: number): number => {
-                      if (weight <= 0 || reps <= 0) return 0;
-                      const cappedReps = Math.min(reps, 20);
-                      if (reps <= 5) {
-                        return weight * (1 + cappedReps / 30);
-                      } else {
-                        const denominator = 1.0278 - (0.0278 * cappedReps);
-                        return denominator > 0 ? weight / denominator : weight;
-                      }
-                    };
-
-                    const lastWeek1RMs = lastWeekRecords.map(r => calculate1RM(r.weight, r.reps));
-                    const avgLastWeek1RM = lastWeek1RMs.reduce((sum, rm) => sum + rm, 0) / lastWeek1RMs.length;
-                    return avgLastWeek1RM > 0 ? avgLastWeek1RM.toFixed(1) : '0.0';
-                  })()}kg
+                  {predictionMetrics.formattedBaseline}kg
                 </div>
                 <div className="text-xs text-gray-500">promedio semana anterior completa</div>
               </div>
               <div className="bg-purple-800/30 rounded-lg p-2 sm:p-3 text-center">
                 <div className="text-xs text-purple-300 mb-1">Mejora Esperada</div>
                 <div className="text-sm sm:text-lg font-semibold text-purple-400">
-                  {(() => {
-                    if (records.length === 0) return 'Sin mejora';
-                    // OPCIÓN A: Usar misma lógica de semana anterior que arriba
-                    const getLastCompleteWeekRecords = (records: WorkoutRecord[]) => {
-                      const weekGroups = new Map<string, WorkoutRecord[]>();
-                      const now = new Date();
-
-                      records.forEach(record => {
-                        const date = new Date(record.date);
-                        const dayOfWeek = date.getDay();
-                        const daysToSubtract = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
-                        const weekStart = new Date(date);
-                        weekStart.setDate(date.getDate() - daysToSubtract);
-                        weekStart.setHours(0, 0, 0, 0);
-
-                        const weekKey = weekStart.toISOString().split('T')[0];
-                        if (!weekGroups.has(weekKey)) {
-                          weekGroups.set(weekKey, []);
-                        }
-                        weekGroups.get(weekKey)!.push(record);
-                      });
-
-                      const currentWeekStart = new Date();
-                      const currentDayOfWeek = currentWeekStart.getDay();
-                      const currentDaysToSubtract = currentDayOfWeek === 0 ? 6 : currentDayOfWeek - 1;
-                      currentWeekStart.setDate(currentWeekStart.getDate() - currentDaysToSubtract);
-                      currentWeekStart.setHours(0, 0, 0, 0);
-
-                      const sortedWeeks = Array.from(weekGroups.entries())
-                        .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
-                        .filter(([weekKey]) => {
-                          const weekStart = new Date(weekKey);
-                          return weekStart.getTime() < currentWeekStart.getTime();
-                        });
-
-                      return sortedWeeks.length > 0 ? sortedWeeks[sortedWeeks.length - 1][1] : [];
-                    };
-
-                    const lastWeekRecords = getLastCompleteWeekRecords(records);
-
-                    const calculate1RM = (weight: number, reps: number): number => {
-                      if (weight <= 0 || reps <= 0) return 0;
-                      const cappedReps = Math.min(reps, 20);
-                      if (reps <= 5) {
-                        return weight * (1 + cappedReps / 30);
-                      } else {
-                        const denominator = 1.0278 - (0.0278 * cappedReps);
-                        return denominator > 0 ? weight / denominator : weight;
-                      }
-                    };
-
-                    let avgBaseline1RM = 0;
-                    if (lastWeekRecords.length > 0) {
-                      const lastWeek1RMs = lastWeekRecords.map(r => calculate1RM(r.weight, r.reps));
-                      avgBaseline1RM = lastWeek1RMs.reduce((sum, rm) => sum + rm, 0) / lastWeek1RMs.length;
-                    } else {
-                      // Fallback: últimos 5 entrenamientos
-                      const recentRecords = records.slice(-5);
-                      if (recentRecords.length > 0) {
-                        const recent1RMs = recentRecords.map(r => calculate1RM(r.weight, r.reps));
-                        avgBaseline1RM = recent1RMs.reduce((sum, rm) => sum + rm, 0) / recent1RMs.length;
-                      }
-                    }
-
-                    const improvement = Math.max(0, analysis.progressPrediction.predictedPR.weight - avgBaseline1RM);
-                    return improvement > 0 ? `+${improvement.toFixed(1)}kg` : 'Sin mejora';
-                  })()}
+                  {predictionMetrics.formattedImprovement}
                 </div>
                 <div className="text-xs text-gray-500">vs semana anterior</div>
               </div>

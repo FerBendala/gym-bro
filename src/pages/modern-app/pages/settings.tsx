@@ -1,10 +1,11 @@
-import { Bell, Database, Info, Shield, User } from 'lucide-react';
+import { Bell, Database, Download, Info, Shield, User } from 'lucide-react';
 import React, { useState } from 'react';
 import { AdminPanelPage } from '../../../components/admin-panel/admin-panel-page';
+import { DataExport } from '../../../components/data-export';
 import { MODERN_THEME } from '../../../constants/modern-theme';
 import { cn } from '../../../utils/functions';
 
-type SettingsSection = 'main' | 'admin' | 'profile' | 'notifications' | 'about';
+type SettingsSection = 'main' | 'admin' | 'export' | 'profile' | 'notifications' | 'about';
 
 interface SettingsItem {
   id: SettingsSection;
@@ -15,7 +16,7 @@ interface SettingsItem {
 }
 
 /**
- * Página de configuración con administración de ejercicios
+ * Página de configuración con administración de ejercicios y exportación de datos
  * Incluye navegación a diferentes secciones de configuración
  */
 export const ModernSettings: React.FC = () => {
@@ -27,6 +28,12 @@ export const ModernSettings: React.FC = () => {
       label: 'Administración de Ejercicios',
       icon: Database,
       description: 'Gestionar ejercicios y asignaciones por día'
+    },
+    {
+      id: 'export',
+      label: 'Exportar Datos',
+      icon: Download,
+      description: 'Descargar todos tus datos en JSON, CSV o Excel'
     },
     {
       id: 'profile',
@@ -157,6 +164,14 @@ export const ModernSettings: React.FC = () => {
           <div>
             {renderSectionHeader('Administración de Ejercicios', () => setActiveSection('main'))}
             <AdminPanelPage />
+          </div>
+        );
+
+      case 'export':
+        return (
+          <div>
+            {renderSectionHeader('Exportar Datos', () => setActiveSection('main'))}
+            <DataExport />
           </div>
         );
 

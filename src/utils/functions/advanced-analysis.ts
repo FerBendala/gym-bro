@@ -550,13 +550,6 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
     return recordDate >= previousWeekStart && recordDate <= previousWeekEnd;
   });
 
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[OPCIÓN A] 🔄 Análisis Recuperación:`);
-    console.log(`📅 Semana anterior: ${lastWeekStart.toISOString().split('T')[0]} - ${lastWeekEnd.toISOString().split('T')[0]} (${recentRecords.length} registros)`);
-    console.log(`📅 Semana previa: ${previousWeekStart.toISOString().split('T')[0]} - ${previousWeekEnd.toISOString().split('T')[0]} (${olderRecords.length} registros)`);
-    console.log(`📅 Excluida semana actual: desde ${currentWeekStart.toISOString().split('T')[0]}`);
-  }
-
   // **CORRECCIÓN CLAVE**: Calcular tanto volumen total (para stress) como promedio por sesión (para comparación justa)
   let recentVolume = recentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
   let olderVolume = olderRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
@@ -582,10 +575,6 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
 
     if (olderRecords.length === 0 && older7Days.length > 0) {
       olderVolume = older7Days.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-    }
-
-    if (process.env.NODE_ENV === 'development' && (recent7Days.length > 0 || older7Days.length > 0)) {
-      console.log(`[OPCIÓN A] ⚠️ Fallback recuperación: usando últimos 7-14 días`);
     }
   }
 
@@ -729,21 +718,6 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
     trend,
     consistency: Math.round(Math.min(100, Math.max(0, 100 - Math.abs(volumeChange))) * 10) / 10
   };
-
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[OPCIÓN A] 📊 Resultados Recuperación:`);
-    console.log(`⏱️ Tiempo recuperación: ${predictedRecoveryTime}h`);
-    console.log(`📉 Cambio volumen: ${volumeChange.toFixed(1)}% (${fatigueHistory.trend})`);
-    console.log(`🎯 Consistencia: ${fatigueHistory.consistency}%`);
-    console.log(`💪 Índice fatiga: ${fatigueIndex} (${fatigueIndex < 50 ? 'BAJO' : 'ALTO'})`);
-    console.log(`😴 Días recuperación: ${recoveryDays} (${recoveryDays <= 2 ? 'RECIENTE' : 'EXTENDIDO'})`);
-    console.log(`🧠 Contexto: Vol+${volumeChange.toFixed(1)}% + Fatiga=${fatigueIndex} + Recup=${recoveryDays}d → ${fatigueHistory.trend}`);
-    console.log(`📅 Frecuencia semanal: ${weeklyFrequency} días únicos`);
-    console.log(`🔍 Vol reciente: ${recentVolume}kg, Vol anterior: ${olderVolume}kg`);
-    console.log(`📊 Promedio reciente: ${recentAvgVolume.toFixed(1)}kg/sesión vs ${olderAvgVolume.toFixed(1)}kg/sesión`);
-  }
-
-
 
   return {
     fatigueIndex,
@@ -955,8 +929,9 @@ const validateDataSufficiency = (records: WorkoutRecord[]): {
 
 /**
  * Obtiene registros de la última semana completa (excluyendo semana actual)
+ * Esta función asegura consistencia temporal para todas las predicciones
  */
-const getLastCompleteWeekRecords = (records: WorkoutRecord[]): WorkoutRecord[] => {
+export const getLastCompleteWeekRecords = (records: WorkoutRecord[]): WorkoutRecord[] => {
   if (records.length === 0) return [];
 
   const weekGroups = new Map<string, WorkoutRecord[]>();
@@ -1263,7 +1238,6 @@ const calculateNextWeekPredictions = (
   strengthTrend: number,
   volumeTrend: number,
   avgVolume: number,
-  current1RMMax: number
 ): { nextWeekWeight: number; nextWeekVolume: number } => {
   // CORRECCIÓN: Usar misma base temporal que calculateBasicMetrics (última semana completa)
   const lastCompleteWeekRecords = getLastCompleteWeekRecords(validRecords);
@@ -1276,20 +1250,12 @@ const calculateNextWeekPredictions = (
     const lastWeekWorkingWeights = lastCompleteWeekRecords.map(r => r.weight);
     avgRecentWorking = lastWeekWorkingWeights.reduce((sum, w) => sum + w, 0) / lastWeekWorkingWeights.length;
     maxRecentWorking = Math.max(...lastWeekWorkingWeights);
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log(`[OPCIÓN A] 🏋️ Peso trabajo semana anterior: ${avgRecentWorking.toFixed(1)}kg (promedio), ${maxRecentWorking}kg (máximo)`);
-    }
   } else {
     // Fallback: últimos 5 entrenamientos si no hay semana anterior completa
     const recentWorkingWeights = validRecords.slice(-5).map(r => r.weight);
     if (recentWorkingWeights.length > 0) {
       avgRecentWorking = recentWorkingWeights.reduce((sum, w) => sum + w, 0) / recentWorkingWeights.length;
       maxRecentWorking = Math.max(...recentWorkingWeights);
-
-      if (process.env.NODE_ENV === 'development') {
-        console.log(`[OPCIÓN A] ⚠️ Fallback peso trabajo: ${avgRecentWorking.toFixed(1)}kg (últimos 5 entrenamientos)`);
-      }
     }
   }
 
@@ -1710,7 +1676,6 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
     trendsData.strengthTrend,
     trendsData.volumeTrend,
     basicMetrics.avgVolume,
-    basicMetrics.current1RMMax
   );
 
   // Calcular predicción de PR
@@ -2933,6 +2898,67 @@ export const testPredictionRanges = (records: WorkoutRecord[]): { valid: boolean
   return {
     valid: issues.length === 0,
     issues
+  };
+};
+
+// ========================================
+// FUNCIONES ESPECÍFICAS PARA FRONTEND
+// ========================================
+
+/**
+ * Calcula el 1RM promedio de la última semana completa
+ * Usa la misma lógica temporal que las predicciones
+ */
+export const calculateBaseline1RM = (records: WorkoutRecord[]): number => {
+  const lastWeekRecords = getLastCompleteWeekRecords(records);
+
+  if (lastWeekRecords.length === 0) {
+    // Fallback: últimos 5 entrenamientos si no hay semana completa
+    const recentRecords = records.slice(-5);
+    if (recentRecords.length === 0) return 0;
+
+    const recent1RMs = recentRecords.map(r => calculateOptimal1RM(r.weight, r.reps));
+    return recent1RMs.reduce((sum, rm) => sum + rm, 0) / recent1RMs.length;
+  }
+
+  const lastWeek1RMs = lastWeekRecords.map(r => calculateOptimal1RM(r.weight, r.reps));
+  return lastWeek1RMs.reduce((sum, rm) => sum + rm, 0) / lastWeek1RMs.length;
+};
+
+/**
+ * Calcula la mejora esperada del PR vs baseline
+ */
+export const calculatePRImprovement = (records: WorkoutRecord[], predictedPRWeight: number): number => {
+  const baseline1RM = calculateBaseline1RM(records);
+  return Math.max(0, predictedPRWeight - baseline1RM);
+};
+
+/**
+ * Interfaz para métricas calculadas del frontend
+ */
+export interface PredictionMetrics {
+  baseline1RM: number;
+  improvement: number;
+  formattedBaseline: string;
+  formattedImprovement: string;
+}
+
+/**
+ * Calcula todas las métricas necesarias para el frontend de predicciones
+ * Optimizada para usarse con useMemo
+ */
+export const calculatePredictionMetrics = (
+  records: WorkoutRecord[],
+  predictedPRWeight: number
+): PredictionMetrics => {
+  const baseline1RM = calculateBaseline1RM(records);
+  const improvement = calculatePRImprovement(records, predictedPRWeight);
+
+  return {
+    baseline1RM,
+    improvement,
+    formattedBaseline: baseline1RM > 0 ? baseline1RM.toFixed(1) : '0.0',
+    formattedImprovement: improvement > 0 ? `+${improvement.toFixed(1)}kg` : 'Sin mejora'
   };
 };
 

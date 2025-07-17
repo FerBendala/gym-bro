@@ -10,7 +10,9 @@ export const ExerciseListHeader: React.FC<ExerciseListHeaderProps> = ({
   dayOfWeek,
   isOnline,
   onOpenAdmin,
-  hasExercises = false
+  hasExercises = false,
+  isDragModeActive = false,
+  onToggleDragMode
 }) => {
   return (
     <div className="flex items-center justify-between mb-6 mt-8">
@@ -20,29 +22,43 @@ export const ExerciseListHeader: React.FC<ExerciseListHeaderProps> = ({
             {dayOfWeek}
           </h2>
           <div className="flex items-center space-x-4">
-            {/* Tooltip de drag and drop */}
-            {hasExercises && (
-              <div className="flex items-center space-x-2 text-xs text-gray-400 bg-gray-800/50 px-2 py-1 rounded-lg">
-                <Move className="w-3 h-3" />
-                <span className="hidden sm:inline">Arrastra para reordenar</span>
-                <span className="sm:hidden">Arrastra</span>
-              </div>
-            )}
             <ConnectionIndicator isOnline={isOnline} />
           </div>
         </div>
       </div>
 
-      {/* Botón de configurar más visible y atractivo */}
-      <button
-        onClick={onOpenAdmin}
-        className="inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
-      >
-        <div className="flex items-center space-x-2">
-          <Plus className="w-4 h-4" />
-          <span className="font-medium text-sm">Añadir Ejercicio</span>
-        </div>
-      </button>
+      {/* Botones de acción */}
+      <div className="flex items-center space-x-2">
+        {/* Botón Arrastrar - solo visible cuando hay ejercicios */}
+        {hasExercises && onToggleDragMode && (
+          <button
+            onClick={onToggleDragMode}
+            className={`inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm ${isDragModeActive
+                ? 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500'
+                : 'bg-gray-700 text-gray-300 hover:bg-gray-600 hover:text-white focus:ring-gray-500'
+              }`}
+            title={isDragModeActive ? 'Desactivar modo arrastrar' : 'Activar modo arrastrar para reordenar ejercicios'}
+          >
+            <div className="flex items-center space-x-2">
+              <Move className="w-4 h-4" />
+              <span className="font-medium text-sm">
+                {isDragModeActive ? 'Desactivar' : 'Arrastrar'}
+              </span>
+            </div>
+          </button>
+        )}
+
+        {/* Botón Añadir Ejercicio */}
+        <button
+          onClick={onOpenAdmin}
+          className="inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed px-4 py-2 text-sm bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500"
+        >
+          <div className="flex items-center space-x-2">
+            <Plus className="w-4 h-4" />
+            <span className="font-medium text-sm">Añadir Ejercicio</span>
+          </div>
+        </button>
+      </div>
     </div>
   );
 }; 

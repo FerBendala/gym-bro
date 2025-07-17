@@ -1,6 +1,7 @@
 import { Calendar, Dumbbell, TrendingUp, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { useModalOverflow } from '../../../hooks';
 import { formatNumber } from '../../../utils/functions';
 import type { ExerciseModalProps } from '../types';
 import { ExerciseCardForm } from './exercise-card-form';
@@ -21,6 +22,9 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
   lastWorkoutSeries = []
 }) => {
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+
+  // Hook para manejar overflow del body
+  useModalOverflow(isOpen);
 
   // Crear o encontrar el contenedor del portal una sola vez
   useEffect(() => {
@@ -94,7 +98,7 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
 
   const modalContent = (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[60] p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] p-4"
       onClick={handleBackdropClick}
     >
       <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl max-w-2xl w-full max-h-[95vh] overflow-hidden transform transition-all duration-300">

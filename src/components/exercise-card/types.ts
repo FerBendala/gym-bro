@@ -9,6 +9,7 @@ export interface ExerciseCardProps {
   onRecord: (assignmentId: string, data: WorkoutFormData | WorkoutFormDataAdvanced) => Promise<void>;
   disabled?: boolean;
   isTrainedToday?: boolean;
+  onGoToHistory?: (exerciseId: string, exerciseName: string) => void;
 }
 
 /**
@@ -19,6 +20,7 @@ export interface ExerciseCardHeaderProps {
   disabled: boolean;
   onToggleModal: () => void;
   onShowPreview: () => void;
+  onGoToHistory?: (exerciseId: string, exerciseName: string) => void;
 }
 
 /**

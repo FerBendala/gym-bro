@@ -1,7 +1,8 @@
 import { TrendingUp, Zap } from 'lucide-react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { WorkoutRecord } from '../../interfaces';
 import { calculateExerciseProgress, formatNumber } from '../../utils/functions';
+import { Button } from '../button';
 import { Card, CardContent, CardHeader } from '../card';
 import { InfoTooltip } from '../tooltip';
 
@@ -13,6 +14,9 @@ export interface ExerciseAnalyticsProps {
  * Componente de analytics por ejercicio
  */
 export const ExerciseAnalytics: React.FC<ExerciseAnalyticsProps> = ({ records }) => {
+  // Estado para manejar la categoría seleccionada
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
   const exerciseAnalysis = useMemo(() => {
     if (records.length === 0) return [];
 
@@ -335,14 +339,6 @@ export const ExerciseAnalytics: React.FC<ExerciseAnalyticsProps> = ({ records })
           </div>
         </CardContent>
       </Card>
-
-      {/* Resumen de Balance Muscular Mejorado */}
-      <MuscleBalanceSummary
-        records={selectedCategory === 'all' ? records : records.filter(record =>
-          record.exercise?.categories?.includes(selectedCategory)
-        )}
-        selectedCategory={selectedCategory}
-      />
     </div>
   );
 }; 

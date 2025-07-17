@@ -19,7 +19,7 @@ interface ExerciseCardWithRecordsProps extends ExerciseCardProps {
   workoutRecords: WorkoutRecord[];
 }
 
-export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignment, onRecord, disabled = false, isTrainedToday = false, workoutRecords }) => {
+export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignment, onRecord, disabled = false, isTrainedToday = false, workoutRecords, onGoToHistory }) => {
   const {
     showModal,
     loading,
@@ -62,6 +62,7 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignmen
             disabled={disabled}
             onToggleModal={toggleModal}
             onShowPreview={() => setShowPreview(true)}
+            onGoToHistory={onGoToHistory}
           />
 
           {assignment.exercise?.description && (
@@ -105,6 +106,15 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignmen
         advancedFormMethods={advancedFormMethods}
         lastWorkoutSeries={lastWorkoutSeries}
       />
+
+      {/* Modal de vista previa completa */}
+      {showPreview && assignment.exercise?.url && (
+        <URLPreview
+          url={assignment.exercise.url}
+          showFullPreview={true}
+          onClose={() => setShowPreview(false)}
+        />
+      )}
     </>
   );
 };

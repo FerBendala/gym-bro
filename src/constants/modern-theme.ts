@@ -237,7 +237,7 @@ export const MODERN_COMPONENTS = {
   },
 
   modal: {
-    overlay: 'fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-50',
+    overlay: 'fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[70]',
     container: 'bg-gray-900/95 backdrop-blur-md rounded-2xl border border-gray-700/50 shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden',
     header: 'flex items-center justify-between p-6 border-b border-gray-700/50',
     content: 'overflow-y-auto',

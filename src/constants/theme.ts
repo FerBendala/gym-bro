@@ -62,7 +62,7 @@ export const THEME_CONTAINERS = {
     } satisfies Record<UIVariant, string>
   },
   modal: {
-    overlay: 'fixed inset-0 bg-black/50 flex items-end lg:items-center justify-center p-0 lg:p-4 z-[60]',
+    overlay: 'fixed inset-0 bg-black/50 flex items-end lg:items-center justify-center p-0 lg:p-4 z-[70]',
     container: 'w-full h-full lg:h-auto lg:max-h-[90vh] bg-gray-900 rounded-t-lg lg:rounded-lg lg:max-w-4xl xl:max-w-6xl overflow-hidden',
     header: 'flex items-center justify-between p-4 sm:p-6 border-b border-gray-700',
     content: 'overflow-y-auto h-[calc(100vh-80px)] lg:max-h-[calc(90vh-80px)] p-4 sm:p-6 scroll-smooth'
@@ -250,15 +250,18 @@ export const THEME_SPINNER = {
  * Reutilizable en Notification, Toast, Alert, etc.
  */
 export const THEME_NOTIFICATION = {
-  base: 'fixed top-4 right-4 z-[70] animate-slide-in',
-  container: 'border rounded-lg p-4 max-w-sm shadow-lg backdrop-blur-sm',
-  content: 'flex items-start',
-  icon: 'w-5 h-5 text-white mt-0.5 mr-3 flex-shrink-0',
+  base: 'fixed top-4 right-4 z-[99999] animate-slide-in',
+  container: 'min-w-80 max-w-sm rounded-lg shadow-lg border backdrop-blur-sm',
+  content: 'flex items-start space-x-3 p-4',
+  icon: 'w-5 h-5 mt-0.5 flex-shrink-0',
   message: {
-    base: 'text-white text-sm font-medium leading-relaxed',
-    helper: 'text-white/80 text-xs mt-1'
+    base: 'text-sm flex-1',
+    success: 'text-green-300',
+    error: 'text-red-300',
+    warning: 'text-yellow-300',
+    info: 'text-blue-300'
   },
-  closeButton: 'ml-2 text-white/80 hover:text-white transition-colors p-1 rounded-md hover:bg-white/10',
+  close: 'ml-auto flex-shrink-0 text-gray-400 hover:text-gray-300 transition-colors',
   closeIcon: 'w-4 h-4',
   progressBar: {
     container: 'mt-3 h-1 bg-white/20 rounded-full overflow-hidden',
@@ -266,19 +269,19 @@ export const THEME_NOTIFICATION = {
   },
   types: {
     success: {
-      background: 'bg-green-600 border-green-500 shadow-green-500/20',
+      background: 'bg-green-900/90 border-green-700',
       duration: 4000
     },
     error: {
-      background: 'bg-red-600 border-red-500 shadow-red-500/20',
+      background: 'bg-red-900/90 border-red-700',
       duration: 6000
     },
     warning: {
-      background: 'bg-yellow-600 border-yellow-500 shadow-yellow-500/20',
-      duration: 4000
+      background: 'bg-yellow-900/90 border-yellow-700',
+      duration: 5000
     },
     info: {
-      background: 'bg-blue-600 border-blue-500 shadow-blue-500/20',
+      background: 'bg-blue-900/90 border-blue-700',
       duration: 4000
     }
   }
@@ -485,14 +488,14 @@ export const THEME_URL_PREVIEW = {
     message: 'text-sm text-gray-400 truncate flex-1'
   },
   full: {
-    overlay: 'fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center p-4 z-50',
-    container: 'bg-gray-900 rounded-lg max-w-4xl w-full max-h-[90vh] overflow-hidden',
-    header: 'flex items-center justify-between p-4 border-b border-gray-700',
-    title: 'text-lg font-semibold text-white',
-    content: 'p-4',
-    footer: 'p-4 border-t border-gray-700 bg-gray-800',
+    overlay: 'fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]',
+    container: 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden transform transition-all duration-300',
+    header: 'relative bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20 border-b border-gray-700/50 p-6',
+    title: 'text-2xl font-bold text-white mb-1 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent',
+    content: 'overflow-y-auto max-h-[calc(95vh-180px)] p-6',
+    footer: 'border-t border-gray-700/50 p-6 bg-gray-800/30',
     footerContent: 'flex items-center justify-between',
-    url: 'text-sm text-gray-400 truncate flex-1 mr-4'
+    url: 'text-sm text-gray-400 bg-gray-800/30 px-3 py-1.5 rounded-full border border-gray-600/30 inline-block'
   },
   media: {
     iframe: 'w-full h-full rounded-lg',
@@ -509,34 +512,19 @@ export const THEME_URL_PREVIEW = {
   },
   types: {
     youtube: {
-      colors: 'bg-red-600/20 text-red-400 border-red-600/30',
-      background: 'bg-red-600/20',
-      text: 'text-red-400',
-      border: 'border-red-600/30'
+      colors: 'border-red-700 bg-red-900/20 hover:bg-red-900/30'
     },
     video: {
-      colors: 'bg-purple-600/20 text-purple-400 border-purple-600/30',
-      background: 'bg-purple-600/20',
-      text: 'text-purple-400',
-      border: 'border-purple-600/30'
+      colors: 'border-purple-700 bg-purple-900/20 hover:bg-purple-900/30'
     },
     image: {
-      colors: 'bg-green-600/20 text-green-400 border-green-600/30',
-      background: 'bg-green-600/20',
-      text: 'text-green-400',
-      border: 'border-green-600/30'
+      colors: 'border-green-700 bg-green-900/20 hover:bg-green-900/30'
     },
     website: {
-      colors: 'bg-blue-600/20 text-blue-400 border-blue-600/30',
-      background: 'bg-blue-600/20',
-      text: 'text-blue-400',
-      border: 'border-blue-600/30'
+      colors: 'border-blue-700 bg-blue-900/20 hover:bg-blue-900/30'
     },
     default: {
-      colors: 'bg-gray-600/20 text-gray-400 border-gray-600/30',
-      background: 'bg-gray-600/20',
-      text: 'text-gray-400',
-      border: 'border-gray-600/30'
+      colors: 'border-gray-700 bg-gray-800 hover:bg-gray-750'
     }
   }
 } as const;

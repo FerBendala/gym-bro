@@ -13,12 +13,13 @@ interface UseDragAndDropOptions {
   onReorder?: (items: any[]) => void;
   items: any[];
   getItemId: (item: any) => string;
+  enabled?: boolean; // Nuevo parámetro para habilitar/deshabilitar
 }
 
-export const useDragAndDrop = ({ onReorder, items, getItemId }: UseDragAndDropOptions) => {
+export const useDragAndDrop = ({ onReorder, items, getItemId, enabled = true }: UseDragAndDropOptions) => {
   const [isDragging, setIsDragging] = useState(false);
 
-  // Configuración optimizada de sensores para móvil
+  // Configuración optimizada de sensores para móvil - solo si está habilitado
   const sensors = useSensors(
     // TouchSensor para mejor soporte móvil
     useSensor(TouchSensor, {
@@ -27,6 +28,8 @@ export const useDragAndDrop = ({ onReorder, items, getItemId }: UseDragAndDropOp
         delay: 250,
         tolerance: 5,
       },
+      // Deshabilitar si no está habilitado
+      disabled: !enabled,
     }),
     // PointerSensor para desktop
     useSensor(PointerSensor, {
@@ -34,22 +37,28 @@ export const useDragAndDrop = ({ onReorder, items, getItemId }: UseDragAndDropOp
       activationConstraint: {
         distance: 8,
       },
+      // Deshabilitar si no está habilitado
+      disabled: !enabled,
     }),
     useSensor(KeyboardSensor, {
       coordinateGetter: (event, args) => {
         const { currentCoordinates } = args;
         return currentCoordinates;
       },
+      // Deshabilitar si no está habilitado
+      disabled: !enabled,
     })
   );
 
   const handleDragStart = () => {
+    if (!enabled) return;
     setIsDragging(true);
     // Prevenir scroll durante el drag en móvil
     document.body.style.overflow = 'hidden';
   };
 
   const handleDragEnd = (event: DragEndEvent) => {
+    if (!enabled) return;
     setIsDragging(false);
     // Restaurar scroll
     document.body.style.overflow = '';
@@ -74,7 +83,7 @@ export const useDragAndDrop = ({ onReorder, items, getItemId }: UseDragAndDropOp
 
   return {
     sensors,
-    isDragging,
+    isDragging: isDragging && enabled, // Solo mostrar isDragging si está habilitado
     handleDragStart,
     handleDragEnd,
     collisionDetection: closestCenter,
