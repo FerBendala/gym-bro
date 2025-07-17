@@ -3,6 +3,21 @@ import { es } from 'date-fns/locale';
 import type { WorkoutRecord } from '../../interfaces';
 
 /**
+ * Calcula el volumen real de un registro usando series individuales si están disponibles
+ */
+const calculateRealVolume = (record: WorkoutRecord): number => {
+  // Si tiene series individuales, calcular volumen sumando cada serie
+  if (record.individualSets && record.individualSets.length > 0) {
+    return record.individualSets.reduce((total, set) => {
+      return total + (set.weight * set.reps);
+    }, 0);
+  }
+
+  // Fallback: usar valores agregados
+  return record.weight * record.reps * record.sets;
+};
+
+/**
  * Interfaz para métricas por día de la semana mejorada
  */
 export interface DayMetrics {
@@ -213,39 +228,96 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
     // **CORRECCIÓN CLAVE**: Tendencia comparando mismo día de semanas diferentes
     let trend = 0;
 
-    if (workoutCount >= 2) {
-      // Obtener todos los entrenamientos de este día específico, ordenados por fecha
+    if (workoutCount >= 3) {
+      // Calcular tendencias con 3+ entrenamientos usando lógica realista
       const thisDayRecords = dayWorkouts.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-      // Comparar últimas ocurrencias vs primeras ocurrencias del mismo día
-      const halfPoint = Math.floor(thisDayRecords.length / 2);
+      if (workoutCount >= 4) {
+        // CORRECCIÓN CLAVE: Verificar si hay distribución temporal real
+        const uniqueDates = new Set(thisDayRecords.map(r => r.date.toDateString()));
 
-      if (halfPoint >= 1) {
-        const olderOccurrences = thisDayRecords.slice(0, halfPoint);
-        const recentOccurrences = thisDayRecords.slice(halfPoint);
+        if (uniqueDates.size <= 2) {
+          // Si todos los entrenamientos están en 1-2 días, no calcular tendencia temporal
+          trend = 10; // Tendencia positiva leve por actividad consistente
+        } else {
+          // Solo si hay distribución temporal real, calcular tendencia
+          const halfPoint = Math.floor(thisDayRecords.length / 2);
+          const olderOccurrences = thisDayRecords.slice(0, halfPoint);
+          const recentOccurrences = thisDayRecords.slice(halfPoint);
 
-        // Calcular volumen promedio por sesión para cada período
-        const olderAvgVolume = olderOccurrences.reduce((sum, r) =>
-          sum + (r.weight * r.reps * r.sets), 0) / olderOccurrences.length;
+          const olderAvgVolume = olderOccurrences.reduce((sum, r) =>
+            sum + calculateRealVolume(r), 0) / olderOccurrences.length;
 
-        const recentAvgVolume = recentOccurrences.reduce((sum, r) =>
-          sum + (r.weight * r.reps * r.sets), 0) / recentOccurrences.length;
+          const recentAvgVolume = recentOccurrences.reduce((sum, r) =>
+            sum + calculateRealVolume(r), 0) / recentOccurrences.length;
 
-        // Calcular tendencia porcentual basada en volumen promedio por sesión
-        if (olderAvgVolume > 0) {
-          const rawTrend = ((recentAvgVolume - olderAvgVolume) / olderAvgVolume) * 100;
-
-          // Aplicar threshold para evitar fluctuaciones menores
-          if (Math.abs(rawTrend) >= 10) {
-            trend = Math.round(rawTrend);
-            // Limitar a rango razonable
-            trend = Math.max(-100, Math.min(100, trend));
+          if (olderAvgVolume > 0) {
+            const rawTrend = ((recentAvgVolume - olderAvgVolume) / olderAvgVolume) * 100;
+            // Aplicar threshold realista para detectar cambios significativos
+            if (Math.abs(rawTrend) >= 8) {
+              trend = Math.max(-30, Math.min(30, Math.round(rawTrend * 0.6))); // Factor conservador
+            } else {
+              trend = 5; // Tendencia positiva leve por defecto
+            }
+          } else if (recentAvgVolume > 0) {
+            trend = 25; // Comenzó a entrenar en este día
           }
-        } else if (recentAvgVolume > 0) {
-          // Comenzó a entrenar en este día
-          trend = 50; // Tendencia positiva moderada
+        }
+      } else {
+        // Para exactamente 3 entrenamientos: verificar distribución temporal
+        const uniqueDates = new Set(thisDayRecords.map(r => r.date.toDateString()));
+
+        if (uniqueDates.size <= 1) {
+          // Si todos los entrenamientos están en el mismo día
+          trend = 8; // Tendencia positiva leve por actividad
+        } else {
+          // Si hay distribución temporal, comparar primer vs último
+          const firstVolume = calculateRealVolume(thisDayRecords[0]);
+          const lastVolume = calculateRealVolume(thisDayRecords[2]);
+
+          if (firstVolume > 0) {
+            const rawTrend = ((lastVolume - firstVolume) / firstVolume) * 100;
+            // Threshold más bajo para pocos datos
+            if (Math.abs(rawTrend) >= 12) {
+              trend = Math.max(-20, Math.min(20, Math.round(rawTrend * 0.5))); // Factor muy conservador
+            } else {
+              trend = 5; // Leve positivo por defecto con pocos datos
+            }
+          } else {
+            trend = 5;
+          }
         }
       }
+    } else if (workoutCount === 2) {
+      // Para 2 entrenamientos: verificar si están en días diferentes
+      const thisDayRecords = dayWorkouts.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      const uniqueDates = new Set(thisDayRecords.map(r => r.date.toDateString()));
+
+      if (uniqueDates.size <= 1) {
+        // Si ambos entrenamientos están en el mismo día
+        trend = 6; // Tendencia positiva leve por actividad
+      } else {
+        // Si están en días diferentes, comparar con mucha cautela
+        const firstVolume = calculateRealVolume(thisDayRecords[0]);
+        const lastVolume = calculateRealVolume(thisDayRecords[1]);
+
+        if (firstVolume > 0) {
+          const rawTrend = ((lastVolume - firstVolume) / firstVolume) * 100;
+          // Solo marcar tendencia si hay cambio muy significativo
+          if (rawTrend > 25) {
+            trend = Math.min(15, Math.round(rawTrend * 0.3)); // Factor muy conservador
+          } else if (rawTrend < -30) {
+            trend = Math.max(-10, Math.round(rawTrend * 0.3));
+          } else {
+            trend = 3; // Muy leve positivo por defecto
+          }
+        } else {
+          trend = 3;
+        }
+      }
+    } else if (workoutCount === 1) {
+      // Primera vez entrenando en este día = tendencia positiva leve
+      trend = 20; // Positivo moderado para nuevo día
     }
 
     // Performance score (0-100) basado en volumen, consistencia y variedad
@@ -737,39 +809,96 @@ export const calculateVolumeTrendByDay = (records: WorkoutRecord[]): { day: stri
 
     let trend = 0;
 
-    if (dayRecords.length >= 2) {
-      // Ordenar por fecha
+    if (dayRecords.length >= 3) {
+      // Calcular tendencias con 3+ entrenamientos usando lógica realista
       const sortedDayRecords = dayRecords.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-      // Dividir en primera mitad vs segunda mitad
-      const halfPoint = Math.floor(sortedDayRecords.length / 2);
+      if (dayRecords.length >= 4) {
+        // CORRECCIÓN CLAVE: Verificar si hay distribución temporal real
+        const uniqueDates = new Set(sortedDayRecords.map(r => r.date.toDateString()));
 
-      if (halfPoint >= 1) {
-        const olderOccurrences = sortedDayRecords.slice(0, halfPoint);
-        const recentOccurrences = sortedDayRecords.slice(halfPoint);
+        if (uniqueDates.size <= 2) {
+          // Si todos los entrenamientos están en 1-2 días, no calcular tendencia temporal
+          trend = 10; // Tendencia positiva leve por actividad consistente
+        } else {
+          // Solo si hay distribución temporal real, calcular tendencia
+          const halfPoint = Math.floor(sortedDayRecords.length / 2);
+          const olderOccurrences = sortedDayRecords.slice(0, halfPoint);
+          const recentOccurrences = sortedDayRecords.slice(halfPoint);
 
-        // Calcular volumen promedio por sesión para cada período
-        const olderAvgVolume = olderOccurrences.reduce((sum, r) =>
-          sum + (r.weight * r.reps * r.sets), 0) / olderOccurrences.length;
+          const olderAvgVolume = olderOccurrences.reduce((sum, r) =>
+            sum + calculateRealVolume(r), 0) / olderOccurrences.length;
 
-        const recentAvgVolume = recentOccurrences.reduce((sum, r) =>
-          sum + (r.weight * r.reps * r.sets), 0) / recentOccurrences.length;
+          const recentAvgVolume = recentOccurrences.reduce((sum, r) =>
+            sum + calculateRealVolume(r), 0) / recentOccurrences.length;
 
-        // Calcular tendencia porcentual basada en volumen promedio por sesión
-        if (olderAvgVolume > 0) {
-          const rawTrend = ((recentAvgVolume - olderAvgVolume) / olderAvgVolume) * 100;
-
-          // Aplicar threshold para evitar fluctuaciones menores
-          if (Math.abs(rawTrend) >= 10) {
-            trend = Math.round(rawTrend);
-            // Limitar a rango razonable
-            trend = Math.max(-100, Math.min(100, trend));
+          if (olderAvgVolume > 0) {
+            const rawTrend = ((recentAvgVolume - olderAvgVolume) / olderAvgVolume) * 100;
+            // Aplicar threshold realista para detectar cambios significativos
+            if (Math.abs(rawTrend) >= 8) {
+              trend = Math.max(-30, Math.min(30, Math.round(rawTrend * 0.6))); // Factor conservador
+            } else {
+              trend = 5; // Tendencia positiva leve por defecto
+            }
+          } else if (recentAvgVolume > 0) {
+            trend = 25; // Comenzó a entrenar en este día
           }
-        } else if (recentAvgVolume > 0) {
-          // Comenzó a entrenar en este día
-          trend = 50; // Tendencia positiva moderada
+        }
+      } else {
+        // Para exactamente 3 entrenamientos: verificar distribución temporal
+        const uniqueDates = new Set(sortedDayRecords.map(r => r.date.toDateString()));
+
+        if (uniqueDates.size <= 1) {
+          // Si todos los entrenamientos están en el mismo día
+          trend = 8; // Tendencia positiva leve por actividad
+        } else {
+          // Si hay distribución temporal, comparar primer vs último
+          const firstVolume = calculateRealVolume(sortedDayRecords[0]);
+          const lastVolume = calculateRealVolume(sortedDayRecords[2]);
+
+          if (firstVolume > 0) {
+            const rawTrend = ((lastVolume - firstVolume) / firstVolume) * 100;
+            // Threshold más bajo para pocos datos
+            if (Math.abs(rawTrend) >= 12) {
+              trend = Math.max(-20, Math.min(20, Math.round(rawTrend * 0.5))); // Factor muy conservador
+            } else {
+              trend = 5; // Leve positivo por defecto con pocos datos
+            }
+          } else {
+            trend = 5;
+          }
         }
       }
+    } else if (dayRecords.length === 2) {
+      // Para 2 entrenamientos: verificar si están en días diferentes
+      const sortedDayRecords = dayRecords.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      const uniqueDates = new Set(sortedDayRecords.map(r => r.date.toDateString()));
+
+      if (uniqueDates.size <= 1) {
+        // Si ambos entrenamientos están en el mismo día
+        trend = 6; // Tendencia positiva leve por actividad
+      } else {
+        // Si están en días diferentes, comparar con mucha cautela
+        const firstVolume = calculateRealVolume(sortedDayRecords[0]);
+        const lastVolume = calculateRealVolume(sortedDayRecords[1]);
+
+        if (firstVolume > 0) {
+          const rawTrend = ((lastVolume - firstVolume) / firstVolume) * 100;
+          // Solo marcar tendencia si hay cambio muy significativo
+          if (rawTrend > 25) {
+            trend = Math.min(15, Math.round(rawTrend * 0.3)); // Factor muy conservador
+          } else if (rawTrend < -30) {
+            trend = Math.max(-10, Math.round(rawTrend * 0.3));
+          } else {
+            trend = 3; // Muy leve positivo por defecto
+          }
+        } else {
+          trend = 3;
+        }
+      }
+    } else if (dayRecords.length === 1) {
+      // Primera vez entrenando en este día = tendencia positiva leve
+      trend = 20; // Positivo moderado para nuevo día
     }
 
     trends.push({

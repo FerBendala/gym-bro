@@ -1351,7 +1351,25 @@ export const calculateTotalGrowth = (timelineData: Array<{ value: number; totalW
 };
 
 /**
+ * Calcula el volumen real de un registro usando series individuales si están disponibles
+ * @param record Registro de entrenamiento
+ * @returns Volumen total real
+ */
+const calculateRealVolume = (record: WorkoutRecord): number => {
+  // Si tiene series individuales, calcular volumen sumando cada serie
+  if (record.individualSets && record.individualSets.length > 0) {
+    return record.individualSets.reduce((total, set) => {
+      return total + (set.weight * set.reps);
+    }, 0);
+  }
+
+  // Fallback: usar valores agregados
+  return record.weight * record.reps * record.sets;
+};
+
+/**
  * Calcula el progreso de un ejercicio individual usando múltiples períodos para mayor robustez
+ * MEJORADO: Considera volumen cuando el progreso de fuerza es mínimo para capturar mejoras en capacidad de trabajo
  * @param exerciseRecords Array de registros de un ejercicio específico
  * @returns Objeto con progreso absoluto y porcentual
  */
@@ -1367,9 +1385,13 @@ export const calculateExerciseProgress = (exerciseRecords: WorkoutRecord[]): {
 
   const sortedRecords = [...exerciseRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
+
+
   // Para ejercicios individuales, usar múltiples registros para mayor estabilidad
   let first1RM: number;
   let last1RM: number;
+  let firstVolume: number;
+  let lastVolume: number;
 
   if (sortedRecords.length === 2) {
     // CORREGIDO: Para 2 sesiones, usar directamente primera y última
@@ -1378,6 +1400,10 @@ export const calculateExerciseProgress = (exerciseRecords: WorkoutRecord[]): {
 
     first1RM = firstRecord.weight * (1 + Math.min(firstRecord.reps, 20) / 30);
     last1RM = lastRecord.weight * (1 + Math.min(lastRecord.reps, 20) / 30);
+
+    // CORREGIDO: Calcular volumen real usando series individuales si están disponibles
+    firstVolume = calculateRealVolume(firstRecord);
+    lastVolume = calculateRealVolume(lastRecord);
   } else {
     // Para 3+ sesiones, usar lógica de períodos
     const firstPeriodSize = Math.min(3, Math.floor(sortedRecords.length / 3));
@@ -1399,19 +1425,50 @@ export const calculateExerciseProgress = (exerciseRecords: WorkoutRecord[]): {
       const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
       return sum + oneRM;
     }, 0) / lastPeriod.length;
+
+    // Calcular volumen total promedio por sesión usando volumen real
+    firstVolume = firstPeriod.reduce((sum, r) => {
+      return sum + calculateRealVolume(r);
+    }, 0) / firstPeriod.length;
+
+    lastVolume = lastPeriod.reduce((sum, r) => {
+      return sum + calculateRealVolume(r);
+    }, 0) / lastPeriod.length;
   }
 
-  const absoluteProgress = last1RM - first1RM;
+  let absoluteProgress = last1RM - first1RM;
+  let rawPercentProgress = first1RM > 0 ? (absoluteProgress / first1RM) * 100 : 0;
+
+  // MEJORA: Si el progreso de fuerza es mínimo pero hay mejora en volumen, considerarlo como progreso
+  if (Math.abs(rawPercentProgress) < 2.5 && firstVolume > 0) {
+    const volumeProgress = ((lastVolume - firstVolume) / firstVolume) * 100;
+
+    // Para pocas sesiones (≤3), ser más sensible al cambio de volumen (>1%)
+    // Para más sesiones, requerir cambio más significativo (>5%)
+    const volumeThreshold = sortedRecords.length <= 3 ? 1 : 5;
+
+
+
+    if (volumeProgress > volumeThreshold) {
+      // Convertir mejora de volumen a equivalente de fuerza
+      // Factor más generoso para pocas sesiones, más conservador para muchas
+      const volumeToStrengthFactor = sortedRecords.length <= 3 ? 0.5 : 0.3;
+      const adjustedStrengthProgress = volumeProgress * volumeToStrengthFactor;
+
+      rawPercentProgress = Math.max(rawPercentProgress, adjustedStrengthProgress);
+      absoluteProgress = (rawPercentProgress / 100) * first1RM;
+    }
+  }
 
   // Calcular porcentaje con validación
   if (first1RM <= 0) {
     return { absoluteProgress, percentProgress: 0, first1RM, last1RM };
   }
 
-  const rawPercentProgress = (absoluteProgress / first1RM) * 100;
-
   // Limitar progreso a un rango razonable (-80% a +300% para ejercicios individuales)
   const percentProgress = Math.max(-80, Math.min(300, rawPercentProgress));
+
+
 
   return { absoluteProgress, percentProgress, first1RM, last1RM };
 };

@@ -60,6 +60,7 @@ export interface CategoryMetrics {
   daysSinceLastWorkout: number;
   trend: 'improving' | 'stable' | 'declining';
   strengthLevel: 'beginner' | 'intermediate' | 'advanced';
+  recentImprovement: boolean; // Indica si hay mejora reciente en frecuencia
   volumeDistribution: {
     thisWeek: number;
     lastWeek: number;
@@ -908,10 +909,77 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
       weeklyData.get(weekKey)!.add(record.date.toDateString());
     });
 
-    // Calcular promedio de días únicos por semana solo para semanas con entrenamientos
-    const avgWorkoutsPerWeek = weeklyData.size > 0
-      ? Array.from(weeklyData.values()).reduce((sum, daysSet) => sum + daysSet.size, 0) / weeklyData.size
-      : 0;
+    // MEJORADO: Calcular frecuencia reconociendo mejoras recientes
+    let avgWorkoutsPerWeek = 0;
+    let recentImprovement = false; // Declarar en el ámbito correcto
+
+    if (weeklyData.size > 0) {
+      // Frecuencia histórica promedio
+      const historicalAvg = Array.from(weeklyData.values()).reduce((sum, daysSet) => sum + daysSet.size, 0) / weeklyData.size;
+
+      // Lógica de detección de mejoras adaptada al número de semanas
+      const sortedWeeks = Array.from(weeklyData.entries())
+        .sort(([a], [b]) => a.localeCompare(b));
+
+      if (weeklyData.size >= 2) {
+        // Con 2+ semanas, comparar período reciente vs anterior
+        if (weeklyData.size >= 4) {
+          // Con 4+ semanas: comparar últimas 2 vs anteriores
+          const recentWeeks = sortedWeeks.slice(-2);
+          const olderWeeks = sortedWeeks.slice(0, -2);
+
+          const recentAvg = recentWeeks.reduce((sum, [_, daysSet]) => sum + daysSet.size, 0) / recentWeeks.length;
+          const olderAvg = olderWeeks.reduce((sum, [_, daysSet]) => sum + daysSet.size, 0) / olderWeeks.length;
+
+          if (recentAvg > olderAvg * 1.4) { // 40% mejora
+            recentImprovement = true;
+            avgWorkoutsPerWeek = (recentAvg * 0.7) + (historicalAvg * 0.3);
+          } else {
+            avgWorkoutsPerWeek = historicalAvg;
+          }
+        } else {
+          // Con 2-3 semanas: comparar última semana vs anteriores
+          const lastWeek = sortedWeeks[sortedWeeks.length - 1];
+          const previousWeeks = sortedWeeks.slice(0, -1);
+
+          const lastWeekFreq = lastWeek[1].size;
+          const previousAvg = previousWeeks.reduce((sum, [_, daysSet]) => sum + daysSet.size, 0) / previousWeeks.length;
+
+          // DEBUG para Piernas
+          if (category === 'Piernas') {
+            console.log('=== DEBUG PIERNAS (pocas semanas) ===');
+            console.log('weeklyData:', Array.from(weeklyData.entries()));
+            console.log('lastWeekFreq:', lastWeekFreq);
+            console.log('previousAvg:', previousAvg);
+            console.log('mejora threshold:', previousAvg * 1.5);
+            console.log('¿hay mejora?:', lastWeekFreq > previousAvg * 1.5);
+          }
+
+          // Con pocas semanas, ser más liberal: 50% mejora
+          if (lastWeekFreq > previousAvg * 1.5 && lastWeekFreq >= 2) {
+            recentImprovement = true;
+            // Dar más peso a la mejora reciente
+            avgWorkoutsPerWeek = (lastWeekFreq * 0.6) + (historicalAvg * 0.4);
+
+            if (category === 'Piernas') {
+              console.log('¡MEJORA DETECTADA EN PIERNAS!');
+              console.log('avgWorkoutsPerWeek calculado:', avgWorkoutsPerWeek);
+            }
+          } else {
+            avgWorkoutsPerWeek = historicalAvg;
+          }
+        }
+      } else {
+        avgWorkoutsPerWeek = historicalAvg;
+      }
+
+      // DEBUG para Piernas
+      if (category === 'Piernas') {
+        console.log('avgWorkoutsPerWeek final:', avgWorkoutsPerWeek);
+        console.log('recentImprovement:', recentImprovement);
+        console.log('==================');
+      }
+    }
 
     const lastWorkout = new Date(Math.max(...dates.map(d => d.getTime())));
 
@@ -943,15 +1011,82 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
 
     let trend: 'improving' | 'stable' | 'declining' = 'stable';
 
-    // Con pocas semanas (≤3), ser más conservador - requiere cambios más grandes para detectar tendencia
+    // **CORRECCIÓN CRÍTICA**: Implementar lógica mejorada que considera contexto completo
+    // Calcular factores de contexto para evaluar tendencias con precisión
+    const recentDays = daysSinceLastWorkout;
+    const avgVolumePerSession = categoryVolume / categoryRecords.length;
+
+    // **CORRECCIÓN**: Fórmula de fatiga más realista para volúmenes altos
+    const fatigueIndex = Math.min(100, Math.max(0, (avgVolumePerSession / 1500) * 60));
+
+    // Con pocas semanas (≤3), ser más conservador pero aplicar correcciones de contexto
     if (weeksWithData <= 3) {
-      if (weightProgression > 10 || volumeProgression > 15) trend = 'improving';
-      else if (weightProgression < -15 || volumeProgression < -20) trend = 'declining';
-      // De lo contrario, mantener como 'stable' para evitar falsos negativos
+      if (volumeProgression > 25) {
+        // **CORRECCIÓN**: Si hay progreso significativo en peso (>15%), no es aumento excesivo
+        if (weightProgression > 15) {
+          trend = 'improving'; // Progreso válido en ambos aspectos ✅
+        } else {
+          trend = 'declining'; // Aumento excesivo de volumen sin progreso de peso
+        }
+      } else if (volumeProgression > 15) {
+        // **CORRECCIÓN DE CONTEXTO**: Aumento moderado 15-25% evaluar contexto
+        if (fatigueIndex < 50 && recentDays <= 2) {
+          trend = 'improving'; // Progreso controlado ✅
+        } else {
+          trend = 'declining'; // Aumento problemático
+        }
+      } else if (weightProgression > 10 || volumeProgression > 10) {
+        trend = 'improving';
+      } else if (weightProgression < -15 || volumeProgression < -20) {
+        trend = 'declining';
+      } else {
+        // **NUEVA CORRECCIÓN DE PROGRESO**: Considerar volumen cuando progreso de fuerza es mínimo
+        if (Math.abs(weightProgression) < 2.5 && volumeProgression > 5) {
+          // Aplicar factor 30% como progreso de fuerza equivalente
+          const adjustedProgress = weightProgression + (volumeProgression * 0.3);
+          trend = adjustedProgress > 2.0 ? 'improving' : 'stable';
+        } else {
+          trend = 'stable'; // De lo contrario, mantener como 'stable'
+        }
+      }
     } else {
-      // Con más datos, usar thresholds normales
-      if (weightProgression > 5 || volumeProgression > 5) trend = 'improving';
-      else if (weightProgression < -5 || volumeProgression < -5) trend = 'declining';
+      // Con más datos, usar thresholds mejorados con correcciones de contexto
+      if (volumeProgression > 25) {
+        // **CORRECCIÓN**: Si hay progreso significativo en peso (>15%), no es aumento excesivo
+        if (weightProgression > 15) {
+          trend = 'improving'; // Progreso válido en ambos aspectos ✅
+        } else {
+          trend = 'declining'; // Aumento excesivo de volumen sin progreso de peso
+        }
+      } else if (volumeProgression > 15) {
+        // **CORRECCIÓN DE CONTEXTO**: Evaluar contexto para aumento 15-25%
+        if (fatigueIndex < 50 && recentDays <= 2) {
+          trend = 'improving'; // Progreso controlado ✅
+          if (categoryRecords.length > 0 && categoryRecords[0]?.exercise?.categories?.includes('Hombros')) {
+            console.log('HOMBROS: Contexto POSITIVO → IMPROVING (fatiga <50, recup ≤2d)');
+          }
+        } else {
+          trend = 'declining'; // Aumento problemático
+          if (categoryRecords.length > 0 && categoryRecords[0]?.exercise?.categories?.includes('Hombros')) {
+            console.log('HOMBROS: Contexto NEGATIVO → DECLINING (fatiga ≥50 o recup >2d)');
+            console.log('fatigueIndex < 50?', fatigueIndex < 50);
+            console.log('recentDays <= 2?', recentDays <= 2);
+          }
+        }
+      } else if (weightProgression > 5 || volumeProgression > 5) {
+        trend = 'improving';
+      } else if (weightProgression < -5 || volumeProgression < -5) {
+        trend = 'declining';
+      } else {
+        // **NUEVA CORRECCIÓN DE PROGRESO**: Considerar volumen cuando progreso de fuerza es mínimo
+        if (Math.abs(weightProgression) < 2.5 && volumeProgression > 5) {
+          // Aplicar factor 30% como progreso de fuerza equivalente  
+          const adjustedProgress = weightProgression + (volumeProgression * 0.3);
+          trend = adjustedProgress > 2.0 ? 'improving' : 'stable';
+        } else {
+          trend = 'stable';
+        }
+      }
     }
 
     const strengthLevel = determineStrengthLevel(estimatedOneRM, category);
@@ -987,7 +1122,8 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
       trend,
       strengthLevel,
       volumeDistribution,
-      performanceMetrics
+      performanceMetrics,
+      recentImprovement
     };
 
     // Generar recomendaciones y advertencias
@@ -1241,10 +1377,51 @@ const analyzeProgressTrend = (categoryRecords: WorkoutRecord[]): {
 
   const improvement = firstHalfAvg1RM > 0 ? ((secondHalfAvg1RM - firstHalfAvg1RM) / firstHalfAvg1RM) * 100 : 0;
 
+  // **CORRECCIÓN CRÍTICA**: Aplicar la misma lógica mejorada que en CategoryMetrics
+  // Calcular también progresión de volumen para análisis completo
+  const firstHalfAvgVolume = firstHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / firstHalf.length;
+  const secondHalfAvgVolume = secondHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / secondHalf.length;
+  const volumeProgression = firstHalfAvgVolume > 0 ? ((secondHalfAvgVolume - firstHalfAvgVolume) / firstHalfAvgVolume) * 100 : 0;
+
+  // Calcular factores de contexto
+  const recentDays = Math.floor((new Date().getTime() - new Date(sortedRecords[sortedRecords.length - 1].date).getTime()) / (1000 * 60 * 60 * 24));
+  const avgVolumePerSession = secondHalfAvgVolume;
+  // **CORRECCIÓN**: Fórmula de fatiga más realista para volúmenes altos
+  const fatigueIndex = Math.min(100, Math.max(0, (avgVolumePerSession / 1500) * 60));
+
+
+
   let trend: 'improving' | 'stable' | 'declining';
-  if (improvement > 5) trend = 'improving';
-  else if (improvement < -5) trend = 'declining';
-  else trend = 'stable';
+
+  // Aplicar la misma lógica que en CategoryMetrics
+  if (volumeProgression > 25) {
+    // **CORRECCIÓN**: Si hay progreso significativo en peso (>15%), no es aumento excesivo
+    if (improvement > 15) {
+      trend = 'improving'; // Progreso válido en ambos aspectos ✅
+    } else {
+      trend = 'declining'; // Aumento excesivo de volumen sin progreso de peso
+    }
+  } else if (volumeProgression > 15) {
+    // **CORRECCIÓN DE CONTEXTO**: Evaluar contexto para aumento 15-25%
+    if (fatigueIndex < 50 && recentDays <= 2) {
+      trend = 'improving'; // Progreso controlado ✅
+    } else {
+      trend = 'declining'; // Aumento problemático
+    }
+  } else if (improvement > 5 || volumeProgression > 5) {
+    trend = 'improving';
+  } else if (improvement < -5 || volumeProgression < -5) {
+    trend = 'declining';
+  } else {
+    // **NUEVA CORRECCIÓN DE PROGRESO**: Considerar volumen cuando progreso de fuerza es mínimo
+    if (Math.abs(improvement) < 2.5 && volumeProgression > 5) {
+      // Aplicar factor 30% como progreso de fuerza equivalente
+      const adjustedProgress = improvement + (volumeProgression * 0.3);
+      trend = adjustedProgress > 2.0 ? 'improving' : 'stable';
+    } else {
+      trend = 'stable';
+    }
+  }
 
   // Encontrar último record con mejora significativa usando 1RM
   let lastImprovement: Date | null = null;
@@ -1258,6 +1435,12 @@ const analyzeProgressTrend = (categoryRecords: WorkoutRecord[]): {
     if (current1RM > previous1RM * 1.05) { // Mejora del 5% en 1RM
       lastImprovement = new Date(current.date);
     }
+  }
+
+  // **DEBUG**: Log final de resultado para Hombros
+  if (categoryRecords.length > 0 && categoryRecords[0]?.exercise?.categories?.includes('Hombros')) {
+    console.log('HOMBROS: RESULTADO FINAL → trend =', trend);
+    console.log('=====================================');
   }
 
   return { trend, lastImprovement };
@@ -1411,7 +1594,8 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: Wo
 const generateSpecificRecommendations = (
   category: string,
   balance: Partial<MuscleBalance>,
-  categoryMetrics: CategoryMetrics[]
+  categoryMetrics: CategoryMetrics[],
+  context?: { recentImprovement?: boolean }
 ): string[] => {
   const recommendations: string[] = [];
 
@@ -1424,9 +1608,17 @@ const generateSpecificRecommendations = (
     }
   }
 
-  // Recomendaciones por frecuencia
+  // Recomendaciones por frecuencia con reconocimiento de mejoras recientes
   if (balance.weeklyFrequency && balance.weeklyFrequency < 2) {
-    recommendations.push(`Aumentar frecuencia a 2-3 sesiones por semana`);
+    if (context?.recentImprovement) {
+      recommendations.push(`¡Excelente progreso en frecuencia! Mantén esta mejora y busca llegar a 2-3 sesiones semanales consistentes`);
+    } else {
+      recommendations.push(`Aumentar frecuencia a 2-3 sesiones por semana`);
+    }
+  } else if (balance.weeklyFrequency && balance.weeklyFrequency >= 2 && balance.weeklyFrequency < 3) {
+    if (context?.recentImprovement) {
+      recommendations.push(`¡Muy bien! Has mejorado significativamente la frecuencia. Mantén este ritmo de 2+ sesiones semanales`);
+    }
   } else if (balance.weeklyFrequency && balance.weeklyFrequency > 4) {
     recommendations.push(`Reducir frecuencia para mejorar recuperación`);
   }
@@ -1612,6 +1804,8 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
     const rawStrengthIndex = calculateStrengthIndex(categoryRecords);
     const strengthIndex = adjustMetricsForLimitedData(rawStrengthIndex, temporalAdjustmentFactor, 'score');
 
+    // **CORRECCIÓN CRÍTICA**: Usar lógica mejorada que considera volumen, fatiga y recuperación
+    // En lugar de solo 1RM, analizar tendencias con contexto completo
     const progressAnalysis = analyzeProgressTrend(categoryRecords);
 
     const intensityScore = calculateIntensityScore(categoryRecords);
@@ -1660,7 +1854,8 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
     };
 
     // Generar recomendaciones específicas y advertencias
-    const specificRecommendations = generateSpecificRecommendations(metric.category, balanceData, categoryMetrics);
+    const additionalContext = { recentImprovement: metric.recentImprovement }; // Usar el valor del metric
+    const specificRecommendations = generateSpecificRecommendations(metric.category, balanceData, categoryMetrics, additionalContext);
     const warnings = generateWarnings(metric.category, balanceData, categoryMetrics);
 
     // Objeto final completo
@@ -1790,4 +1985,8 @@ export const calculateCategoryAnalysis = (records: WorkoutRecord[]): CategoryAna
     leastTrainedCategory,
     balanceScore
   };
-}; 
+};
+
+/**
+ * Analiza tendencias de progreso básico
+ */

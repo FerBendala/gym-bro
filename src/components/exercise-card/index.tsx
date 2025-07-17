@@ -105,6 +105,15 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignmen
         advancedFormMethods={advancedFormMethods}
         lastWorkoutSeries={lastWorkoutSeries}
       />
+
+      {/* Modal de vista previa completa */}
+      {showPreview && assignment.exercise?.url && (
+        <URLPreview
+          url={assignment.exercise.url}
+          showFullPreview={true}
+          onClose={() => setShowPreview(false)}
+        />
+      )}
     </>
   );
 };
