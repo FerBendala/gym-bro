@@ -429,6 +429,5 @@ export const calculateCategoryEffortDistribution = (
   }
 
   // 3. FALLBACK: Distribución conservadora
-  console.log(`⚠️ Ejercicio desconocido: "${exerciseName}" - usando distribución conservadora`);
   return getConservativeDistribution(categories);
 }; 

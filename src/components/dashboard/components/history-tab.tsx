@@ -167,11 +167,6 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
 
           currentAvgVolume = currentWeekRecords.length > 0 ? currentPartialVolume / currentWeekRecords.length : 0;
           previousAvgVolume = previousWeekRecords.length > 0 ? previousPartialVolume / previousWeekRecords.length : 0;
-
-          if (process.env.NODE_ENV === 'development') {
-            console.log(`[COMPARACIÓN JUSTA] Día ${dayOfWeekToCompare}: ${currentWeekRecords.length} vs ${previousWeekRecords.length} entrenamientos`);
-            console.log(`[COMPARACIÓN JUSTA] Vol/sesión: ${currentAvgVolume.toFixed(1)} vs ${previousAvgVolume.toFixed(1)}kg`);
-          }
         } else {
           // SEMANA COMPLETA: Comparación normal
           currentAvgVolume = point.totalWorkouts > 0 ? point.value / point.totalWorkouts : 0;

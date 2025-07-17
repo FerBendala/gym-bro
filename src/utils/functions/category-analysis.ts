@@ -945,39 +945,17 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
           const lastWeekFreq = lastWeek[1].size;
           const previousAvg = previousWeeks.reduce((sum, [_, daysSet]) => sum + daysSet.size, 0) / previousWeeks.length;
 
-          // DEBUG para Piernas
-          if (category === 'Piernas') {
-            console.log('=== DEBUG PIERNAS (pocas semanas) ===');
-            console.log('weeklyData:', Array.from(weeklyData.entries()));
-            console.log('lastWeekFreq:', lastWeekFreq);
-            console.log('previousAvg:', previousAvg);
-            console.log('mejora threshold:', previousAvg * 1.5);
-            console.log('¿hay mejora?:', lastWeekFreq > previousAvg * 1.5);
-          }
-
           // Con pocas semanas, ser más liberal: 50% mejora
           if (lastWeekFreq > previousAvg * 1.5 && lastWeekFreq >= 2) {
             recentImprovement = true;
             // Dar más peso a la mejora reciente
             avgWorkoutsPerWeek = (lastWeekFreq * 0.6) + (historicalAvg * 0.4);
-
-            if (category === 'Piernas') {
-              console.log('¡MEJORA DETECTADA EN PIERNAS!');
-              console.log('avgWorkoutsPerWeek calculado:', avgWorkoutsPerWeek);
-            }
           } else {
             avgWorkoutsPerWeek = historicalAvg;
           }
         }
       } else {
         avgWorkoutsPerWeek = historicalAvg;
-      }
-
-      // DEBUG para Piernas
-      if (category === 'Piernas') {
-        console.log('avgWorkoutsPerWeek final:', avgWorkoutsPerWeek);
-        console.log('recentImprovement:', recentImprovement);
-        console.log('==================');
       }
     }
 
@@ -1062,16 +1040,8 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
         // **CORRECCIÓN DE CONTEXTO**: Evaluar contexto para aumento 15-25%
         if (fatigueIndex < 50 && recentDays <= 2) {
           trend = 'improving'; // Progreso controlado ✅
-          if (categoryRecords.length > 0 && categoryRecords[0]?.exercise?.categories?.includes('Hombros')) {
-            console.log('HOMBROS: Contexto POSITIVO → IMPROVING (fatiga <50, recup ≤2d)');
-          }
         } else {
           trend = 'declining'; // Aumento problemático
-          if (categoryRecords.length > 0 && categoryRecords[0]?.exercise?.categories?.includes('Hombros')) {
-            console.log('HOMBROS: Contexto NEGATIVO → DECLINING (fatiga ≥50 o recup >2d)');
-            console.log('fatigueIndex < 50?', fatigueIndex < 50);
-            console.log('recentDays <= 2?', recentDays <= 2);
-          }
         }
       } else if (weightProgression > 5 || volumeProgression > 5) {
         trend = 'improving';
@@ -1437,11 +1407,7 @@ const analyzeProgressTrend = (categoryRecords: WorkoutRecord[]): {
     }
   }
 
-  // **DEBUG**: Log final de resultado para Hombros
-  if (categoryRecords.length > 0 && categoryRecords[0]?.exercise?.categories?.includes('Hombros')) {
-    console.log('HOMBROS: RESULTADO FINAL → trend =', trend);
-    console.log('=====================================');
-  }
+
 
   return { trend, lastImprovement };
 };
