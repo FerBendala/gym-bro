@@ -33,6 +33,7 @@ interface HistoryPoint {
   uniqueExercises: number;
   change: number;
   changePercent: number;
+  totalVolumeChangePercent: number;
   trend: 'up' | 'down' | 'stable';
 }
 
@@ -126,6 +127,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
       const weekNumber = index + 1;
       let change = 0;
       let changePercent = 0;
+      let totalVolumeChangePercent = 0;
       let trend: 'up' | 'down' | 'stable' = 'stable';
 
       if (index > 0) {
@@ -173,9 +175,16 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
           previousAvgVolume = previousPoint.totalWorkouts > 0 ? previousPoint.value / previousPoint.totalWorkouts : 0;
         }
 
-        // Usar volumen promedio por sesión para el cambio
+        // **CORRECCIÓN**: Calcular tanto cambio por sesión como volumen total
+        const currentTotalVolume = point.value;
+        const previousTotalVolume = previousPoint.value;
+
+        // Cambio en volumen promedio por sesión
         change = Math.round(currentAvgVolume - previousAvgVolume);
         changePercent = previousAvgVolume > 0 ? ((currentAvgVolume - previousAvgVolume) / previousAvgVolume) * 100 : 0;
+
+        // Cambio en volumen total para referencia
+        totalVolumeChangePercent = previousTotalVolume > 0 ? ((currentTotalVolume - previousTotalVolume) / previousTotalVolume) * 100 : 0;
 
         if (Math.abs(changePercent) < 5) {
           trend = 'stable';
@@ -191,6 +200,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
         weekNumber,
         change,
         changePercent,
+        totalVolumeChangePercent: index > 0 ? totalVolumeChangePercent : 0,
         trend
       };
     });
@@ -333,7 +343,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
   const avgValue = historyData.length > 0 ? historyData.reduce((sum, p) => sum + p.value, 0) / historyData.length : 0;
 
   // **FUNCIÓN UNIFICADA**: Usar la función utilitaria para calcular crecimiento
-  const { absoluteGrowth: totalGrowth, percentGrowth: totalGrowthPercent } = calculateTotalGrowth(historyData);
+  const { percentGrowth: totalGrowthPercent } = calculateTotalGrowth(historyData);
 
   const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
@@ -566,11 +576,19 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
                         <TrendIcon className={`w-3 h-3 ${trendColor}`} />
                         Cambio vs Semana Anterior
                       </h5>
-                      <div className="flex justify-between items-center">
-                        <span className="text-xs text-gray-400">Volumen/sesión:</span>
-                        <span className={`text-xs font-medium ${point.change > 0 ? 'text-green-400' : point.change < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                          {point.change > 0 ? '+' : ''}{formatNumber(point.change)} kg ({point.changePercent > 0 ? '+' : ''}{point.changePercent.toFixed(1)}%)
-                        </span>
+                      <div className="space-y-1">
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-400">Volumen/sesión:</span>
+                          <span className={`text-xs font-medium ${point.change > 0 ? 'text-green-400' : point.change < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                            {point.change > 0 ? '+' : ''}{formatNumber(point.change)} kg ({point.changePercent > 0 ? '+' : ''}{point.changePercent.toFixed(1)}%)
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-xs text-gray-500">Volumen total:</span>
+                          <span className={`text-xs font-medium ${point.totalVolumeChangePercent > 0 ? 'text-green-400' : point.totalVolumeChangePercent < 0 ? 'text-red-400' : 'text-gray-400'}`}>
+                            {point.totalVolumeChangePercent > 0 ? '+' : ''}{point.totalVolumeChangePercent.toFixed(1)}%
+                          </span>
+                        </div>
                       </div>
                     </div>
                   )}

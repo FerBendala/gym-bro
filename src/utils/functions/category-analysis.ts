@@ -144,34 +144,139 @@ const calculatePersonalRecords = (categoryRecords: WorkoutRecord[]): number => {
 
 /**
  * Calcula la progresión de peso para una categoría
- * CORREGIDO: Comparación justa de 1RM promedio por sesión entre períodos
+ * CORREGIDO: Aplica distribuciones de esfuerzo, detecta cambios de ejercicios y limita valores extremos
  */
-const calculateWeightProgression = (categoryRecords: WorkoutRecord[]): number => {
+const calculateWeightProgression = (categoryRecords: WorkoutRecord[], targetCategory?: string): number => {
   if (categoryRecords.length < 2) return 0;
 
   const sortedRecords = [...categoryRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  // Dividir en primera mitad vs segunda mitad para comparación justa
-  const midpoint = Math.floor(sortedRecords.length / 2);
-  const firstHalf = sortedRecords.slice(0, midpoint);
-  const secondHalf = sortedRecords.slice(midpoint);
+  // Detectar la categoría objetivo si no se proporciona
+  const categoryName = targetCategory || sortedRecords[0]?.exercise?.categories?.[0];
+  if (!categoryName) return 0;
 
-  if (firstHalf.length === 0 || secondHalf.length === 0) return 0;
+  // **CORRECCIÓN FUNDAMENTAL**: División cronológica real, no por cantidad de registros
+  const firstDate = new Date(sortedRecords[0].date);
+  const lastDate = new Date(sortedRecords[sortedRecords.length - 1].date);
+  const timeSpan = lastDate.getTime() - firstDate.getTime();
+  const midpointTime = firstDate.getTime() + (timeSpan / 2);
 
-  // **CORRECCIÓN CLAVE**: Usar 1RM promedio por sesión para comparación justa
+  const firstHalf = sortedRecords.filter(r => new Date(r.date).getTime() <= midpointTime);
+  const secondHalf = sortedRecords.filter(r => new Date(r.date).getTime() > midpointTime);
+
+  // Asegurar que ambos períodos tengan al menos un registro
+  if (firstHalf.length === 0 || secondHalf.length === 0) {
+    // Fallback: división por registros solo si la cronológica falla
+    const midpoint = Math.floor(sortedRecords.length / 2);
+    const fallbackFirstHalf = sortedRecords.slice(0, Math.max(1, midpoint));
+    const fallbackSecondHalf = sortedRecords.slice(Math.max(1, midpoint));
+
+    if (fallbackFirstHalf.length === 0 || fallbackSecondHalf.length === 0) return 0;
+
+    firstHalf.length = 0;
+    firstHalf.push(...fallbackFirstHalf);
+    secondHalf.length = 0;
+    secondHalf.push(...fallbackSecondHalf);
+  }
+
+  // **MEJORA INTELIGENTE**: Detectar si hay cambio significativo de ejercicios
+  const firstHalfExercises = new Set(firstHalf.map(r => r.exercise?.name).filter(Boolean));
+  const secondHalfExercises = new Set(secondHalf.map(r => r.exercise?.name).filter(Boolean));
+  const commonExercises = [...firstHalfExercises].filter(ex => secondHalfExercises.has(ex));
+
+  // Si hay pocos ejercicios comunes, usar análisis más conservador
+  const hasSignificantExerciseChange = commonExercises.length < Math.min(firstHalfExercises.size, secondHalfExercises.size) * 0.5;
+
+  // **CORRECCIÓN CRÍTICA**: Usar 1RM ponderado por esfuerzo de categoría
   const firstHalfAvg1RM = firstHalf.reduce((sum, r) => {
+    const categories = r.exercise?.categories || [];
+    const effortDistribution = calculateCategoryEffortDistribution(categories, r.exercise?.name);
+    const categoryEffort = effortDistribution[categoryName] || 0;
     const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-    return sum + oneRM;
-  }, 0) / firstHalf.length; // Promedio por sesión
+    const weightedOneRM = oneRM * categoryEffort;
+    return sum + weightedOneRM;
+  }, 0) / firstHalf.length;
 
   const secondHalfAvg1RM = secondHalf.reduce((sum, r) => {
+    const categories = r.exercise?.categories || [];
+    const effortDistribution = calculateCategoryEffortDistribution(categories, r.exercise?.name);
+    const categoryEffort = effortDistribution[categoryName] || 0;
     const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-    return sum + oneRM;
-  }, 0) / secondHalf.length; // Promedio por sesión
+    const weightedOneRM = oneRM * categoryEffort;
+    return sum + weightedOneRM;
+  }, 0) / secondHalf.length;
 
   if (firstHalfAvg1RM === 0) return 0;
 
-  return Math.round(((secondHalfAvg1RM - firstHalfAvg1RM) / firstHalfAvg1RM) * 100);
+  let densityProgression = ((secondHalfAvg1RM - firstHalfAvg1RM) / firstHalfAvg1RM) * 100;
+
+  // **MEJORA HÍBRIDA**: Combinar densidad de entrenamiento + progresión individual de ejercicios
+  const exerciseNames = [...new Set(sortedRecords.map(r => r.exercise?.name).filter(Boolean))];
+  const individualExerciseProgressions: number[] = [];
+
+  // Calcular progresión de cada ejercicio individual
+  exerciseNames.forEach(exerciseName => {
+    const exerciseRecords = sortedRecords.filter(r => r.exercise?.name === exerciseName);
+    if (exerciseRecords.length >= 2) {
+      const exerciseFirstHalf = firstHalf.filter(r => r.exercise?.name === exerciseName);
+      const exerciseSecondHalf = secondHalf.filter(r => r.exercise?.name === exerciseName);
+
+      if (exerciseFirstHalf.length > 0 && exerciseSecondHalf.length > 0) {
+        const firstAvg = exerciseFirstHalf.reduce((sum, r) => {
+          const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+          return sum + oneRM;
+        }, 0) / exerciseFirstHalf.length;
+
+        const secondAvg = exerciseSecondHalf.reduce((sum, r) => {
+          const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+          return sum + oneRM;
+        }, 0) / exerciseSecondHalf.length;
+
+        if (firstAvg > 0) {
+          const exerciseProgression = ((secondAvg - firstAvg) / firstAvg) * 100;
+          individualExerciseProgressions.push(exerciseProgression);
+        }
+      }
+    }
+  });
+
+  // Calcular progresión promedio de ejercicios individuales
+  const avgIndividualProgression = individualExerciseProgressions.length > 0
+    ? individualExerciseProgressions.reduce((sum, p) => sum + p, 0) / individualExerciseProgressions.length
+    : 0;
+
+  // **HÍBRIDO INTELIGENTE**: 60% densidad + 40% progresión individual
+  // Esto da crédito a mejoras reales en ejercicios aunque la densidad por sesión baje
+  let progression = (densityProgression * 0.6) + (avgIndividualProgression * 0.4);
+
+  // **FILTRO INTELIGENTE**: Limitar progresiones extremas causadas por cambio de ejercicios
+  if (hasSignificantExerciseChange && Math.abs(progression) > 100) {
+    // Si hay cambio significativo de ejercicios y progresión extrema, ser más conservador
+    progression = Math.sign(progression) * Math.min(Math.abs(progression), 50);
+  }
+
+  // **LÍMITE DE SEGURIDAD**: Progresiones >200% son sospechosas
+  if (Math.abs(progression) > 200) {
+    progression = Math.sign(progression) * 200;
+  }
+
+  // **DEBUG**: Log para verificar la lógica híbrida
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`🔧 DIVISIÓN CRONOLÓGICA ${categoryName}:`, {
+      totalRegistros: sortedRecords.length,
+      primeraFecha: firstDate.toISOString().split('T')[0],
+      últimaFecha: lastDate.toISOString().split('T')[0],
+      períodoDías: Math.round(timeSpan / (1000 * 60 * 60 * 24)),
+      primerosPeriodo: firstHalf.length,
+      segundoPeriodo: secondHalf.length,
+      densidadProgresión: Math.round(densityProgression * 10) / 10,
+      ejerciciosIndividuales: Math.round(avgIndividualProgression * 10) / 10,
+      híbrido: Math.round(progression * 10) / 10,
+      ejerciciosAnalizados: exerciseNames.length
+    });
+  }
+
+  return Math.round(progression);
 };
 
 /**
@@ -179,30 +284,123 @@ const calculateWeightProgression = (categoryRecords: WorkoutRecord[]): number =>
  */
 /**
  * Calcula la progresión de volumen para una categoría
- * CORREGIDO: Comparación justa de volumen promedio por sesión entre períodos
+ * CORREGIDO: Aplica distribuciones de esfuerzo, detecta cambios de ejercicios y limita valores extremos
  */
-const calculateVolumeProgression = (categoryRecords: WorkoutRecord[]): number => {
+const calculateVolumeProgression = (categoryRecords: WorkoutRecord[], targetCategory?: string): number => {
   if (categoryRecords.length < 2) return 0;
 
   const sortedRecords = [...categoryRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  // Dividir en primera mitad vs segunda mitad para comparación justa
-  const midpoint = Math.floor(sortedRecords.length / 2);
-  const firstHalf = sortedRecords.slice(0, midpoint);
-  const secondHalf = sortedRecords.slice(midpoint);
+  // Detectar la categoría objetivo si no se proporciona
+  const categoryName = targetCategory || sortedRecords[0]?.exercise?.categories?.[0];
+  if (!categoryName) return 0;
 
-  if (firstHalf.length === 0 || secondHalf.length === 0) return 0;
+  // **CORRECCIÓN FUNDAMENTAL**: División cronológica real, no por cantidad de registros
+  const firstDate = new Date(sortedRecords[0].date);
+  const lastDate = new Date(sortedRecords[sortedRecords.length - 1].date);
+  const timeSpan = lastDate.getTime() - firstDate.getTime();
+  const midpointTime = firstDate.getTime() + (timeSpan / 2);
 
-  // **CORRECCIÓN CLAVE**: Usar volumen promedio por sesión para comparación justa
-  const firstHalfAvgVolume = firstHalf.reduce((sum, r) =>
-    sum + (r.weight * r.reps * r.sets), 0) / firstHalf.length; // Promedio por sesión
+  const firstHalf = sortedRecords.filter(r => new Date(r.date).getTime() <= midpointTime);
+  const secondHalf = sortedRecords.filter(r => new Date(r.date).getTime() > midpointTime);
 
-  const secondHalfAvgVolume = secondHalf.reduce((sum, r) =>
-    sum + (r.weight * r.reps * r.sets), 0) / secondHalf.length; // Promedio por sesión
+  // Asegurar que ambos períodos tengan al menos un registro
+  if (firstHalf.length === 0 || secondHalf.length === 0) {
+    // Fallback: división por registros solo si la cronológica falla
+    const midpoint = Math.floor(sortedRecords.length / 2);
+    const fallbackFirstHalf = sortedRecords.slice(0, Math.max(1, midpoint));
+    const fallbackSecondHalf = sortedRecords.slice(Math.max(1, midpoint));
+
+    if (fallbackFirstHalf.length === 0 || fallbackSecondHalf.length === 0) return 0;
+
+    firstHalf.length = 0;
+    firstHalf.push(...fallbackFirstHalf);
+    secondHalf.length = 0;
+    secondHalf.push(...fallbackSecondHalf);
+  }
+
+  // **MEJORA INTELIGENTE**: Detectar si hay cambio significativo de ejercicios
+  const firstHalfExercises = new Set(firstHalf.map(r => r.exercise?.name).filter(Boolean));
+  const secondHalfExercises = new Set(secondHalf.map(r => r.exercise?.name).filter(Boolean));
+  const commonExercises = [...firstHalfExercises].filter(ex => secondHalfExercises.has(ex));
+
+  // Si hay pocos ejercicios comunes, usar análisis más conservador
+  const hasSignificantExerciseChange = commonExercises.length < Math.min(firstHalfExercises.size, secondHalfExercises.size) * 0.5;
+
+  // **CORRECCIÓN CRÍTICA**: Usar volumen ponderado por esfuerzo de categoría
+  const firstHalfAvgVolume = firstHalf.reduce((sum, r) => {
+    const categories = r.exercise?.categories || [];
+    const effortDistribution = calculateCategoryEffortDistribution(categories, r.exercise?.name);
+    const categoryEffort = effortDistribution[categoryName] || 0;
+    const totalVolume = r.weight * r.reps * r.sets;
+    const categoryVolume = totalVolume * categoryEffort;
+    return sum + categoryVolume;
+  }, 0) / firstHalf.length;
+
+  const secondHalfAvgVolume = secondHalf.reduce((sum, r) => {
+    const categories = r.exercise?.categories || [];
+    const effortDistribution = calculateCategoryEffortDistribution(categories, r.exercise?.name);
+    const categoryEffort = effortDistribution[categoryName] || 0;
+    const totalVolume = r.weight * r.reps * r.sets;
+    const categoryVolume = totalVolume * categoryEffort;
+    return sum + categoryVolume;
+  }, 0) / secondHalf.length;
 
   if (firstHalfAvgVolume === 0) return 0;
 
-  return Math.round(((secondHalfAvgVolume - firstHalfAvgVolume) / firstHalfAvgVolume) * 100);
+  let densityProgression = ((secondHalfAvgVolume - firstHalfAvgVolume) / firstHalfAvgVolume) * 100;
+
+  // **MEJORA HÍBRIDA**: Combinar densidad de entrenamiento + progresión individual de ejercicios  
+  const individualExerciseProgressions: number[] = [];
+
+  // Calcular progresión de volumen de cada ejercicio individual
+  const exerciseNames = [...new Set(sortedRecords.map(r => r.exercise?.name).filter(Boolean))];
+  exerciseNames.forEach(exerciseName => {
+    const exerciseRecords = sortedRecords.filter(r => r.exercise?.name === exerciseName);
+    if (exerciseRecords.length >= 2) {
+      const exerciseFirstHalf = firstHalf.filter(r => r.exercise?.name === exerciseName);
+      const exerciseSecondHalf = secondHalf.filter(r => r.exercise?.name === exerciseName);
+
+      if (exerciseFirstHalf.length > 0 && exerciseSecondHalf.length > 0) {
+        const firstAvgVolume = exerciseFirstHalf.reduce((sum, r) => {
+          const totalVolume = r.weight * r.reps * r.sets;
+          return sum + totalVolume;
+        }, 0) / exerciseFirstHalf.length;
+
+        const secondAvgVolume = exerciseSecondHalf.reduce((sum, r) => {
+          const totalVolume = r.weight * r.reps * r.sets;
+          return sum + totalVolume;
+        }, 0) / exerciseSecondHalf.length;
+
+        if (firstAvgVolume > 0) {
+          const exerciseProgression = ((secondAvgVolume - firstAvgVolume) / firstAvgVolume) * 100;
+          individualExerciseProgressions.push(exerciseProgression);
+        }
+      }
+    }
+  });
+
+  // Calcular progresión promedio de ejercicios individuales
+  const avgIndividualProgression = individualExerciseProgressions.length > 0
+    ? individualExerciseProgressions.reduce((sum, p) => sum + p, 0) / individualExerciseProgressions.length
+    : 0;
+
+  // **HÍBRIDO INTELIGENTE**: 60% densidad + 40% progresión individual
+  // Esto da crédito a mejoras reales en ejercicios aunque la densidad por sesión baje
+  let progression = (densityProgression * 0.6) + (avgIndividualProgression * 0.4);
+
+  // **FILTRO INTELIGENTE**: Limitar progresiones extremas causadas por cambio de ejercicios
+  if (hasSignificantExerciseChange && Math.abs(progression) > 100) {
+    // Si hay cambio significativo de ejercicios y progresión extrema, ser más conservador
+    progression = Math.sign(progression) * Math.min(Math.abs(progression), 50);
+  }
+
+  // **LÍMITE DE SEGURIDAD**: Progresiones >250% son sospechosas
+  if (Math.abs(progression) > 250) {
+    progression = Math.sign(progression) * 250;
+  }
+
+  return Math.round(progression);
 };
 
 /**
@@ -969,8 +1167,8 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
     const estimatedOneRM = categoryRecords.length > 0 ?
       Math.max(...categoryRecords.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30))) : 0;
 
-    const weightProgression = calculateWeightProgression(categoryRecords);
-    const volumeProgression = calculateVolumeProgression(categoryRecords);
+    const weightProgression = calculateWeightProgression(categoryRecords, category);
+    const volumeProgression = calculateVolumeProgression(categoryRecords, category);
     const intensityScore = calculateIntensityScore(categoryRecords);
     const efficiencyScore = calculateEfficiencyScore(categoryRecords);
     const consistencyScore = calculateConsistencyScore(categoryRecords, avgWorkoutsPerWeek);
@@ -1309,10 +1507,15 @@ const adjustMetricsForLimitedData = (
 };
 
 /**
- * Analiza la tendencia de progreso para un grupo muscular
- * Corregido para usar 1RM estimado consistentemente
+ * Analiza la tendencia de progreso para un grupo muscular usando valores ya calculados
+ * CORRECCIÓN CRÍTICA: Usar valores ya calculados en lugar de recalcular
  */
-const analyzeProgressTrend = (categoryRecords: WorkoutRecord[]): {
+const analyzeProgressTrend = (
+  categoryRecords: WorkoutRecord[],
+  targetCategory?: string,
+  preCalculatedWeightProgression?: number,
+  preCalculatedVolumeProgression?: number
+): {
   trend: 'improving' | 'stable' | 'declining';
   lastImprovement: Date | null;
 } => {
@@ -1320,43 +1523,40 @@ const analyzeProgressTrend = (categoryRecords: WorkoutRecord[]): {
     return { trend: 'stable', lastImprovement: null };
   }
 
-  // Ordenar por fecha
+  // **CORRECCIÓN CRÍTICA**: Usar valores ya calculados si están disponibles
+  let improvement = preCalculatedWeightProgression;
+  let volumeProgression = preCalculatedVolumeProgression;
+
+  // Si no se proporcionan valores precalculados, calcular con la misma lógica
+  if (improvement === undefined || volumeProgression === undefined) {
+    improvement = calculateWeightProgression(categoryRecords, targetCategory);
+    volumeProgression = calculateVolumeProgression(categoryRecords, targetCategory);
+  }
+
+  // Logs de verificación para categorías críticas
+  const isHombros = targetCategory?.toLowerCase().includes('hombros');
+  const isEspalda = targetCategory?.toLowerCase().includes('espalda');
+  const isPecho = targetCategory?.toLowerCase().includes('pecho');
+
+  if (isHombros || isEspalda || isPecho) {
+    console.log(`🎯 ANÁLISIS INTELIGENTE ${targetCategory?.toUpperCase()}:`);
+    console.log(`🎯   - Peso: ${improvement?.toFixed(1)}% (con distribución de esfuerzo + filtros)`);
+    console.log(`🎯   - Volumen: ${volumeProgression?.toFixed(1)}% (con distribución de esfuerzo + filtros)`);
+    console.log(`🎯   - Registros analizados: ${categoryRecords.length}`);
+    console.log(`🎯   - Usando valores precalculados: ${preCalculatedWeightProgression !== undefined}`);
+    console.log(`🎯   - Detección de cambios de ejercicios: ACTIVA`);
+    console.log(`🎯   - Límites de seguridad aplicados: SÍ`);
+  }
+
+  // Ordenar por fecha para lastImprovement
   const sortedRecords = [...categoryRecords].sort((a, b) =>
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-  // Usar primera mitad vs segunda mitad para máxima precisión temporal
-  const midpoint = Math.floor(sortedRecords.length / 2);
-  const firstHalf = sortedRecords.slice(0, midpoint);
-  const secondHalf = sortedRecords.slice(midpoint);
-
-  if (firstHalf.length === 0 || secondHalf.length === 0) {
-    return { trend: 'stable', lastImprovement: null };
-  }
-
-  // Calcular 1RM promedio para cada mitad - CORREGIDO
-  const firstHalfAvg1RM = firstHalf.reduce((sum, r) => {
-    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-    return sum + oneRM;
-  }, 0) / firstHalf.length;
-
-  const secondHalfAvg1RM = secondHalf.reduce((sum, r) => {
-    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-    return sum + oneRM;
-  }, 0) / secondHalf.length;
-
-  const improvement = firstHalfAvg1RM > 0 ? ((secondHalfAvg1RM - firstHalfAvg1RM) / firstHalfAvg1RM) * 100 : 0;
-
-  // **CORRECCIÓN CRÍTICA**: Aplicar la misma lógica mejorada que en CategoryMetrics
-  // Calcular también progresión de volumen para análisis completo
-  const firstHalfAvgVolume = firstHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / firstHalf.length;
-  const secondHalfAvgVolume = secondHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / secondHalf.length;
-  const volumeProgression = firstHalfAvgVolume > 0 ? ((secondHalfAvgVolume - firstHalfAvgVolume) / firstHalfAvgVolume) * 100 : 0;
 
   // Calcular factores de contexto
   const recentDays = Math.floor((new Date().getTime() - new Date(sortedRecords[sortedRecords.length - 1].date).getTime()) / (1000 * 60 * 60 * 24));
-  const avgVolumePerSession = secondHalfAvgVolume;
-  // **CORRECCIÓN**: Fórmula de fatiga más realista para volúmenes altos
+  const avgVolumePerSession = volumeProgression > 0 ? sortedRecords.slice(-Math.ceil(sortedRecords.length / 4)).reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / Math.ceil(sortedRecords.length / 4) : 0;
   const fatigueIndex = Math.min(100, Math.max(0, (avgVolumePerSession / 1500) * 60));
 
 
@@ -1515,10 +1715,22 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: Wo
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
 
-  // Analizar 1RM promedio por período para detectar tendencia de progreso
-  const midpoint = Math.floor(sortedRecords.length / 2);
-  const firstHalf = sortedRecords.slice(0, midpoint);
-  const secondHalf = sortedRecords.slice(midpoint);
+  // **CORRECCIÓN FUNDAMENTAL**: División cronológica real, no por cantidad de registros
+  const firstDate = new Date(sortedRecords[0].date);
+  const lastDate = new Date(sortedRecords[sortedRecords.length - 1].date);
+  const timeSpan = lastDate.getTime() - firstDate.getTime();
+  const midpointTime = firstDate.getTime() + (timeSpan / 2);
+
+  let firstHalf = sortedRecords.filter(r => new Date(r.date).getTime() <= midpointTime);
+  let secondHalf = sortedRecords.filter(r => new Date(r.date).getTime() > midpointTime);
+
+  // Asegurar que ambos períodos tengan al menos un registro
+  if (firstHalf.length === 0 || secondHalf.length === 0) {
+    // Fallback: división por registros solo si la cronológica falla
+    const midpoint = Math.floor(sortedRecords.length / 2);
+    firstHalf = sortedRecords.slice(0, Math.max(1, midpoint));
+    secondHalf = sortedRecords.slice(Math.max(1, midpoint));
+  }
 
   const firstHalfAvg1RM = firstHalf.reduce((sum, r) => {
     const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
@@ -1772,7 +1984,12 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
 
     // **CORRECCIÓN CRÍTICA**: Usar lógica mejorada que considera volumen, fatiga y recuperación
     // En lugar de solo 1RM, analizar tendencias con contexto completo
-    const progressAnalysis = analyzeProgressTrend(categoryRecords);
+    const progressAnalysis = analyzeProgressTrend(
+      categoryRecords,
+      metric.category,
+      metric.weightProgression,
+      metric.volumeProgression
+    );
 
     const intensityScore = calculateIntensityScore(categoryRecords);
 
