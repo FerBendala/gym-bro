@@ -67,6 +67,7 @@ const calculateSingleCategoryMetrics = (categoryName: string, categoryRecords: W
         sessionsAboveAverage: 0
       },
       recommendations: [],
+      recentImprovement: false,
       warnings: []
     };
   }
@@ -152,8 +153,8 @@ const calculateSingleCategoryMetrics = (categoryName: string, categoryRecords: W
     percentage: 0, // Se calculará después
     personalRecords,
     estimatedOneRM: Math.round(estimatedOneRM),
-    weightProgression: 0, // Simplificado
-    volumeProgression: 0, // Simplificado
+    weightProgression: 0, // No usado - se calcula en calculateCategoryMetrics
+    volumeProgression: 0, // No usado - se calcula en calculateCategoryMetrics
     intensityScore,
     efficiencyScore,
     consistencyScore,
@@ -177,7 +178,8 @@ const calculateSingleCategoryMetrics = (categoryName: string, categoryRecords: W
       sessionsAboveAverage: 0
     },
     recommendations: [],
-    warnings: []
+    warnings: [],
+    recentImprovement: false
   };
 };
 

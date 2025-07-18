@@ -112,8 +112,12 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
         const currentAvgVolume = point.totalWorkouts > 0 ? point.value / point.totalWorkouts : 0;
         const previousAvgVolume = previousPoint.totalWorkouts > 0 ? previousPoint.value / previousPoint.totalWorkouts : 0;
 
+        // Cambio en volumen promedio por sesión
         change = Math.round(currentAvgVolume - previousAvgVolume);
         changePercent = previousAvgVolume > 0 ? ((currentAvgVolume - previousAvgVolume) / previousAvgVolume) * 100 : 0;
+
+        // **NOTA**: En progress-timeline se mantiene solo volumen por sesión para simplicidad
+        // El volumen total no se muestra aquí ya que es principalmente para gráficos
 
         if (Math.abs(changePercent) < 5) {
           trend = 'stable';
@@ -137,7 +141,7 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
   const maxValue = Math.max(...timelineData.map(point => point.value));
 
   // **FUNCIÓN UNIFICADA**: Usar la función utilitaria para calcular crecimiento
-  const { absoluteGrowth: totalGrowth, percentGrowth: totalGrowthPercent } = calculateTotalGrowth(timelineData);
+  const { percentGrowth: totalGrowthPercent } = calculateTotalGrowth(timelineData);
 
   const getTrendIcon = (trend: 'up' | 'down' | 'stable') => {
     switch (trend) {
