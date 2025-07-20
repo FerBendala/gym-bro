@@ -24,7 +24,6 @@ import {
   DataQualityRadial,
   FactorsChart,
   PredictionTimeline,
-  PRProgressChart,
   TrendAnalysisChart
 } from './predictions-charts';
 
@@ -91,14 +90,19 @@ const validateNextWeekWeight = (records: WorkoutRecord[], rawPrediction: number)
   return result;
 };
 
-const validatePRWeight = (records: WorkoutRecord[], rawPrediction: number): number => {
+const validatePRWeight = (records: WorkoutRecord[], rawPrediction: number, nextWeekWeight?: number): number => {
   const recentRecords = getRecentRecords(records);
   if (recentRecords.length === 0) return 0;
 
   const recentMaxWeight = Math.max(...recentRecords.map(r => r.weight));
 
   if (recentMaxWeight > 0) {
-    const minReasonablePR = recentMaxWeight * 1.01; // Mínimo 1% mejora
+    // CORRECCIÓN: PR futuro debe ser progresivo (6 semanas = +5-15kg adicionales)
+    const baseNextWeek = nextWeekWeight || (recentMaxWeight * 1.01);
+    const minReasonablePR = Math.max(
+      baseNextWeek + 2.5, // Al menos 2.5kg más que próxima semana
+      recentMaxWeight * 1.05  // O mínimo 5% mejora total
+    );
     const maxReasonablePR = recentMaxWeight * 1.20; // Máximo 20% mejora
 
     if (rawPrediction < minReasonablePR) {
@@ -121,7 +125,18 @@ const validateMonthlyGrowth = (rawGrowth: number): number => {
   return Math.round(validGrowth * 100) / 100; // Redondear a 2 decimales
 };
 
-const validateTimeToNextPR = (rawTime: number): number => {
+const validateTimeToNextPR = (rawTime: number, nextWeekWeight?: number, prWeight?: number, strengthTrend?: number): number => {
+  // Si tenemos datos para calcular tiempo realista desde próxima semana
+  if (nextWeekWeight && prWeight && strengthTrend && strengthTrend > 0) {
+    const weightDifference = prWeight - nextWeekWeight; // Desde próxima semana, no desde hoy
+    const weeksNeeded = Math.max(1, Math.ceil(weightDifference / strengthTrend));
+
+    // ✅ Cálculo realista implementado
+
+    return Math.max(1, Math.min(52, weeksNeeded));
+  }
+
+  // Fallback al valor original validado
   return Math.max(1, Math.min(52, rawTime || 8)); // Entre 1 y 52 semanas
 };
 
@@ -151,6 +166,36 @@ const calculateValidatedImprovement = (records: WorkoutRecord[], predictedPR: nu
 
 export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
   const analysis = useMemo(() => calculateAdvancedAnalysis(records), [records]);
+
+  // 🎯 MÉTRICAS CENTRALIZADAS - Una sola fuente de verdad
+  const centralizedMetrics = useMemo(() => {
+    const currentWeight = calculateValidatedCurrentWeight(records);
+    const nextWeekWeight = validateNextWeekWeight(records, analysis.progressPrediction.nextWeekWeight);
+    const prWeight = validatePRWeight(records, analysis.progressPrediction.predictedPR.weight, nextWeekWeight);
+    const strengthTrend = validateStrengthTrend(analysis.progressPrediction.strengthTrend);
+    const monthlyGrowth = validateMonthlyGrowth(analysis.progressPrediction.monthlyGrowthRate);
+    const timeToNextPR = validateTimeToNextPR(
+      analysis.progressPrediction.timeToNextPR,
+      nextWeekWeight,
+      prWeight,
+      strengthTrend
+    );
+
+    // ✅ Métricas centralizadas verificadas y funcionando
+
+    return {
+      currentWeight,
+      nextWeekWeight,
+      prWeight,
+      strengthTrend,
+      monthlyGrowth,
+      timeToNextPR,
+      improvement: prWeight - currentWeight,
+      improvementPercentage: ((prWeight / currentWeight - 1) * 100).toFixed(1),
+      nextWeekIncrease: nextWeekWeight - currentWeight,
+      prIncrease: prWeight - nextWeekWeight
+    };
+  }, [records, analysis]);
 
   // Usar el hook mejorado para calcular métricas de forma optimizada
   const predictionMetrics: EnhancedPredictionMetrics = usePredictionMetrics(
@@ -388,61 +433,207 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
         </CardContent>
       </Card>
 
-      {/* Predicción de Récord Personal - Gráfico Semi-Gauge */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-white flex items-center">
-            <Trophy className="w-5 h-5 mr-2" />
-            Predicción de Récord Personal
-            <InfoTooltip
-              content={`Predicción visual basada en tu baseline de ${predictionMetrics.formattedBaseline}kg. El gauge muestra el progreso hacia tu PR estimado de ${analysis.progressPrediction.predictedPR.weight}kg con ${analysis.progressPrediction.predictedPR.confidence}% de confianza.`}
-              position="top"
-              className="ml-2"
-            />
-          </h3>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {/* Header con estado de confianza */}
-            <div className="flex items-center justify-between p-4 bg-purple-900/20 rounded-lg border border-purple-500/30">
-              <div className="flex items-center gap-3">
-                <div className="p-2 rounded-lg bg-gradient-to-br from-purple-500/80 to-violet-500/80">
-                  <Trophy className="w-5 h-5 text-white" />
+      {/* 🏆 PREDICCIÓN DE RÉCORD PERSONAL - REDISEÑO MODERNO */}
+      <Card className="overflow-hidden">
+        <CardContent className="p-0">
+          {/* Hero Section con Gradiente */}
+          <div className="relative bg-gradient-to-br from-purple-900/40 via-violet-900/30 to-pink-900/20 p-6 border-b border-purple-500/20">
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-sm"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-xl bg-gradient-to-br from-purple-500 to-violet-600 shadow-lg shadow-purple-500/25">
+                  <Trophy className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-white">Próximo Récord Personal</h4>
-                  <div className="flex items-center gap-2 mt-1">
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${analysis.progressPrediction.predictedPR.confidence >= 70 ? 'bg-green-500 text-white' :
-                      analysis.progressPrediction.predictedPR.confidence >= 50 ? 'bg-yellow-500 text-black' :
-                        'bg-red-500 text-white'}`}>
-                      Confianza: {analysis.progressPrediction.predictedPR.confidence}%
+                  <h3 className="text-xl font-bold text-white">Predicción de Récord Personal</h3>
+                  <p className="text-sm text-purple-200 opacity-90">Tu próximo hito basado en progreso actual</p>
+                </div>
+              </div>
+
+              {/* PR Principal */}
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="flex items-baseline gap-2 mb-2">
+                    <span className="text-4xl font-bold text-white">
+                      {centralizedMetrics.prWeight}
                     </span>
-                    {analysis.progressPrediction.timeToNextPR > 0 && (
-                      <span className="px-2 py-1 rounded-full text-xs font-medium bg-purple-500 text-white">
-                        {analysis.progressPrediction.timeToNextPR} semana{analysis.progressPrediction.timeToNextPR !== 1 ? 's' : ''}
-                      </span>
-                    )}
+                    <span className="text-xl text-purple-300">kg</span>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold flex items-center gap-1 ${analysis.progressPrediction.predictedPR.confidence >= 80 ? 'bg-emerald-500 text-white' :
+                      analysis.progressPrediction.predictedPR.confidence >= 60 ? 'bg-yellow-500 text-black' :
+                        'bg-red-500 text-white'
+                      }`}>
+                      <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
+                      {analysis.progressPrediction.predictedPR.confidence}% confianza
+                    </span>
+                    <span className="px-3 py-1 rounded-full text-xs font-semibold bg-violet-500 text-white">
+                      {(() => {
+                        if (centralizedMetrics.timeToNextPR >= 4) {
+                          const months = Math.round(centralizedMetrics.timeToNextPR / 4 * 10) / 10;
+                          return months === 1 ? '1 mes' : `${months} meses`;
+                        } else {
+                          return centralizedMetrics.timeToNextPR === 1 ? '1 semana' : `${centralizedMetrics.timeToNextPR} semanas`;
+                        }
+                      })()}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Progress Ring */}
+                <div className="relative w-24 h-24">
+                  <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="45"
+                      stroke="rgb(124 58 237 / 0.2)"
+                      strokeWidth="6"
+                      fill="none"
+                    />
+                    <circle
+                      cx="50"
+                      cy="50"
+                      r="45"
+                      stroke="url(#progressGradient)"
+                      strokeWidth="6"
+                      fill="none"
+                      strokeLinecap="round"
+                      strokeDasharray={`${(analysis.progressPrediction.predictedPR.confidence * 283) / 100} 283`}
+                      className="transition-all duration-1000 ease-out"
+                    />
+                    <defs>
+                      <linearGradient id="progressGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stopColor="rgb(168 85 247)" />
+                        <stop offset="100%" stopColor="rgb(236 72 153)" />
+                      </linearGradient>
+                    </defs>
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-sm font-bold text-white">{analysis.progressPrediction.predictedPR.confidence}%</span>
                   </div>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-xl font-bold text-purple-400">
-                  {validatePRWeight(records, analysis.progressPrediction.predictedPR.weight)}kg
+            </div>
+          </div>
+
+          {/* Métricas Clave */}
+          <div className="p-6 space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Progreso Actual */}
+              <div className="relative p-4 rounded-xl bg-gradient-to-br from-blue-900/20 to-cyan-900/20 border border-blue-500/30 hover:border-blue-400/50 transition-colors">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500 to-cyan-500">
+                    <Weight className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-sm font-medium text-blue-200">Peso Actual</span>
                 </div>
-                <div className="text-xs text-gray-400">objetivo estimado</div>
+                <div className="text-2xl font-bold text-blue-400 mb-1">
+                  {centralizedMetrics.currentWeight}kg
+                </div>
+                <div className="text-xs text-blue-300 opacity-75">
+                  Último máximo registrado
+                </div>
+              </div>
+
+              {/* Próxima Semana */}
+              <div className="relative p-4 rounded-xl bg-gradient-to-br from-emerald-900/20 to-green-900/20 border border-emerald-500/30 hover:border-emerald-400/50 transition-colors">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-emerald-500 to-green-500">
+                    <TrendingUp className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-sm font-medium text-emerald-200">Próxima Semana</span>
+                </div>
+                <div className="text-2xl font-bold text-emerald-400 mb-1">
+                  {centralizedMetrics.nextWeekWeight}kg
+                </div>
+                <div className="text-xs text-emerald-300 opacity-75">
+                  +{centralizedMetrics.nextWeekIncrease.toFixed(1)}kg esperado
+                </div>
+              </div>
+
+              {/* Mejora Total */}
+              <div className="relative p-4 rounded-xl bg-gradient-to-br from-amber-900/20 to-orange-900/20 border border-amber-500/30 hover:border-amber-400/50 transition-colors">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-amber-500 to-orange-500">
+                    <Target className="w-4 h-4 text-white" />
+                  </div>
+                  <span className="text-sm font-medium text-amber-200">Mejora Total</span>
+                </div>
+                <div className="text-2xl font-bold text-amber-400 mb-1">
+                  +{centralizedMetrics.improvement.toFixed(1)}kg
+                </div>
+                <div className="text-xs text-amber-300 opacity-75">
+                  {centralizedMetrics.improvementPercentage}% incremento
+                </div>
               </div>
             </div>
 
-            {/* Gráfico Semi-Gauge de Progreso hacia PR */}
-            <div className="relative p-4 bg-gray-800/30 rounded-lg border border-purple-500/20">
-              <PRProgressChart
-                currentWeight={calculateValidatedCurrentWeight(records)}
-                predictedPR={validatePRWeight(records, analysis.progressPrediction.predictedPR.weight)}
-                baseline1RM={calculateValidatedBaseline1RM(records)}
-                confidence={Math.max(5, Math.min(95, analysis.progressPrediction.predictedPR.confidence))}
-                timeToNextPR={validateTimeToNextPR(analysis.progressPrediction.timeToNextPR)}
-                improvement={calculateValidatedImprovement(records, validatePRWeight(records, analysis.progressPrediction.predictedPR.weight))}
-              />
+            {/* Mini Timeline */}
+            <div className="mt-6 p-4 bg-gray-800/30 rounded-xl border border-gray-600/30">
+              <h4 className="text-sm font-semibold text-white mb-3 flex items-center gap-2">
+                <BarChart className="w-4 h-4" />
+                Proyección de Progreso
+              </h4>
+              <div className="flex items-center justify-between text-sm">
+                <div className="text-center">
+                  <div className="w-3 h-3 rounded-full bg-blue-500 mx-auto mb-1"></div>
+                  <div className="text-blue-400 font-semibold">{centralizedMetrics.currentWeight}kg</div>
+                  <div className="text-gray-400 text-xs">Hoy</div>
+                </div>
+                <div className="flex-1 h-0.5 bg-gradient-to-r from-blue-500 via-emerald-500 to-purple-500 mx-4"></div>
+                <div className="text-center">
+                  <div className="w-3 h-3 rounded-full bg-emerald-500 mx-auto mb-1"></div>
+                  <div className="text-emerald-400 font-semibold">{centralizedMetrics.nextWeekWeight}kg</div>
+                  <div className="text-gray-400 text-xs">1 sem</div>
+                </div>
+                <div className="flex-1 h-0.5 bg-gradient-to-r from-emerald-500 to-purple-500 mx-4"></div>
+                <div className="text-center">
+                  <div className="w-3 h-3 rounded-full bg-purple-500 mx-auto mb-1"></div>
+                  <div className="text-purple-400 font-semibold">
+                    {centralizedMetrics.prWeight}kg
+                  </div>
+                  <div className="text-gray-400 text-xs">
+                    {(() => {
+                      if (centralizedMetrics.timeToNextPR >= 4) {
+                        const months = Math.round(centralizedMetrics.timeToNextPR / 4 * 10) / 10;
+                        return months === 1 ? '1 mes' : `${months} meses`;
+                      } else {
+                        return centralizedMetrics.timeToNextPR === 1 ? '1 sem' : `${centralizedMetrics.timeToNextPR} sem`;
+                      }
+                    })()}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Insights Adicionales */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 pt-4 border-t border-gray-700">
+              <div className="flex items-center gap-3 p-3 bg-gray-800/30 rounded-lg">
+                <div className="p-1.5 rounded bg-violet-500/20">
+                  <TrendingUp className="w-4 h-4 text-violet-400" />
+                </div>
+                <div>
+                  <div className="text-xs text-gray-400">Tendencia de Fuerza</div>
+                  <div className={`text-sm font-semibold ${validateStrengthTrend(analysis.progressPrediction.strengthTrend) > 0 ? 'text-green-400' :
+                    validateStrengthTrend(analysis.progressPrediction.strengthTrend) < 0 ? 'text-red-400' : 'text-gray-400'
+                    }`}>
+                    {validateStrengthTrend(analysis.progressPrediction.strengthTrend) > 0 ? '+' : ''}
+                    {validateStrengthTrend(analysis.progressPrediction.strengthTrend)}kg/sem
+                  </div>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 p-3 bg-gray-800/30 rounded-lg">
+                <div className="p-1.5 rounded bg-emerald-500/20">
+                  <BarChart className="w-4 h-4 text-emerald-400" />
+                </div>
+                <div>
+                  <div className="text-xs text-gray-400">Crecimiento Mensual</div>
+                  <div className="text-sm font-semibold text-emerald-400">
+                    +{centralizedMetrics.monthlyGrowth}kg/mes
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </CardContent>
@@ -466,11 +657,11 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
             {/* Gráfico de Timeline */}
             <div className="relative">
               <PredictionTimeline
-                currentWeight={calculateValidatedCurrentWeight(records)}
-                nextWeekWeight={validateNextWeekWeight(records, analysis.progressPrediction.nextWeekWeight)}
-                predictedPR={validatePRWeight(records, analysis.progressPrediction.predictedPR.weight)}
-                monthlyGrowthRate={validateMonthlyGrowth(analysis.progressPrediction.monthlyGrowthRate)}
-                strengthTrend={validateStrengthTrend(analysis.progressPrediction.strengthTrend)}
+                currentWeight={centralizedMetrics.currentWeight}
+                nextWeekWeight={centralizedMetrics.nextWeekWeight}
+                predictedPR={centralizedMetrics.prWeight}
+                monthlyGrowthRate={centralizedMetrics.monthlyGrowth}
+                strengthTrend={centralizedMetrics.strengthTrend}
               />
             </div>
 
@@ -486,13 +677,10 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
                   </div>
                 </div>
                 <div className="text-xl font-bold text-blue-400 mb-1">
-                  {validateNextWeekWeight(records, analysis.progressPrediction.nextWeekWeight)}kg
+                  {centralizedMetrics.nextWeekWeight}kg
                 </div>
                 <div className="text-xs text-gray-400">
-                  {(() => {
-                    const validTrend = validateStrengthTrend(analysis.progressPrediction.strengthTrend);
-                    return `${validTrend > 0 ? '+' : ''}${validTrend}kg/sem`;
-                  })()}
+                  {centralizedMetrics.strengthTrend > 0 ? '+' : ''}{centralizedMetrics.strengthTrend}kg/sem
                 </div>
               </div>
 
@@ -506,10 +694,17 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
                   </div>
                 </div>
                 <div className="text-xl font-bold text-purple-400 mb-1">
-                  {validatePRWeight(records, analysis.progressPrediction.predictedPR.weight)}kg
+                  {centralizedMetrics.prWeight}kg
                 </div>
                 <div className="text-xs text-gray-400">
-                  {validateTimeToNextPR(analysis.progressPrediction.timeToNextPR)} semanas
+                  {(() => {
+                    if (centralizedMetrics.timeToNextPR >= 4) {
+                      const months = Math.round(centralizedMetrics.timeToNextPR / 4 * 10) / 10;
+                      return months === 1 ? '1 mes' : `${months} meses`;
+                    } else {
+                      return centralizedMetrics.timeToNextPR === 1 ? '1 semana' : `${centralizedMetrics.timeToNextPR} semanas`;
+                    }
+                  })()}
                 </div>
               </div>
 

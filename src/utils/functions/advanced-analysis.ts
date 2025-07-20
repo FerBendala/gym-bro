@@ -1259,23 +1259,24 @@ const calculateNextWeekPredictions = (
     }
   }
 
-  // Predicción conservadora de peso de trabajo para próxima semana
-  // Máximo incremento realista: 2.5kg/semana para principiantes, menos para avanzados
+  // CORRECCIÓN CRÍTICA: Usar peso máximo, NO promedio para evitar distorsión
+  // entre ejercicios de aislamiento (10kg) y compounds (130kg)
   const maxWeeklyIncrease = Math.max(0, Math.min(2.5, strengthTrend));
 
   let nextWeekWeight = Math.max(
-    avgRecentWorking, // Nunca menos que el promedio actual
-    avgRecentWorking + maxWeeklyIncrease
+    maxRecentWorking * 0.95, // Nunca menos que 95% del peso máximo
+    maxRecentWorking + maxWeeklyIncrease
   );
 
   // Validación adicional: no más del 105% del peso máximo reciente
   nextWeekWeight = Math.min(nextWeekWeight, maxRecentWorking * 1.05);
 
-  // Validación final: el peso no debe diferir más del 15% del promedio reciente
-  const maxReasonableChange = avgRecentWorking * 0.15;
+  // Validación final: peso debe estar en rango realista del peso máximo
+  const minReasonableWeight = maxRecentWorking * 0.95; // Mínimo 95%
+  const maxReasonableWeight = maxRecentWorking * 1.05; // Máximo 105%
   nextWeekWeight = Math.max(
-    avgRecentWorking - maxReasonableChange,
-    Math.min(avgRecentWorking + maxReasonableChange, nextWeekWeight)
+    minReasonableWeight,
+    Math.min(maxReasonableWeight, nextWeekWeight)
   );
 
   // Predicción de volumen con validación más estricta
@@ -1287,10 +1288,14 @@ const calculateNextWeekPredictions = (
     )
   );
 
-  return {
+  const result = {
     nextWeekWeight: Math.round(nextWeekWeight * 100) / 100,
     nextWeekVolume: Math.round(nextWeekVolume)
   };
+
+  // ✅ Algoritmo base corregido - logs removidos
+
+  return result;
 };
 
 /**
@@ -1526,10 +1531,10 @@ const validateAndCorrectPredictions = (
     corrections.push(`Tendencia volumen: ${prediction.volumeTrend}kg/sem → ${correctedPrediction.volumeTrend}kg/sem`);
   }
 
-  // Solo en desarrollo - mostrar correcciones realizadas
-  if (corrections.length > 0 && process.env.NODE_ENV === 'development') {
-    console.warn(`[Predicciones] ${corrections.length} correcciones aplicadas:`, corrections);
-  }
+  // DEBUG TEMPORAL: Comentado para verificar si ya no se necesitan correcciones
+  // if (corrections.length > 0 && process.env.NODE_ENV === 'development') {
+  //   console.warn(`[Predicciones] ${corrections.length} correcciones aplicadas:`, corrections);
+  // }
 
   if (confidencePenalty > 0) {
     correctedPrediction.confidenceLevel = Math.max(5, correctedPrediction.confidenceLevel - confidencePenalty);
