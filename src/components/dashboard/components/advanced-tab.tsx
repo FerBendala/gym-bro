@@ -10,6 +10,7 @@ import {
 } from 'lucide-react';
 import React, { useMemo } from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
+import { formatNumber } from '../../../utils/functions';
 import { calculateAdvancedAnalysis, getLastWeekRecords, getThisWeekRecords } from '../../../utils/functions/advanced-analysis';
 import { Card, CardContent, CardHeader } from '../../card';
 import { StatCard } from '../../stat-card';
@@ -830,15 +831,6 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
     );
   }
 
-  // Íconos para métricas de fatiga (mismo estilo que Balance Muscular)
-  const fatigueIcons: Record<string, React.FC<any>> = {
-    'fatigueLevel': AlertTriangle,
-    'recoveryRate': Activity,
-    'recoveryScore': CheckCircle,
-    'workloadTrend': TrendingUp,
-    'overreachingRisk': Shield
-  };
-
   // Colores para métricas de fatiga
   const fatigueColors: Record<string, string> = {
     'fatigueLevel': 'from-red-500/80 to-orange-500/80',
@@ -1052,7 +1044,7 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                         <div>
                           <div className="flex justify-between text-xs mb-1">
                             <span className="text-gray-400">Volumen:</span>
-                            <span className="text-white">{safeNumber(analysis.fatigueAnalysis.stressFactors.volumeStress, 0)}%</span>
+                            <span className="text-white">{formatNumber(safeNumber(analysis.fatigueAnalysis.stressFactors.volumeStress, 0))}%</span>
                           </div>
                           <div className="w-full bg-gray-700 rounded-full h-2">
                             <div
@@ -1064,7 +1056,7 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                         <div>
                           <div className="flex justify-between text-xs mb-1">
                             <span className="text-gray-400">Frecuencia:</span>
-                            <span className="text-white">{safeNumber(analysis.fatigueAnalysis.stressFactors.frequencyStress, 0)}%</span>
+                            <span className="text-white">{formatNumber(safeNumber(analysis.fatigueAnalysis.stressFactors.frequencyStress, 0))}%</span>
                           </div>
                           <div className="w-full bg-gray-700 rounded-full h-2">
                             <div
@@ -1311,7 +1303,6 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
             </CardContent>
           </Card>
         </div>
-
       </div>
     </div>
   );

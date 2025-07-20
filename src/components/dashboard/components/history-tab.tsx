@@ -518,19 +518,12 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
 
                     {/* Volumen principal y cambio */}
                     <div className="text-right flex-shrink-0">
-                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-400">
-                        {formatNumber(point.value)} kg
-                      </div>
                       <div className="text-xs text-gray-400">
                         volumen total
                       </div>
-                      {point.weekNumber > 1 && (
-                        <div className="text-xs text-gray-500 mt-1">
-                          <span className={`font-medium ${point.change > 0 ? 'text-green-400' : point.change < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                            {point.change > 0 ? '+' : ''}{point.changePercent.toFixed(1)}%
-                          </span>
-                        </div>
-                      )}
+                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-400">
+                        {formatNumber(point.value)} kg
+                      </div>
                     </div>
                   </div>
 

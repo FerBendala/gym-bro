@@ -10,6 +10,14 @@ export { DashboardHeader } from './dashboard-header';
 export { DashboardTabNavigation } from './dashboard-tab-navigation';
 export { ExercisesTab } from './exercises-tab';
 export { HistoryTab } from './history-tab';
+
+export {
+  ConfidenceGauge,
+  DataQualityRadial,
+  FactorsChart,
+  PredictionTimeline, PRProgressChart, TrendAnalysisChart
+} from './predictions-charts';
 export { PredictionsTab } from './predictions-tab';
+
 export { TrendsTab } from './trends-tab';
 
