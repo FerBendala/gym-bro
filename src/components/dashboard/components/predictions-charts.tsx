@@ -219,6 +219,7 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
   predictedPR,
   strengthTrend
 }) => {
+
   const generateTimelineData = () => {
     const weeks = [];
     const currentDate = new Date();
@@ -263,6 +264,8 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
       x: prDate.getTime(),
       y: predictedPR
     });
+
+
 
     return weeks;
   };

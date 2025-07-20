@@ -69,19 +69,26 @@ const validateNextWeekWeight = (records: WorkoutRecord[], rawPrediction: number)
   const recentRecords = getRecentRecords(records);
   if (recentRecords.length === 0) return 0;
 
-  const avgRecentWeight = recentRecords.reduce((sum, r) => sum + r.weight, 0) / recentRecords.length;
   const maxRecentWeight = Math.max(...recentRecords.map(r => r.weight));
 
-  const minReasonable = avgRecentWeight;
-  const maxReasonable = maxRecentWeight + 2.5; // Máximo 2.5kg mejora semanal
+  // CORRECCIÓN CRÍTICA: usar el peso máximo como base, NO el promedio
+  // La próxima semana debe estar cerca del peso máximo actual
+  const minReasonable = maxRecentWeight * 0.95; // Mínimo 95% del peso máximo
+  const maxReasonable = maxRecentWeight + 2.5; // Máximo +2.5kg mejora semanal
+
+  let result: number;
 
   if (rawPrediction < minReasonable) {
-    return Math.round(avgRecentWeight * 1.01 * 100) / 100; // 1% conservador
+    result = Math.round(maxRecentWeight * 1.01 * 100) / 100; // 1% mejora conservadora del peso máximo
   } else if (rawPrediction > maxReasonable) {
-    return Math.round(maxReasonable * 100) / 100;
+    result = Math.round(maxReasonable * 100) / 100;
+  } else {
+    result = Math.round(rawPrediction * 100) / 100;
   }
 
-  return Math.round(rawPrediction * 100) / 100;
+
+
+  return result;
 };
 
 const validatePRWeight = (records: WorkoutRecord[], rawPrediction: number): number => {
