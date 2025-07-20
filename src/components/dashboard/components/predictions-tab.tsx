@@ -105,11 +105,13 @@ const validatePRWeight = (records: WorkoutRecord[], rawPrediction: number): numb
 };
 
 const validateStrengthTrend = (rawTrend: number): number => {
-  return Math.max(-2, Math.min(2, rawTrend)); // Limitar a ±2kg/sem
+  const validTrend = Math.max(-2, Math.min(2, rawTrend)); // Limitar a ±2kg/sem
+  return Math.round(validTrend * 100) / 100; // Redondear a 2 decimales
 };
 
 const validateMonthlyGrowth = (rawGrowth: number): number => {
-  return Math.max(-5, Math.min(10, rawGrowth)); // Rango realista: -5kg a +10kg/mes
+  const validGrowth = Math.max(-5, Math.min(10, rawGrowth)); // Rango realista: -5kg a +10kg/mes
+  return Math.round(validGrowth * 100) / 100; // Redondear a 2 decimales
 };
 
 const validateTimeToNextPR = (rawTime: number): number => {
@@ -120,7 +122,8 @@ const calculateValidatedCurrentWeight = (records: WorkoutRecord[]): number => {
   const recentRecords = getRecentRecords(records);
   if (recentRecords.length === 0) return 0;
 
-  return Math.max(...recentRecords.map(r => r.weight));
+  const currentWeight = Math.max(...recentRecords.map(r => r.weight));
+  return Math.round(currentWeight * 100) / 100; // Redondear a 2 decimales
 };
 
 const calculateValidatedBaseline1RM = (records: WorkoutRecord[]): number => {
@@ -129,7 +132,8 @@ const calculateValidatedBaseline1RM = (records: WorkoutRecord[]): number => {
 
   // Calcular 1RM estimado promedio de registros recientes
   const estimated1RMs = recentRecords.map(r => r.weight * (1 + r.reps / 30));
-  return estimated1RMs.reduce((sum, val) => sum + val, 0) / estimated1RMs.length;
+  const baseline = estimated1RMs.reduce((sum, val) => sum + val, 0) / estimated1RMs.length;
+  return Math.round(baseline * 100) / 100; // Redondear a 2 decimales
 };
 
 const calculateValidatedImprovement = (records: WorkoutRecord[], predictedPR: number): number => {

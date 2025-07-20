@@ -223,13 +223,22 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
     const weeks = [];
     const currentDate = new Date();
 
-    // Datos históricos (últimas 4 semanas)
+    // Validar strengthTrend para evitar valores irreales
+    const validStrengthTrend = Math.max(-2, Math.min(2, strengthTrend));
+
+    // Datos históricos (últimas 4 semanas) - con progresión realista
     for (let i = 4; i >= 1; i--) {
       const date = new Date(currentDate);
       date.setDate(date.getDate() - (i * 7));
+
+      // Calcular peso histórico con límites realistas
+      const historicalWeight = currentWeight - (validStrengthTrend * i);
+      const minHistoricalWeight = currentWeight * 0.85; // Máximo 15% menos
+      const maxHistoricalWeight = currentWeight * 1.05; // Máximo 5% más
+
       weeks.push({
         x: date.getTime(),
-        y: Math.max(0, currentWeight - (strengthTrend * i))
+        y: Math.max(minHistoricalWeight, Math.min(maxHistoricalWeight, historicalWeight))
       });
     }
 
