@@ -218,30 +218,41 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
       volumenDiaCompleto: '7000-8000kg por día de entrenamiento es realista'
     });
 
-    console.log('📅 NORMALIZACIÓN POR DÍA DE LA SEMANA (CORREGIDA):', {
+    console.log('🎯 TENDENCIA NORMALIZADA POR DÍA DE LA SEMANA:', {
       diaActual: getDayName(new Date()),
-      problemaResuelto: '✅ YA NO valores hardcodeados ni sumas incorrectas',
+      problemaUsuario: '¿Por qué tendencia negativa si lunes aumentó volumen?',
 
-      // Patrones detectados (sin hardcodear)
-      patternSemanal: weeklyInsights.weeklyPattern,
-      diaPico: weeklyInsights.peakDay,
-      diaDescanso: weeklyInsights.restDay,
+      // 🔄 COMPARACIÓN ANTES vs DESPUÉS
+      tendenciaAnterior: {
+        metodo: 'Compara días diferentes (injusto)',
+        valor: analysis.progressPrediction.volumeTrend.toFixed(1) + 'kg/sem',
+        problema: '❌ Compara lunes vs otros días directamente'
+      },
 
-      // Volúmenes promedio reales por día
-      volumenPorDia: weeklyInsights.avgVolumeByDay,
+      tendenciaNormalizada: {
+        metodo: 'Compara lunes con lunes anteriores (justo)',
+        valor: normalizedVolumeTrend.toFixed(1) + 'kg/sem',
+        correccion: '✅ Detecta si ESTE lunes vs lunes anteriores'
+      },
 
-      // Tendencias corregidas
-      volumeTrendNormalizado: normalizedVolumeTrend.toFixed(1) + 'kg/sem',
-      volumeTrendOriginal: analysis.progressPrediction.volumeTrend.toFixed(1) + 'kg/sem',
+      // Patrones detectados
+      patrones: {
+        diaPico: weeklyInsights.peakDay,
+        diaDescanso: weeklyInsights.restDay,
+        variabilidad: weeklyInsights.weeklyPattern
+      },
 
-      // Predicción corregida (ya no 2070kg!)
-      prediccionHoyAntes: '2070.6kg (❌ BUG)',
-      prediccionHoyAhora: todayVolumePrediction.toFixed(1) + 'kg (✅ CORREGIDA)',
+      // Volúmenes por día para entender el patrón
+      volumenPromedioPorDia: Object.entries(weeklyInsights.avgVolumeByDay)
+        .map(([dia, vol]) => `${dia}: ${vol.toFixed(0)}kg`)
+        .join(', '),
 
-      // Debug adicional
-      totalRegistros: records.length,
-      diasConDatos: Object.keys(weeklyInsights.avgVolumeByDay).length,
-      algoritmoCorregido: '✅ Suma volumen total por día, no registros individuales'
+      // Predicción realista
+      prediccionHoy: todayVolumePrediction.toFixed(1) + 'kg',
+
+      // Resultado
+      ahoraEnUI: '✅ UI usa tendencia normalizada (no la original)',
+      explicacion: 'Si lunes aumentó → tendencia normalizada será positiva'
     });
 
     return {
@@ -257,8 +268,8 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
       nextWeekIncrease: nextWeekWeight - currentWeight,
       prIncrease: prWeight - nextWeekWeight,
 
-      // Valores directos del análisis (sin validación adicional)
-      volumeTrend: analysis.progressPrediction.volumeTrend,
+      // 🎯 CORRECCIÓN CRÍTICA: Usar tendencia normalizada, no la original
+      volumeTrend: normalizedVolumeTrend, // ✅ Tendencia corregida por día de la semana
       plateauRisk: analysis.progressPrediction.plateauRisk,
       confidenceLevel: analysis.progressPrediction.confidenceLevel,
       prConfidence: analysis.progressPrediction.predictedPR.confidence,
