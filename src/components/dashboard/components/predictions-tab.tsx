@@ -211,7 +211,11 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
       totalRegistros: records.length,
       volumenMedioRegistro: records.reduce((sum, r) => sum + (r.sets * r.reps * r.weight), 0) / records.length,
       registroMasAlto: Math.max(...records.map(r => r.sets * r.reps * r.weight)),
-      registroMasBajo: Math.min(...records.map(r => r.sets * r.reps * r.weight))
+      registroMasBajo: Math.min(...records.map(r => r.sets * r.reps * r.weight)),
+
+      explicacion: '✅ Volúmenes altos son NORMALES para entrenamientos completos',
+      ejemplo: 'Press pierna 156kg × 12 reps × 3 sets = 5640kg (normal)',
+      volumenDiaCompleto: '7000-8000kg por día de entrenamiento es realista'
     });
 
     console.log('📅 NORMALIZACIÓN POR DÍA DE LA SEMANA (CORREGIDA):', {

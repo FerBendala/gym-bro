@@ -259,7 +259,7 @@ export const normalizeVolumeByDay = (
 
 /**
  * Calcula tendencia de volumen normalizada por día de la semana
- * CORRECCIÓN CRÍTICA: Tendencia realista, no valores extremos
+ * CORRECCIÓN CRÍTICA: Límites ajustados para volúmenes altos realistas
  */
 export const calculateNormalizedVolumeTrend = (records: WorkoutRecord[]): number => {
   if (records.length < 6) return 0; // Necesitamos datos suficientes
@@ -314,18 +314,21 @@ export const calculateNormalizedVolumeTrend = (records: WorkoutRecord[]): number
   // Tendencia diaria realista
   const dailyTrend = (recentAvg - olderAvg) / daysBetween;
 
-  // Convertir a tendencia semanal y aplicar límites realistas
+  // Convertir a tendencia semanal
   const weeklyTrend = dailyTrend * 7;
 
-  // LÍMITES REALISTAS: Máximo ±50kg por semana
-  const limitedTrend = Math.max(-50, Math.min(50, weeklyTrend));
+  // LÍMITES REALISTAS AJUSTADOS: Para volúmenes altos de entrenamiento completo
+  // Límite basado en porcentaje del volumen promedio (máximo ±15% por semana)
+  const avgVolume = (olderAvg + recentAvg) / 2;
+  const maxReasonableTrend = avgVolume * 0.15; // 15% del volumen promedio
+  const limitedTrend = Math.max(-maxReasonableTrend, Math.min(maxReasonableTrend, weeklyTrend));
 
   return roundToDecimals(limitedTrend);
 };
 
 /**
  * Predice volumen para un día específico considerando patrón semanal
- * CORRECCIÓN CRÍTICA: Lógica simplificada y realista
+ * CORRECCIÓN CRÍTICA: Manejo inteligente de volúmenes altos
  */
 export const predictVolumeForDay = (
   records: WorkoutRecord[],
@@ -344,11 +347,21 @@ export const predictVolumeForDay = (
     return allDays.length > 0 ? allDays.reduce((a, b) => a + b) / allDays.length : 0;
   }
 
-  // CORRECCIÓN SIMPLE: Aplicar tendencia semanal dividida por 7 días
-  const dailyTrendAdjustment = volumeTrend / 7; // Tendencia diaria
-  const predictedVolume = baseDayVolume + dailyTrendAdjustment;
+  // CORRECCIÓN INTELIGENTE: Aplicar tendencia como porcentaje para volúmenes altos
+  const avgWeeklyVolume = Object.values(avgVolumeByDay).reduce((a, b) => a + b, 0);
+  const trendPercentage = avgWeeklyVolume > 0 ? volumeTrend / avgWeeklyVolume : 0;
 
-  return roundToDecimals(Math.max(0, predictedVolume));
+  // Aplicar tendencia como porcentaje (más realista para volúmenes altos)
+  const predictedVolume = baseDayVolume * (1 + trendPercentage);
+
+  // Validación: no permitir cambios mayores al 20% del volumen base
+  const maxChange = baseDayVolume * 0.2;
+  const limitedVolume = Math.max(
+    baseDayVolume - maxChange,
+    Math.min(baseDayVolume + maxChange, predictedVolume)
+  );
+
+  return roundToDecimals(Math.max(0, limitedVolume));
 };
 
 /**
