@@ -18,10 +18,7 @@ import { formatNumber } from '../../../utils/functions';
 import { calculateAdvancedAnalysis } from '../../../utils/functions/advanced-analysis';
 // 🎯 NUEVAS IMPORTACIONES: Funciones para normalización por día de la semana
 import {
-  calculateNormalizedVolumeTrend,
-  getDayName,
-  getWeeklyVolumeInsights,
-  predictVolumeForDay
+  calculateNormalizedVolumeTrend
 } from '../../../utils/functions';
 import { Card, CardContent, CardHeader } from '../../card';
 import { StatCard } from '../../stat-card';
@@ -189,71 +186,7 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
       strengthTrend
     );
 
-    // ✅ Todas las métricas centralizadas y sincronizadas
-
-    // 🎯 DEMO: Normalización por día de la semana
-    const weeklyInsights = getWeeklyVolumeInsights(records);
     const normalizedVolumeTrend = calculateNormalizedVolumeTrend(records);
-    const todayVolumePrediction = predictVolumeForDay(records, new Date(), normalizedVolumeTrend);
-
-    // 🔍 DEBUG DETALLADO: Investigar volúmenes altos
-    const sampleRecords = records.slice(0, 5).map(r => ({
-      fecha: r.date.toISOString().split('T')[0],
-      ejercicio: r.exercise?.name || 'desconocido',
-      sets: r.sets,
-      reps: r.reps,
-      peso: r.weight,
-      volumen: r.sets * r.reps * r.weight
-    }));
-
-    console.log('🔍 DEBUG VOLÚMENES ALTOS:', {
-      registrosMuestra: sampleRecords,
-      totalRegistros: records.length,
-      volumenMedioRegistro: records.reduce((sum, r) => sum + (r.sets * r.reps * r.weight), 0) / records.length,
-      registroMasAlto: Math.max(...records.map(r => r.sets * r.reps * r.weight)),
-      registroMasBajo: Math.min(...records.map(r => r.sets * r.reps * r.weight)),
-
-      explicacion: '✅ Volúmenes altos son NORMALES para entrenamientos completos',
-      ejemplo: 'Press pierna 156kg × 12 reps × 3 sets = 5640kg (normal)',
-      volumenDiaCompleto: '7000-8000kg por día de entrenamiento es realista'
-    });
-
-    console.log('🎯 TENDENCIA NORMALIZADA POR DÍA DE LA SEMANA:', {
-      diaActual: getDayName(new Date()),
-      problemaUsuario: '¿Por qué tendencia negativa si lunes aumentó volumen?',
-
-      // 🔄 COMPARACIÓN ANTES vs DESPUÉS
-      tendenciaAnterior: {
-        metodo: 'Compara días diferentes (injusto)',
-        valor: analysis.progressPrediction.volumeTrend.toFixed(1) + 'kg/sem',
-        problema: '❌ Compara lunes vs otros días directamente'
-      },
-
-      tendenciaNormalizada: {
-        metodo: 'Compara lunes con lunes anteriores (justo)',
-        valor: normalizedVolumeTrend.toFixed(1) + 'kg/sem',
-        correccion: '✅ Detecta si ESTE lunes vs lunes anteriores'
-      },
-
-      // Patrones detectados
-      patrones: {
-        diaPico: weeklyInsights.peakDay,
-        diaDescanso: weeklyInsights.restDay,
-        variabilidad: weeklyInsights.weeklyPattern
-      },
-
-      // Volúmenes por día para entender el patrón
-      volumenPromedioPorDia: Object.entries(weeklyInsights.avgVolumeByDay)
-        .map(([dia, vol]) => `${dia}: ${vol.toFixed(0)}kg`)
-        .join(', '),
-
-      // Predicción realista
-      prediccionHoy: todayVolumePrediction.toFixed(1) + 'kg',
-
-      // Resultado
-      ahoraEnUI: '✅ UI usa tendencia normalizada (no la original)',
-      explicacion: 'Si lunes aumentó → tendencia normalizada será positiva'
-    });
 
     return {
       // Métricas validadas centralizadas
@@ -848,7 +781,7 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
                   <div className="text-blue-400 font-semibold">{centralizedMetrics.currentWeight}kg</div>
                   <div className="text-gray-400 text-xs">Hoy</div>
                 </div>
-                <div className="flex-1 h-0.5 bg-gradient-to-r from-blue-500 via-emerald-500 to-purple-500 mx-4"></div>
+                <div className="flex-1 h-0.5 bg-gradient-to-r from-blue-500 to-emerald-500 mx-4"></div>
                 <div className="text-center">
                   <div className="w-3 h-3 rounded-full bg-emerald-500 mx-auto mb-1"></div>
                   <div className="text-emerald-400 font-semibold">{centralizedMetrics.nextWeekWeight}kg</div>

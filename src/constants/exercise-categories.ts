@@ -98,6 +98,57 @@ export const IDEAL_VOLUME_DISTRIBUTION: Record<string, number> = {
 /**
  * Obtiene el porcentaje ideal de volumen para una categoría específica
  */
+export const getIdealVolumePercentage = (categoryName: string): number => {
+  return IDEAL_VOLUME_DISTRIBUTION[categoryName] || 15; // 15% por defecto para categorías no definidas
+};
+
+/**
+ * Obtiene el porcentaje ideal de volumen considerando la configuración personalizada del usuario
+ * Si el usuario ha personalizado la distribución, usa esos valores; sino usa los valores por defecto
+ */
+export const getIdealVolumePercentageAsync = async (categoryName: string): Promise<number> => {
+  try {
+    // Importación dinámica para evitar dependencias circulares
+    const { getItem } = await import('../utils/data/indexeddb-utils');
+
+    // Intentar obtener configuración personalizada (usando any para evitar problemas de tipo)
+    const result = await getItem<any>('metadata', 'userSettings');
+
+    if (result.success && result.data?.value?.customVolumeDistribution) {
+      const customValue = result.data.value.customVolumeDistribution[categoryName];
+      if (typeof customValue === 'number') {
+        return customValue;
+      }
+    }
+  } catch (error) {
+    console.warn('Error obteniendo configuración personalizada de volumen:', error);
+  }
+
+  // Fallback a valores por defecto
+  return getIdealVolumePercentage(categoryName);
+};
+
+/**
+ * Obtiene toda la distribución de volumen ideal (personalizada o por defecto)
+ */
+export const getIdealVolumeDistributionAsync = async (): Promise<Record<string, number>> => {
+  try {
+    // Importación dinámica para evitar dependencias circulares
+    const { getItem } = await import('../utils/data/indexeddb-utils');
+
+    // Intentar obtener configuración personalizada (usando any para evitar problemas de tipo)
+    const result = await getItem<any>('metadata', 'userSettings');
+
+    if (result.success && result.data?.value?.customVolumeDistribution) {
+      return result.data.value.customVolumeDistribution;
+    }
+  } catch (error) {
+    console.warn('Error obteniendo distribución personalizada de volumen:', error);
+  }
+
+  // Fallback a valores por defecto
+  return IDEAL_VOLUME_DISTRIBUTION;
+};
 
 /**
  * Base de datos de ejercicios conocidos con distribuciones realistas de esfuerzo
@@ -259,11 +310,6 @@ const EXERCISE_PATTERNS: Array<{
       description: 'Rueda abdominal'
     }
   ];
-export const getIdealVolumePercentage = (categoryName: string): number => {
-  return IDEAL_VOLUME_DISTRIBUTION[categoryName] || 15; // 15% por defecto para categorías no definidas
-};
-
-
 
 /**
  * Pesos relativos para el esfuerzo muscular en ejercicios multi-categoría

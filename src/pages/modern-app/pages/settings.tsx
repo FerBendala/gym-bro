@@ -1,11 +1,12 @@
-import { Bell, Database, Download, Info, Shield, User } from 'lucide-react';
+import { Bell, Database, Download, Info, Shield, Sliders, User } from 'lucide-react';
 import React, { useState } from 'react';
 import { AdminPanelPage } from '../../../components/admin-panel/admin-panel-page';
 import { DataExport } from '../../../components/data-export';
 import { MODERN_THEME } from '../../../constants/modern-theme';
 import { cn } from '../../../utils/functions';
+import { VolumeSettings } from './volume-settings';
 
-type SettingsSection = 'main' | 'admin' | 'export' | 'profile' | 'notifications' | 'about';
+type SettingsSection = 'main' | 'admin' | 'export' | 'profile' | 'notifications' | 'about' | 'volume';
 
 interface SettingsItem {
   id: SettingsSection;
@@ -28,6 +29,12 @@ export const ModernSettings: React.FC = () => {
       label: 'Administración de Ejercicios',
       icon: Database,
       description: 'Gestionar ejercicios y asignaciones por día'
+    },
+    {
+      id: 'volume',
+      label: 'Configuración de Volumen',
+      icon: Sliders,
+      description: 'Personalizar distribución ideal de volumen por grupo muscular'
     },
     {
       id: 'export',
@@ -165,6 +172,11 @@ export const ModernSettings: React.FC = () => {
             {renderSectionHeader('Administración de Ejercicios', () => setActiveSection('main'))}
             <AdminPanelPage />
           </div>
+        );
+
+      case 'volume':
+        return (
+          <VolumeSettings onBack={() => setActiveSection('main')} />
         );
 
       case 'export':

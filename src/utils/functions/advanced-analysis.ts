@@ -1,8 +1,8 @@
 import { differenceInDays, endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { WorkoutRecord } from '../../interfaces';
-import { calculateIntensityScore } from './category-analysis';
-// 🎯 NUEVA IMPORTACIÓN: Funciones para normalización por día de la semana
+import { calculateIntensityScore, normalizeVolumeTrend } from './category-analysis';
+// 🎯 NUEVA IMPORTACIÓN: Funciones para normalización por día de la semana aplicadas
 
 // ========================================
 // CONSTANTES PARA CÁLCULOS DE PREDICCIÓN
@@ -1097,12 +1097,20 @@ const calculateTrends = (
       const recentWeight = recentData[1].weight;
       const previousWeight = recentData[0].weight;
 
-      // CORRECCIÓN CRÍTICA: Tendencia de volumen realista
+      // CORRECCIÓN CRÍTICA: Tendencia de volumen realista con normalización por día de la semana
       // La diferencia directa puede ser excesiva, especialmente con semanas incompletas
       const rawVolumeTrend = recentVolumePerSession - previousVolumePerSession;
 
+      // **MEJORA FUNDAMENTAL**: Usar normalización por día de la semana
+      const currentDate = new Date(validRecords[validRecords.length - 1].date);
+      const normalizedVolumeTrend = normalizeVolumeTrend(
+        recentData[1].volume,
+        recentData[0].volume,
+        currentDate
+      );
+
       // Aplicar límites realistas inmediatamente
-      volumeTrend = Math.max(-50, Math.min(50, rawVolumeTrend)); // Máximo ±50kg/sem
+      volumeTrend = Math.max(-50, Math.min(50, normalizedVolumeTrend)); // Máximo ±50kg/sem
 
       // Si la tendencia es extrema, usar enfoque más conservador
       if (Math.abs(rawVolumeTrend) > 100) {

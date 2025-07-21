@@ -4,6 +4,7 @@ import {
   calculatePredictionMetrics,
   type PredictionMetrics
 } from '../../../utils/functions/advanced-analysis';
+import { normalizeByWeekday } from '../../../utils/functions/category-analysis';
 
 /**
  * Valida un registro de entrenamiento para predicciones
@@ -19,7 +20,7 @@ const isValidRecord = (record: WorkoutRecord): boolean => {
 };
 
 /**
- * Interfaz extendida para métricas con información de calidad
+ * Interfaz extendida para métricas con información de calidad y normalización por día de la semana
  */
 export interface EnhancedPredictionMetrics extends PredictionMetrics {
   dataQuality: {
@@ -29,6 +30,12 @@ export interface EnhancedPredictionMetrics extends PredictionMetrics {
     hasRecentData: boolean;
     dataSpan: number; // días entre primer y último registro
     qualityScore: number; // 0-100
+  };
+  // Nuevas métricas normalizadas por día de la semana
+  weekdayNormalization: {
+    currentWeekdayFactor: number;
+    isPartialWeek: boolean;
+    normalizedVolumeTrend: number;
   };
 }
 
@@ -83,6 +90,17 @@ export const usePredictionMetrics = (
     // Calcular métricas base usando registros validados
     const baseMetrics = calculatePredictionMetrics(validRecords, predictedPRWeight);
 
+    // **NUEVA FUNCIONALIDAD**: Calcular normalización por día de la semana
+    const currentDate = new Date();
+    const { weekdayFactor } = normalizeByWeekday(100, 100, currentDate); // Usar valores dummy para obtener el factor
+
+    // Determinar si estamos en una semana parcial (factor < 1.0)
+    const isPartialWeek = weekdayFactor < 1.0;
+
+    // Por ahora, usar un valor por defecto para normalizedVolumeTrend
+    // TODO: Integrar con las métricas de tendencia completas cuando estén disponibles
+    const normalizedVolumeTrend = 0;
+
     return {
       ...baseMetrics,
       dataQuality: {
@@ -92,6 +110,11 @@ export const usePredictionMetrics = (
         hasRecentData,
         dataSpan,
         qualityScore: Math.round(Math.min(100, qualityScore))
+      },
+      weekdayNormalization: {
+        currentWeekdayFactor: weekdayFactor,
+        isPartialWeek,
+        normalizedVolumeTrend: Math.round(normalizedVolumeTrend)
       }
     };
   }, [records, predictedPRWeight]);

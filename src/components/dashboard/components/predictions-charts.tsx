@@ -33,7 +33,7 @@ export interface FactorsChartProps {
 }
 
 // Gráfico de Gauge para Nivel de Confianza
-export const ConfidenceGauge: React.FC<ConfidenceGaugeProps> = ({ confidence, level, color }) => {
+export const ConfidenceGauge: React.FC<ConfidenceGaugeProps> = ({ confidence, level }) => {
   const getGaugeColor = (conf: number): string => {
     if (conf >= 80) return '#10b981'; // green-500
     if (conf >= 60) return '#3b82f6'; // blue-500
@@ -450,7 +450,7 @@ export const FactorsChart: React.FC<FactorsChartProps> = ({ factors }) => {
 
   const series = [{
     name: 'Score',
-    data: factors.map(f => f.value)
+    data: factors.map(f => typeof f.value === 'number' ? f.value : parseFloat(f.value as string) || 0)
   }];
 
   return (

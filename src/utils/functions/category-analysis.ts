@@ -1,4 +1,4 @@
-import { differenceInDays, endOfMonth, endOfWeek, format, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
+import { differenceInDays, endOfMonth, endOfWeek, format, getDay, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { EXERCISE_CATEGORIES, IDEAL_VOLUME_DISTRIBUTION, calculateCategoryEffortDistribution } from '../../constants/exercise-categories';
 import type { WorkoutRecord } from '../../interfaces';
@@ -30,6 +30,92 @@ const getCurrentDateFromRecords = (records: WorkoutRecord[]): Date => {
   // En lugar de verificar si es "muy antigua", simplemente usar la fecha más reciente
   // esto maneja tanto datos pasados como futuros correctamente
   return latestDate;
+};
+
+/**
+ * Normaliza métricas semanales basándose en el día actual de la semana
+ * CRÍTICO: Evita comparaciones injustas entre semanas incompletas vs completas
+ */
+export const normalizeByWeekday = (
+  currentWeekValue: number,
+  comparisonWeekValue: number,
+  currentDate: Date = new Date()
+): {
+  normalizedCurrent: number;
+  normalizedComparison: number;
+  weekdayFactor: number;
+} => {
+  const currentWeekday = getDay(currentDate); // 0 = domingo, 6 = sábado
+
+  // Factor de normalización basado en día de la semana
+  // Asumiendo distribución típica de entrenamientos a lo largo de la semana
+  const weekdayFactors: Record<number, number> = {
+    0: 1.0,   // Domingo - semana completa
+    1: 0.15,  // Lunes - 15% de la semana
+    2: 0.30,  // Martes - 30% de la semana  
+    3: 0.45,  // Miércoles - 45% de la semana
+    4: 0.60,  // Jueves - 60% de la semana
+    5: 0.75,  // Viernes - 75% de la semana
+    6: 0.90   // Sábado - 90% de la semana
+  };
+
+  const weekdayFactor = weekdayFactors[currentWeekday] || 1.0;
+
+  // Si estamos a mitad de semana, proyectar el valor completo de la semana actual
+  const normalizedCurrent = weekdayFactor > 0 ? currentWeekValue / weekdayFactor : currentWeekValue;
+
+  // La semana de comparación ya está completa, no necesita normalización
+  const normalizedComparison = comparisonWeekValue;
+
+  return {
+    normalizedCurrent,
+    normalizedComparison,
+    weekdayFactor
+  };
+};
+
+/**
+ * Normaliza tendencias de volumen considerando el día de la semana
+ * ESENCIAL: Corrige el problema de "tendencia negativa falsa" los lunes
+ */
+export const normalizeVolumeTrend = (
+  thisWeekVolume: number,
+  lastWeekVolume: number,
+  currentDate: Date = new Date()
+): number => {
+  const { normalizedCurrent, normalizedComparison } = normalizeByWeekday(
+    thisWeekVolume,
+    lastWeekVolume,
+    currentDate
+  );
+
+  if (normalizedComparison === 0) return 0;
+
+  return ((normalizedCurrent - normalizedComparison) / normalizedComparison) * 100;
+};
+
+/**
+ * Calcula porcentajes de volumen normalizados por día de la semana
+ */
+export const calculateNormalizedWeeklyPercentage = (
+  categoryVolume: number,
+  totalVolume: number,
+  currentDate: Date = new Date()
+): number => {
+  const { normalizedCurrent: normalizedCategoryVolume } = normalizeByWeekday(
+    categoryVolume,
+    categoryVolume, // Solo normalizamos, no comparamos
+    currentDate
+  );
+
+  const { normalizedCurrent: normalizedTotalVolume } = normalizeByWeekday(
+    totalVolume,
+    totalVolume,
+    currentDate
+  );
+
+  if (normalizedTotalVolume === 0) return 0;
+  return (normalizedCategoryVolume / normalizedTotalVolume) * 100;
 };
 
 /**
@@ -468,13 +554,19 @@ const getOptimalFrequency = (category: string): number => {
 
 /**
  * Calcula score de regularidad mejorado que no penaliza patrones sistemáticos
+ * MEJORADO: Considera el día de la semana actual para evaluaciones más justas
  */
 const calculateRegularityScore = (categoryRecords: WorkoutRecord[]): number => {
   if (categoryRecords.length < 3) return 50; // Score neutral para pocos datos
 
+  const currentDate = getCurrentDateFromRecords(categoryRecords);
   const sortedRecords = [...categoryRecords].sort((a, b) =>
     new Date(a.date).getTime() - new Date(b.date).getTime()
   );
+
+  // **MEJORA**: Considerar si la evaluación es en día temprano de la semana
+  const currentWeekday = getDay(currentDate);
+  const isEarlyWeek = currentWeekday <= 2; // Lunes o Martes
 
   const daysBetweenWorkouts: number[] = [];
   for (let i = 1; i < sortedRecords.length; i++) {
@@ -493,14 +585,39 @@ const calculateRegularityScore = (categoryRecords: WorkoutRecord[]): number => {
   const stdDev = Math.sqrt(variance);
   const coefficientOfVariation = avgInterval > 0 ? stdDev / avgInterval : 1;
 
+  // **MEJORA**: Ajustar tolerancia basada en el día de la semana
+  let toleranceThreshold = 0.3; // Umbral base
+  if (isEarlyWeek) {
+    // Ser más tolerante al inicio de la semana
+    toleranceThreshold = 0.4;
+  }
+
+  // **MEJORA**: Considerar el último entrenamiento en el contexto del día actual
+  const lastRecordDate = new Date(sortedRecords[sortedRecords.length - 1].date);
+  const daysSinceLastWorkout = Math.floor(
+    (currentDate.getTime() - lastRecordDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  // Si el último entrenamiento fue muy reciente y estamos al inicio de la semana,
+  // no penalizar la consistencia
+  if (isEarlyWeek && daysSinceLastWorkout <= 2) {
+    toleranceThreshold = 0.5; // Aún más tolerante
+  }
+
   // Mejorado: No penalizar patrones sistemáticos
-  // Si el CV es bajo (< 0.3), es un patrón regular = buena puntuación
-  if (coefficientOfVariation < 0.3) {
-    return Math.min(100, 90 + (10 * (0.3 - coefficientOfVariation) / 0.3));
+  // Si el CV es bajo (< toleranceThreshold), es un patrón regular = buena puntuación
+  if (coefficientOfVariation < toleranceThreshold) {
+    return Math.min(100, 90 + (10 * (toleranceThreshold - coefficientOfVariation) / toleranceThreshold));
   }
 
   // Para mayor variabilidad, reducir puntuación gradualmente
-  const regularityScore = Math.max(20, 90 - (coefficientOfVariation * 100));
+  let regularityScore = Math.max(20, 90 - (coefficientOfVariation * 100));
+
+  // **MEJORA**: Bonus por entrenamientos recientes al inicio de semana
+  if (isEarlyWeek && daysSinceLastWorkout <= 1) {
+    regularityScore = Math.min(100, regularityScore * 1.1); // 10% bonus
+  }
+
   return Math.round(regularityScore);
 };
 
@@ -842,12 +959,17 @@ const determineStrengthLevel = (estimatedOneRM: number, category: string): 'begi
 
 /**
  * Calcula la distribución de volumen temporal para una categoría
+ * MEJORADO: Incluye normalización por día de la semana para comparaciones justas
  */
 const calculateVolumeDistribution = (categoryRecords: WorkoutRecord[], allRecords?: WorkoutRecord[]): {
   thisWeek: number;
   lastWeek: number;
   thisMonth: number;
   lastMonth: number;
+  // Valores normalizados para comparaciones justas
+  thisWeekNormalized: number;
+  weekdayFactor: number;
+  volumeTrend: number; // Tendencia normalizada
 } => {
   // Usar la fecha actual basada en los datos reales
   const now = getCurrentDateFromRecords(allRecords || categoryRecords);
@@ -886,11 +1008,29 @@ const calculateVolumeDistribution = (categoryRecords: WorkoutRecord[], allRecord
     return date >= lastMonthStart && date <= lastMonthEnd;
   });
 
+  // Calcular volúmenes base
+  const thisWeekVolume = thisWeekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const lastWeekVolume = lastWeekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+
+  // **MEJORA CRÍTICA**: Normalizar volumen de esta semana por día actual
+  const { normalizedCurrent: thisWeekNormalized, weekdayFactor } = normalizeByWeekday(
+    thisWeekVolume,
+    lastWeekVolume,
+    now
+  );
+
+  // Calcular tendencia normalizada
+  const volumeTrend = normalizeVolumeTrend(thisWeekVolume, lastWeekVolume, now);
+
   return {
-    thisWeek: thisWeekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0),
-    lastWeek: lastWeekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0),
+    thisWeek: thisWeekVolume,
+    lastWeek: lastWeekVolume,
     thisMonth: thisMonthRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0),
-    lastMonth: lastMonthRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0)
+    lastMonth: lastMonthRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0),
+    // Nuevos valores normalizados
+    thisWeekNormalized: Math.round(thisWeekNormalized),
+    weekdayFactor,
+    volumeTrend: Math.round(volumeTrend)
   };
 };
 
@@ -1669,12 +1809,40 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: Wo
       const percentages = weeklyBalanceData.map(w => w.percentage);
       const avgPercentage = percentages.reduce((sum, p) => sum + p, 0) / percentages.length;
       const variance = percentages.reduce((sum, p) => sum + Math.pow(p - avgPercentage, 2), 0) / percentages.length;
-      const volatility = avgPercentage > 0 ? Math.round((Math.sqrt(variance) / avgPercentage) * 100) : 0;
+      const rawVolatility = avgPercentage > 0 ? (Math.sqrt(variance) / avgPercentage) * 100 : 0;
+
+      // **AJUSTE DINÁMICO**: Reducir sensibilidad basada en cantidad de datos
+      const weeksCount = weeklyBalanceData.length;
+      let adjustedVolatility = rawVolatility;
+
+      if (weeksCount < 6) {
+        // Con pocas semanas, reducir volatilidad significativamente
+        const reductionFactor = Math.max(0.3, weeksCount / 10); // 30-60% del valor original
+        adjustedVolatility = rawVolatility * reductionFactor;
+      } else if (weeksCount < 12) {
+        // Con semanas moderadas, reducir volatilidad moderadamente
+        const reductionFactor = Math.max(0.6, weeksCount / 15); // 60-80% del valor original
+        adjustedVolatility = rawVolatility * reductionFactor;
+      }
+
+      // **FILTRO ADICIONAL**: Considerar si la variación es sistemática vs aleatoria
+      if (weeksCount >= 4) {
+        const sortedPercentages = [...percentages].sort((a, b) => a - b);
+        const medianPercentage = sortedPercentages[Math.floor(sortedPercentages.length / 2)];
+        const iqr = sortedPercentages[Math.floor(sortedPercentages.length * 0.75)] -
+          sortedPercentages[Math.floor(sortedPercentages.length * 0.25)];
+
+        // Si el rango intercuartílico es pequeño, es más consistente de lo que sugiere la varianza
+        const iqrRatio = iqr / (medianPercentage || 1);
+        if (iqrRatio < 0.5) {
+          adjustedVolatility *= 0.7; // Reducir volatilidad 30% más si es sistemático
+        }
+      }
 
       return {
         trend,
         consistency: balanceConsistency,
-        volatility: Math.min(100, volatility)
+        volatility: Math.min(100, Math.round(adjustedVolatility))
       };
     }
   }
@@ -1728,10 +1896,23 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: Wo
   // Calcular volatilidad
   const volatility = mean > 0 ? (stdDev / mean) * 100 : 0;
 
+  // **MEJORA**: Calcular volatilidad más tolerante también en el fallback
+  const rawVolatility = mean > 0 ? (stdDev / mean) * 100 : 0;
+
+  // Reducir volatilidad cuando hay pocos datos
+  const recordsCount = sortedRecords.length;
+  let adjustedVolatility = rawVolatility;
+
+  if (recordsCount < 10) {
+    adjustedVolatility = rawVolatility * 0.5; // 50% del valor original
+  } else if (recordsCount < 20) {
+    adjustedVolatility = rawVolatility * 0.7; // 70% del valor original
+  }
+
   return {
     trend,
     consistency: Math.round(consistency),
-    volatility: Math.round(Math.min(100, volatility))
+    volatility: Math.round(Math.min(100, adjustedVolatility))
   };
 };
 
@@ -1852,9 +2033,9 @@ const generateWarnings = (
     }
   }
 
-  if (balance.balanceHistory?.volatility && balance.balanceHistory.volatility > 50) {
+  if (balance.balanceHistory?.volatility && balance.balanceHistory.volatility > 70) {
     const volatilityPercent = Math.round(balance.balanceHistory.volatility);
-    if (volatilityPercent > 70) {
+    if (volatilityPercent > 85) {
       warnings.push(`Entrenamiento muy irregular en ${category.toLowerCase()} (${volatilityPercent}% variación) - establece rutina más consistente`);
     } else {
       warnings.push(`Entrenamiento irregular en ${category.toLowerCase()} (${volatilityPercent}% variación) - intenta ser más constante`);

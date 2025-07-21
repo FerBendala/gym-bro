@@ -318,10 +318,15 @@ export const calculateNormalizedVolumeTrend = (records: WorkoutRecord[]): number
   const weeklyTrend = dailyTrend * 7;
 
   // LÍMITES REALISTAS AJUSTADOS: Para volúmenes altos de entrenamiento completo
-  // Límite basado en porcentaje del volumen promedio (máximo ±15% por semana)
+  // Límite más conservador: máximo ±5% del volumen promedio por semana
   const avgVolume = (olderAvg + recentAvg) / 2;
-  const maxReasonableTrend = avgVolume * 0.15; // 15% del volumen promedio
-  const limitedTrend = Math.max(-maxReasonableTrend, Math.min(maxReasonableTrend, weeklyTrend));
+  const maxReasonableTrend = avgVolume * 0.05; // 5% del volumen promedio (más conservador)
+
+  // Límite absoluto adicional: máximo ±300kg/sem para cualquier volumen
+  const absoluteMaxTrend = 300;
+  const finalMaxTrend = Math.min(maxReasonableTrend, absoluteMaxTrend);
+
+  const limitedTrend = Math.max(-finalMaxTrend, Math.min(finalMaxTrend, weeklyTrend));
 
   return roundToDecimals(limitedTrend);
 };
