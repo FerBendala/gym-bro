@@ -196,6 +196,24 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
     const normalizedVolumeTrend = calculateNormalizedVolumeTrend(records);
     const todayVolumePrediction = predictVolumeForDay(records, new Date(), normalizedVolumeTrend);
 
+    // 🔍 DEBUG DETALLADO: Investigar volúmenes altos
+    const sampleRecords = records.slice(0, 5).map(r => ({
+      fecha: r.date.toISOString().split('T')[0],
+      ejercicio: r.exercise?.name || 'desconocido',
+      sets: r.sets,
+      reps: r.reps,
+      peso: r.weight,
+      volumen: r.sets * r.reps * r.weight
+    }));
+
+    console.log('🔍 DEBUG VOLÚMENES ALTOS:', {
+      registrosMuestra: sampleRecords,
+      totalRegistros: records.length,
+      volumenMedioRegistro: records.reduce((sum, r) => sum + (r.sets * r.reps * r.weight), 0) / records.length,
+      registroMasAlto: Math.max(...records.map(r => r.sets * r.reps * r.weight)),
+      registroMasBajo: Math.min(...records.map(r => r.sets * r.reps * r.weight))
+    });
+
     console.log('📅 NORMALIZACIÓN POR DÍA DE LA SEMANA (CORREGIDA):', {
       diaActual: getDayName(new Date()),
       problemaResuelto: '✅ YA NO valores hardcodeados ni sumas incorrectas',
