@@ -21,4 +21,11 @@ export * from './time-utils';
 export * from './trends-analysis';
 export * from './url-preview-utils';
 export * from './url-validation';
+export * from './workout-utils';
+
+// 🎯 Exportaciones específicas para normalización semanal
+export {
+  calculateNormalizedVolumeTrend, getDayName, getWeeklyVolumeInsights,
+  predictVolumeForDay
+} from './workout-utils';
 

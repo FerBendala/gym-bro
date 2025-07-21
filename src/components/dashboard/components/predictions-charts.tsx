@@ -27,7 +27,7 @@ export interface PredictionTimelineProps {
 export interface FactorsChartProps {
   factors: {
     name: string;
-    value: number;
+    value: number | string;
     status: 'good' | 'warning' | 'bad';
   }[];
 }
@@ -613,13 +613,11 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
   baseline1RM,
   confidence,
   timeToNextPR,
-  improvement
 }) => {
   // Validar datos de entrada
   const validCurrentWeight = Math.max(0, currentWeight || 0);
   const validPredictedPR = Math.max(validCurrentWeight, predictedPR || validCurrentWeight * 1.05);
   const validBaseline1RM = Math.max(validCurrentWeight, baseline1RM || validCurrentWeight);
-  const validImprovement = Math.max(0, Math.min(15, improvement || 0));
 
   // Calcular progreso como porcentaje hacia el PR
   // Usar baseline1RM como punto de partida y predictedPR como objetivo

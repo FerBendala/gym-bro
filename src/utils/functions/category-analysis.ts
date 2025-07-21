@@ -260,22 +260,6 @@ const calculateWeightProgression = (categoryRecords: WorkoutRecord[], targetCate
     progression = Math.sign(progression) * 200;
   }
 
-  // **DEBUG**: Log para verificar la lógica híbrida
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`🔧 DIVISIÓN CRONOLÓGICA ${categoryName}:`, {
-      totalRegistros: sortedRecords.length,
-      primeraFecha: firstDate.toISOString().split('T')[0],
-      últimaFecha: lastDate.toISOString().split('T')[0],
-      períodoDías: Math.round(timeSpan / (1000 * 60 * 60 * 24)),
-      primerosPeriodo: firstHalf.length,
-      segundoPeriodo: secondHalf.length,
-      densidadProgresión: Math.round(densityProgression * 10) / 10,
-      ejerciciosIndividuales: Math.round(avgIndividualProgression * 10) / 10,
-      híbrido: Math.round(progression * 10) / 10,
-      ejerciciosAnalizados: exerciseNames.length
-    });
-  }
-
   return Math.round(progression);
 };
 
@@ -1531,21 +1515,6 @@ const analyzeProgressTrend = (
   if (improvement === undefined || volumeProgression === undefined) {
     improvement = calculateWeightProgression(categoryRecords, targetCategory);
     volumeProgression = calculateVolumeProgression(categoryRecords, targetCategory);
-  }
-
-  // Logs de verificación para categorías críticas
-  const isHombros = targetCategory?.toLowerCase().includes('hombros');
-  const isEspalda = targetCategory?.toLowerCase().includes('espalda');
-  const isPecho = targetCategory?.toLowerCase().includes('pecho');
-
-  if (isHombros || isEspalda || isPecho) {
-    console.log(`🎯 ANÁLISIS INTELIGENTE ${targetCategory?.toUpperCase()}:`);
-    console.log(`🎯   - Peso: ${improvement?.toFixed(1)}% (con distribución de esfuerzo + filtros)`);
-    console.log(`🎯   - Volumen: ${volumeProgression?.toFixed(1)}% (con distribución de esfuerzo + filtros)`);
-    console.log(`🎯   - Registros analizados: ${categoryRecords.length}`);
-    console.log(`🎯   - Usando valores precalculados: ${preCalculatedWeightProgression !== undefined}`);
-    console.log(`🎯   - Detección de cambios de ejercicios: ACTIVA`);
-    console.log(`🎯   - Límites de seguridad aplicados: SÍ`);
   }
 
   // Ordenar por fecha para lastImprovement

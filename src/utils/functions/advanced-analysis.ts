@@ -2,6 +2,7 @@ import { differenceInDays, endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { WorkoutRecord } from '../../interfaces';
 import { calculateIntensityScore } from './category-analysis';
+// 🎯 NUEVA IMPORTACIÓN: Funciones para normalización por día de la semana
 
 // ========================================
 // CONSTANTES PARA CÁLCULOS DE PREDICCIÓN
