@@ -1,4 +1,4 @@
-import { Activity, Brain, History, Scale, Target, Zap } from 'lucide-react';
+import { Brain, History, Scale, Target, Zap } from 'lucide-react';
 import type { DashboardTabConfig } from './types';
 
 /**
@@ -11,12 +11,6 @@ export const DASHBOARD_TABS: DashboardTabConfig[] = [
     label: 'Balance Muscular',
     icon: Scale,
     description: 'Equilibrio, progreso y análisis detallado por grupos musculares'
-  },
-  {
-    id: 'trends',
-    label: 'Tendencias',
-    icon: Activity,
-    description: 'Patrones temporales y hábitos de entrenamiento'
   },
   {
     id: 'history',

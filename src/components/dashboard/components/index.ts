@@ -14,10 +14,9 @@ export { HistoryTab } from './history-tab';
 export {
   ConfidenceGauge,
   DataQualityRadial,
-  FactorsChart,
-  PredictionTimeline, PRProgressChart, TrendAnalysisChart
+  FactorsChart, PRProgressChart, PredictionTimeline, TrendAnalysisChart
 } from './predictions-charts';
 export { PredictionsTab } from './predictions-tab';
 
-export { TrendsTab } from './trends-tab';
+
 
