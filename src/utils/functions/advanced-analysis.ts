@@ -2135,17 +2135,6 @@ const calculateProgressionRate = (records: WorkoutRecord[]): number => {
   return firstAvg > 0 ? ((lastAvg - firstAvg) / firstAvg) * 100 : 0;
 };
 
-const analyzeExerciseVariety = (records: WorkoutRecord[]) => {
-  const exercises = new Set(records.map(r => r.exercise));
-  const recentExercises = new Set(records.slice(-14).map(r => r.exercise));
-
-  return {
-    total: exercises.size,
-    recent: recentExercises.size,
-    varietyScore: (recentExercises.size / Math.max(exercises.size, 1)) * 100
-  };
-};
-
 const analyzeRepRanges = (records: WorkoutRecord[]) => {
   let lowRep = 0; // 1-5 reps
   let midRep = 0; // 6-12 reps

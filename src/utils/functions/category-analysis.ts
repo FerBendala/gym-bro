@@ -1,7 +1,7 @@
 import { differenceInDays, endOfMonth, endOfWeek, format, getDay, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { EXERCISE_CATEGORIES, IDEAL_VOLUME_DISTRIBUTION, calculateCategoryEffortDistribution } from '../../constants/exercise-categories';
-import type { WorkoutRecord } from '../../interfaces';
+import type { ExerciseAssignment, WorkoutRecord } from '../../interfaces';
 
 /**
  * Parejas de grupos musculares antagonistas
@@ -39,7 +39,8 @@ const getCurrentDateFromRecords = (records: WorkoutRecord[]): Date => {
 export const normalizeByWeekday = (
   currentWeekValue: number,
   comparisonWeekValue: number,
-  currentDate: Date = new Date()
+  currentDate: Date = new Date(),
+  allAssignments?: ExerciseAssignment[] // Usar asignaciones en lugar de registros
 ): {
   normalizedCurrent: number;
   normalizedComparison: number;
@@ -47,17 +48,72 @@ export const normalizeByWeekday = (
 } => {
   const currentWeekday = getDay(currentDate); // 0 = domingo, 6 = sábado
 
-  // Factor de normalización basado en día de la semana
-  // Asumiendo distribución típica de entrenamientos a lo largo de la semana
-  const weekdayFactors: Record<number, number> = {
-    0: 1.0,   // Domingo - semana completa
-    1: 0.15,  // Lunes - 15% de la semana
-    2: 0.30,  // Martes - 30% de la semana  
-    3: 0.45,  // Miércoles - 45% de la semana
-    4: 0.60,  // Jueves - 60% de la semana
-    5: 0.75,  // Viernes - 75% de la semana
-    6: 0.90   // Sábado - 90% de la semana
-  };
+  // **MEJORA**: Detectar patrón de entrenamiento basado en asignaciones configuradas
+  let weekdayFactors: Record<number, number>;
+
+  if (allAssignments && allAssignments.length > 0) {
+    // Analizar distribución de asignaciones por día
+    const weekdayDistribution = new Array(7).fill(0);
+    const totalAssignments = allAssignments.length;
+
+    allAssignments.forEach(assignment => {
+      // Mapear DayOfWeek a índice numérico (0-6)
+      const dayMap: Record<string, number> = {
+        'domingo': 0,
+        'lunes': 1,
+        'martes': 2,
+        'miércoles': 3,
+        'jueves': 4,
+        'viernes': 5,
+        'sábado': 6
+      };
+      const weekday = dayMap[assignment.dayOfWeek];
+      if (weekday !== undefined) {
+        weekdayDistribution[weekday]++;
+      }
+    });
+
+    // Calcular porcentajes de asignaciones por día
+    const weekdayPercentages = weekdayDistribution.map(count => count / totalAssignments);
+
+    // Crear factores basados en distribución de asignaciones
+    const cumulativePercentages = weekdayPercentages.map((_, index) =>
+      weekdayPercentages.slice(0, index + 1).reduce((sum, p) => sum + p, 0)
+    );
+
+    weekdayFactors = {
+      0: cumulativePercentages[0], // Domingo
+      1: cumulativePercentages[1], // Lunes
+      2: cumulativePercentages[2], // Martes
+      3: cumulativePercentages[3], // Miércoles
+      4: cumulativePercentages[4], // Jueves
+      5: cumulativePercentages[5], // Viernes
+      6: cumulativePercentages[6]  // Sábado
+    };
+
+    // **DEBUG**: Log del patrón detectado
+    if (currentWeekday === 1 || currentWeekday === 2) { // Lunes o martes
+      console.log('[PATRÓN DE ASIGNACIONES DETECTADO]', {
+        weekdayDistribution,
+        weekdayPercentages,
+        cumulativePercentages,
+        weekdayFactors,
+        currentWeekday,
+        totalAssignments
+      });
+    }
+  } else {
+    // Fallback: distribución típica (lunes a viernes)
+    weekdayFactors = {
+      0: 0.0,   // Domingo - no entrena
+      1: 0.20,  // Lunes - 20% de la semana
+      2: 0.40,  // Martes - 40% de la semana  
+      3: 0.60,  // Miércoles - 60% de la semana
+      4: 0.80,  // Jueves - 80% de la semana
+      5: 1.0,   // Viernes - 100% de la semana
+      6: 1.0    // Sábado - 100% de la semana (no entrena)
+    };
+  }
 
   const weekdayFactor = weekdayFactors[currentWeekday] || 1.0;
 
@@ -81,12 +137,14 @@ export const normalizeByWeekday = (
 export const normalizeVolumeTrend = (
   thisWeekVolume: number,
   lastWeekVolume: number,
-  currentDate: Date = new Date()
+  currentDate: Date = new Date(),
+  allAssignments?: ExerciseAssignment[]
 ): number => {
   const { normalizedCurrent, normalizedComparison } = normalizeByWeekday(
     thisWeekVolume,
     lastWeekVolume,
-    currentDate
+    currentDate,
+    allAssignments
   );
 
   if (normalizedComparison === 0) return 0;
@@ -100,18 +158,21 @@ export const normalizeVolumeTrend = (
 export const calculateNormalizedWeeklyPercentage = (
   categoryVolume: number,
   totalVolume: number,
-  currentDate: Date = new Date()
+  currentDate: Date = new Date(),
+  allAssignments?: ExerciseAssignment[]
 ): number => {
   const { normalizedCurrent: normalizedCategoryVolume } = normalizeByWeekday(
     categoryVolume,
     categoryVolume, // Solo normalizamos, no comparamos
-    currentDate
+    currentDate,
+    allAssignments
   );
 
   const { normalizedCurrent: normalizedTotalVolume } = normalizeByWeekday(
     totalVolume,
     totalVolume,
-    currentDate
+    currentDate,
+    allAssignments
   );
 
   if (normalizedTotalVolume === 0) return 0;
@@ -232,7 +293,7 @@ const calculatePersonalRecords = (categoryRecords: WorkoutRecord[]): number => {
  * Calcula la progresión de peso para una categoría
  * CORREGIDO: Aplica distribuciones de esfuerzo, detecta cambios de ejercicios y limita valores extremos
  */
-const calculateWeightProgression = (categoryRecords: WorkoutRecord[], targetCategory?: string): number => {
+const calculateWeightProgression = (categoryRecords: WorkoutRecord[], targetCategory?: string, allAssignments?: ExerciseAssignment[]): number => {
   if (categoryRecords.length < 2) return 0;
 
   const sortedRecords = [...categoryRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
@@ -294,7 +355,29 @@ const calculateWeightProgression = (categoryRecords: WorkoutRecord[], targetCate
 
   if (firstHalfAvg1RM === 0) return 0;
 
-  let densityProgression = ((secondHalfAvg1RM - firstHalfAvg1RM) / firstHalfAvg1RM) * 100;
+  // **MEJORA CRÍTICA**: Normalizar por día de la semana para comparaciones justas
+  const currentDate = new Date();
+  const { normalizedCurrent: normalizedSecondHalf, normalizedComparison: normalizedFirstHalf, weekdayFactor } = normalizeByWeekday(
+    secondHalfAvg1RM,
+    firstHalfAvg1RM,
+    currentDate,
+    allAssignments // Pasar asignaciones para detectar patrón
+  );
+
+  let densityProgression = normalizedFirstHalf > 0 ? ((normalizedSecondHalf - normalizedFirstHalf) / normalizedFirstHalf) * 100 : 0;
+
+  // **DEBUG**: Log para verificar la normalización
+  if (categoryName === 'Pecho' || categoryName === 'Espalda' || categoryName === 'Piernas') {
+    console.log(`[NORMALIZACIÓN WEIGHT ${categoryName}]`, {
+      originalSecondHalf: secondHalfAvg1RM,
+      originalFirstHalf: firstHalfAvg1RM,
+      normalizedSecondHalf,
+      normalizedFirstHalf,
+      weekdayFactor,
+      densityProgression,
+      currentWeekday: currentDate.getDay()
+    });
+  }
 
   // **MEJORA HÍBRIDA**: Combinar densidad de entrenamiento + progresión individual de ejercicios
   const exerciseNames = [...new Set(sortedRecords.map(r => r.exercise?.name).filter(Boolean))];
@@ -334,6 +417,17 @@ const calculateWeightProgression = (categoryRecords: WorkoutRecord[], targetCate
   // **HÍBRIDO INTELIGENTE**: 60% densidad + 40% progresión individual
   // Esto da crédito a mejoras reales en ejercicios aunque la densidad por sesión baje
   let progression = (densityProgression * 0.6) + (avgIndividualProgression * 0.4);
+
+  // **MEJORA ESPECÍFICA PARA PECHO**: Considerar que el volumen es igual de importante
+  if (categoryName === 'Pecho') {
+    // Para pecho, dar más peso al progreso individual y ser más tolerante con aumentos de volumen
+    progression = (densityProgression * 0.4) + (avgIndividualProgression * 0.6);
+
+    // Si hay progreso individual significativo, no penalizar tanto por densidad
+    if (avgIndividualProgression > 10) {
+      progression = Math.max(progression, avgIndividualProgression * 0.8);
+    }
+  }
 
   // **FILTRO INTELIGENTE**: Limitar progresiones extremas causadas por cambio de ejercicios
   if (hasSignificantExerciseChange && Math.abs(progression) > 100) {
@@ -418,7 +512,29 @@ const calculateVolumeProgression = (categoryRecords: WorkoutRecord[], targetCate
 
   if (firstHalfAvgVolume === 0) return 0;
 
-  let densityProgression = ((secondHalfAvgVolume - firstHalfAvgVolume) / firstHalfAvgVolume) * 100;
+  // **MEJORA CRÍTICA**: Normalizar por día de la semana para comparaciones justas
+  const currentDate = new Date();
+  const { normalizedCurrent: normalizedSecondHalf, normalizedComparison: normalizedFirstHalf, weekdayFactor } = normalizeByWeekday(
+    secondHalfAvgVolume,
+    firstHalfAvgVolume,
+    currentDate,
+    categoryRecords // Pasar registros para detectar patrón
+  );
+
+  let densityProgression = normalizedFirstHalf > 0 ? ((normalizedSecondHalf - normalizedFirstHalf) / normalizedFirstHalf) * 100 : 0;
+
+  // **DEBUG**: Log para verificar la normalización
+  if (categoryName === 'Pecho' || categoryName === 'Espalda' || categoryName === 'Piernas') {
+    console.log(`[NORMALIZACIÓN VOLUME ${categoryName}]`, {
+      originalSecondHalf: secondHalfAvgVolume,
+      originalFirstHalf: firstHalfAvgVolume,
+      normalizedSecondHalf,
+      normalizedFirstHalf,
+      weekdayFactor,
+      densityProgression,
+      currentWeekday: currentDate.getDay()
+    });
+  }
 
   // **MEJORA HÍBRIDA**: Combinar densidad de entrenamiento + progresión individual de ejercicios  
   const individualExerciseProgressions: number[] = [];
@@ -458,6 +574,17 @@ const calculateVolumeProgression = (categoryRecords: WorkoutRecord[], targetCate
   // **HÍBRIDO INTELIGENTE**: 60% densidad + 40% progresión individual
   // Esto da crédito a mejoras reales en ejercicios aunque la densidad por sesión baje
   let progression = (densityProgression * 0.6) + (avgIndividualProgression * 0.4);
+
+  // **MEJORA ESPECÍFICA PARA PECHO**: Considerar que el volumen es igual de importante
+  if (categoryName === 'Pecho') {
+    // Para pecho, dar más peso al progreso individual y ser más tolerante con aumentos de volumen
+    progression = (densityProgression * 0.4) + (avgIndividualProgression * 0.6);
+
+    // Si hay progreso individual significativo, no penalizar tanto por densidad
+    if (avgIndividualProgression > 10) {
+      progression = Math.max(progression, avgIndividualProgression * 0.8);
+    }
+  }
 
   // **FILTRO INTELIGENTE**: Limitar progresiones extremas causadas por cambio de ejercicios
   if (hasSignificantExerciseChange && Math.abs(progression) > 100) {
@@ -961,7 +1088,7 @@ const determineStrengthLevel = (estimatedOneRM: number, category: string): 'begi
  * Calcula la distribución de volumen temporal para una categoría
  * MEJORADO: Incluye normalización por día de la semana para comparaciones justas
  */
-const calculateVolumeDistribution = (categoryRecords: WorkoutRecord[], allRecords?: WorkoutRecord[]): {
+const calculateVolumeDistribution = (categoryRecords: WorkoutRecord[], allRecords?: WorkoutRecord[], allAssignments?: ExerciseAssignment[]): {
   thisWeek: number;
   lastWeek: number;
   thisMonth: number;
@@ -1016,11 +1143,12 @@ const calculateVolumeDistribution = (categoryRecords: WorkoutRecord[], allRecord
   const { normalizedCurrent: thisWeekNormalized, weekdayFactor } = normalizeByWeekday(
     thisWeekVolume,
     lastWeekVolume,
-    now
+    now,
+    allAssignments
   );
 
   // Calcular tendencia normalizada
-  const volumeTrend = normalizeVolumeTrend(thisWeekVolume, lastWeekVolume, now);
+  const volumeTrend = normalizeVolumeTrend(thisWeekVolume, lastWeekVolume, now, allAssignments);
 
   return {
     thisWeek: thisWeekVolume,
@@ -1141,7 +1269,7 @@ const generateCategoryWarnings = (
  * Calcula métricas por categoría de ejercicio con análisis avanzado
  * Opción 2: Volumen Relativo al Esfuerzo - distribuye el volumen proporcionalmente
  */
-export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetrics[] => {
+export const calculateCategoryMetrics = (records: WorkoutRecord[], allAssignments?: ExerciseAssignment[]): CategoryMetrics[] => {
   if (records.length === 0) return [];
 
   // Agrupar records por categoría (un record puede contar para múltiples categorías)
@@ -1291,7 +1419,7 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
     const estimatedOneRM = categoryRecords.length > 0 ?
       Math.max(...categoryRecords.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30))) : 0;
 
-    const weightProgression = calculateWeightProgression(categoryRecords, category);
+    const weightProgression = calculateWeightProgression(categoryRecords, category, allAssignments);
     const volumeProgression = calculateVolumeProgression(categoryRecords, category);
     const intensityScore = calculateIntensityScore(categoryRecords);
     const efficiencyScore = calculateEfficiencyScore(categoryRecords);
@@ -1319,72 +1447,31 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[]): CategoryMetr
     // **CORRECCIÓN**: Fórmula de fatiga más realista para volúmenes altos
     const fatigueIndex = Math.min(100, Math.max(0, (avgVolumePerSession / 1500) * 60));
 
-    // Con pocas semanas (≤3), ser más conservador pero aplicar correcciones de contexto
-    if (weeksWithData <= 3) {
-      if (volumeProgression > 25) {
-        // **CORRECCIÓN**: Si hay progreso significativo en peso (>15%), no es aumento excesivo
-        if (weightProgression > 15) {
-          trend = 'improving'; // Progreso válido en ambos aspectos ✅
-        } else {
-          trend = 'declining'; // Aumento excesivo de volumen sin progreso de peso
-        }
-      } else if (volumeProgression > 15) {
-        // **CORRECCIÓN DE CONTEXTO**: Aumento moderado 15-25% evaluar contexto
-        if (fatigueIndex < 50 && recentDays <= 2) {
-          trend = 'improving'; // Progreso controlado ✅
-        } else {
-          trend = 'declining'; // Aumento problemático
-        }
-      } else if (weightProgression > 10 || volumeProgression > 10) {
-        trend = 'improving';
-      } else if (weightProgression < -15 || volumeProgression < -20) {
-        trend = 'declining';
-      } else {
-        // **NUEVA CORRECCIÓN DE PROGRESO**: Considerar volumen cuando progreso de fuerza es mínimo
-        if (Math.abs(weightProgression) < 2.5 && volumeProgression > 5) {
-          // Aplicar factor 30% como progreso de fuerza equivalente
-          const adjustedProgress = weightProgression + (volumeProgression * 0.3);
-          trend = adjustedProgress > 2.0 ? 'improving' : 'stable';
-        } else {
-          trend = 'stable'; // De lo contrario, mantener como 'stable'
-        }
-      }
-    } else {
-      // Con más datos, usar thresholds mejorados con correcciones de contexto
-      if (volumeProgression > 25) {
-        // **CORRECCIÓN**: Si hay progreso significativo en peso (>15%), no es aumento excesivo
-        if (weightProgression > 15) {
-          trend = 'improving'; // Progreso válido en ambos aspectos ✅
-        } else {
-          trend = 'declining'; // Aumento excesivo de volumen sin progreso de peso
-        }
-      } else if (volumeProgression > 15) {
-        // **CORRECCIÓN DE CONTEXTO**: Evaluar contexto para aumento 15-25%
-        if (fatigueIndex < 50 && recentDays <= 2) {
-          trend = 'improving'; // Progreso controlado ✅
-        } else {
-          trend = 'declining'; // Aumento problemático
-        }
-      } else if (weightProgression > 5 || volumeProgression > 5) {
-        trend = 'improving';
-      } else if (weightProgression < -5 || volumeProgression < -5) {
-        trend = 'declining';
-      } else {
-        // **NUEVA CORRECCIÓN DE PROGRESO**: Considerar volumen cuando progreso de fuerza es mínimo
-        if (Math.abs(weightProgression) < 2.5 && volumeProgression > 5) {
-          // Aplicar factor 30% como progreso de fuerza equivalente  
-          const adjustedProgress = weightProgression + (volumeProgression * 0.3);
-          trend = adjustedProgress > 2.0 ? 'improving' : 'stable';
-        } else {
-          trend = 'stable';
-        }
-      }
+    // **CENTRALIZACIÓN**: Usar directamente la lógica de balanceHistory.trend
+    // Esto elimina la duplicación y usa el sistema más inteligente
+    const balanceHistory = analyzeBalanceHistory(categoryRecords, records, allAssignments);
+    trend = balanceHistory.trend; // Usar directamente el resultado del análisis de balance
+
+    // **DEBUG**: Log para verificar la centralización
+    if (category === 'Pecho' || category === 'Espalda' || category === 'Piernas') {
+      console.log(`[CENTRALIZACIÓN ${category}] Categoría: ${category}`, {
+        weightProgression,
+        volumeProgression,
+        weeksWithData,
+        balanceHistoryTrend: balanceHistory.trend,
+        finalTrend: trend,
+        balanceHistoryConsistency: balanceHistory.consistency,
+        balanceHistoryVolatility: balanceHistory.volatility
+      });
+
+      // **VERIFICACIÓN FINAL**: Confirmar que la centralización funciona
+      console.log(`[VERIFICACIÓN FINAL ${category}] Tendencia final: ${trend}`);
     }
 
     const strengthLevel = determineStrengthLevel(estimatedOneRM, category);
 
     // Pasar todos los records como segundo parámetro para cálculo correcto de fechas
-    const volumeDistribution = calculateVolumeDistribution(categoryRecords, records);
+    const volumeDistribution = calculateVolumeDistribution(categoryRecords, records, allAssignments);
 
     const performanceMetrics = calculateCategoryPerformanceMetrics(categoryRecords);
 
@@ -1638,7 +1725,8 @@ const analyzeProgressTrend = (
   categoryRecords: WorkoutRecord[],
   targetCategory?: string,
   preCalculatedWeightProgression?: number,
-  preCalculatedVolumeProgression?: number
+  preCalculatedVolumeProgression?: number,
+  allAssignments?: ExerciseAssignment[]
 ): {
   trend: 'improving' | 'stable' | 'declining';
   lastImprovement: Date | null;
@@ -1653,7 +1741,7 @@ const analyzeProgressTrend = (
 
   // Si no se proporcionan valores precalculados, calcular con la misma lógica
   if (improvement === undefined || volumeProgression === undefined) {
-    improvement = calculateWeightProgression(categoryRecords, targetCategory);
+    improvement = calculateWeightProgression(categoryRecords, targetCategory, allAssignments);
     volumeProgression = calculateVolumeProgression(categoryRecords, targetCategory);
   }
 
@@ -1781,7 +1869,7 @@ const determineDevelopmentStage = (
  * Analiza el historial de balance para un grupo muscular
  * Actualizado para medir consistencia real de balance, no solo fuerza
  */
-const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: WorkoutRecord[]): {
+const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: WorkoutRecord[], allAssignments?: ExerciseAssignment[]): {
   trend: 'improving' | 'stable' | 'declining';
   consistency: number;
   volatility: number;
@@ -1795,15 +1883,44 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: Wo
     const balanceConsistency = calculateBalanceConsistency(categoryRecords, allRecords);
     const weeklyBalanceData = calculateWeeklyBalancePercentages(categoryRecords, allRecords);
 
+    // **DEBUG**: Ver qué camino está tomando
+    const categoryName = categoryRecords[0]?.exercise?.categories?.[0];
+    if (categoryName === 'Pecho' || categoryName === 'Espalda' || categoryName === 'Piernas') {
+      console.log(`[ANALYZE BALANCE HISTORY ${categoryName} - CAMINO]`, {
+        allRecordsLength: allRecords.length,
+        categoryRecordsLength: categoryRecords.length,
+        weeklyBalanceDataLength: weeklyBalanceData.length,
+        usingMainPath: weeklyBalanceData.length >= 3,
+        usingFallback: weeklyBalanceData.length < 3
+      });
+    }
+
     if (weeklyBalanceData.length >= 3) {
       // Analizar tendencia de balance (se acerca o aleja del ideal)
       const idealPercentage = IDEAL_VOLUME_DISTRIBUTION[categoryRecords[0]?.exercise?.categories?.[0] || ''] || 15;
       const trendTowardsIdeal = analyzeTrendTowardsIdeal(weeklyBalanceData, idealPercentage);
 
+      // **MEJORA**: Verificar progreso de fuerza y volumen también en el camino principal
+      const volumeProgression = calculateVolumeProgression(categoryRecords);
+      const weightProgression = calculateWeightProgression(categoryRecords, undefined, allAssignments);
+
       let trend: 'improving' | 'stable' | 'declining';
-      if (trendTowardsIdeal > 0.1) trend = 'improving';
-      else if (trendTowardsIdeal < -0.1) trend = 'declining';
-      else trend = 'stable';
+
+      // **PRIORIDAD**: Si hay progreso significativo, es improving
+      if (weightProgression > 5 || volumeProgression > 10) {
+        trend = 'improving';
+      } else if (trendTowardsIdeal > 0.05) {
+        trend = 'improving';
+      } else if (trendTowardsIdeal < -0.5) {
+        // **VERIFICACIÓN**: Si hay progreso de volumen, ser más tolerante
+        if (volumeProgression > 0) {
+          trend = 'stable';
+        } else {
+          trend = 'declining';
+        }
+      } else {
+        trend = 'stable';
+      }
 
       // Calcular volatilidad del balance (variabilidad en porcentajes semanales)
       const percentages = weeklyBalanceData.map(w => w.percentage);
@@ -1837,6 +1954,22 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: Wo
         if (iqrRatio < 0.5) {
           adjustedVolatility *= 0.7; // Reducir volatilidad 30% más si es sistemático
         }
+      }
+
+      // **DEBUG**: Log para el camino principal
+      if (categoryRecords[0]?.exercise?.categories?.[0] === 'Pecho' ||
+        categoryRecords[0]?.exercise?.categories?.[0] === 'Espalda' ||
+        categoryRecords[0]?.exercise?.categories?.[0] === 'Piernas') {
+        console.log(`[ANALYZE BALANCE HISTORY ${categoryRecords[0]?.exercise?.categories?.[0]}]`, {
+          trendTowardsIdeal,
+          weightProgression,
+          volumeProgression,
+          finalTrend: trend,
+          balanceConsistency,
+          adjustedVolatility,
+          usingFallback: false,
+          logic: weightProgression > 5 || volumeProgression > 10 ? 'progression-based' : 'balance-based'
+        });
       }
 
       return {
@@ -1882,9 +2015,49 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: Wo
   const trendChange = firstHalfAvg1RM > 0 ? ((secondHalfAvg1RM - firstHalfAvg1RM) / firstHalfAvg1RM) * 100 : 0;
 
   let trend: 'improving' | 'stable' | 'declining';
-  if (trendChange > 5) trend = 'improving';
-  else if (trendChange < -5) trend = 'declining';
-  else trend = 'stable';
+
+  // **MEJORA**: Umbrales más tolerantes para todas las categorías
+  const categoryName = categoryRecords[0]?.exercise?.categories?.[0];
+
+  // Umbrales extremadamente tolerantes para todas las categorías
+  const improvingThreshold = 0.1;  // 0.1% para todas las categorías
+  const decliningThreshold = -2.0; // -2.0% para todas las categorías (muy tolerante)
+
+  // **MEJORA**: Lógica más inteligente para el fallback
+  const volumeProgression = calculateVolumeProgression(categoryRecords);
+  const weightProgression = calculateWeightProgression(categoryRecords, undefined, allAssignments);
+
+  // **LÓGICA PRINCIPAL**: Priorizar progreso de fuerza y volumen sobre trendChange
+  if (weightProgression > 0 || volumeProgression > 0) {
+    // Si hay cualquier progreso positivo, es improving
+    if (weightProgression > 5 || volumeProgression > 10) {
+      trend = 'improving';
+    } else {
+      trend = 'stable';
+    }
+  } else if (trendChange > improvingThreshold) {
+    trend = 'improving';
+  } else if (trendChange < decliningThreshold) {
+    trend = 'declining';
+  } else {
+    trend = 'stable';
+  }
+
+  // **DEBUG**: Log para verificar el cálculo
+  if (categoryName === 'Pecho' || categoryName === 'Espalda' || categoryName === 'Piernas') {
+    console.log(`[ANALYZE BALANCE HISTORY ${categoryName}]`, {
+      trendChange,
+      improvingThreshold,
+      decliningThreshold,
+      volumeProgression,
+      weightProgression,
+      finalTrend: trend,
+      firstHalfAvg1RM,
+      secondHalfAvg1RM,
+      usingFallback: true,
+      logic: weightProgression > 5 || volumeProgression > 10 ? 'progression-based' : 'trendChange-based'
+    });
+  }
 
   // Calcular consistencia de progreso (no de balance, pero mejor que nada)
   const oneRMs = sortedRecords.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30));
@@ -2080,10 +2253,10 @@ const shouldShowAntagonistWarning = (
 /**
  * Analiza el balance muscular con métricas avanzadas
  */
-export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] => {
+export const analyzeMuscleBalance = (records: WorkoutRecord[], allAssignments?: ExerciseAssignment[]): MuscleBalance[] => {
   if (records.length === 0) return [];
 
-  const categoryMetrics = calculateCategoryMetrics(records);
+  const categoryMetrics = calculateCategoryMetrics(records, allAssignments);
   const totalVolume = categoryMetrics.reduce((sum, metric) => sum + metric.totalVolume, 0);
 
   // Calcular factor de ajuste temporal
@@ -2117,8 +2290,22 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
     const deviation = actualPercentage - idealPercentage;
 
     // Ajustar el margen de balance según el factor temporal
-    const balanceMargin = 5 + (15 * (1 - temporalAdjustmentFactor)); // Margen más amplio con menos datos
+    const balanceMargin = 3 + (7 * (1 - temporalAdjustmentFactor)); // Margen más estricto: máximo 10% en lugar de 20%
     const isBalanced = Math.abs(deviation) <= balanceMargin;
+
+    // DEBUG: Log para verificar la lógica de balance más estricta
+    if (process.env.NODE_ENV === 'development' && (metric.category === 'Pecho' || metric.category === 'Espalda' || metric.category === 'Piernas')) {
+      console.log(`🔧 DEBUG - Balance ${metric.category} (MARGEN ESTRICTO):`, {
+        category: metric.category,
+        actualPercentage,
+        idealPercentage,
+        deviation,
+        balanceMargin,
+        temporalAdjustmentFactor,
+        isBalanced,
+        status: isBalanced ? 'Equilibrado' : 'Desequilibrado'
+      });
+    }
 
     // Obtener registros específicos para esta categoría
     const categoryRecords = recordsByCategory[metric.category] || [];
@@ -2143,7 +2330,7 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
 
     const intensityScore = calculateIntensityScore(categoryRecords);
 
-    const balanceHistory = analyzeBalanceHistory(categoryRecords, records);
+    const balanceHistory = analyzeBalanceHistory(categoryRecords, records, allAssignments);
     // Ajustar consistencia del historial
     balanceHistory.consistency = adjustMetricsForLimitedData(balanceHistory.consistency, temporalAdjustmentFactor, 'percentage');
 
@@ -2304,9 +2491,9 @@ export const findLeastTrainedCategory = (categoryMetrics: CategoryMetrics[]): st
 /**
  * Calcula el análisis completo por categorías
  */
-export const calculateCategoryAnalysis = (records: WorkoutRecord[]): CategoryAnalysis => {
-  const categoryMetrics = calculateCategoryMetrics(records);
-  const muscleBalance = analyzeMuscleBalance(records);
+export const calculateCategoryAnalysis = (records: WorkoutRecord[], allAssignments?: ExerciseAssignment[]): CategoryAnalysis => {
+  const categoryMetrics = calculateCategoryMetrics(records, allAssignments);
+  const muscleBalance = analyzeMuscleBalance(records, allAssignments);
   const balanceScore = calculateBalanceScore(muscleBalance, records);
   const dominantCategory = findDominantCategory(categoryMetrics);
   const leastTrainedCategory = findLeastTrainedCategory(categoryMetrics);
@@ -2323,3 +2510,67 @@ export const calculateCategoryAnalysis = (records: WorkoutRecord[]): CategoryAna
 /**
  * Analiza tendencias de progreso básico
  */
+
+/**
+ * Calcula las métricas de categorías para un período reciente
+ * @param records - Todos los registros de entrenamiento
+ * @param weeksToConsider - Número de semanas a considerar (default: 8)
+ * @returns Array de métricas por categoría basado en período reciente
+ */
+export const calculateRecentCategoryMetrics = (
+  records: WorkoutRecord[],
+  weeksToConsider: number = 8
+): CategoryMetrics[] => {
+  // Filtrar solo registros de las últimas N semanas
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - (weeksToConsider * 7));
+
+  const recentRecords = records.filter(r => new Date(r.date) >= cutoffDate);
+
+  // Si no hay registros recientes, devolver array vacío
+  if (recentRecords.length === 0) {
+    return [];
+  }
+
+  // Usar la función existente con los registros filtrados
+  return calculateCategoryMetrics(recentRecords);
+};
+
+/**
+ * Función utilitaria para obtener asignaciones y pasarlas a las funciones de análisis
+ * Esta función debe ser llamada desde los componentes que usan el análisis de categorías
+ */
+export const getAssignmentsForAnalysis = async (): Promise<ExerciseAssignment[]> => {
+  try {
+    // Importar dinámicamente para evitar dependencias circulares
+    const { getAllAssignments } = await import('../../api/database');
+    return await getAllAssignments();
+  } catch (error) {
+    console.error('Error obteniendo asignaciones para análisis:', error);
+    return [];
+  }
+};
+
+/**
+ * Wrapper para calculateCategoryAnalysis que obtiene automáticamente las asignaciones
+ */
+export const calculateCategoryAnalysisWithAssignments = async (records: WorkoutRecord[]): Promise<CategoryAnalysis> => {
+  const allAssignments = await getAssignmentsForAnalysis();
+  return calculateCategoryAnalysis(records, allAssignments);
+};
+
+/**
+ * Wrapper para calculateCategoryMetrics que obtiene automáticamente las asignaciones
+ */
+export const calculateCategoryMetricsWithAssignments = async (records: WorkoutRecord[]): Promise<CategoryMetrics[]> => {
+  const allAssignments = await getAssignmentsForAnalysis();
+  return calculateCategoryMetrics(records, allAssignments);
+};
+
+/**
+ * Wrapper para analyzeMuscleBalance que obtiene automáticamente las asignaciones
+ */
+export const analyzeMuscleBalanceWithAssignments = async (records: WorkoutRecord[]): Promise<MuscleBalance[]> => {
+  const allAssignments = await getAssignmentsForAnalysis();
+  return analyzeMuscleBalance(records, allAssignments);
+};
