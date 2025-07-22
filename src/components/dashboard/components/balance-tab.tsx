@@ -3,15 +3,20 @@ import {
   Activity,
   AlertTriangle,
   BarChart,
+  Brain,
+  Calendar,
   CheckCircle,
+  Clock,
   Dumbbell,
   Footprints,
   PieChart,
   Scale,
+  Target,
   Timer,
   TrendingDown,
   TrendingUp,
-  Trophy
+  Trophy,
+  Zap
 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import Chart from 'react-apexcharts';
@@ -20,6 +25,7 @@ import { useNotification } from '../../../context/notification-context';
 import { ExerciseAssignment, WorkoutRecord } from '../../../interfaces';
 import { formatNumber } from '../../../utils/functions';
 import { analyzeMuscleBalance, calculateBalanceScore, calculateCategoryAnalysis } from '../../../utils/functions/category-analysis';
+import { calculateTrendsAnalysis } from '../../../utils/functions/trends-analysis';
 import { Card, CardContent, CardHeader } from '../../card';
 import { InfoTooltip } from '../../tooltip';
 
@@ -86,6 +92,28 @@ const getCategoryIcon = (category: string) => {
     case 'Core': return Activity;
     default: return BarChart;
   }
+};
+
+// Íconos para días de la semana (para el subtab de tendencias)
+const dayIcons: Record<string, React.FC<any>> = {
+  'Lunes': Target,
+  'Martes': Activity,
+  'Miércoles': Zap,
+  'Jueves': BarChart,
+  'Viernes': Trophy,
+  'Sábado': Calendar,
+  'Domingo': Clock
+};
+
+// Colores para días de la semana (para el subtab de tendencias)
+const dayColors: Record<string, string> = {
+  'Lunes': 'from-blue-500/80 to-cyan-500/80',
+  'Martes': 'from-green-500/80 to-emerald-500/80',
+  'Miércoles': 'from-purple-500/80 to-violet-500/80',
+  'Jueves': 'from-orange-500/80 to-amber-500/80',
+  'Viernes': 'from-red-500/80 to-pink-500/80',
+  'Sábado': 'from-indigo-500/80 to-blue-500/80',
+  'Domingo': 'from-teal-500/80 to-green-500/80'
 };
 
 // Función para calcular balance entre tren superior e inferior
@@ -812,380 +840,7 @@ const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
   );
 };
 
-export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
-  const { showNotification } = useNotification();
-  const [assignments, setAssignments] = useState<ExerciseAssignment[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [activeSubTab, setActiveSubTab] = useState<'general' | 'balanceByGroup' | 'upperLower'>('general');
 
-  // Función para hacer smooth scroll a una card específica
-  const scrollToCard = (cardId: string) => {
-    const element = document.getElementById(cardId);
-    if (element) {
-      // Calcular la posición con offset para que se vea el título
-      const elementPosition = element.offsetTop;
-      const offset = 100; // Offset de 100px hacia arriba para ver el título
-
-      window.scrollTo({
-        top: elementPosition - offset,
-        behavior: 'smooth'
-      });
-    }
-  };
-
-  // Función para manejar clicks en items del gráfico de balance por categoría
-  const handleBalanceItemClick = (itemName: string) => {
-    const cardId = `balance-card-${itemName.toLowerCase().replace(/\s+/g, '-')}`;
-    scrollToCard(cardId);
-  };
-
-  // Función para manejar clicks en items del gráfico de tren superior vs inferior
-  const handleUpperLowerItemClick = (itemName: string) => {
-    const cardId = `upper-lower-card-${itemName.toLowerCase().replace(/\s+/g, '-')}`;
-    scrollToCard(cardId);
-  };
-
-  // Cargar asignaciones al montar el componente
-  useEffect(() => {
-    const loadAssignments = async () => {
-      try {
-        setIsLoading(true);
-        const assignments = await getAllAssignments();
-        setAssignments(assignments);
-      } catch (error) {
-        console.error('Error cargando asignaciones:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    loadAssignments();
-  }, []);
-
-  // Calcular métricas y análisis con asignaciones
-  const categoryMetrics = useMemo(() => {
-    if (isLoading) return { categoryMetrics: [], muscleBalance: [], dominantCategory: null, leastTrainedCategory: null, balanceScore: 0 };
-    return calculateCategoryAnalysis(records, assignments);
-  }, [records, assignments, isLoading]);
-
-  const muscleBalance = useMemo(() => {
-    if (isLoading) return [];
-    return analyzeMuscleBalance(records, assignments);
-  }, [records, assignments, isLoading]);
-
-  // NUEVO: Calcular métricas recientes (últimas 8 semanas)
-  const recentMuscleBalance = useMemo(() => {
-    const eightWeeksAgo = new Date();
-    eightWeeksAgo.setDate(eightWeeksAgo.getDate() - 56);
-    const recentRecords = records.filter(r => new Date(r.date) >= eightWeeksAgo);
-
-    return recentRecords.length > 0 ? analyzeMuscleBalance(recentRecords, assignments) : [];
-  }, [records, assignments]);
-
-  const balanceScore = useMemo(() => calculateBalanceScore(muscleBalance, records), [muscleBalance, records]);
-
-  // Calcular consistencia corregida - usar frecuencia como base si balanceHistory no existe
-  const calculateConsistency = () => {
-    const calculations = muscleBalance.map(b => {
-      let consistencyValue = 0;
-      let source = 'none';
-
-      if (b.balanceHistory?.consistency !== undefined && b.balanceHistory.consistency > 0) {
-        consistencyValue = b.balanceHistory.consistency;
-        source = 'balanceHistory';
-      } else {
-        const frequency = b.weeklyFrequency || 0;
-        consistencyValue = Math.min(100, (frequency / 2.5) * 100);
-        source = 'frequency';
-      }
-
-      return {
-        category: b.category,
-        value: consistencyValue,
-        source,
-        frequency: b.weeklyFrequency,
-        originalConsistency: b.balanceHistory?.consistency
-      };
-    });
-
-    const total = calculations.reduce((sum, calc) => sum + calc.value, 0);
-    const average = total / muscleBalance.length;
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🔧 DEBUG - Cálculo Consistencia:', {
-        calculations,
-        total,
-        average,
-        sourcesUsed: calculations.map(c => `${c.category}: ${c.source}`)
-      });
-    }
-
-    return average;
-  };
-
-  // NUEVO: Calcular consistencia basada en datos recientes
-  const calculateRecentConsistency = () => {
-    if (recentMuscleBalance.length === 0) return 0;
-
-    const calculations = recentMuscleBalance.map(b => {
-      // Para datos recientes, SIEMPRE calcular basado en frecuencia
-      // Ignorar balanceHistory.consistency porque es del período completo
-      const frequency = b.weeklyFrequency || 0;
-
-      // Frecuencias óptimas por grupo muscular
-      const optimalFrequencies: Record<string, number> = {
-        'Piernas': 2.0,
-        'Pecho': 2.5,
-        'Espalda': 2.5,
-        'Brazos': 3.0,
-        'Hombros': 3.0,
-        'Core': 3.5
-      };
-
-      const optimal = optimalFrequencies[b.category] || 2.5;
-
-      // Calcular score de frecuencia (0-100)
-      const frequencyScore = Math.min(100, (frequency / optimal) * 100);
-
-      // Para consistencia reciente, dar más peso a la frecuencia (80%)
-      // y menos a la regularidad (20%) ya que es un período corto
-      const consistencyValue = frequencyScore * 0.8 + 20; // +20 base por mantener rutina
-
-      return {
-        category: b.category,
-        value: Math.min(100, consistencyValue),
-        frequency: frequency,
-        optimal: optimal,
-        frequencyScore: frequencyScore
-      };
-    });
-
-    const total = calculations.reduce((sum, calc) => sum + calc.value, 0);
-    const average = total / recentMuscleBalance.length;
-
-    if (process.env.NODE_ENV === 'development') {
-      console.log('🆕 DEBUG - Consistencia Reciente Recalculada:', {
-        calculations,
-        average
-      });
-    }
-
-    return average;
-  };
-
-  const historicalConsistency = calculateConsistency();
-  const recentConsistency = calculateRecentConsistency();
-
-  // Debug adicional para comparar consistencias
-  if (process.env.NODE_ENV === 'development') {
-    console.log('📊 DEBUG - Comparación de consistencias:', {
-      historicalBalance: muscleBalance.map(b => ({
-        category: b.category,
-        consistency: b.balanceHistory?.consistency || 0,
-        frequency: b.weeklyFrequency
-      })),
-      recentBalance: recentMuscleBalance.map(b => ({
-        category: b.category,
-        consistency: b.balanceHistory?.consistency || 0,
-        frequency: b.weeklyFrequency
-      })),
-      historicalConsistency,
-      recentConsistency,
-      recentDataExists: recentMuscleBalance.length > 0
-    });
-  }
-
-  // Usar promedio ponderado: 70% reciente + 30% histórico si hay datos recientes
-  const finalConsistency = recentMuscleBalance.length > 0
-    ? (recentConsistency * 0.7 + historicalConsistency * 0.3)
-    : historicalConsistency;
-
-  const radarData = [
-    { category: 'Balance', value: safeNumber(balanceScore), max: 100 },
-    {
-      category: 'Consistencia',
-      value: safeNumber(finalConsistency),
-      max: 100
-    },
-    {
-      category: 'Intensidad',
-      value: safeNumber(muscleBalance.reduce((sum, b) => sum + (b.intensityScore || 0), 0) / muscleBalance.length),
-      max: 100
-    },
-    {
-      category: 'Frecuencia',
-      value: Math.min(100, safeNumber(muscleBalance.reduce((sum, b) => sum + (b.weeklyFrequency || 0), 0) / muscleBalance.length) * 33.33),
-      max: 100
-    },
-    {
-      category: 'Progreso',
-      value: Math.min(100, muscleBalance.filter(b => b.progressTrend === 'improving').length * 25),
-      max: 100
-    }
-  ];
-
-  // Calcular métricas promedio para explicaciones
-  const avgIntensity = muscleBalance.reduce((sum, b) => sum + (b.intensityScore || 0), 0) / muscleBalance.length;
-  const avgFrequency = Math.min(100, muscleBalance.reduce((sum, b) => sum + (b.weeklyFrequency || 0), 0) / muscleBalance.length * 33.33);
-
-  // Debug final: mostrar valores calculados del radar (SOLO EN DESARROLLO)
-  if (process.env.NODE_ENV === 'development') {
-    console.log('📊 DEBUG - Radar Data Final:', {
-      radarData: radarData.map(r => ({ [r.category]: r.value })),
-      progressTrends: muscleBalance.map(b => ({ category: b.category, trend: b.progressTrend })),
-      improvingCount: muscleBalance.filter(b => b.progressTrend === 'improving').length,
-      avgFrequency,
-      frequencyRadarValue: radarData.find(r => r.category === 'Frecuencia')?.value,
-      weeklyFrequencies: muscleBalance.map(b => ({ category: b.category, weeklyFrequency: b.weeklyFrequency }))
-    });
-  }
-
-  // Mostrar toast de balance cuando se cargan los datos
-  useEffect(() => {
-    if (!isLoading && assignments.length > 0 && categoryMetrics.categoryMetrics.length > 0) {
-      const upperLowerBalance = calculateUpperLowerBalance(categoryMetrics.categoryMetrics);
-
-      // Definir el contenido de la notificación aquí
-      const message = upperLowerBalance.isBalanced
-        ? 'Balance Equilibrado: ' + upperLowerBalance.recommendation
-        : 'Desequilibrio Detectado: ' + upperLowerBalance.recommendation;
-
-      const type = upperLowerBalance.isBalanced ? 'success' : 'warning';
-
-      showNotification(message, type);
-    }
-  }, [isLoading, assignments, showNotification, categoryMetrics.categoryMetrics]);
-
-  if (records.length === 0) {
-    return (
-      <div className="text-center py-12">
-        <div className="p-4 bg-gray-800 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-          <Scale className="w-8 h-8 text-gray-400" />
-        </div>
-        <h3 className="text-lg font-medium text-gray-300 mb-2">
-          Sin datos de balance muscular
-        </h3>
-        <p className="text-gray-500">
-          Registra algunos entrenamientos para ver tu análisis de balance muscular
-        </p>
-      </div>
-    );
-  }
-
-  const subTabs = [
-    {
-      id: 'general' as const,
-      name: 'General',
-      icon: BarChart,
-      description: 'Análisis general con Balance Radar'
-    },
-    {
-      id: 'balanceByGroup' as const,
-      name: 'Balance por Grupo',
-      icon: PieChart,
-      description: 'Análisis detallado por categorías'
-    },
-    {
-      id: 'upperLower' as const,
-      name: 'Tren Superior vs Inferior',
-      icon: Scale,
-      description: 'Balance entre tren superior e inferior'
-    }
-  ];
-
-  // Debug: log para ver los valores reales (SOLO EN DESARROLLO)
-  if (process.env.NODE_ENV === 'development') {
-    console.log('🔍 DEBUG - Consistencia valores:', {
-      muscleBalance: muscleBalance.length,
-      consistencyValues: muscleBalance.map(b => ({
-        category: b.category,
-        volume: b.volume,
-        percentage: b.percentage,
-        isBalanced: b.isBalanced,
-        priorityLevel: b.priorityLevel,
-        progressTrend: b.progressTrend,
-        weeklyFrequency: b.weeklyFrequency,
-        intensityScore: b.intensityScore,
-        balanceHistory: b.balanceHistory,
-        hasConsistency: !!b.balanceHistory?.consistency,
-        consistencyValue: b.balanceHistory?.consistency || 'undefined'
-      })),
-      balanceScore,
-      avgConsistency: muscleBalance.reduce((sum, b) => sum + (b.balanceHistory?.consistency || 0), 0) / muscleBalance.length,
-      detailedMuscleBalance: muscleBalance.map(b => ({
-        category: b.category,
-        volume: b.volume,
-        percentage: b.percentage,
-        isBalanced: b.isBalanced,
-        priorityLevel: b.priorityLevel,
-        progressTrend: b.progressTrend,
-        weeklyFrequency: b.weeklyFrequency,
-        intensityScore: b.intensityScore,
-        balanceHistory: b.balanceHistory,
-        hasConsistency: !!b.balanceHistory?.consistency,
-        consistencyValue: b.balanceHistory?.consistency || 'undefined'
-      }))
-    });
-  }
-
-  return (
-    <div className="space-y-6">
-      {/* Navegación de SubTabs */}
-      <div className="flex bg-gray-800 rounded-lg p-1 overflow-hidden">
-        {subTabs.map((tab) => {
-          const Icon = tab.icon;
-          const isActive = activeSubTab === tab.id;
-
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveSubTab(tab.id)}
-              className={`
-                flex-1 flex items-center justify-center space-x-1 lg:space-x-2 px-2 lg:px-4 py-2 lg:py-3 rounded-md text-xs lg:text-sm font-medium transition-all duration-200 min-w-0
-                ${isActive
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
-                }
-              `}
-            >
-              <Icon className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0" />
-              <span className="hidden md:block truncate">{tab.name}</span>
-              <span className="md:hidden truncate">{tab.name.split(' ')[0]}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {/* Contenido de SubTabs */}
-      {activeSubTab === 'general' && (
-        <GeneralContent
-          balanceScore={balanceScore}
-          finalConsistency={finalConsistency}
-          avgIntensity={avgIntensity}
-          avgFrequency={avgFrequency}
-          muscleBalance={muscleBalance}
-        />
-      )}
-
-      {activeSubTab === 'balanceByGroup' && (
-        <BalanceByGroupContent
-          muscleBalance={muscleBalance}
-          categoryAnalysis={categoryMetrics}
-          onItemClick={handleBalanceItemClick}
-        />
-      )}
-
-      {activeSubTab === 'upperLower' && (
-        <UpperLowerBalanceContent
-          upperLowerBalance={calculateUpperLowerBalance(categoryMetrics.categoryMetrics)}
-          categoryAnalysis={categoryMetrics}
-          muscleBalance={muscleBalance}
-          onItemClick={handleUpperLowerItemClick}
-        />
-      )}
-    </div>
-  );
-};
 
 interface GeneralContentProps {
   balanceScore: number;
@@ -1733,4 +1388,620 @@ const BalanceByGroupContent: React.FC<BalanceByGroupContentProps> = ({
         })}
     </div>
   </div>
-); 
+);
+
+interface TrendsContentProps {
+  records: WorkoutRecord[];
+}
+
+const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
+  const analysis = useMemo(() => calculateTrendsAnalysis(records), [records]);
+
+  // Calcular indicador de experiencia basado en registros
+  const experienceLevel = useMemo(() => {
+    if (records.length < 10) return 'Principiante';
+    if (records.length < 30) return 'Intermedio';
+    if (records.length < 60) return 'Avanzado';
+    return 'Experto';
+  }, [records.length]);
+
+  if (records.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="p-4 bg-gray-800 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+          <TrendingUp className="w-8 h-8 text-gray-400" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-300 mb-2">
+          Sin datos de tendencias
+        </h3>
+        <p className="text-gray-500">
+          Registra algunos entrenamientos para ver tus patrones temporales
+        </p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header informativo */}
+      {records.length < 20 && (
+        <Card className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 border-purple-500/30">
+          <CardContent>
+            <div className="flex items-start gap-3 p-2">
+              <Activity className="w-5 h-5 text-purple-400 mt-0.5 flex-shrink-0" />
+              <div>
+                <h4 className="text-sm font-medium text-purple-300 mb-1">
+                  Análisis adaptado a tu nivel ({experienceLevel})
+                </h4>
+                <p className="text-xs text-gray-400">
+                  Las tendencias se analizan según tu historial de entrenamiento.
+                  Con más datos, el análisis será más preciso.
+                </p>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Análisis por Día de la Semana */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <Calendar className="w-5 h-5 mr-2" />
+            Análisis por Día de la Semana
+            <InfoTooltip
+              content="Análisis completo de tus patrones de entrenamiento por día, incluyendo rendimiento, tendencias y recomendaciones personalizadas."
+              position="top"
+              className="ml-2"
+            />
+          </h3>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {analysis.dayMetricsOrdered.map((day) => {
+              const Icon = dayIcons[day.dayName] || Calendar;
+              const colorGradient = dayColors[day.dayName] || 'from-gray-500/80 to-gray-600/80';
+
+              const getPerformanceBadge = () => {
+                if (day.performanceScore >= 80) return { text: 'Excelente', color: 'bg-green-500 text-white' };
+                if (day.performanceScore >= 60) return { text: 'Bueno', color: 'bg-blue-500 text-white' };
+                if (day.performanceScore >= 40) return { text: 'Regular', color: 'bg-yellow-500 text-black' };
+                return { text: 'Necesita Mejora', color: 'bg-red-500 text-white' };
+              };
+
+              const performanceBadge = getPerformanceBadge();
+
+              return (
+                <div
+                  key={day.dayName}
+                  className={`relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/30 hover:border-gray-600/50 transition-all duration-200`}
+                >
+                  {/* Header con ícono y estado */}
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
+                      <div className={`p-2 sm:p-3 rounded-lg bg-gradient-to-br ${colorGradient}`}>
+                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white truncate">
+                          {day.dayName}
+                        </h4>
+                        <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
+                          {day.workouts > 0 && (
+                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${performanceBadge.color}`}>
+                              {performanceBadge.text}
+                            </span>
+                          )}
+                          {day.trend > 0 && (
+                            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
+                          )}
+                          {day.trend < 0 && (
+                            <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="text-right ml-2 sm:ml-4">
+                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">
+                        {day.workouts}
+                      </div>
+                      <div className="text-xs text-gray-400">
+                        entrenamientos
+                      </div>
+                      <div className="mt-1 sm:mt-2 flex justify-end">
+                        {day.workouts > 0 ? (
+                          <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
+                        ) : (
+                          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {day.workouts > 0 ? (
+                    <>
+                      {/* Barra de progreso de volumen */}
+                      <div className="mb-4">
+                        <div className="flex justify-between text-xs text-gray-400 mb-2">
+                          <span>Volumen: {formatNumber(day.totalVolume)} kg</span>
+                          <span className="text-gray-300">
+                            {day.percentage.toFixed(1)}% del total
+                          </span>
+                        </div>
+                        <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">
+                          <div
+                            className={`relative h-full bg-gradient-to-r ${colorGradient} transition-all duration-300`}
+                            style={{ width: `${Math.min(100, safeNumber(day.percentage, 0))}%` }}
+                          >
+                            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
+                            {safeNumber(day.percentage, 0) > 15 && (
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <span className="text-xs font-medium text-white drop-shadow-sm">
+                                  {formatNumber(day.totalVolume)} kg
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                          {safeNumber(day.percentage, 0) <= 15 && safeNumber(day.percentage, 0) > 0 && (
+                            <div className="absolute top-0 left-2 h-full flex items-center">
+                              <span className="text-xs font-medium text-white drop-shadow-sm">
+                                {formatNumber(day.totalVolume)} kg
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      {/* Grid de métricas responsivo */}
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
+                        <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                          <div className="text-xs text-gray-400 mb-1">Peso Máximo</div>
+                          <div className="text-sm sm:text-lg font-semibold text-white">
+                            {formatNumber(day.maxWeight)} kg
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                          <div className="text-xs text-gray-400 mb-1">Ejercicios</div>
+                          <div className="text-sm sm:text-lg font-semibold text-white">
+                            {formatNumber(day.uniqueExercises)}
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                          <div className="text-xs text-gray-400 mb-1">Consistencia</div>
+                          <div className="text-sm sm:text-lg font-semibold text-white">
+                            {day.consistency}%
+                          </div>
+                        </div>
+
+                        <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
+                          <div className="text-xs text-gray-400 mb-1">Peso Promedio</div>
+                          <div className="text-sm sm:text-lg font-semibold text-white">
+                            {formatNumber(day.avgWeight)} kg
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Recomendaciones específicas */}
+                      {day.recommendations.length > 0 && (
+                        <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
+                          <div className="flex items-start gap-2">
+                            <Zap className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
+                            <div className="flex-1 min-w-0">
+                              <p className="text-sm text-blue-300 break-words">
+                                {day.recommendations[0]}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-4">
+                      <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-3">
+                        <div className="flex items-start gap-2">
+                          <AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-yellow-300 break-words">
+                              Sin entrenamientos registrados. Considera añadir entrenamientos en este día para equilibrar tu rutina semanal.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+};
+
+export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
+  const { showNotification } = useNotification();
+  const [assignments, setAssignments] = useState<ExerciseAssignment[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [activeSubTab, setActiveSubTab] = useState<'general' | 'balanceByGroup' | 'upperLower' | 'trends'>('general');
+
+  // Función para hacer smooth scroll a una card específica
+  const scrollToCard = (cardId: string) => {
+    const element = document.getElementById(cardId);
+    if (element) {
+      // Calcular la posición con offset para que se vea el título
+      const elementPosition = element.offsetTop;
+      const offset = 100; // Offset de 100px hacia arriba para ver el título
+
+      window.scrollTo({
+        top: elementPosition - offset,
+        behavior: 'smooth'
+      });
+    }
+  };
+
+  // Función para manejar clicks en items del gráfico de balance por categoría
+  const handleBalanceItemClick = (itemName: string) => {
+    const cardId = `balance-card-${itemName.toLowerCase().replace(/\s+/g, '-')}`;
+    scrollToCard(cardId);
+  };
+
+  // Función para manejar clicks en items del gráfico de tren superior vs inferior
+  const handleUpperLowerItemClick = (itemName: string) => {
+    const cardId = `upper-lower-card-${itemName.toLowerCase().replace(/\s+/g, '-')}`;
+    scrollToCard(cardId);
+  };
+
+  // Cargar asignaciones al montar el componente
+  useEffect(() => {
+    const loadAssignments = async () => {
+      try {
+        setIsLoading(true);
+        const assignments = await getAllAssignments();
+        setAssignments(assignments);
+      } catch (error) {
+        console.error('Error cargando asignaciones:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadAssignments();
+  }, []);
+
+  // Calcular métricas y análisis con asignaciones
+  const categoryMetrics = useMemo(() => {
+    if (isLoading) return { categoryMetrics: [], muscleBalance: [], dominantCategory: null, leastTrainedCategory: null, balanceScore: 0 };
+    return calculateCategoryAnalysis(records, assignments);
+  }, [records, assignments, isLoading]);
+
+  const muscleBalance = useMemo(() => {
+    if (isLoading) return [];
+    return analyzeMuscleBalance(records, assignments);
+  }, [records, assignments, isLoading]);
+
+  // NUEVO: Calcular métricas recientes (últimas 8 semanas)
+  const recentMuscleBalance = useMemo(() => {
+    const eightWeeksAgo = new Date();
+    eightWeeksAgo.setDate(eightWeeksAgo.getDate() - 56);
+    const recentRecords = records.filter(r => new Date(r.date) >= eightWeeksAgo);
+
+    return recentRecords.length > 0 ? analyzeMuscleBalance(recentRecords, assignments) : [];
+  }, [records, assignments]);
+
+  const balanceScore = useMemo(() => calculateBalanceScore(muscleBalance, records), [muscleBalance, records]);
+
+  // Calcular consistencia corregida - usar frecuencia como base si balanceHistory no existe
+  const calculateConsistency = () => {
+    const calculations = muscleBalance.map(b => {
+      let consistencyValue = 0;
+      let source = 'none';
+
+      if (b.balanceHistory?.consistency !== undefined && b.balanceHistory.consistency > 0) {
+        consistencyValue = b.balanceHistory.consistency;
+        source = 'balanceHistory';
+      } else {
+        const frequency = b.weeklyFrequency || 0;
+        consistencyValue = Math.min(100, (frequency / 2.5) * 100);
+        source = 'frequency';
+      }
+
+      return {
+        category: b.category,
+        value: consistencyValue,
+        source,
+        frequency: b.weeklyFrequency,
+        originalConsistency: b.balanceHistory?.consistency
+      };
+    });
+
+    const total = calculations.reduce((sum, calc) => sum + calc.value, 0);
+    const average = total / muscleBalance.length;
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🔧 DEBUG - Cálculo Consistencia:', {
+        calculations,
+        total,
+        average,
+        sourcesUsed: calculations.map(c => `${c.category}: ${c.source}`)
+      });
+    }
+
+    return average;
+  };
+
+  // NUEVO: Calcular consistencia basada en datos recientes
+  const calculateRecentConsistency = () => {
+    if (recentMuscleBalance.length === 0) return 0;
+
+    const calculations = recentMuscleBalance.map(b => {
+      // Para datos recientes, SIEMPRE calcular basado en frecuencia
+      // Ignorar balanceHistory.consistency porque es del período completo
+      const frequency = b.weeklyFrequency || 0;
+
+      // Frecuencias óptimas por grupo muscular
+      const optimalFrequencies: Record<string, number> = {
+        'Piernas': 2.0,
+        'Pecho': 2.5,
+        'Espalda': 2.5,
+        'Brazos': 3.0,
+        'Hombros': 3.0,
+        'Core': 3.5
+      };
+
+      const optimal = optimalFrequencies[b.category] || 2.5;
+
+      // Calcular score de frecuencia (0-100)
+      const frequencyScore = Math.min(100, (frequency / optimal) * 100);
+
+      // Para consistencia reciente, dar más peso a la frecuencia (80%)
+      // y menos a la regularidad (20%) ya que es un período corto
+      const consistencyValue = frequencyScore * 0.8 + 20; // +20 base por mantener rutina
+
+      return {
+        category: b.category,
+        value: Math.min(100, consistencyValue),
+        frequency: frequency,
+        optimal: optimal,
+        frequencyScore: frequencyScore
+      };
+    });
+
+    const total = calculations.reduce((sum, calc) => sum + calc.value, 0);
+    const average = total / recentMuscleBalance.length;
+
+    if (process.env.NODE_ENV === 'development') {
+      console.log('🆕 DEBUG - Consistencia Reciente Recalculada:', {
+        calculations,
+        average
+      });
+    }
+
+    return average;
+  };
+
+  const historicalConsistency = calculateConsistency();
+  const recentConsistency = calculateRecentConsistency();
+
+  // Debug adicional para comparar consistencias
+  if (process.env.NODE_ENV === 'development') {
+    console.log('📊 DEBUG - Comparación de consistencias:', {
+      historicalBalance: muscleBalance.map(b => ({
+        category: b.category,
+        consistency: b.balanceHistory?.consistency || 0,
+        frequency: b.weeklyFrequency
+      })),
+      recentBalance: recentMuscleBalance.map(b => ({
+        category: b.category,
+        consistency: b.balanceHistory?.consistency || 0,
+        frequency: b.weeklyFrequency
+      })),
+      historicalConsistency,
+      recentConsistency,
+      recentDataExists: recentMuscleBalance.length > 0
+    });
+  }
+
+  // Usar promedio ponderado: 70% reciente + 30% histórico si hay datos recientes
+  const finalConsistency = recentMuscleBalance.length > 0
+    ? (recentConsistency * 0.7 + historicalConsistency * 0.3)
+    : historicalConsistency;
+
+  const radarData = [
+    { category: 'Balance', value: safeNumber(balanceScore), max: 100 },
+    {
+      category: 'Consistencia',
+      value: safeNumber(finalConsistency),
+      max: 100
+    },
+    {
+      category: 'Intensidad',
+      value: safeNumber(muscleBalance.reduce((sum, b) => sum + (b.intensityScore || 0), 0) / muscleBalance.length),
+      max: 100
+    },
+    {
+      category: 'Frecuencia',
+      value: Math.min(100, safeNumber(muscleBalance.reduce((sum, b) => sum + (b.weeklyFrequency || 0), 0) / muscleBalance.length) * 33.33),
+      max: 100
+    },
+    {
+      category: 'Progreso',
+      value: Math.min(100, muscleBalance.filter(b => b.progressTrend === 'improving').length * 25),
+      max: 100
+    }
+  ];
+
+  // Calcular métricas promedio para explicaciones
+  const avgIntensity = muscleBalance.reduce((sum, b) => sum + (b.intensityScore || 0), 0) / muscleBalance.length;
+  const avgFrequency = Math.min(100, muscleBalance.reduce((sum, b) => sum + (b.weeklyFrequency || 0), 0) / muscleBalance.length * 33.33);
+
+  // Debug final: mostrar valores calculados del radar (SOLO EN DESARROLLO)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('📊 DEBUG - Radar Data Final:', {
+      radarData: radarData.map(r => ({ [r.category]: r.value })),
+      progressTrends: muscleBalance.map(b => ({ category: b.category, trend: b.progressTrend })),
+      improvingCount: muscleBalance.filter(b => b.progressTrend === 'improving').length,
+      avgFrequency,
+      frequencyRadarValue: radarData.find(r => r.category === 'Frecuencia')?.value,
+      weeklyFrequencies: muscleBalance.map(b => ({ category: b.category, weeklyFrequency: b.weeklyFrequency }))
+    });
+  }
+
+  // Mostrar toast de balance cuando se cargan los datos
+  useEffect(() => {
+    if (!isLoading && assignments.length > 0 && categoryMetrics.categoryMetrics.length > 0) {
+      const upperLowerBalance = calculateUpperLowerBalance(categoryMetrics.categoryMetrics);
+
+      // Definir el contenido de la notificación aquí
+      const message = upperLowerBalance.isBalanced
+        ? 'Balance Equilibrado: ' + upperLowerBalance.recommendation
+        : 'Desequilibrio Detectado: ' + upperLowerBalance.recommendation;
+
+      const type = upperLowerBalance.isBalanced ? 'success' : 'warning';
+
+      showNotification(message, type);
+    }
+  }, [isLoading, assignments, showNotification, categoryMetrics.categoryMetrics]);
+
+  if (records.length === 0) {
+    return (
+      <div className="text-center py-12">
+        <div className="p-4 bg-gray-800 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
+          <Scale className="w-8 h-8 text-gray-400" />
+        </div>
+        <h3 className="text-lg font-medium text-gray-300 mb-2">
+          Sin datos de balance muscular
+        </h3>
+        <p className="text-gray-500">
+          Registra algunos entrenamientos para ver tu análisis de balance muscular
+        </p>
+      </div>
+    );
+  }
+
+  const subTabs = [
+    {
+      id: 'general' as const,
+      name: 'General',
+      icon: BarChart,
+      description: 'Análisis general con Balance Radar'
+    },
+    {
+      id: 'balanceByGroup' as const,
+      name: 'Balance por Grupo',
+      icon: PieChart,
+      description: 'Análisis detallado por categorías'
+    },
+    {
+      id: 'upperLower' as const,
+      name: 'Tren Superior vs Inferior',
+      icon: Scale,
+      description: 'Balance entre tren superior e inferior'
+    },
+    {
+      id: 'trends' as const,
+      name: 'Tendencias',
+      icon: Brain,
+      description: 'Análisis de tendencias de entrenamiento'
+    }
+  ];
+
+  // Debug: log para ver los valores reales (SOLO EN DESARROLLO)
+  if (process.env.NODE_ENV === 'development') {
+    console.log('🔍 DEBUG - Consistencia valores:', {
+      muscleBalance: muscleBalance.length,
+      consistencyValues: muscleBalance.map(b => ({
+        category: b.category,
+        volume: b.volume,
+        percentage: b.percentage,
+        isBalanced: b.isBalanced,
+        priorityLevel: b.priorityLevel,
+        progressTrend: b.progressTrend,
+        weeklyFrequency: b.weeklyFrequency,
+        intensityScore: b.intensityScore,
+        balanceHistory: b.balanceHistory,
+        hasConsistency: !!b.balanceHistory?.consistency,
+        consistencyValue: b.balanceHistory?.consistency || 'undefined'
+      })),
+      balanceScore,
+      avgConsistency: muscleBalance.reduce((sum, b) => sum + (b.balanceHistory?.consistency || 0), 0) / muscleBalance.length,
+      detailedMuscleBalance: muscleBalance.map(b => ({
+        category: b.category,
+        volume: b.volume,
+        percentage: b.percentage,
+        isBalanced: b.isBalanced,
+        priorityLevel: b.priorityLevel,
+        progressTrend: b.progressTrend,
+        weeklyFrequency: b.weeklyFrequency,
+        intensityScore: b.intensityScore,
+        balanceHistory: b.balanceHistory,
+        hasConsistency: !!b.balanceHistory?.consistency,
+        consistencyValue: b.balanceHistory?.consistency || 'undefined'
+      }))
+    });
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Navegación de SubTabs */}
+      <div className="flex bg-gray-800 rounded-lg p-1 overflow-hidden">
+        {subTabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeSubTab === tab.id;
+
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSubTab(tab.id)}
+              className={`
+                flex-1 flex items-center justify-center space-x-1 lg:space-x-2 px-2 lg:px-4 py-2 lg:py-3 rounded-md text-xs lg:text-sm font-medium transition-all duration-200 min-w-0
+                ${isActive
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
+                }
+              `}
+            >
+              <Icon className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0" />
+              <span className="hidden md:block truncate">{tab.name}</span>
+              <span className="md:hidden truncate">{tab.name.split(' ')[0]}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {/* Contenido de SubTabs */}
+      {activeSubTab === 'general' && (
+        <GeneralContent
+          balanceScore={balanceScore}
+          finalConsistency={finalConsistency}
+          avgIntensity={avgIntensity}
+          avgFrequency={avgFrequency}
+          muscleBalance={muscleBalance}
+        />
+      )}
+
+      {activeSubTab === 'balanceByGroup' && (
+        <BalanceByGroupContent
+          muscleBalance={muscleBalance}
+          categoryAnalysis={categoryMetrics}
+          onItemClick={handleBalanceItemClick}
+        />
+      )}
+
+      {activeSubTab === 'upperLower' && (
+        <UpperLowerBalanceContent
+          upperLowerBalance={calculateUpperLowerBalance(categoryMetrics.categoryMetrics)}
+          categoryAnalysis={categoryMetrics}
+          muscleBalance={muscleBalance}
+          onItemClick={handleUpperLowerItemClick}
+        />
+      )}
+
+      {activeSubTab === 'trends' && (
+        <TrendsContent records={records} />
+      )}
+    </div>
+  );
+}; 

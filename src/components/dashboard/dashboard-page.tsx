@@ -8,8 +8,7 @@ import {
   DashboardTabNavigation,
   ExercisesTab,
   HistoryTab,
-  PredictionsTab,
-  TrendsTab
+  PredictionsTab
 } from './components';
 import { DEFAULT_DASHBOARD_TAB } from './constants';
 import { useDashboardData } from './hooks';
@@ -41,8 +40,6 @@ export const DashboardPage: React.FC = () => {
     switch (activeTab) {
       case 'balance':
         return <BalanceTab records={workoutRecords} />;
-      case 'trends':
-        return <TrendsTab records={workoutRecords} />;
       case 'history':
         return <HistoryTab records={workoutRecords} />;
       case 'exercises':
