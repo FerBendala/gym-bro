@@ -1,7 +1,8 @@
 import { differenceInDays, endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import type { WorkoutRecord } from '../../interfaces';
-import { calculateIntensityScore } from './category-analysis';
+import { calculateIntensityScore, normalizeVolumeTrend } from './category-analysis';
+// 🎯 NUEVA IMPORTACIÓN: Funciones para normalización por día de la semana aplicadas
 
 // ========================================
 // CONSTANTES PARA CÁLCULOS DE PREDICCIÓN
@@ -1096,12 +1097,20 @@ const calculateTrends = (
       const recentWeight = recentData[1].weight;
       const previousWeight = recentData[0].weight;
 
-      // CORRECCIÓN CRÍTICA: Tendencia de volumen realista
+      // CORRECCIÓN CRÍTICA: Tendencia de volumen realista con normalización por día de la semana
       // La diferencia directa puede ser excesiva, especialmente con semanas incompletas
       const rawVolumeTrend = recentVolumePerSession - previousVolumePerSession;
 
+      // **MEJORA FUNDAMENTAL**: Usar normalización por día de la semana
+      const currentDate = new Date(validRecords[validRecords.length - 1].date);
+      const normalizedVolumeTrend = normalizeVolumeTrend(
+        recentData[1].volume,
+        recentData[0].volume,
+        currentDate
+      );
+
       // Aplicar límites realistas inmediatamente
-      volumeTrend = Math.max(-50, Math.min(50, rawVolumeTrend)); // Máximo ±50kg/sem
+      volumeTrend = Math.max(-50, Math.min(50, normalizedVolumeTrend)); // Máximo ±50kg/sem
 
       // Si la tendencia es extrema, usar enfoque más conservador
       if (Math.abs(rawVolumeTrend) > 100) {
@@ -2124,17 +2133,6 @@ const calculateProgressionRate = (records: WorkoutRecord[]): number => {
   const lastAvg = lastQuarter.reduce((sum, r) => sum + r.weight, 0) / lastQuarter.length;
 
   return firstAvg > 0 ? ((lastAvg - firstAvg) / firstAvg) * 100 : 0;
-};
-
-const analyzeExerciseVariety = (records: WorkoutRecord[]) => {
-  const exercises = new Set(records.map(r => r.exercise));
-  const recentExercises = new Set(records.slice(-14).map(r => r.exercise));
-
-  return {
-    total: exercises.size,
-    recent: recentExercises.size,
-    varietyScore: (recentExercises.size / Math.max(exercises.size, 1)) * 100
-  };
 };
 
 const analyzeRepRanges = (records: WorkoutRecord[]) => {

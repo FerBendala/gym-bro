@@ -1,9 +1,10 @@
 import React, { createContext, useCallback, useContext, useState } from 'react';
+import type { ThemeNotificationType } from '../constants/theme';
 import type { NotificationState } from '../interfaces';
 
 interface NotificationContextType {
   notification: NotificationState;
-  showNotification: (message: string, type: 'success' | 'error' | 'info' | 'warning') => void;
+  showNotification: (message: string, type: ThemeNotificationType) => void;
   hideNotification: () => void;
 }
 
@@ -28,13 +29,21 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
     type: 'info'
   });
 
-  const showNotification = useCallback((message: string, type: 'success' | 'error' | 'info' | 'warning') => {
+  const showNotification = useCallback((message: string, type: ThemeNotificationType) => {
+    // Validar que el tipo sea válido
+    const validTypes: ThemeNotificationType[] = ['success', 'error', 'warning', 'info'];
+    const validType = validTypes.includes(type) ? type : 'info';
+
     // Si ya hay una notificación visible, la ocultamos primero
     setNotification(prev => ({ ...prev, show: false }));
 
     // Pequeño delay para permitir que la animación de salida se complete
     setTimeout(() => {
-      setNotification({ show: true, message, type });
+      setNotification({
+        show: true,
+        message: message.trim(),
+        type: validType
+      });
     }, 100);
   }, []);
 

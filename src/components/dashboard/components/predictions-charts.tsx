@@ -27,13 +27,13 @@ export interface PredictionTimelineProps {
 export interface FactorsChartProps {
   factors: {
     name: string;
-    value: number;
+    value: number | string;
     status: 'good' | 'warning' | 'bad';
   }[];
 }
 
 // Gráfico de Gauge para Nivel de Confianza
-export const ConfidenceGauge: React.FC<ConfidenceGaugeProps> = ({ confidence, level, color }) => {
+export const ConfidenceGauge: React.FC<ConfidenceGaugeProps> = ({ confidence, level }) => {
   const getGaugeColor = (conf: number): string => {
     if (conf >= 80) return '#10b981'; // green-500
     if (conf >= 60) return '#3b82f6'; // blue-500
@@ -450,7 +450,7 @@ export const FactorsChart: React.FC<FactorsChartProps> = ({ factors }) => {
 
   const series = [{
     name: 'Score',
-    data: factors.map(f => f.value)
+    data: factors.map(f => typeof f.value === 'number' ? f.value : parseFloat(f.value as string) || 0)
   }];
 
   return (
@@ -613,13 +613,11 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
   baseline1RM,
   confidence,
   timeToNextPR,
-  improvement
 }) => {
   // Validar datos de entrada
   const validCurrentWeight = Math.max(0, currentWeight || 0);
   const validPredictedPR = Math.max(validCurrentWeight, predictedPR || validCurrentWeight * 1.05);
   const validBaseline1RM = Math.max(validCurrentWeight, baseline1RM || validCurrentWeight);
-  const validImprovement = Math.max(0, Math.min(15, improvement || 0));
 
   // Calcular progreso como porcentaje hacia el PR
   // Usar baseline1RM como punto de partida y predictedPR como objetivo

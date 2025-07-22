@@ -117,6 +117,23 @@ export const getAssignmentsByDay = async (dayOfWeek: DayOfWeek): Promise<Exercis
   }
 };
 
+/**
+ * Obtiene todas las asignaciones de ejercicios para detectar días de entrenamiento
+ */
+export const getAllAssignments = async (): Promise<ExerciseAssignment[]> => {
+  try {
+    const q = query(collection(db, 'exerciseAssignments'));
+    const querySnapshot = await getDocs(q);
+    const assignments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ExerciseAssignment));
+
+    return assignments;
+  } catch (error) {
+    console.error('❌ Error obteniendo todas las asignaciones:', error);
+    handleFirebaseError(error, 'obtener todas las asignaciones de ejercicios');
+    return []; // Fallback para evitar crashes
+  }
+};
+
 export const updateExerciseAssignment = async (assignmentId: string, updates: Partial<ExerciseAssignment>) => {
   try {
     await updateDoc(doc(db, 'exerciseAssignments', assignmentId), updates);

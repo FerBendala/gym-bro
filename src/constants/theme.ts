@@ -251,37 +251,33 @@ export const THEME_SPINNER = {
  */
 export const THEME_NOTIFICATION = {
   base: 'fixed top-4 right-4 z-[99999] animate-slide-in',
-  container: 'min-w-80 max-w-sm rounded-lg shadow-lg border backdrop-blur-sm',
+  container: 'min-w-80 max-w-sm rounded-xl shadow-xl backdrop-blur-sm border',
   content: 'flex items-start space-x-3 p-4',
   icon: 'w-5 h-5 mt-0.5 flex-shrink-0',
   message: {
-    base: 'text-sm flex-1',
-    success: 'text-green-300',
-    error: 'text-red-300',
-    warning: 'text-yellow-300',
-    info: 'text-blue-300'
+    base: 'text-sm flex-1 text-white',
+    success: 'text-green-100',
+    error: 'text-red-100',
+    warning: 'text-yellow-100',
+    info: 'text-blue-100'
   },
-  close: 'ml-auto flex-shrink-0 text-gray-400 hover:text-gray-300 transition-colors',
-  closeIcon: 'w-4 h-4',
-  progressBar: {
-    container: 'mt-3 h-1 bg-white/20 rounded-full overflow-hidden',
-    bar: 'h-full bg-white/60 rounded-full animate-progress'
-  },
+  close: 'ml-auto flex-shrink-0 p-1 rounded-lg hover:bg-white/10 transition-colors duration-200',
+  closeIcon: 'w-4 h-4 text-white/70 hover:text-white',
   types: {
     success: {
-      background: 'bg-green-900/90 border-green-700',
+      background: 'bg-emerald-900/95 border-emerald-600/50',
       duration: 4000
     },
     error: {
-      background: 'bg-red-900/90 border-red-700',
+      background: 'bg-red-900/95 border-red-600/50',
       duration: 6000
     },
     warning: {
-      background: 'bg-yellow-900/90 border-yellow-700',
+      background: 'bg-amber-900/95 border-amber-600/50',
       duration: 5000
     },
     info: {
-      background: 'bg-blue-900/90 border-blue-700',
+      background: 'bg-blue-900/95 border-blue-600/50',
       duration: 4000
     }
   }

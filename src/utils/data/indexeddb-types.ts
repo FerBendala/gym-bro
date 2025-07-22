@@ -76,6 +76,8 @@ export interface UserSettings extends SystemMetadata {
     autoSync?: boolean;
     syncInterval?: number; // minutos
     maxCacheSize?: number; // MB
+    // Configuración personalizada de volumen por grupo muscular
+    customVolumeDistribution?: Record<string, number>;
   };
 }
 
