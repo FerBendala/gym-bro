@@ -1,6 +1,31 @@
 import type { WorkoutRecord } from '../../../interfaces';
 import { analyzeMuscleBalance, calculateBalanceScore, calculateCategoryAnalysis } from '../../../utils/functions/category-analysis';
 
+// Constantes para meta-categorías (como en main)
+const META_CATEGORIES = {
+  UPPER_BODY: {
+    id: 'upper_body',
+    name: 'Tren Superior',
+    categories: ['Pecho', 'Espalda', 'Hombros', 'Brazos'],
+    idealPercentage: 60,
+    color: '#3B82F6'
+  },
+  LOWER_BODY: {
+    id: 'lower_body',
+    name: 'Tren Inferior',
+    categories: ['Piernas', 'Glúteos'],
+    idealPercentage: 35,
+    color: '#10B981'
+  },
+  CORE: {
+    id: 'core',
+    name: 'Core',
+    categories: ['Core'],
+    idealPercentage: 5,
+    color: '#8B5CF6'
+  }
+};
+
 export const calculateBalanceAnalysis = (records: WorkoutRecord[]) => {
   if (records.length === 0) {
     return {
@@ -25,32 +50,8 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]) => {
   const muscleBalance = analyzeMuscleBalance(records);
   const balanceScore = calculateBalanceScore(muscleBalance, records);
 
-  // Calcular balance superior/inferior
-  const upperCategories = ['Pecho', 'Espalda', 'Hombros', 'Brazos'];
-  const lowerCategories = ['Piernas', 'Core'];
-
-  const upperVolume = upperCategories.reduce((sum, cat) => {
-    const categoryData = muscleBalance.find(item => item.category === cat);
-    return sum + (categoryData?.volume || 0);
-  }, 0);
-
-  const lowerVolume = lowerCategories.reduce((sum, cat) => {
-    const categoryData = muscleBalance.find(item => item.category === cat);
-    return sum + (categoryData?.volume || 0);
-  }, 0);
-
-  const totalVolume = upperVolume + lowerVolume;
-
-  const upperLowerBalance = {
-    upper: {
-      volume: upperVolume,
-      percentage: totalVolume > 0 ? (upperVolume / totalVolume) * 100 : 0
-    },
-    lower: {
-      volume: lowerVolume,
-      percentage: totalVolume > 0 ? (lowerVolume / totalVolume) * 100 : 0
-    }
-  };
+  // Calcular balance superior/inferior CORREGIDO: usando la misma lógica que main
+  const upperLowerBalance = calculateUpperLowerBalance(categoryAnalysis.categoryMetrics);
 
   // Calcular consistencia
   const consistency = calculateConsistency(records);
@@ -84,6 +85,83 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]) => {
     categoryAnalysis,
     upperLowerBalance,
     selectedView: 'general' as const
+  };
+};
+
+// NUEVA FUNCIÓN: Calcular balance tren superior vs inferior como en main
+const calculateUpperLowerBalance = (categoryMetrics: Array<{ category: string; percentage: number; totalVolume: number }>) => {
+  const upperBodyCategories = ['Pecho', 'Espalda', 'Hombros', 'Brazos'];
+  const lowerBodyCategories = ['Piernas'];
+  const coreCategories = ['Core'];
+
+  const upperBody = {
+    percentage: categoryMetrics
+      .filter(m => upperBodyCategories.includes(m.category))
+      .reduce((sum, m) => sum + m.percentage, 0),
+    volume: categoryMetrics
+      .filter(m => upperBodyCategories.includes(m.category))
+      .reduce((sum, m) => sum + m.totalVolume, 0),
+    categories: upperBodyCategories
+  };
+
+  const lowerBody = {
+    percentage: categoryMetrics
+      .filter(m => lowerBodyCategories.includes(m.category))
+      .reduce((sum, m) => sum + m.percentage, 0),
+    volume: categoryMetrics
+      .filter(m => lowerBodyCategories.includes(m.category))
+      .reduce((sum, m) => sum + m.totalVolume, 0),
+    categories: lowerBodyCategories
+  };
+
+  const core = {
+    percentage: categoryMetrics
+      .filter(m => coreCategories.includes(m.category))
+      .reduce((sum, m) => sum + m.percentage, 0),
+    volume: categoryMetrics
+      .filter(m => coreCategories.includes(m.category))
+      .reduce((sum, m) => sum + m.totalVolume, 0),
+    categories: coreCategories
+  };
+
+  // Calcular balance basado en desviación de porcentajes individuales vs ideales
+  const upperBodyDeviation = Math.abs(upperBody.percentage - META_CATEGORIES.UPPER_BODY.idealPercentage);
+  const lowerBodyDeviation = Math.abs(lowerBody.percentage - META_CATEGORIES.LOWER_BODY.idealPercentage);
+  const coreDeviation = Math.abs(core.percentage - META_CATEGORIES.CORE.idealPercentage);
+
+  // Considerar balanceado si ninguna categoría se desvía más de 5% del ideal
+  const maxAcceptableDeviation = 5;
+  const isBalanced = upperBodyDeviation <= maxAcceptableDeviation &&
+    lowerBodyDeviation <= maxAcceptableDeviation &&
+    coreDeviation <= maxAcceptableDeviation;
+
+  // Generar recomendación basada en las mayores desviaciones
+  let recommendation = 'El balance entre tren superior e inferior es adecuado';
+
+  if (!isBalanced) {
+    const deviations = [
+      { category: 'Tren Superior', deviation: upperBodyDeviation, current: upperBody.percentage, ideal: META_CATEGORIES.UPPER_BODY.idealPercentage },
+      { category: 'Tren Inferior', deviation: lowerBodyDeviation, current: lowerBody.percentage, ideal: META_CATEGORIES.LOWER_BODY.idealPercentage },
+      { category: 'Core', deviation: coreDeviation, current: core.percentage, ideal: META_CATEGORIES.CORE.idealPercentage }
+    ];
+
+    // Ordenar por desviación descendente
+    deviations.sort((a, b) => b.deviation - a.deviation);
+
+    const worstDeviation = deviations[0];
+    if (worstDeviation.current > worstDeviation.ideal) {
+      recommendation = `Considera reducir el entrenamiento de ${worstDeviation.category} (${worstDeviation.current.toFixed(1)}% vs ${worstDeviation.ideal}% ideal)`;
+    } else {
+      recommendation = `Considera aumentar el entrenamiento de ${worstDeviation.category} (${worstDeviation.current.toFixed(1)}% vs ${worstDeviation.ideal}% ideal)`;
+    }
+  }
+
+  return {
+    upperBody,
+    lowerBody,
+    core,
+    isBalanced,
+    recommendation
   };
 };
 
