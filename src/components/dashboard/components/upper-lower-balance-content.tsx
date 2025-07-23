@@ -5,11 +5,11 @@ import { Card, CardContent } from '../../card';
 
 interface UpperLowerBalanceContentProps {
   upperLowerBalance: {
-    upper: {
+    upperBody: {
       volume: number;
       percentage: number;
     };
-    lower: {
+    lowerBody: {
       volume: number;
       percentage: number;
     };
@@ -19,17 +19,26 @@ interface UpperLowerBalanceContentProps {
 export const UpperLowerBalanceContent: React.FC<UpperLowerBalanceContentProps> = ({
   upperLowerBalance
 }) => {
+  // Validar que los datos existan
+  if (!upperLowerBalance?.upperBody || !upperLowerBalance?.lowerBody) {
+    return (
+      <div className="text-center py-8">
+        <p className="text-gray-400">No hay datos disponibles para el análisis de balance.</p>
+      </div>
+    );
+  }
+
   const metaCategories = [
     {
       name: 'Tren Superior',
-      data: upperLowerBalance.upper,
+      data: upperLowerBalance.upperBody,
       color: 'from-blue-500 to-purple-600',
       icon: '💪',
       description: 'Pecho, Espalda, Hombros, Brazos'
     },
     {
       name: 'Tren Inferior',
-      data: upperLowerBalance.lower,
+      data: upperLowerBalance.lowerBody,
       color: 'from-green-500 to-emerald-600',
       icon: '🦵',
       description: 'Piernas, Core'
@@ -122,11 +131,11 @@ export const UpperLowerBalanceContent: React.FC<UpperLowerBalanceContentProps> =
             <div className="space-y-3">
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Tren Superior:</span>
-                <span className="text-white font-semibold">{formatNumber(upperLowerBalance.upper.percentage, 1)}%</span>
+                <span className="text-white font-semibold">{formatNumber(upperLowerBalance.upperBody.percentage, 1)}%</span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Tren Inferior:</span>
-                <span className="text-white font-semibold">{formatNumber(upperLowerBalance.lower.percentage, 1)}%</span>
+                <span className="text-white font-semibold">{formatNumber(upperLowerBalance.lowerBody.percentage, 1)}%</span>
               </div>
             </div>
 
@@ -134,13 +143,13 @@ export const UpperLowerBalanceContent: React.FC<UpperLowerBalanceContentProps> =
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Diferencia:</span>
                 <span className="text-white font-semibold">
-                  {formatNumber(Math.abs(upperLowerBalance.upper.percentage - upperLowerBalance.lower.percentage), 1)}%
+                  {formatNumber(Math.abs(upperLowerBalance.upperBody.percentage - upperLowerBalance.lowerBody.percentage), 1)}%
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-gray-400">Volumen Total:</span>
                 <span className="text-white font-semibold">
-                  {formatNumber(upperLowerBalance.upper.volume + upperLowerBalance.lower.volume, 0)} kg
+                  {formatNumber(upperLowerBalance.upperBody.volume + upperLowerBalance.lowerBody.volume, 0)} kg
                 </span>
               </div>
             </div>
@@ -149,7 +158,7 @@ export const UpperLowerBalanceContent: React.FC<UpperLowerBalanceContentProps> =
           {/* Recomendación */}
           <div className="mt-4 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
             <p className="text-sm text-blue-300">
-              {Math.abs(upperLowerBalance.upper.percentage - upperLowerBalance.lower.percentage) > 15
+              {Math.abs(upperLowerBalance.upperBody.percentage - upperLowerBalance.lowerBody.percentage) > 15
                 ? 'Considera ajustar tu rutina para equilibrar mejor el desarrollo entre tren superior e inferior.'
                 : 'Excelente balance entre tren superior e inferior. Mantén esta distribución.'
               }
