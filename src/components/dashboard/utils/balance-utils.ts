@@ -15,26 +15,73 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]) => {
 
     const categoryVolume = categoryRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
     const categoryWorkouts = new Set(categoryRecords.map(r => r.date.toDateString())).size;
+    const avgWeight = categoryRecords.length > 0
+      ? categoryRecords.reduce((sum, r) => sum + r.weight, 0) / categoryRecords.length
+      : 0;
+
+    // Calcular intensidad basada en el peso promedio vs peso máximo
+    const maxWeight = Math.max(...categoryRecords.map(r => r.weight), 0);
+    const intensityScore = maxWeight > 0 ? (avgWeight / maxWeight) * 100 : 0;
+
+    // Calcular frecuencia semanal
+    const weeklyFrequency = categoryWorkouts / Math.max(1, Math.ceil(totalWorkouts / 7));
+
+    // Calcular tendencia (simplificado)
+    const recentRecords = categoryRecords.slice(-5);
+    const olderRecords = categoryRecords.slice(-10, -5);
+    const recentVolume = recentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+    const olderVolume = olderRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+
+    let progressTrend = 'stable';
+    if (recentVolume > olderVolume * 1.1) progressTrend = 'improving';
+    else if (recentVolume < olderVolume * 0.9) progressTrend = 'declining';
+
+    // Calcular PRs (personal records)
+    const personalRecords = categoryRecords.filter(r => {
+      const sameExerciseRecords = categoryRecords.filter(cr => cr.exercise?.name === r.exercise?.name);
+      return sameExerciseRecords.every(cr => r.weight >= cr.weight);
+    });
 
     acc[category] = {
       volume: categoryVolume,
       percentage: totalVolume > 0 ? (categoryVolume / totalVolume) * 100 : 0,
       workouts: categoryWorkouts,
       frequency: totalWorkouts > 0 ? (categoryWorkouts / totalWorkouts) * 100 : 0,
-      avgWeight: categoryRecords.length > 0
-        ? categoryRecords.reduce((sum, r) => sum + r.weight, 0) / categoryRecords.length
-        : 0
+      avgWeight,
+      intensityScore,
+      weeklyFrequency,
+      weightProgression: progressTrend === 'improving' ? 10 : progressTrend === 'declining' ? -10 : 0,
+      personalRecords: personalRecords.length
     };
     return acc;
   }, {} as Record<string, any>);
 
-  // Balance muscular
-  const muscleBalance = Object.entries(categoryAnalysis).map(([category, data]) => ({
-    category,
-    percentage: data.percentage,
-    totalVolume: data.volume,
-    idealPercentage: 100 / Object.keys(categoryAnalysis).length
-  }));
+  // Balance muscular con campos adicionales
+  const muscleBalance = Object.entries(categoryAnalysis).map(([category, data]) => {
+    const idealPercentage = 100 / Object.keys(categoryAnalysis).length;
+    const isBalanced = Math.abs(data.percentage - idealPercentage) <= 5;
+
+    // Calcular prioridad basada en desequilibrio
+    let priorityLevel = 'normal';
+    if (Math.abs(data.percentage - idealPercentage) > 15) priorityLevel = 'critical';
+    else if (Math.abs(data.percentage - idealPercentage) > 10) priorityLevel = 'high';
+
+    return {
+      category,
+      percentage: data.percentage,
+      totalVolume: data.volume,
+      idealPercentage,
+      intensityScore: data.intensityScore,
+      weeklyFrequency: data.weeklyFrequency,
+      isBalanced,
+      priorityLevel,
+      progressTrend: data.progressTrend,
+      personalRecords: data.personalRecords,
+      balanceHistory: {
+        trend: data.progressTrend
+      }
+    };
+  });
 
   // Balance superior/inferior
   const upperCategories = ['Pecho', 'Espalda', 'Hombros', 'Brazos'];
@@ -74,7 +121,12 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]) => {
     avgIntensity,
     avgFrequency,
     muscleBalance,
-    categoryAnalysis,
+    categoryAnalysis: {
+      categoryMetrics: Object.entries(categoryAnalysis).map(([category, data]) => ({
+        category,
+        ...data
+      }))
+    },
     upperLowerBalance,
     selectedView: 'general' as const
   };

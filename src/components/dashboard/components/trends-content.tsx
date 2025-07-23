@@ -212,7 +212,7 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
                     </div>
                     <div className="text-right ml-2 sm:ml-4">
                       <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">
-                        {day.workouts}
+                        {formatNumber(day.workouts, 0)}
                       </div>
                       <div className="text-xs text-gray-400">
                         entrenamientos
@@ -232,9 +232,9 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
                       {/* Barra de progreso de volumen */}
                       <div className="mb-4">
                         <div className="flex justify-between text-xs text-gray-400 mb-2">
-                          <span>Volumen: {formatNumber(day.totalVolume)} kg</span>
+                          <span>Volumen: {formatNumber(day.totalVolume, 0)} kg</span>
                           <span className="text-gray-300">
-                            {day.percentage.toFixed(1)}% del total
+                            {formatNumber(day.percentage, 1)}% del total
                           </span>
                         </div>
                         <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">
@@ -246,7 +246,7 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
                             {safeNumber(day.percentage, 0) > 15 && (
                               <div className="absolute inset-0 flex items-center justify-center">
                                 <span className="text-xs font-medium text-white drop-shadow-sm">
-                                  {formatNumber(day.totalVolume)} kg
+                                  {formatNumber(day.totalVolume, 0)} kg
                                 </span>
                               </div>
                             )}
@@ -254,7 +254,7 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
                           {safeNumber(day.percentage, 0) <= 15 && safeNumber(day.percentage, 0) > 0 && (
                             <div className="absolute top-0 left-2 h-full flex items-center">
                               <span className="text-xs font-medium text-white drop-shadow-sm">
-                                {formatNumber(day.totalVolume)} kg
+                                {formatNumber(day.totalVolume, 0)} kg
                               </span>
                             </div>
                           )}
@@ -266,28 +266,28 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
                         <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                           <div className="text-xs text-gray-400 mb-1">Peso Máximo</div>
                           <div className="text-sm sm:text-lg font-semibold text-white">
-                            {formatNumber(day.maxWeight)} kg
+                            {formatNumber(day.maxWeight, 0)} kg
                           </div>
                         </div>
 
                         <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                           <div className="text-xs text-gray-400 mb-1">Ejercicios</div>
                           <div className="text-sm sm:text-lg font-semibold text-white">
-                            {formatNumber(day.uniqueExercises)}
+                            {formatNumber(day.uniqueExercises, 0)}
                           </div>
                         </div>
 
                         <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                           <div className="text-xs text-gray-400 mb-1">Consistencia</div>
                           <div className="text-sm sm:text-lg font-semibold text-white">
-                            {day.consistency}%
+                            {formatNumber(day.consistency, 0)}%
                           </div>
                         </div>
 
                         <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                           <div className="text-xs text-gray-400 mb-1">Peso Promedio</div>
                           <div className="text-sm sm:text-lg font-semibold text-white">
-                            {formatNumber(day.avgWeight)} kg
+                            {formatNumber(day.avgWeight, 0)} kg
                           </div>
                         </div>
                       </div>
