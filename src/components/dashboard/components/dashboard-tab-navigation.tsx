@@ -7,6 +7,7 @@ import type { DashboardTab } from '../types';
 interface DashboardTabNavigationProps {
   activeTab: DashboardTab;
   onTabChange: (tab: DashboardTab) => void;
+  timeFilterLabel: string;
 }
 
 /**
@@ -16,6 +17,7 @@ interface DashboardTabNavigationProps {
 export const DashboardTabNavigation: React.FC<DashboardTabNavigationProps> = ({
   activeTab,
   onTabChange,
+  timeFilterLabel
 }) => {
   return (
     <div className="space-y-4">

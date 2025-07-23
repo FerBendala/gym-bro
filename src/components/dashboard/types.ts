@@ -17,6 +17,7 @@ export interface DashboardProps {
 }
 
 export interface DashboardHeaderProps {
+  timeFilterLabel: string;
   activeTab: DashboardTab;
   onTabChange: (tab: DashboardTab) => void;
   onClose: () => void;
@@ -25,6 +26,7 @@ export interface DashboardHeaderProps {
 export interface DashboardTabNavigationProps {
   activeTab: DashboardTab;
   onTabChange: (tab: DashboardTab) => void;
+  timeFilterLabel: string;
 }
 
 export interface DashboardEmptyStateProps {

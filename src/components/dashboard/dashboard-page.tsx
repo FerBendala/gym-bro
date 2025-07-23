@@ -64,6 +64,7 @@ export const DashboardPage: React.FC = () => {
       <DashboardTabNavigation
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        timeFilterLabel="Últimos 30 días"
       />
 
       {/* Contenido principal */}
