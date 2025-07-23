@@ -197,7 +197,7 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
       monthlyGrowth,
       timeToNextPR,
       improvement: prWeight - currentWeight,
-      improvementPercentage: ((prWeight / currentWeight - 1) * 100).toFixed(1),
+      improvementPercentage: formatNumber(((prWeight / currentWeight - 1) * 100), 1),
       nextWeekIncrease: nextWeekWeight - currentWeight,
       prIncrease: prWeight - nextWeekWeight,
 
@@ -748,7 +748,7 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
                   {centralizedMetrics.nextWeekWeight}kg
                 </div>
                 <div className="text-xs text-emerald-300 opacity-75">
-                  +{centralizedMetrics.nextWeekIncrease.toFixed(1)}kg esperado
+                  +{formatNumber(centralizedMetrics.nextWeekIncrease, 1)}kg esperado
                 </div>
               </div>
 
@@ -761,7 +761,7 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
                   <span className="text-sm font-medium text-amber-200">Mejora Total</span>
                 </div>
                 <div className="text-2xl font-bold text-amber-400 mb-1">
-                  +{centralizedMetrics.improvement.toFixed(1)}kg
+                  +{formatNumber(centralizedMetrics.improvement, 1)}kg
                 </div>
                 <div className="text-xs text-amber-300 opacity-75">
                   {centralizedMetrics.improvementPercentage}% incremento

@@ -225,7 +225,7 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
 
         <StatCard
           title="Progreso Promedio"
-          value={`${globalMetrics.avgProgress > 0 ? '+' : ''}${safeNumber(globalMetrics.avgProgress, 0).toFixed(1)}%`}
+          value={`${globalMetrics.avgProgress > 0 ? '+' : ''}${formatNumber(safeNumber(globalMetrics.avgProgress, 0), 1)}%`}
           icon={Calendar}
           variant={globalMetrics.avgProgress > 0 ? 'success' : globalMetrics.avgProgress < 0 ? 'danger' : 'warning'}
           tooltip="Progreso promedio de todos los ejercicios basado en 1RM estimado."
@@ -418,7 +418,7 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
                       <div className="flex justify-between text-xs text-gray-400 mb-2">
                         <span>Evolución: {formatNumber(exercise.firstWeight)} kg → {formatNumber(exercise.lastWeight)} kg</span>
                         <span className={`font-medium ${exercise.progressPercent > 0 ? 'text-green-400' : exercise.progressPercent < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                          {exercise.progressPercent > 0 ? '+' : ''}{safeNumber(exercise.progressPercent, 0).toFixed(1)}%
+                          {exercise.progressPercent > 0 ? '+' : ''}{formatNumber(safeNumber(exercise.progressPercent, 0), 1)}%
                         </span>
                       </div>
                       <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">

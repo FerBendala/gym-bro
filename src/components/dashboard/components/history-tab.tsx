@@ -410,7 +410,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
 
         <StatCard
           title="Crecimiento Total"
-          value={`${totalGrowthPercent >= 0 ? '+' : ''}${safeNumber(totalGrowthPercent, 0).toFixed(1)}%`}
+          value={`${totalGrowthPercent >= 0 ? '+' : ''}${formatNumber(safeNumber(totalGrowthPercent, 0), 1)}%`}
           icon={totalGrowthPercent >= 0 ? TrendingUp : TrendingDown}
           variant={totalGrowthPercent >= 10 ? 'success' : totalGrowthPercent >= 0 ? 'warning' : 'danger'}
           tooltip="Cambio porcentual en volumen promedio por sesión comparando las primeras semanas con las últimas semanas (más estable que primera vs última)."
@@ -573,13 +573,13 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
                         <div className="flex justify-between items-center">
                           <span className="text-xs text-gray-400">Volumen/sesión:</span>
                           <span className={`text-xs font-medium ${point.change > 0 ? 'text-green-400' : point.change < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                            {point.change > 0 ? '+' : ''}{formatNumber(point.change)} kg ({point.changePercent > 0 ? '+' : ''}{point.changePercent.toFixed(1)}%)
+                            {point.change > 0 ? '+' : ''}{formatNumber(point.change)} kg ({point.changePercent > 0 ? '+' : ''}{formatNumber(point.changePercent, 1)}%)
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-xs text-gray-500">Volumen total:</span>
                           <span className={`text-xs font-medium ${point.totalVolumeChangePercent > 0 ? 'text-green-400' : point.totalVolumeChangePercent < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                            {point.totalVolumeChangePercent > 0 ? '+' : ''}{point.totalVolumeChangePercent.toFixed(1)}%
+                            {point.totalVolumeChangePercent > 0 ? '+' : ''}{formatNumber(point.totalVolumeChangePercent, 1)}%
                           </span>
                         </div>
                       </div>

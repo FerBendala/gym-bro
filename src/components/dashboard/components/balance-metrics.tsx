@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatNumber } from '../../../utils/functions';
 
 interface BalanceMetricsProps {
   categoryAnalysis: Record<string, any>;
@@ -14,84 +15,77 @@ export const BalanceMetrics: React.FC<BalanceMetricsProps> = ({
   upperLowerBalance,
   onUpperLowerClick
 }) => {
-  const handleUpperLowerClick = (itemName: string) => {
+  const handleUpperLowerClick = (type: 'upper' | 'lower') => {
     if (onUpperLowerClick) {
-      onUpperLowerClick(itemName);
+      onUpperLowerClick(type === 'upper' ? 'Tren Superior' : 'Tren Inferior');
     }
   };
 
   return (
-    <div className="space-y-6">
-      {/* Balance Superior vs Inferior */}
-      <div className="space-y-4">
-        <h4 className="text-md font-semibold text-white">Balance Superior vs Inferior</h4>
-
-        <div className="space-y-3">
-          <div
-            className="space-y-2 cursor-pointer hover:bg-gray-800/50 p-2 rounded-lg transition-colors duration-200"
-            onClick={() => handleUpperLowerClick('Tren Superior')}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-300">Tren Superior</span>
-              <span className="text-sm text-white">{upperLowerBalance.upper.percentage.toFixed(1)}%</span>
+    <div className="space-y-4">
+      {/* Balance Superior/Inferior */}
+      <div className="grid grid-cols-2 gap-4">
+        <div
+          className="p-4 rounded-lg bg-gradient-to-br from-blue-900/20 to-blue-800/20 border border-blue-500/30 cursor-pointer hover:bg-blue-900/30 transition-colors duration-200"
+          onClick={() => handleUpperLowerClick('upper')}
+        >
+          <div className="text-center">
+            <div className="text-2xl font-bold text-blue-400 mb-1">
+              {formatNumber(upperLowerBalance.upper.percentage, 1)}%
             </div>
-            <div className="w-full h-3 bg-gray-700 rounded-full overflow-hidden">
+            <div className="text-sm text-gray-400 mb-2">Tren Superior</div>
+            <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-blue-500 transition-all duration-1000 ease-out"
+                className="h-full bg-gradient-to-r from-blue-500 to-blue-600 transition-all duration-1000"
                 style={{ width: `${Math.min(100, upperLowerBalance.upper.percentage)}%` }}
               />
             </div>
-          </div>
-
-          <div
-            className="space-y-2 cursor-pointer hover:bg-gray-800/50 p-2 rounded-lg transition-colors duration-200"
-            onClick={() => handleUpperLowerClick('Tren Inferior')}
-          >
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-gray-300">Tren Inferior</span>
-              <span className="text-sm text-white">{upperLowerBalance.lower.percentage.toFixed(1)}%</span>
+            <div className="text-xs text-gray-500 mt-1">
+              <span className="text-white">{formatNumber(upperLowerBalance.upper.percentage, 1)}%</span>
             </div>
-            <div className="w-full h-3 bg-gray-700 rounded-full overflow-hidden">
+          </div>
+        </div>
+
+        <div
+          className="p-4 rounded-lg bg-gradient-to-br from-green-900/20 to-green-800/20 border border-green-500/30 cursor-pointer hover:bg-green-900/30 transition-colors duration-200"
+          onClick={() => handleUpperLowerClick('lower')}
+        >
+          <div className="text-center">
+            <div className="text-2xl font-bold text-green-400 mb-1">
+              {formatNumber(upperLowerBalance.lower.percentage, 1)}%
+            </div>
+            <div className="text-sm text-gray-400 mb-2">Tren Inferior</div>
+            <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
               <div
-                className="h-full bg-green-500 transition-all duration-1000 ease-out"
+                className="h-full bg-gradient-to-r from-green-500 to-green-600 transition-all duration-1000"
                 style={{ width: `${Math.min(100, upperLowerBalance.lower.percentage)}%` }}
               />
+            </div>
+            <div className="text-xs text-gray-500 mt-1">
+              <span className="text-white">{formatNumber(upperLowerBalance.lower.percentage, 1)}%</span>
             </div>
           </div>
         </div>
       </div>
 
       {/* Métricas por categoría */}
-      <div className="space-y-4">
-        <h4 className="text-md font-semibold text-white">Métricas por Categoría</h4>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {Object.entries(categoryAnalysis)
-            .filter(([_, data]) => data.volume > 0)
-            .map(([category, data]) => (
-              <div key={category} className="bg-gray-800/30 rounded-lg p-3">
-                <h5 className="text-sm font-medium text-white mb-2">{category}</h5>
-                <div className="space-y-1 text-xs">
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Volumen:</span>
-                    <span className="text-white">{Math.round(data.volume)} kg</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Porcentaje:</span>
-                    <span className="text-white">{data.percentage.toFixed(1)}%</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Sesiones:</span>
-                    <span className="text-white">{data.workouts}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-400">Peso Promedio:</span>
-                    <span className="text-white">{Math.round(data.avgWeight)} kg</span>
-                  </div>
-                </div>
+      <div className="space-y-3">
+        {Object.entries(categoryAnalysis)
+          .filter(([_, data]) => data.volume > 0)
+          .map(([category, data]) => (
+            <div key={category} className="flex items-center justify-between p-3 rounded-lg bg-gray-800/30 border border-gray-700/30">
+              <div className="flex items-center space-x-3">
+                <div className="w-3 h-3 rounded-full bg-gradient-to-r from-blue-500 to-purple-600" />
+                <span className="text-sm font-medium text-gray-300">{category}</span>
               </div>
-            ))}
-        </div>
+              <div className="text-right">
+                <div className="text-sm font-semibold text-white">
+                  {formatNumber(data.percentage, 1)}%
+                </div>
+                <div className="text-xs text-gray-400">{formatNumber(data.volume, 0)} kg</div>
+              </div>
+            </div>
+          ))}
       </div>
     </div>
   );
