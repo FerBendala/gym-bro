@@ -23,11 +23,7 @@ export interface DashboardHeaderProps {
   onClose: () => void;
 }
 
-export interface DashboardTabNavigationProps {
-  activeTab: DashboardTab;
-  onTabChange: (tab: DashboardTab) => void;
-  timeFilterLabel: string;
-}
+
 
 export interface DashboardEmptyStateProps {
   isOnline: boolean;

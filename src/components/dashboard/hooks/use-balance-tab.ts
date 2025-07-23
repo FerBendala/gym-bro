@@ -1,43 +1,61 @@
-import type { WorkoutRecord } from '@/interfaces';
-import { useMemo } from 'react';
+import { useState } from 'react';
+import type { WorkoutRecord } from '../../../interfaces';
 import { calculateBalanceAnalysis } from '../utils/balance-utils';
 
 export const useBalanceTab = (records: WorkoutRecord[]) => {
-  const balanceData = useMemo(() => {
-    if (records.length === 0) {
-      return {
-        balanceScore: 0,
-        finalConsistency: 0,
-        avgIntensity: 0,
-        avgFrequency: 0,
-        muscleBalance: [],
-        categoryAnalysis: {},
-        upperLowerBalance: {},
-        selectedView: 'general' as const
-      };
+  const [activeSubTab, setActiveSubTab] = useState<'general' | 'balanceByGroup' | 'upperLower' | 'trends'>('general');
+
+  // Calcular métricas de balance
+  const {
+    balanceScore,
+    finalConsistency,
+    avgIntensity,
+    avgFrequency,
+    muscleBalance,
+    categoryAnalysis,
+    upperLowerBalance
+  } = calculateBalanceAnalysis(records);
+
+  // Función para hacer smooth scroll a una card específica
+  const scrollToCard = (cardId: string) => {
+    const element = document.getElementById(cardId);
+    if (element) {
+      const elementPosition = element.offsetTop;
+      const offset = 100;
+      window.scrollTo({
+        top: elementPosition - offset,
+        behavior: 'smooth'
+      });
     }
-
-    return calculateBalanceAnalysis(records);
-  }, [records]);
-
-  const handleViewChange = (view: 'general' | 'upperLower' | 'byGroup' | 'trends') => {
-    // Esta función se puede expandir si necesitamos manejar cambios de vista
-    return view;
   };
 
+  // Función para manejar clicks en items del gráfico de balance por categoría
   const handleBalanceItemClick = (itemName: string) => {
-    // Lógica para manejar clicks en elementos de balance
-    console.log('Clicked balance item:', itemName);
+    const cardId = `balance-card-${itemName.toLowerCase().replace(/\s+/g, '-')}`;
+    scrollToCard(cardId);
   };
 
+  // Función para manejar clicks en items del balance superior vs inferior
   const handleUpperLowerItemClick = (itemName: string) => {
-    // Lógica para manejar clicks en elementos upper/lower
-    console.log('Clicked upper/lower item:', itemName);
+    const cardId = `upper-lower-card-${itemName.toLowerCase().replace(/\s+/g, '-')}`;
+    scrollToCard(cardId);
   };
 
   return {
-    ...balanceData,
-    handleViewChange,
+    // Estado de subtabs
+    activeSubTab,
+    setActiveSubTab,
+
+    // Métricas calculadas
+    balanceScore,
+    finalConsistency,
+    avgIntensity,
+    avgFrequency,
+    muscleBalance,
+    categoryAnalysis,
+    upperLowerBalance,
+
+    // Handlers
     handleBalanceItemClick,
     handleUpperLowerItemClick
   };

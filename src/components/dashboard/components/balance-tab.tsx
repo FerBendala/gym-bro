@@ -1,11 +1,11 @@
-import { Activity, BarChart3, Calendar, Target } from 'lucide-react';
+import { BarChart3, Brain, PieChart, Scale } from 'lucide-react';
 import React from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
-import { Card, CardContent, CardHeader } from '../../card';
-import { StatCard } from '../../stat-card';
 import { useBalanceTab } from '../hooks/use-balance-tab';
-import { BalanceChart } from './balance-chart';
-import { BalanceMetrics } from './balance-metrics';
+import { BalanceByGroupContent } from './balance-by-group-content';
+import { GeneralContent } from './general-content';
+import { TrendsContent } from './trends-content';
+import { UpperLowerBalanceContent } from './upper-lower-balance-content';
 
 interface BalanceTabProps {
   records: WorkoutRecord[];
@@ -13,6 +13,8 @@ interface BalanceTabProps {
 
 export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
   const {
+    activeSubTab,
+    setActiveSubTab,
     balanceScore,
     finalConsistency,
     avgIntensity,
@@ -40,72 +42,93 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
     );
   }
 
+  const subTabs = [
+    {
+      id: 'general' as const,
+      name: 'General',
+      icon: BarChart3,
+      description: 'Análisis general con Balance Radar'
+    },
+    {
+      id: 'balanceByGroup' as const,
+      name: 'Balance por Grupo',
+      icon: PieChart,
+      description: 'Análisis detallado por categorías'
+    },
+    {
+      id: 'upperLower' as const,
+      name: 'Tren Superior vs Inferior',
+      icon: Scale,
+      description: 'Balance entre tren superior e inferior'
+    },
+    {
+      id: 'trends' as const,
+      name: 'Tendencias',
+      icon: Brain,
+      description: 'Análisis de tendencias y predicciones'
+    }
+  ];
+
   return (
     <div className="space-y-6">
-      {/* Métricas principales */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard
-          title="Score de Balance"
-          value={`${Math.round(balanceScore)}/100`}
-          icon={Target}
-          variant={balanceScore >= 80 ? 'success' : balanceScore >= 60 ? 'warning' : 'danger'}
-          tooltip="Evaluación del balance entre grupos musculares. 80+ es excelente, 60-79 es bueno, <60 necesita mejora."
-        />
-        <StatCard
-          title="Consistencia"
-          value={`${Math.round(finalConsistency)}%`}
-          icon={BarChart3}
-          variant={finalConsistency >= 70 ? 'success' : finalConsistency >= 50 ? 'warning' : 'danger'}
-          tooltip="Porcentaje de días con entrenamiento vs días totales."
-        />
-        <StatCard
-          title="Intensidad Promedio"
-          value={`${Math.round(avgIntensity)}kg`}
-          icon={Activity}
-          variant="primary"
-          tooltip="Peso promedio utilizado en todos los ejercicios."
-        />
-        <StatCard
-          title="Frecuencia"
-          value={`${avgFrequency} sesiones`}
-          icon={Calendar}
-          variant={avgFrequency >= 4 ? 'success' : avgFrequency >= 2 ? 'warning' : 'danger'}
-          tooltip="Número total de sesiones de entrenamiento registradas."
-        />
+      {/* Navegación de SubTabs */}
+      <div className="flex bg-gray-800 rounded-lg p-1 overflow-hidden">
+        {subTabs.map((tab) => {
+          const Icon = tab.icon;
+          const isActive = activeSubTab === tab.id;
+
+          return (
+            <button
+              key={tab.id}
+              onClick={() => setActiveSubTab(tab.id)}
+              className={`
+                flex-1 flex items-center justify-center space-x-1 lg:space-x-2 px-2 lg:px-4 py-2 lg:py-3 rounded-md text-xs lg:text-sm font-medium transition-all duration-200 min-w-0
+                ${isActive
+                  ? 'bg-blue-600 text-white shadow-lg'
+                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
+                }
+              `}
+            >
+              <Icon className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0" />
+              <span className="hidden md:block truncate">{tab.name}</span>
+              <span className="md:hidden truncate">{tab.name.split(' ')[0]}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Gráfico de balance */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-white flex items-center">
-            <span className="mr-2">📈</span>
-            Distribución por Categorías
-          </h3>
-        </CardHeader>
-        <CardContent>
-          <BalanceChart
-            muscleBalance={muscleBalance}
-            onItemClick={handleBalanceItemClick}
-          />
-        </CardContent>
-      </Card>
+      {/* Contenido de SubTabs */}
+      {activeSubTab === 'general' && (
+        <GeneralContent
+          balanceScore={balanceScore}
+          finalConsistency={finalConsistency}
+          avgIntensity={avgIntensity}
+          avgFrequency={avgFrequency}
+          muscleBalance={muscleBalance}
+          onItemClick={handleBalanceItemClick}
+        />
+      )}
 
-      {/* Métricas detalladas */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-white flex items-center">
-            <span className="mr-2">📊</span>
-            Métricas Detalladas
-          </h3>
-        </CardHeader>
-        <CardContent>
-          <BalanceMetrics
-            categoryAnalysis={categoryAnalysis}
-            upperLowerBalance={upperLowerBalance}
-            onUpperLowerClick={handleUpperLowerItemClick}
-          />
-        </CardContent>
-      </Card>
+      {activeSubTab === 'balanceByGroup' && (
+        <BalanceByGroupContent
+          muscleBalance={muscleBalance}
+          categoryAnalysis={categoryAnalysis}
+          onItemClick={handleBalanceItemClick}
+        />
+      )}
+
+      {activeSubTab === 'upperLower' && (
+        <UpperLowerBalanceContent
+          upperLowerBalance={upperLowerBalance}
+          categoryAnalysis={categoryAnalysis}
+          muscleBalance={muscleBalance}
+          onItemClick={handleUpperLowerItemClick}
+        />
+      )}
+
+      {activeSubTab === 'trends' && (
+        <TrendsContent records={records} />
+      )}
     </div>
   );
 }; 
