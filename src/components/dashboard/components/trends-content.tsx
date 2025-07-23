@@ -1,4 +1,4 @@
-import { Brain, Calendar, Target, TrendingDown, TrendingUp } from 'lucide-react';
+import { Calendar, Target } from 'lucide-react';
 import React from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
 import { calculateTrendsAnalysis } from '../../../utils/functions/trends-analysis';
@@ -24,107 +24,69 @@ const dayIcons: Record<string, React.FC<any>> = {
 export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
   const trendsData = calculateTrendsAnalysis(records);
 
-  // Calcular tendencias generales
-  const volumeTrend = trendsData.temporalEvolution.growthRate;
-  const consistency = trendsData.workoutHabits.consistencyScore;
-  const progress = trendsData.temporalEvolution.predictions.confidence;
-
   return (
     <div className="space-y-6">
-      {/* Análisis de Tendencias */}
+      {/* Balance por Día de la Semana */}
       <Card>
         <CardHeader>
           <h3 className="text-lg font-semibold text-white flex items-center">
-            <span className="mr-2">📈</span>
-            Análisis de Tendencias
+            <span className="mr-2">📅</span>
+            Balance por Día de la Semana
             <InfoTooltip
-              content="Análisis de tendencias de volumen y progreso por día de la semana"
+              content="Análisis del balance de entrenamiento por cada día de la semana"
               position="top"
               className="ml-2"
             />
           </h3>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-            <StatCard
-              title="Tendencia Volumen"
-              value={`${volumeTrend > 0 ? '+' : ''}${volumeTrend.toFixed(1)}kg/sem`}
-              icon={volumeTrend > 0 ? TrendingUp : TrendingDown}
-              variant={volumeTrend > 0 ? 'success' : volumeTrend < 0 ? 'danger' : 'primary'}
-              tooltip="Tendencia semanal del volumen de entrenamiento"
-            />
-            <StatCard
-              title="Crecimiento"
-              value={`${trendsData.temporalEvolution.growthRate > 0 ? '+' : ''}${trendsData.temporalEvolution.growthRate.toFixed(1)}%`}
-              icon={trendsData.temporalEvolution.growthRate > 0 ? TrendingUp : TrendingDown}
-              variant={trendsData.temporalEvolution.growthRate > 0 ? 'success' : trendsData.temporalEvolution.growthRate < 0 ? 'danger' : 'primary'}
-              tooltip="Tasa de crecimiento semanal"
-            />
-            <StatCard
-              title="Consistencia"
-              value={`${Math.round(consistency)}%`}
-              icon={Calendar}
-              variant={consistency >= 70 ? 'success' : consistency >= 50 ? 'warning' : 'danger'}
-              tooltip="Consistencia en el entrenamiento"
-            />
-            <StatCard
-              title="Confianza"
-              value={`${Math.round(progress)}%`}
-              icon={Brain}
-              variant={progress >= 80 ? 'success' : progress >= 60 ? 'warning' : 'danger'}
-              tooltip="Confianza en las predicciones"
-            />
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Tendencias por Día */}
-      <Card>
-        <CardHeader>
-          <h3 className="text-lg font-semibold text-white flex items-center">
-            <span className="mr-2">📊</span>
-            Tendencias por Día de la Semana
-          </h3>
-        </CardHeader>
-        <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {trendsData.dayMetricsOrdered.map((dayMetric) => {
               const Icon = dayIcons[dayMetric.dayName] || Calendar;
-              const isPositive = dayMetric.trend > 0;
+              const isActive = dayMetric.workouts > 0;
 
               return (
                 <div
                   key={dayMetric.dayName}
-                  className="bg-gradient-to-br from-gray-800/50 to-gray-700/50 rounded-xl border border-gray-600/30 p-4 hover:border-gray-500/50 transition-all duration-200"
+                  className={`bg-gradient-to-br from-gray-800/50 to-gray-700/50 rounded-xl border p-4 hover:border-gray-500/50 transition-all duration-200 ${isActive ? 'border-green-500/30' : 'border-gray-600/30'
+                    }`}
                 >
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">
-                      <div className={`p-2 rounded-lg bg-gradient-to-br ${isPositive ? 'from-green-500 to-green-700' : 'from-red-500 to-red-700'}`}>
+                      <div className={`p-2 rounded-lg bg-gradient-to-br ${isActive ? 'from-green-500 to-green-700' : 'from-gray-500 to-gray-700'}`}>
                         <Icon className="w-4 h-4 text-white" />
                       </div>
                       <h4 className="font-semibold text-white">{dayMetric.dayName}</h4>
                     </div>
                     <div className="text-right">
-                      <div className={`text-lg font-bold ${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                        {isPositive ? '+' : ''}{dayMetric.trend.toFixed(1)}%
-                      </div>
-                      <div className="text-sm text-gray-400">{dayMetric.totalVolume}kg</div>
+                      <div className="text-lg font-bold text-white">{dayMetric.totalVolume}kg</div>
+                      <div className="text-sm text-gray-400">{dayMetric.workouts} sesiones</div>
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <div className="flex justify-between text-sm">
-                      <span className="text-gray-400">Sesiones:</span>
-                      <span className="text-white">{dayMetric.workouts}</span>
+                      <span className="text-gray-400">Volumen:</span>
+                      <span className="text-white">{dayMetric.totalVolume}kg</span>
                     </div>
                     <div className="flex justify-between text-sm">
                       <span className="text-gray-400">Promedio:</span>
                       <span className="text-white">{Math.round(dayMetric.avgVolume)}kg</span>
                     </div>
                     <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Ejercicios:</span>
+                      <span className="text-white">{dayMetric.uniqueExercises}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-gray-400">Consistencia:</span>
+                      <span className={`${dayMetric.consistency >= 70 ? 'text-green-400' : dayMetric.consistency >= 50 ? 'text-yellow-400' : 'text-red-400'}`}>
+                        {Math.round(dayMetric.consistency)}%
+                      </span>
+                    </div>
+                    <div className="flex justify-between text-sm">
                       <span className="text-gray-400">Estado:</span>
-                      <span className={`${isPositive ? 'text-green-400' : 'text-red-400'}`}>
-                        {isPositive ? 'Mejorando' : 'Decreciendo'}
+                      <span className={`${isActive ? 'text-green-400' : 'text-gray-400'}`}>
+                        {isActive ? 'Activo' : 'Inactivo'}
                       </span>
                     </div>
                   </div>
@@ -135,32 +97,44 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
         </CardContent>
       </Card>
 
-      {/* Predicciones */}
+      {/* Resumen Semanal */}
       <Card>
         <CardHeader>
           <h3 className="text-lg font-semibold text-white flex items-center">
-            <span className="mr-2">🔮</span>
-            Predicciones y Recomendaciones
+            <span className="mr-2">📊</span>
+            Resumen Semanal
           </h3>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {trendsData.temporalEvolution.insights.map((insight, index) => (
-              <div
-                key={index}
-                className="bg-gradient-to-br from-gray-800/30 to-gray-700/30 rounded-lg border border-gray-600/30 p-4"
-              >
-                <div className="flex items-start space-x-3">
-                  <div className="p-2 rounded-lg bg-gradient-to-br from-blue-500/20 to-purple-500/20 border border-blue-500/30">
-                    <Brain className="w-4 h-4 text-blue-400" />
-                  </div>
-                  <div className="flex-1">
-                    <h4 className="font-semibold text-white mb-1">Insight #{index + 1}</h4>
-                    <p className="text-gray-300 text-sm">{insight}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+            <StatCard
+              title="Días Activos"
+              value={trendsData.dayMetricsOrdered.filter(d => d.workouts > 0).length.toString()}
+              icon={Calendar}
+              variant="primary"
+              tooltip="Número de días con entrenamiento"
+            />
+            <StatCard
+              title="Volumen Total"
+              value={`${Math.round(trendsData.dayMetricsOrdered.reduce((sum, d) => sum + d.totalVolume, 0))}kg`}
+              icon={Target}
+              variant="primary"
+              tooltip="Volumen total de la semana"
+            />
+            <StatCard
+              title="Consistencia"
+              value={`${Math.round(trendsData.workoutHabits.consistencyScore)}%`}
+              icon={Calendar}
+              variant={trendsData.workoutHabits.consistencyScore >= 70 ? 'success' : trendsData.workoutHabits.consistencyScore >= 50 ? 'warning' : 'danger'}
+              tooltip="Consistencia semanal"
+            />
+            <StatCard
+              title="Mejor Día"
+              value={trendsData.workoutHabits.preferredDay}
+              icon={Target}
+              variant="primary"
+              tooltip="Día con más entrenamientos"
+            />
           </div>
         </CardContent>
       </Card>

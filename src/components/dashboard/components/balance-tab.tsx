@@ -47,25 +47,25 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
       id: 'general' as const,
       name: 'General',
       icon: BarChart3,
-      description: 'Análisis general con Balance Radar'
+      description: 'Chart/Radar de balance general'
     },
     {
       id: 'balanceByGroup' as const,
-      name: 'Balance por Grupo',
+      name: 'Balance',
       icon: PieChart,
-      description: 'Análisis detallado por categorías'
+      description: 'Balance muscular por categorías'
     },
     {
       id: 'upperLower' as const,
-      name: 'Tren Superior vs Inferior',
+      name: 'Tren',
       icon: Scale,
-      description: 'Balance entre tren superior e inferior'
+      description: 'Comparativa tren superior, inferior y core'
     },
     {
       id: 'trends' as const,
       name: 'Tendencias',
       icon: Brain,
-      description: 'Análisis de tendencias y predicciones'
+      description: 'Balance por día de la semana'
     }
   ];
 
