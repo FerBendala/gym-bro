@@ -3,17 +3,10 @@
  * Incluye componentes, hooks, tipos y constantes
  */
 
+export * from './components';
+export * from './constants';
 export { Dashboard } from './dashboard-modal';
 export { DashboardPage } from './dashboard-page';
-
-// Hooks
-export { useDashboardData } from './hooks';
-
-// Componentes de las tabs
-export * from './components';
-
-// Tipos
+export * from './hooks';
 export * from './types';
 
-// Constantes
-export * from './constants';

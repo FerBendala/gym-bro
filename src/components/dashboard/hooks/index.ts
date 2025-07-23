@@ -1,3 +1,5 @@
+export { useAdvancedTab } from './use-advanced-tab';
+export { useBalanceTab } from './use-balance-tab';
 export { useDashboardData } from './use-dashboard-data';
-export { usePredictionMetrics, type EnhancedPredictionMetrics } from './use-prediction-metrics';
+export { usePredictionMetrics } from './use-prediction-metrics';
 

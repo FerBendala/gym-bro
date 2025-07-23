@@ -1,65 +1,37 @@
 import { BarChart3, X } from 'lucide-react';
 import React from 'react';
-import { THEME_RESPONSIVE, THEME_TABS } from '../../../constants/theme';
-import { cn } from '../../../utils/functions';
-import { Button } from '../../button';
-import { DASHBOARD_TABS } from '../constants';
-import type { DashboardHeaderProps } from '../types';
 
-export const DashboardHeader: React.FC<DashboardHeaderProps> = ({
-  timeFilterLabel,
-  activeTab,
-  onTabChange,
-  onClose
-}) => {
+interface DashboardHeaderProps {
+  onClose: () => void;
+}
+
+export const DashboardHeader: React.FC<DashboardHeaderProps> = ({ onClose }) => {
   return (
-    <div className="border-b border-gray-700">
-      {/* Header principal */}
-      <div className="flex items-center justify-between p-6">
-        <div className="flex items-center space-x-3">
-          <div className="p-2 bg-blue-600 rounded-lg">
-            <BarChart3 className="w-6 h-6 text-white" />
-          </div>
-          <div>
-            <h2 className="text-xl font-bold text-white">Dashboard de Progreso</h2>
-            <p className="text-sm text-gray-400">{timeFilterLabel}</p>
-          </div>
-        </div>
-        <Button
-          variant="ghost"
-          onClick={onClose}
-          className={cn(
-            THEME_RESPONSIVE.touch.minTarget,
-            'md:min-h-auto md:min-w-auto'
-          )}
-        >
-          <X className="w-5 h-5 md:w-4 md:h-4" />
-        </Button>
-      </div>
+    <div className="relative bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20 border-b border-gray-700/50">
+      <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10" />
+      <div className="relative p-6">
+        <div className="flex items-start justify-between">
+          <div className="flex items-start space-x-4">
+            <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-200">
+              <BarChart3 className="w-6 h-6 text-white" />
+            </div>
 
-      {/* Navegación por tabs */}
-      <div className="px-6 pb-4">
-        <div className="flex space-x-1 bg-gray-800/50 p-1 rounded-lg overflow-x-auto">
-          {DASHBOARD_TABS.map((tab) => {
-            const Icon = tab.icon;
-            const isActive = activeTab === tab.id;
+            <div className="flex-1">
+              <h3 className="text-2xl font-bold text-white mb-1 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent">
+                Dashboard Analytics
+              </h3>
+              <p className="text-lg text-blue-300 font-medium mb-2">
+                Análisis completo de tu progreso
+              </p>
+            </div>
+          </div>
 
-            return (
-              <button
-                key={tab.id}
-                onClick={() => onTabChange(tab.id)}
-                className={cn(
-                  THEME_TABS.tab.base,
-                  isActive ? THEME_TABS.tab.active : THEME_TABS.tab.inactive,
-                  'flex-shrink-0 flex items-center space-x-2'
-                )}
-                title={tab.description}
-              >
-                <Icon className="w-4 h-4" />
-                <span className="whitespace-nowrap">{tab.label}</span>
-              </button>
-            );
-          })}
+          <button
+            onClick={onClose}
+            className="p-2.5 text-gray-400 hover:text-white hover:bg-white/10 rounded-xl transition-all duration-200 backdrop-blur-sm border border-gray-600/30 hover:border-gray-500/50 hover:shadow-lg hover:scale-105"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </div>
