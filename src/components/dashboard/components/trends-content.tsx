@@ -2,6 +2,7 @@ import { Activity, AlertTriangle, Calendar, CheckCircle, TrendingDown, TrendingU
 import React, { useMemo } from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
 import { formatNumber } from '../../../utils/functions';
+import { calculateTrendsAnalysis } from '../../../utils/functions/trends-analysis';
 import { Card, CardContent, CardHeader } from '../../card';
 
 interface TrendsContentProps {
@@ -13,96 +14,25 @@ const safeNumber = (value: number | undefined, fallback: number = 0): number => 
   return typeof value === 'number' && !isNaN(value) ? value : fallback;
 };
 
-// Iconos y colores para días de la semana
+// Iconos y colores para días de la semana (como en main)
 const dayIcons: Record<string, any> = {
   'Lunes': Calendar,
-  'Martes': Calendar,
-  'Miércoles': Calendar,
-  'Jueves': Calendar,
-  'Viernes': Calendar,
+  'Martes': Activity,
+  'Miércoles': Zap,
+  'Jueves': TrendingUp,
+  'Viernes': CheckCircle,
   'Sábado': Calendar,
   'Domingo': Calendar
 };
 
 const dayColors: Record<string, string> = {
-  'Lunes': 'from-red-500/80 to-red-600/80',
-  'Martes': 'from-orange-500/80 to-orange-600/80',
-  'Miércoles': 'from-yellow-500/80 to-yellow-600/80',
-  'Jueves': 'from-green-500/80 to-green-600/80',
-  'Viernes': 'from-blue-500/80 to-blue-600/80',
-  'Sábado': 'from-purple-500/80 to-purple-600/80',
-  'Domingo': 'from-indigo-500/80 to-indigo-600/80'
-};
-
-// Función para calcular análisis de tendencias
-const calculateTrendsAnalysis = (records: WorkoutRecord[]) => {
-  const dayMetrics: Record<string, any> = {
-    'Lunes': { workouts: 0, totalVolume: 0, maxWeight: 0, uniqueExercises: new Set(), avgWeight: 0, consistency: 0 },
-    'Martes': { workouts: 0, totalVolume: 0, maxWeight: 0, uniqueExercises: new Set(), avgWeight: 0, consistency: 0 },
-    'Miércoles': { workouts: 0, totalVolume: 0, maxWeight: 0, uniqueExercises: new Set(), avgWeight: 0, consistency: 0 },
-    'Jueves': { workouts: 0, totalVolume: 0, maxWeight: 0, uniqueExercises: new Set(), avgWeight: 0, consistency: 0 },
-    'Viernes': { workouts: 0, totalVolume: 0, maxWeight: 0, uniqueExercises: new Set(), avgWeight: 0, consistency: 0 },
-    'Sábado': { workouts: 0, totalVolume: 0, maxWeight: 0, uniqueExercises: new Set(), avgWeight: 0, consistency: 0 },
-    'Domingo': { workouts: 0, totalVolume: 0, maxWeight: 0, uniqueExercises: new Set(), avgWeight: 0, consistency: 0 }
-  };
-
-  const dayNames = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-
-  records.forEach(record => {
-    const date = new Date(record.date);
-    const dayName = dayNames[date.getDay()];
-    const dayData = dayMetrics[dayName];
-
-    if (dayData) {
-      dayData.workouts++;
-      // Calcular volumen total basado en la estructura correcta de WorkoutRecord
-      const recordVolume = (record.weight || 0) * (record.reps || 0) * (record.sets || 0);
-      dayData.totalVolume += recordVolume;
-
-      // Usar el peso del registro como máximo
-      const recordWeight = record.weight || 0;
-      dayData.maxWeight = Math.max(dayData.maxWeight, recordWeight);
-
-      // Añadir el nombre del ejercicio al set
-      if (record.exercise) {
-        dayData.uniqueExercises.add(record.exercise);
-      }
-    }
-  });
-
-  // Calcular promedios y porcentajes
-  const totalVolume = Object.values(dayMetrics).reduce((sum, day) => sum + day.totalVolume, 0);
-  const totalWorkouts = Object.values(dayMetrics).reduce((sum, day) => sum + day.workouts, 0);
-
-  Object.values(dayMetrics).forEach(day => {
-    day.percentage = totalVolume > 0 ? (day.totalVolume / totalVolume) * 100 : 0;
-    day.avgWeight = day.workouts > 0 ? day.totalVolume / day.workouts : 0;
-    day.uniqueExercises = day.uniqueExercises.size;
-    day.consistency = totalWorkouts > 0 ? (day.workouts / totalWorkouts) * 100 : 0;
-
-    // Calcular tendencia (simplificado)
-    day.trend = day.workouts > 0 ? 1 : -1;
-
-    // Calcular score de rendimiento
-    day.performanceScore = Math.min(100, (day.workouts * 20) + (day.percentage * 0.5) + (day.consistency * 0.3));
-
-    // Recomendaciones
-    day.recommendations = [];
-    if (day.workouts === 0) {
-      day.recommendations.push('Considera añadir entrenamientos en este día para equilibrar tu rutina semanal.');
-    } else if (day.percentage < 10) {
-      day.recommendations.push('Aumenta el volumen de entrenamiento en este día para mejor distribución.');
-    } else if (day.percentage > 25) {
-      day.recommendations.push('Reduce ligeramente el volumen para evitar sobrecarga en un solo día.');
-    }
-  });
-
-  return {
-    dayMetricsOrdered: Object.entries(dayMetrics).map(([dayName, data]) => ({
-      dayName,
-      ...data
-    }))
-  };
+  'Lunes': 'from-blue-500/80 to-cyan-500/80',
+  'Martes': 'from-green-500/80 to-emerald-500/80',
+  'Miércoles': 'from-purple-500/80 to-violet-500/80',
+  'Jueves': 'from-orange-500/80 to-amber-500/80',
+  'Viernes': 'from-red-500/80 to-pink-500/80',
+  'Sábado': 'from-indigo-500/80 to-blue-500/80',
+  'Domingo': 'from-teal-500/80 to-green-500/80'
 };
 
 export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
