@@ -33,8 +33,8 @@ export const useDashboardData = () => {
       });
 
       // Enriquecer los registros con información del ejercicio
-      const enrichedRecords = recordsData.map(record => {
-        const exercise = exercisesData.find(ex => ex.id === record.exerciseId);
+      const enrichedRecords = recordsData.map((record: WorkoutRecord) => {
+        const exercise = exercisesData.find((ex: Exercise) => ex.id === record.exerciseId);
 
         if (!exercise) {
           console.warn(`⚠️ Ejercicio no encontrado para record ${record.id} con exerciseId: ${record.exerciseId}`);
@@ -47,8 +47,8 @@ export const useDashboardData = () => {
       });
 
       // Verificar enriquecimiento
-      const recordsWithExercise = enrichedRecords.filter(r => r.exercise);
-      const recordsWithoutExercise = enrichedRecords.filter(r => !r.exercise);
+      const recordsWithExercise = enrichedRecords.filter((r: WorkoutRecord) => r.exercise);
+      const recordsWithoutExercise = enrichedRecords.filter((r: WorkoutRecord) => !r.exercise);
 
       console.log('🔍 Enriquecimiento de datos:', {
         totalRecords: enrichedRecords.length,
