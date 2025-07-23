@@ -1,49 +1,32 @@
-import { Edit2, Trash2 } from 'lucide-react';
+import { useOnlineStatus } from '@/hooks';
+import { useAdminStore } from '@/stores/admin-store';
 import React, { useMemo, useState } from 'react';
-import { EXERCISE_CATEGORIES } from '../../../constants/exercise-categories';
-import { Button } from '../../button';
 import { Card, CardContent, CardHeader } from '../../card';
-import { URLPreview } from '../../url-preview';
-import type { ExerciseCategory, ExerciseListProps } from '../types';
+import type { ExerciseCategory } from '../types';
+import { filterExercisesByCategory, getCategoriesWithCount } from '../utils/admin-utils';
+import { ExerciseCategoryTabs } from './exercise-category-tabs';
+import { ExerciseItem } from './exercise-item';
 
 /**
  * Lista de ejercicios existentes organizados por tabs de categoría
  * Incluye funcionalidad de filtrado por categoría y edición/eliminación
+ * Usa Zustand para el estado global
  */
-export const ExerciseList: React.FC<ExerciseListProps> = ({
-  exercises,
-  isOnline,
-  onEditExercise,
-  onDelete,
-  onPreviewUrl
-}) => {
+export const ExerciseList: React.FC = () => {
+  const isOnline = useOnlineStatus();
+  const exercises = useAdminStore((state) => state.exercises);
+  const setPreviewUrl = useAdminStore((state) => state.setPreviewUrl);
+
   const [selectedCategory, setSelectedCategory] = useState<ExerciseCategory>('all');
 
   // Crear lista de categorías con contador
   const categoriesWithCount = useMemo(() => {
-    const categories = [
-      { id: 'all', name: 'Todos', count: exercises.length }
-    ];
-
-    // Contar ejercicios por categoría (un ejercicio puede estar en múltiples categorías)
-    EXERCISE_CATEGORIES.forEach(category => {
-      const count = exercises.filter(ex => ex.categories?.includes(category)).length;
-      if (count > 0) {
-        categories.push({ id: category, name: category, count });
-      }
-    });
-
-    return categories;
+    return getCategoriesWithCount(exercises);
   }, [exercises]);
 
   // Filtrar ejercicios por categoría seleccionada
   const filteredExercises = useMemo(() => {
-    if (selectedCategory === 'all') {
-      return exercises.sort((a, b) => a.name.localeCompare(b.name));
-    }
-    return exercises
-      .filter(ex => ex.categories?.includes(selectedCategory))
-      .sort((a, b) => a.name.localeCompare(b.name));
+    return filterExercisesByCategory(exercises, selectedCategory);
   }, [exercises, selectedCategory]);
 
   return (
@@ -65,26 +48,12 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
         ) : (
           <div className="space-y-4">
             {/* Tabs de categorías */}
-            <div className="flex flex-wrap gap-2">
-              {categoriesWithCount.map((category) => (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.id ? 'primary' : 'ghost'}
-                  size="sm"
-                  onClick={() => setSelectedCategory(category.id)}
-                  disabled={!isOnline}
-                  className="flex items-center space-x-2"
-                >
-                  <span>{category.name}</span>
-                  <span className={`text-xs px-1.5 py-0.5 rounded-full ${selectedCategory === category.id
-                    ? 'bg-white/20 text-white'
-                    : 'bg-gray-600/50 text-gray-300'
-                    }`}>
-                    {category.count}
-                  </span>
-                </Button>
-              ))}
-            </div>
+            <ExerciseCategoryTabs
+              categoriesWithCount={categoriesWithCount}
+              selectedCategory={selectedCategory}
+              onCategoryChange={setSelectedCategory}
+              isOnline={isOnline}
+            />
 
             {/* Lista de ejercicios filtrados */}
             {filteredExercises.length === 0 ? (
@@ -96,58 +65,11 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({
             ) : (
               <div className="space-y-3">
                 {filteredExercises.map((exercise) => (
-                  <div key={exercise.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700/50 hover:border-gray-600/70 transition-all duration-200">
-                    <div className="space-y-3">
-                      <div className="flex items-center justify-between">
-                        <div className="min-w-0 flex-1">
-                          <h4 className="text-white font-medium truncate">{exercise.name}</h4>
-                          {exercise.categories && exercise.categories.length > 0 && (
-                            <div className="flex flex-wrap gap-1 mt-1">
-                              {exercise.categories.map((category) => (
-                                <span
-                                  key={category}
-                                  className="text-xs text-blue-300 bg-blue-500/15 px-2 py-1 rounded-full font-medium border border-blue-500/20"
-                                >
-                                  {category}
-                                </span>
-                              ))}
-                            </div>
-                          )}
-                          {exercise.description && (
-                            <p className="text-sm text-gray-500 mt-2 line-clamp-2">{exercise.description}</p>
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-2 ml-4">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onEditExercise(exercise)}
-                            disabled={!isOnline}
-                            title="Editar ejercicio"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="danger"
-                            size="sm"
-                            onClick={() => onDelete(exercise.id)}
-                            disabled={!isOnline}
-                            title="Eliminar ejercicio"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-
-                      {/* Vista previa de URL del ejercicio */}
-                      {exercise.url && (
-                        <URLPreview
-                          url={exercise.url}
-                          onClick={() => onPreviewUrl(exercise.url!)}
-                        />
-                      )}
-                    </div>
-                  </div>
+                  <ExerciseItem
+                    key={exercise.id}
+                    exercise={exercise}
+                    onPreviewUrl={setPreviewUrl}
+                  />
                 ))}
               </div>
             )}

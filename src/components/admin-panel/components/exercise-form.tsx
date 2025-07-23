@@ -1,8 +1,15 @@
+import {
+  createExercise,
+  updateExercise
+} from '@/api/services';
+import { useOnlineStatus } from '@/hooks';
+import type { Exercise } from '@/interfaces';
+import { useAdminStore } from '@/stores/admin-store';
+import { useNotification } from '@/stores/notification-store';
 import { Plus, Save, XCircle } from 'lucide-react';
 import React from 'react';
 import { EXERCISE_CATEGORIES } from '../../../constants';
 import { useExerciseForm } from '../../../hooks';
-import type { Exercise } from '../../../interfaces';
 import { Button } from '../../button';
 import { Card, CardContent, CardHeader } from '../../card';
 import { Input } from '../../input';
@@ -11,22 +18,73 @@ import { URLPreview } from '../../url-preview';
 import type { ExerciseFormData } from '../types';
 
 interface ExerciseFormProps {
-  isOnline: boolean;
-  loading: boolean;
-  onSubmit: (data: ExerciseFormData) => Promise<boolean>;
   exercise?: Exercise;
   onCancel?: () => void;
   onPreviewUrl: (url: string) => void;
 }
 
 export const ExerciseForm: React.FC<ExerciseFormProps> = ({
-  isOnline,
-  loading,
-  onSubmit,
   exercise,
   onCancel,
   onPreviewUrl
 }) => {
+  const isOnline = useOnlineStatus();
+  const { showNotification } = useNotification();
+
+  const {
+    editingExercise,
+    setEditingExercise,
+    setLoading,
+    setError,
+    addExercise,
+    updateExerciseInStore
+  } = useAdminStore();
+
+  const handleFormSubmit = async (data: ExerciseFormData) => {
+    if (!isOnline) {
+      showNotification('Sin conexión. No se puede guardar el ejercicio.', 'error');
+      return false;
+    }
+
+    setLoading('creating', true);
+    setError('exercises', null);
+
+    try {
+      // Preparar datos para Firebase - convertir campos vacíos a undefined
+      const exerciseData = {
+        name: data.name,
+        categories: data.categories,
+        description: data.description?.trim() || undefined,
+        url: data.url?.trim() || undefined
+      };
+
+      if (editingExercise) {
+        // Actualizar ejercicio existente
+        await updateExercise(editingExercise.id, exerciseData);
+        updateExerciseInStore(editingExercise.id, exerciseData);
+        showNotification(`Ejercicio "${data.name}" actualizado exitosamente`, 'success');
+        setEditingExercise(null);
+      } else {
+        // Crear nuevo ejercicio
+        const exerciseId = await createExercise(exerciseData);
+        const newExercise: Exercise = {
+          id: exerciseId,
+          ...exerciseData
+        };
+        addExercise(newExercise);
+        showNotification(`Ejercicio "${data.name}" creado exitosamente`, 'success');
+      }
+      return true;
+    } catch (error: any) {
+      const message = error.message || 'Error al guardar el ejercicio';
+      setError('exercises', message);
+      showNotification(message, 'error');
+      return false;
+    } finally {
+      setLoading('creating', false);
+    }
+  };
+
   const {
     register,
     handleSubmit,
@@ -36,7 +94,7 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
     isEditing,
     validateURL,
     setValue
-  } = useExerciseForm({ exercise, onSubmit });
+  } = useExerciseForm({ exercise, onSubmit: handleFormSubmit });
 
   return (
     <Card>
@@ -115,7 +173,7 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
           )}
 
           <div className="flex space-x-2">
-            <Button type="submit" loading={loading} disabled={!isOnline}>
+            <Button type="submit" loading={false} disabled={!isOnline}>
               {isEditing ? (
                 <>
                   <Save className="w-4 h-4 mr-2" />

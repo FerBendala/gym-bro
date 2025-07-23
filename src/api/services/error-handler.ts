@@ -1,8 +1,10 @@
-/**
- * Manejador centralizado de errores de Firebase
- * Proporciona mensajes de error amigables para el usuario
- */
 
+/**
+ * Maneja errores de Firebase de manera centralizada
+ * @param {Object} error - Error de Firebase
+ * @param {string} operation - Operación en la que se produjo el error
+ * @throws {Error} Error con mensaje para el usuario
+ */
 export const handleFirebaseError = (error: any, operation: string) => {
   console.error(`Error in ${operation}:`, error);
 

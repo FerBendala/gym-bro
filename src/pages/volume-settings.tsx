@@ -1,10 +1,10 @@
+import { useNotification } from '@/stores/notification-store';
 import { RotateCcw, Save } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { Button } from '../components/button';
 import { Card } from '../components/card';
 import { IDEAL_VOLUME_DISTRIBUTION } from '../constants/exercise-categories';
 import { MODERN_THEME } from '../constants/modern-theme';
-import { useNotification } from '../context/notification-context';
 import type { UserSettings } from '../utils/data/indexeddb-types';
 import { getItem, updateItem } from '../utils/data/indexeddb-utils';
 import { cn } from '../utils/functions';

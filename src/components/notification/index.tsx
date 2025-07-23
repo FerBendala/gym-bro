@@ -1,7 +1,8 @@
 import { AlertTriangle, CheckCircle, Info, X, XCircle } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { THEME_NOTIFICATION } from '../../constants/theme';
-import { useNotification } from '../../context/notification-context';
+import { useNotification } from '../../stores/notification-store';
+import { cn } from '../../utils/functions';
 
 /**
  * Componente de notificación unificado para toda la aplicación
@@ -44,12 +45,15 @@ export const Notification: React.FC = () => {
         setTimeout(() => {
           hideNotification();
           setIsVisible(false);
-        }, 400); // Duración de la animación de salida
+        }, 300); // Duración de la animación de salida
       }, duration);
 
       return () => clearTimeout(timer);
+    } else {
+      setIsVisible(false);
+      setIsExiting(false);
     }
-  }, [notification.show, notification.type, hideNotification]);
+  }, [notification.show, notification.message, notification.type, hideNotification]);
 
   if (!notification.show && !isVisible) return null;
 
@@ -58,8 +62,10 @@ export const Notification: React.FC = () => {
 
   return (
     <div className={cn(
-      "fixed top-4 right-4 z-[99999] transform transition-all duration-300 animate-hover-lift",
-      isExiting ? "animate-slide-out" : "animate-slide-in"
+      "fixed top-4 right-4 z-[99999] transform transition-all duration-300 ease-in-out",
+      isExiting
+        ? "translate-x-full opacity-0"
+        : "translate-x-0 opacity-100"
     )}>
       <div className={cn(
         "min-w-80 max-w-sm rounded-xl shadow-xl backdrop-blur-sm border animate-fade-in-scale",
@@ -80,12 +86,13 @@ export const Notification: React.FC = () => {
               setTimeout(() => {
                 hideNotification();
                 setIsVisible(false);
-              }, 400);
+              }, 300);
             }}
-            className="ml-auto flex-shrink-0 p-1 rounded-lg hover:bg-white/10 transition-all duration-200 hover:scale-110"
-            aria-label="Cerrar notificación"
+            className={cn(
+              "ml-auto flex-shrink-0 p-1 rounded-lg hover:bg-white/10 transition-colors duration-200"
+            )}
           >
-            <X className="w-4 h-4 text-white/70 hover:text-white transition-colors duration-200" />
+            <X className="w-4 h-4 text-white/70 hover:text-white" />
           </button>
         </div>
       </div>
@@ -93,7 +100,3 @@ export const Notification: React.FC = () => {
   );
 };
 
-// Función helper para combinar clases CSS
-const cn = (...classes: (string | undefined | null | false)[]): string => {
-  return classes.filter(Boolean).join(' ');
-};

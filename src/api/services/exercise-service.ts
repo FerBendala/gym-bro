@@ -1,7 +1,36 @@
 import { db } from '@/api/firebase';
 import { handleFirebaseError } from '@/api/services/error-handler';
 import type { Exercise } from '@/interfaces';
-import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, deleteField, doc, getDocs, updateDoc } from 'firebase/firestore';
+
+/**
+ * Filtra campos undefined de un objeto para Firebase (para creación)
+ */
+function filterUndefinedFields(obj: any): any {
+  const filtered: any = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined && value !== null && value !== '') {
+      filtered[key] = value;
+    }
+  }
+  return filtered;
+}
+
+/**
+ * Filtra campos undefined de un objeto para Firebase y maneja eliminación de campos (para actualización)
+ */
+function prepareUpdatesForFirebase(obj: any): any {
+  const prepared: any = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === undefined || value === null || value === '') {
+      // Usar deleteField para eliminar campos vacíos
+      prepared[key] = deleteField();
+    } else {
+      prepared[key] = value;
+    }
+  }
+  return prepared;
+}
 
 /**
  * Servicio para operaciones CRUD de ejercicios
@@ -9,12 +38,17 @@ import { addDoc, collection, deleteDoc, doc, getDocs, updateDoc } from 'firebase
 export class ExerciseService {
   private static readonly COLLECTION = 'exercises';
 
+
   /**
    * Crea un nuevo ejercicio
+   * @param exercise Ejercicio a crear sin campo "id"
+   * @returns El ID del ejercicio creado
    */
   static async create(exercise: Omit<Exercise, 'id'>): Promise<string> {
     try {
-      const docRef = await addDoc(collection(db, 'exercises'), exercise);
+      // Filtrar campos undefined para creación (no usar deleteField)
+      const filteredExercise = filterUndefinedFields(exercise);
+      const docRef = await addDoc(collection(db, ExerciseService.COLLECTION), filteredExercise);
       return docRef.id;
     } catch (error) {
       handleFirebaseError(error, 'crear ejercicio');
@@ -22,12 +56,14 @@ export class ExerciseService {
     }
   }
 
+
   /**
-   * Obtiene todos los ejercicios
+   * Obtiene todos los ejercicios almacenados en la colección de Firebase
+   * @returns Una promesa que resuelve a un arreglo de ejercicios
    */
   static async getAll(): Promise<Exercise[]> {
     try {
-      const querySnapshot = await getDocs(collection(db, 'exercises'));
+      const querySnapshot = await getDocs(collection(db, ExerciseService.COLLECTION));
       return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Exercise));
     } catch (error) {
       handleFirebaseError(error, 'obtener ejercicios');
@@ -35,24 +71,33 @@ export class ExerciseService {
     }
   }
 
+
   /**
    * Actualiza un ejercicio existente
+   * @param exerciseId ID del ejercicio a actualizar
+   * @param updates Actualizaciones parciales del ejercicio
+   * @throws Error si hay un problema al actualizar el ejercicio
    */
   static async update(exerciseId: string, updates: Partial<Exercise>): Promise<void> {
     try {
-      await updateDoc(doc(db, 'exercises', exerciseId), updates);
+      // Preparar actualizaciones para Firebase (incluyendo eliminación de campos)
+      const preparedUpdates = prepareUpdatesForFirebase(updates);
+      await updateDoc(doc(db, ExerciseService.COLLECTION, exerciseId), preparedUpdates);
     } catch (error) {
       handleFirebaseError(error, 'actualizar ejercicio');
       throw error; // Re-lanzar el error después de manejarlo
     }
   }
 
+
   /**
-   * Elimina un ejercicio
+   * Elimina un ejercicio de la colección de Firebase
+   * @param exerciseId ID del ejercicio a eliminar
+   * @throws Error si hay un problema al eliminar el ejercicio
    */
   static async delete(exerciseId: string): Promise<void> {
     try {
-      await deleteDoc(doc(db, 'exercises', exerciseId));
+      await deleteDoc(doc(db, ExerciseService.COLLECTION, exerciseId));
     } catch (error) {
       handleFirebaseError(error, 'eliminar ejercicio');
       throw error; // Re-lanzar el error después de manejarlo

@@ -7,9 +7,10 @@ import { doc, writeBatch } from 'firebase/firestore';
  * Servicio para operaciones de migración de datos
  */
 export class MigrationService {
+
   /**
-   * Migra ejercicios con campo 'category' (string) a 'categories' (array)
-   * Esta función actualiza la estructura de datos para soportar múltiples categorías
+   * Migrar ejercicios que tienen una categoría (string) a categorías múltiples (array)
+   * @returns Número de ejercicios actualizados
    */
   static async migrateExercisesToMultipleCategories(): Promise<number> {
     try {

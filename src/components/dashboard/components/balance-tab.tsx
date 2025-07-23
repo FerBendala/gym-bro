@@ -1,8 +1,8 @@
 import { getAllAssignments } from '@/api/services';
 import { Card, CardContent, CardHeader } from '@/components/card';
 import { InfoTooltip } from '@/components/tooltip';
-import { useNotification } from '@/context/notification-context';
 import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
+import { useNotification } from '@/stores/notification-store';
 import { formatNumber } from '@/utils/functions';
 import { analyzeMuscleBalance, calculateBalanceScore, calculateCategoryAnalysis } from '@/utils/functions/category-analysis';
 import { calculateTrendsAnalysis } from '@/utils/functions/trends-analysis';

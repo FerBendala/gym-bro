@@ -1,8 +1,8 @@
 import { migrateExercisesToMultipleCategories } from '@/api/services';
 import { ModernLayout, useModernNavigation } from '@/components/modern-ui';
 import { Notification } from '@/components/notification';
-import { NotificationProvider, useNotification } from '@/context/notification-context';
 import type { DayOfWeek } from '@/interfaces';
+import { useNotification } from '@/stores/notification-store';
 import { useEffect, useState } from 'react';
 import { ModernAdminPanel } from './admin-panel';
 import { ModernCalendar } from './calendar';
@@ -166,11 +166,7 @@ const ModernAppContent = () => {
 };
 
 const ModernApp = () => {
-  return (
-    <NotificationProvider>
-      <ModernAppContent />
-    </NotificationProvider>
-  );
+  return <ModernAppContent />;
 };
 
 export default ModernApp; 

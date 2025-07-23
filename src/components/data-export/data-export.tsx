@@ -1,8 +1,8 @@
 import { getExercises, getWorkoutRecords } from '@/api/services';
 import { MODERN_THEME } from '@/constants/modern-theme';
-import { useNotification } from '@/context/notification-context';
 import { useOnlineStatus } from '@/hooks';
 import type { Exercise, WorkoutRecord } from '@/interfaces';
+import { useNotification } from '@/stores/notification-store';
 import { cn } from '@/utils/functions';
 import {
   downloadFile,

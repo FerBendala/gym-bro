@@ -1,8 +1,8 @@
 import { createWorkoutRecord, getAssignmentsByDay, getExercises, getWorkoutRecords, updateAssignmentsOrder } from '@/api/services';
-import { useNotification } from '@/context/notification-context';
 import { useOnlineStatus } from '@/hooks';
 import type { DayOfWeek, ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
-import { getExercisesTrainedTodayForCurrentDay } from '@/utils/functions/date-filters';
+import { useNotification } from '@/stores/notification-store';
+import { getExercisesTrainedTodayForCurrentDay } from '@/utils/functions';
 import { useEffect, useState } from 'react';
 import type { UseExerciseListReturn } from '../types';
 
