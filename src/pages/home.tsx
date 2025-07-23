@@ -1,11 +1,11 @@
 import { ChevronDown } from 'lucide-react';
 import React, { useState } from 'react';
-import { ExerciseList } from '../../../components/exercise-list';
-import { ModernButton, ModernPage, ModernSection } from '../../../components/modern-ui';
-import { DAYS } from '../../../constants/days';
-import { MODERN_THEME } from '../../../constants/modern-theme';
-import type { DayOfWeek } from '../../../interfaces';
-import { cn } from '../../../utils/functions/style-utils';
+import { ExerciseList } from '../components/exercise-list';
+import { ModernButton, ModernPage, ModernSection } from '../components/modern-ui';
+import { DAYS } from '../constants/days';
+import { MODERN_THEME } from '../constants/modern-theme';
+import type { DayOfWeek } from '../interfaces';
+import { cn } from '../utils/functions/style-utils';
 
 interface ModernHomeProps {
   activeDay: DayOfWeek;

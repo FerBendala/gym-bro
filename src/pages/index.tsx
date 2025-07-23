@@ -1,15 +1,15 @@
 import { useEffect, useState } from 'react';
-import { migrateExercisesToMultipleCategories } from '../../api/database';
-import { ModernLayout, NavigationType, useModernNavigation } from '../../components/modern-ui';
-import { Notification } from '../../components/notification';
-import { NotificationProvider, useNotification } from '../../context/notification-context';
-import type { DayOfWeek } from '../../interfaces';
-import { ModernAdminPanel } from './pages/admin-panel';
-import { ModernCalendar } from './pages/calendar';
-import { ModernHome } from './pages/home';
-import { ModernProgress } from './pages/progress';
-import { ModernSettings } from './pages/settings';
-import { WorkoutHistory } from './pages/workout-history';
+import { migrateExercisesToMultipleCategories } from '../api/database';
+import { ModernLayout, NavigationType, useModernNavigation } from '../components/modern-ui';
+import { Notification } from '../components/notification';
+import { NotificationProvider, useNotification } from '../context/notification-context';
+import type { DayOfWeek } from '../interfaces';
+import { ModernAdminPanel } from './admin-panel';
+import { ModernCalendar } from './calendar';
+import { ModernHome } from './home';
+import { ModernProgress } from './progress';
+import { ModernSettings } from './settings';
+import { WorkoutHistory } from './workout-history';
 
 const ModernAppContent = () => {
   const { activeTab, navigateTo, goBack, canGoBack } = useModernNavigation('home');

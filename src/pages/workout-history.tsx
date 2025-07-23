@@ -1,19 +1,19 @@
 import { Calendar, Clock, Dumbbell, Edit, Filter, Search, Target, Trash2, TrendingDown, TrendingUp, X } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { deleteWorkoutRecord, getExercises, getWorkoutRecords, updateWorkoutRecord } from '../../../api/database';
-import { Button } from '../../../components/button';
-import { Card, CardContent } from '../../../components/card';
-import { DatePicker } from '../../../components/date-picker';
-import { Input } from '../../../components/input';
-import { LoadingSpinner } from '../../../components/loading-spinner';
-import { ModernPage, ModernSection } from '../../../components/modern-ui';
-import { Select } from '../../../components/select';
-import { EXERCISE_CATEGORIES, getCategoryColor, getCategoryIcon } from '../../../constants/exercise-categories';
-import { useNotification } from '../../../context/notification-context';
-import { useModalOverflow } from '../../../hooks';
-import type { Exercise, WorkoutRecord } from '../../../interfaces';
-import { formatNumber } from '../../../utils/functions';
+import { deleteWorkoutRecord, getExercises, getWorkoutRecords, updateWorkoutRecord } from '../api/database';
+import { Button } from '../components/button';
+import { Card, CardContent } from '../components/card';
+import { DatePicker } from '../components/date-picker';
+import { Input } from '../components/input';
+import { LoadingSpinner } from '../components/loading-spinner';
+import { ModernPage, ModernSection } from '../components/modern-ui';
+import { Select } from '../components/select';
+import { EXERCISE_CATEGORIES, getCategoryColor, getCategoryIcon } from '../constants/exercise-categories';
+import { useNotification } from '../context/notification-context';
+import { useModalOverflow } from '../hooks';
+import type { Exercise, WorkoutRecord } from '../interfaces';
+import { formatNumber } from '../utils/functions';
 
 interface WorkoutHistoryProps {
   initialFilter?: {

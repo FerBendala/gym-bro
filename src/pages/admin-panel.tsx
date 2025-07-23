@@ -1,7 +1,7 @@
 import React from 'react';
-import { AdminPanel } from '../../../components/admin-panel';
-import { ModernPage } from '../../../components/modern-ui';
-import { MODERN_THEME } from '../../../constants/modern-theme';
+import { AdminPanel } from '../components/admin-panel';
+import { ModernPage } from '../components/modern-ui';
+import { MODERN_THEME } from '../constants/modern-theme';
 
 interface ModernAdminPanelProps {
   isModal?: boolean;
