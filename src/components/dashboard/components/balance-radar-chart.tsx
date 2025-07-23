@@ -12,7 +12,6 @@ interface BalanceRadarChartProps {
   balanceLevel: 'excellent' | 'good' | 'unbalanced' | 'critical';
 }
 
-// Gráfico de Balance Radar usando ApexCharts
 export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
   balanceScore,
   consistency,

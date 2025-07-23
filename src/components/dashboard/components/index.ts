@@ -5,8 +5,6 @@
 
 export { AdvancedTab } from './advanced-tab';
 export { BalanceByGroupContent } from './balance-by-group-content';
-export { BalanceChart } from './balance-chart';
-export { BalanceMetrics } from './balance-metrics';
 export { BalanceRadarChart } from './balance-radar-chart';
 export { BalanceTab } from './balance-tab';
 export { CategoryDashboardChart } from './category-dashboard-chart';
