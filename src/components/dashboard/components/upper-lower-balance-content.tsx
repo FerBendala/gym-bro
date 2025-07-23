@@ -119,7 +119,7 @@ const UpperLowerBalanceContent: React.FC<UpperLowerBalanceContentProps> = ({
 
           const totalFrequency = categoryMetrics.reduce((sum: number, m: any) => sum + (m.avgWorkoutsPerWeek || 0), 0) / Math.max(1, categoryMetrics.length);
           const avgIntensity = categoryMetrics.reduce((sum: number, m: any) => sum + (m.intensityScore || 0), 0) / Math.max(1, categoryMetrics.length);
-          const totalRecords = categoryMetrics.reduce((sum: number, m: any) => sum + (m.personalRecords?.length || 0), 0);
+          const totalRecords = categoryMetrics.reduce((sum: number, m: any) => sum + (m.personalRecords || 0), 0);
           const avgStrength = categoryMetrics.reduce((sum: number, m: any) => sum + (m.progressTrend?.strength || 0), 0) / Math.max(1, categoryMetrics.length);
 
           // Determinar tendencia general basada en muscleBalance (más confiable)

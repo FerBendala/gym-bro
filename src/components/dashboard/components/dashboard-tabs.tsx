@@ -1,12 +1,9 @@
 import React from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
+import { AdvancedTab, ExercisesTab, HistoryTab, PredictionsTab } from '../content';
 import type { DashboardTab } from '../types';
-import { AdvancedTab } from './advanced-tab';
 import { BalanceTab } from './balance-tab';
 import { DashboardTabNavigation } from './dashboard-tab-navigation';
-import { ExercisesTab } from './exercises-tab';
-import { HistoryTab } from './history-tab';
-import { PredictionsTab } from './predictions-tab';
 
 interface DashboardTabsProps {
   records: WorkoutRecord[];
@@ -41,6 +38,7 @@ export const DashboardTabs: React.FC<DashboardTabsProps> = ({
       <DashboardTabNavigation
         activeTab={activeTab}
         onTabChange={onTabChange}
+        timeFilterLabel="Últimos 30 días"
       />
 
       <div className="bg-gradient-to-br from-gray-800/30 to-gray-700/30 rounded-xl border border-gray-600/30 p-5 hover:border-gray-500/50 transition-colors duration-200">

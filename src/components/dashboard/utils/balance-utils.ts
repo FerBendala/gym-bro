@@ -79,7 +79,7 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]) => {
       isBalanced: balance.isBalanced,
       priorityLevel: balance.priorityLevel,
       progressTrend: balance.progressTrend,
-      personalRecords: 0, // Se calculará después si es necesario
+      personalRecords: categoryAnalysis.categoryMetrics.find(m => m.category === balance.category)?.personalRecords || 0,
       balanceHistory: balance.balanceHistory
     })),
     categoryAnalysis,

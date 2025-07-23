@@ -2,15 +2,17 @@ import React, { useState } from 'react';
 import { LoadingSpinner } from '../loading-spinner';
 import { OfflineWarning } from '../offline-warning';
 import {
-  AdvancedTab,
   BalanceTab,
   DashboardEmptyState,
-  DashboardTabNavigation,
+  DashboardTabNavigation
+} from './components';
+import { DEFAULT_DASHBOARD_TAB } from './constants';
+import {
+  AdvancedTab,
   ExercisesTab,
   HistoryTab,
   PredictionsTab
-} from './components';
-import { DEFAULT_DASHBOARD_TAB } from './constants';
+} from './content';
 import { useDashboardData } from './hooks';
 import type { DashboardTab } from './types';
 
