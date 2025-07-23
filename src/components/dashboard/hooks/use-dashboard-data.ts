@@ -25,15 +25,42 @@ export const useDashboardData = () => {
         getExercises()
       ]);
 
+      console.log('📊 Dashboard Data Debug:', {
+        recordsCount: recordsData.length,
+        exercisesCount: exercisesData.length,
+        sampleRecord: recordsData[0],
+        sampleExercise: exercisesData[0]
+      });
+
       // Enriquecer los registros con información del ejercicio
-      const enrichedRecords = recordsData.map(record => ({
-        ...record,
-        exercise: exercisesData.find(ex => ex.id === record.exerciseId)
-      }));
+      const enrichedRecords = recordsData.map(record => {
+        const exercise = exercisesData.find(ex => ex.id === record.exerciseId);
+
+        if (!exercise) {
+          console.warn(`⚠️ Ejercicio no encontrado para record ${record.id} con exerciseId: ${record.exerciseId}`);
+        }
+
+        return {
+          ...record,
+          exercise
+        };
+      });
+
+      // Verificar enriquecimiento
+      const recordsWithExercise = enrichedRecords.filter(r => r.exercise);
+      const recordsWithoutExercise = enrichedRecords.filter(r => !r.exercise);
+
+      console.log('🔍 Enriquecimiento de datos:', {
+        totalRecords: enrichedRecords.length,
+        withExercise: recordsWithExercise.length,
+        withoutExercise: recordsWithoutExercise.length,
+        sampleEnriched: enrichedRecords[0]
+      });
 
       setWorkoutRecords(enrichedRecords);
       setExercises(exercisesData);
     } catch (error: any) {
+      console.error('❌ Error cargando datos del dashboard:', error);
       showNotification(error.message || 'Error al cargar los datos del dashboard', 'error');
     } finally {
       setLoading(false);
