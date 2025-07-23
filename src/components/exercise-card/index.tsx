@@ -13,13 +13,19 @@ import type { ExerciseCardProps } from './types';
 /**
  * Componente principal del ExerciseCard
  * Orquesta los subcomponentes y maneja la lógica principal
- * Adaptado con el diseño visual del balance muscular de referencia
  */
 interface ExerciseCardWithRecordsProps extends ExerciseCardProps {
   workoutRecords: WorkoutRecord[];
 }
 
-export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignment, onRecord, disabled = false, isTrainedToday = false, workoutRecords, onGoToHistory }) => {
+export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({
+  assignment,
+  onRecord,
+  disabled = false,
+  isTrainedToday = false,
+  workoutRecords,
+  onGoToHistory
+}) => {
   const {
     showModal,
     loading,
@@ -38,7 +44,6 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignmen
     await handleSubmit(assignment.id, data, onRecord);
   };
 
-  // Obtener la primera categoría para determinar el color
   const primaryCategory = assignment.exercise?.categories?.[0] || 'Pecho';
   const colorGradient = getCategoryColor(primaryCategory);
 
@@ -81,7 +86,7 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({ assignmen
             </div>
           )}
 
-          {/* Warning de conexión usando componente genérico */}
+          {/* Warning de conexión */}
           {disabled && (
             <OfflineWarning
               message="Sin conexión. No se pueden registrar entrenamientos."
