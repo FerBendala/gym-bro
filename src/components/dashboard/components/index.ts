@@ -9,6 +9,7 @@ export { BalanceChart } from './balance-chart';
 export { BalanceMetrics } from './balance-metrics';
 export { BalanceRadarChart } from './balance-radar-chart';
 export { BalanceTab } from './balance-tab';
+export { CategoryDashboardChart } from './category-dashboard-chart';
 export { DashboardEmptyState } from './dashboard-empty-state';
 export { DashboardHeader } from './dashboard-header';
 export { DashboardTabNavigation } from './dashboard-tab-navigation';
