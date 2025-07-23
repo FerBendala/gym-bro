@@ -29,14 +29,29 @@ export const useBalanceTab = (records: WorkoutRecord[]) => {
     return view;
   };
 
+  const scrollToCard = (cardId: string) => {
+    const element = document.getElementById(cardId);
+    if (element) {
+      element.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start',
+        inline: 'nearest'
+      });
+    }
+  };
+
   const handleBalanceItemClick = (itemName: string) => {
     console.log('Balance item clicked:', itemName);
-    // Aquí se puede agregar lógica adicional para manejar clicks en elementos del balance
+    // Scroll suave al elemento correspondiente
+    const cardId = `balance-card-${itemName.toLowerCase().replace(/\s+/g, '-')}`;
+    scrollToCard(cardId);
   };
 
   const handleUpperLowerItemClick = (itemName: string) => {
     console.log('Upper/Lower item clicked:', itemName);
-    // Aquí se puede agregar lógica adicional para manejar clicks en elementos upper/lower
+    // Scroll suave al elemento correspondiente
+    const cardId = `balance-card-${itemName.toLowerCase().replace(/\s+/g, '-')}`;
+    scrollToCard(cardId);
   };
 
   return {
@@ -45,6 +60,7 @@ export const useBalanceTab = (records: WorkoutRecord[]) => {
     ...balanceData,
     handleViewChange,
     handleBalanceItemClick,
-    handleUpperLowerItemClick
+    handleUpperLowerItemClick,
+    scrollToCard
   };
 }; 

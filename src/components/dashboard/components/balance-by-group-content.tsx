@@ -80,7 +80,7 @@ export const BalanceByGroupContent: React.FC<BalanceByGroupContentProps> = ({
       <CardContent>
         <HorizontalBarChart
           data={muscleBalance
-            .filter(balance => balance.volume && balance.volume > 0)
+            .filter(balance => balance.totalVolume > 0)
             .map(balance => ({
               name: balance.category,
               value: balance.percentage,
@@ -101,7 +101,7 @@ export const BalanceByGroupContent: React.FC<BalanceByGroupContentProps> = ({
     {/* Grid de métricas por categoría con gráficos intuitivos universales */}
     <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
       {muscleBalance
-        .filter(balance => (balance.volume && balance.volume > 0) || balance.priorityLevel === 'critical')
+        .filter(balance => balance.totalVolume > 0 || balance.priorityLevel === 'critical')
         .map((balance) => {
           const Icon = getCategoryIcon(balance.category);
           const colorGradient = getCategoryColor(balance.category);
@@ -118,7 +118,7 @@ export const BalanceByGroupContent: React.FC<BalanceByGroupContentProps> = ({
                   <div className="min-w-0 flex-1">
                     <h4 className="font-bold text-white text-base lg:text-lg truncate">{balance.category}</h4>
                     <div className="text-xs lg:text-sm text-gray-400">
-                      {formatNumber(safeNumber(balance.volume, 0), 0)} kg total • {formatSafePercentage(balance.percentage)} del volumen
+                      {formatNumber(balance.totalVolume, 0)} kg total • {formatSafePercentage(balance.percentage)} del volumen
                     </div>
                   </div>
                 </div>
