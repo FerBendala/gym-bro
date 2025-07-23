@@ -1,7 +1,7 @@
 import { WifiOff } from 'lucide-react';
 import React from 'react';
 import { getCategoryColor } from '../../constants/exercise-categories';
-import type { WorkoutRecord } from '../../interfaces';
+import type { WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '../../interfaces';
 import { Card, CardContent } from '../card';
 import { OfflineWarning } from '../offline-warning';
 import { URLPreview } from '../url-preview';
@@ -40,7 +40,7 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({
     lastWorkoutSeries,
   } = useExerciseCard(assignment.exerciseId, assignment.exercise, workoutRecords);
 
-  const onSubmitForm = async (data: any) => {
+  const onSubmitForm = async (data: WorkoutFormData | WorkoutFormDataAdvanced) => {
     await handleSubmit(assignment.id, data, onRecord);
   };
 

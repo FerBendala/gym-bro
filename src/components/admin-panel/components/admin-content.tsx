@@ -1,4 +1,4 @@
-import { useAdminStore } from '@/stores/admin-store';
+import { useAdminStore } from '@/stores/admin';
 import React from 'react';
 import type { AdminPanelTab } from '../types';
 import { ExerciseAssignments } from './exercise-assignments';
@@ -14,7 +14,12 @@ export const AdminContent: React.FC<AdminContentProps> = ({
   activeTab,
   isModal = false
 }) => {
-  const { editingExercise, setEditingExercise, setPreviewUrl } = useAdminStore();
+  // Usar selectores específicos para acceder al estado correctamente
+  const editingExercise = useAdminStore((state) => state.adminPanel.editingExercise);
+  const setEditingExercise = useAdminStore((state) => state.setEditingExercise);
+  const setPreviewUrl = useAdminStore((state) => state.setPreviewUrl);
+
+  console.log('🎯 AdminContent - Renderizando:', { activeTab, isModal, editingExercise });
 
   const content = (
     <div className="space-y-6">

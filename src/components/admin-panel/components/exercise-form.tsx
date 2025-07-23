@@ -4,7 +4,7 @@ import {
 } from '@/api/services';
 import { useOnlineStatus } from '@/hooks';
 import type { Exercise } from '@/interfaces';
-import { useAdminStore } from '@/stores/admin-store';
+import { useAdminStore } from '@/stores/admin';
 import { useNotification } from '@/stores/notification-store';
 import { Plus, Save, XCircle } from 'lucide-react';
 import React from 'react';
@@ -31,14 +31,15 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
   const isOnline = useOnlineStatus();
   const { showNotification } = useNotification();
 
-  const {
-    editingExercise,
-    setEditingExercise,
-    setLoading,
-    setError,
-    addExercise,
-    updateExerciseInStore
-  } = useAdminStore();
+  console.log('📝 ExerciseForm - Renderizando formulario:', { exercise, isOnline });
+
+  // Usar selectores específicos para acceder al estado correctamente
+  const editingExercise = useAdminStore((state) => state.adminPanel.editingExercise);
+  const setEditingExercise = useAdminStore((state) => state.setEditingExercise);
+  const setLoading = useAdminStore((state) => state.setLoading);
+  const setError = useAdminStore((state) => state.setError);
+  const addExercise = useAdminStore((state) => state.addExercise);
+  const updateExerciseInStore = useAdminStore((state) => state.updateExerciseInStore);
 
   const handleFormSubmit = async (data: ExerciseFormData) => {
     if (!isOnline) {

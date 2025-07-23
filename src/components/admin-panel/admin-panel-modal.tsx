@@ -1,7 +1,7 @@
 import { URLPreview } from '@/components/url-preview';
 import { useAdminDataLoader, useModalOverflow, useOnlineStatus } from '@/hooks';
-import { useAdminStore } from '@/stores/admin-store';
-import React from 'react';
+import { useAdminStore } from '@/stores/admin';
+import React, { useEffect } from 'react';
 import { AdminContent, AdminHeader, AdminTabs } from './components';
 import type { AdminPanelProps } from './types';
 
@@ -19,15 +19,20 @@ export const AdminPanelModal: React.FC<AdminPanelProps> = ({ onClose }) => {
   // Hook para cargar datos iniciales
   useAdminDataLoader();
 
-  const {
-    // Estado de UI
-    activeTab,
-    previewUrl,
+  // Usar selectores específicos para acceder al estado correctamente
+  const activeTab = useAdminStore((state) => state.adminPanel.activeTab);
+  const previewUrl = useAdminStore((state) => state.adminPanel.previewUrl);
+  const setTab = useAdminStore((state) => state.setTab);
+  const setPreviewUrl = useAdminStore((state) => state.setPreviewUrl);
 
-    // Acciones de UI
-    setTab,
-    setPreviewUrl,
-  } = useAdminStore();
+  console.log('🎯 AdminPanelModal - Estado del store:', { activeTab, previewUrl });
+  console.log('🎯 AdminPanelModal - Tipo de activeTab:', typeof activeTab);
+  console.log('🎯 AdminPanelModal - activeTab === undefined:', activeTab === undefined);
+
+  // Log de verificación
+  useEffect(() => {
+    console.log('🎯 AdminPanelModal - activeTab actualizado:', activeTab);
+  }, [activeTab]);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {

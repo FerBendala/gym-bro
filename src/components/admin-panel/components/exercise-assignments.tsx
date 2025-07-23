@@ -1,5 +1,5 @@
 import { useOnlineStatus } from '@/hooks';
-import { useAdminStore } from '@/stores/admin-store';
+import { useAdminStore } from '@/stores/admin';
 import React from 'react';
 import { DAYS } from '../../../constants/days';
 import { Button } from '../../button';
@@ -15,12 +15,11 @@ import { AssignmentItem } from './assignment-item';
 export const ExerciseAssignments: React.FC = () => {
   const isOnline = useOnlineStatus();
 
-  const {
-    selectedDay,
-    setSelectedDay,
-    setPreviewUrl,
-    getAssignmentsByDay
-  } = useAdminStore();
+  // Usar selectores específicos para acceder al estado correctamente
+  const selectedDay = useAdminStore((state) => state.adminPanel.selectedDay);
+  const setSelectedDay = useAdminStore((state) => state.setSelectedDay);
+  const setPreviewUrl = useAdminStore((state) => state.setPreviewUrl);
+  const getAssignmentsByDay = useAdminStore((state) => state.getAssignmentsByDay);
 
   const assignments = getAssignmentsByDay(selectedDay);
 

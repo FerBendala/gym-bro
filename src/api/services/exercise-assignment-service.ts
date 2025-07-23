@@ -33,6 +33,12 @@ export class ExerciseAssignmentService {
    */
   static async getByDay(dayOfWeek: DayOfWeek): Promise<ExerciseAssignment[]> {
     try {
+      // Validar que dayOfWeek no sea undefined o null
+      if (!dayOfWeek) {
+        console.warn('⚠️ dayOfWeek es undefined o null, usando valor por defecto');
+        return [];
+      }
+
       const q = query(
         collection(db, ExerciseAssignmentService.COLLECTION),
         where('dayOfWeek', '==', dayOfWeek)

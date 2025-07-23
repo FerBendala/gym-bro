@@ -13,7 +13,6 @@ import { WorkoutHistory } from './workout-history';
 
 const ModernAppContent = () => {
   const { activeTab, navigateTo, goBack, canGoBack } = useModernNavigation('home');
-  const [activeDay, setActiveDay] = useState<DayOfWeek>('lunes');
   const [showAdmin, setShowAdmin] = useState(false);
   const { showNotification } = useNotification();
 
@@ -53,7 +52,7 @@ const ModernAppContent = () => {
   }, [activeTab]);
 
   // Obtener información del día actual
-  const getCurrentDayInfo = () => {
+  const getCurrentDayInfo = (): DayOfWeek => {
     const today = new Date().toLocaleDateString('es-ES', { weekday: 'long' }).toLowerCase();
     const dayMap: Record<string, DayOfWeek> = {
       'lunes': 'lunes',
@@ -67,11 +66,8 @@ const ModernAppContent = () => {
     return dayMap[today] || 'lunes';
   };
 
-  // Auto-seleccionar el día actual al cargar
-  useEffect(() => {
-    const currentDay = getCurrentDayInfo();
-    setActiveDay(currentDay);
-  }, []);
+  // Inicializar activeDay con el día actual desde el inicio
+  const [activeDay, setActiveDay] = useState<DayOfWeek>(() => getCurrentDayInfo());
 
   // Función para obtener el título y subtítulo según la pestaña activa
   const getPageInfo = (): { title: string; subtitle?: string } => {

@@ -1,5 +1,5 @@
 import { useOnlineStatus } from '@/hooks';
-import { useAdminStore } from '@/stores/admin-store';
+import { useAdminStore } from '@/stores/admin';
 import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader } from '../../card';
 import type { ExerciseCategory } from '../types';
@@ -16,6 +16,9 @@ export const ExerciseList: React.FC = () => {
   const isOnline = useOnlineStatus();
   const exercises = useAdminStore((state) => state.exercises);
   const setPreviewUrl = useAdminStore((state) => state.setPreviewUrl);
+
+  console.log('📋 ExerciseList - Renderizando con ejercicios:', exercises);
+  console.log('📋 ExerciseList - Longitud de ejercicios:', exercises?.length);
 
   const [selectedCategory, setSelectedCategory] = useState<ExerciseCategory>('all');
 

@@ -1,4 +1,4 @@
-import { useAdminStore } from '@/stores/admin-store';
+import { useAdminStore } from '@/stores/admin';
 import { AlertTriangle, Wifi, WifiOff } from 'lucide-react';
 import React from 'react';
 import { useAdminDataLoader, useOnlineStatus } from '../../hooks';

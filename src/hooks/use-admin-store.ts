@@ -8,7 +8,7 @@ import {
   updateExercise
 } from '@/api/services';
 import type { ExerciseFormData } from '@/components/admin-panel/types';
-import { useAdminStore } from '@/stores/admin-store';
+import { useAdminStore } from '@/stores/admin';
 import { useNotification } from '@/stores/notification-store';
 import { useCallback, useEffect } from 'react';
 import { useOnlineStatus } from './use-online-status';

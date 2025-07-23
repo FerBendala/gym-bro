@@ -28,6 +28,13 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
       return;
     }
 
+    // Validar que dayOfWeek sea válido antes de hacer la consulta
+    if (!dayOfWeek) {
+      console.warn('⚠️ dayOfWeek es undefined, saltando carga de asignaciones');
+      setLoading(false);
+      return;
+    }
+
     setLoading(true);
     try {
       const [assignmentsData, exercisesData, workoutRecords] = await Promise.all([

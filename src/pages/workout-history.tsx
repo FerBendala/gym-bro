@@ -416,7 +416,7 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
 
   // Filtrar y ordenar records
   const filteredAndSortedRecords = useMemo(() => {
-    let filtered = records.filter(record => {
+    const filtered = records.filter(record => {
       // Filtro por término de búsqueda
       if (searchTerm && !record.exercise?.name.toLowerCase().includes(searchTerm.toLowerCase())) {
         return false;

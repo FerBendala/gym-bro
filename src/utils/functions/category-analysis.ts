@@ -364,7 +364,7 @@ const calculateWeightProgression = (categoryRecords: WorkoutRecord[], targetCate
     allAssignments // Pasar asignaciones para detectar patrón
   );
 
-  let densityProgression = normalizedFirstHalf > 0 ? ((normalizedSecondHalf - normalizedFirstHalf) / normalizedFirstHalf) * 100 : 0;
+  const densityProgression = normalizedFirstHalf > 0 ? ((normalizedSecondHalf - normalizedFirstHalf) / normalizedFirstHalf) * 100 : 0;
 
   // **DEBUG**: Log para verificar la normalización
   if (categoryName === 'Pecho' || categoryName === 'Espalda' || categoryName === 'Piernas') {
@@ -521,7 +521,7 @@ const calculateVolumeProgression = (categoryRecords: WorkoutRecord[], targetCate
     categoryRecords // Pasar registros para detectar patrón
   );
 
-  let densityProgression = normalizedFirstHalf > 0 ? ((normalizedSecondHalf - normalizedFirstHalf) / normalizedFirstHalf) * 100 : 0;
+  const densityProgression = normalizedFirstHalf > 0 ? ((normalizedSecondHalf - normalizedFirstHalf) / normalizedFirstHalf) * 100 : 0;
 
   // **DEBUG**: Log para verificar la normalización
   if (categoryName === 'Pecho' || categoryName === 'Espalda' || categoryName === 'Piernas') {

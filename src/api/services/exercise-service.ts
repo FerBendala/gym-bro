@@ -63,9 +63,13 @@ export class ExerciseService {
    */
   static async getAll(): Promise<Exercise[]> {
     try {
+      console.log('🔥 ExerciseService.getAll - Iniciando consulta a Firebase');
       const querySnapshot = await getDocs(collection(db, ExerciseService.COLLECTION));
-      return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Exercise));
+      const exercises = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Exercise));
+      console.log('🔥 ExerciseService.getAll - Ejercicios obtenidos:', exercises);
+      return exercises;
     } catch (error) {
+      console.error('🔥 ExerciseService.getAll - Error:', error);
       handleFirebaseError(error, 'obtener ejercicios');
       return []; // Fallback para evitar crashes
     }

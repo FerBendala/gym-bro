@@ -1,11 +1,11 @@
 import { BarChart3, Brain, PieChart, Scale } from 'lucide-react';
 import React from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
+import { UpperLowerBalanceContent } from '../../dashboard-upper-lower-balance-content';
 import { useBalanceTab } from '../hooks/use-balance-tab';
 import { BalanceByGroupContent } from './balance-by-group-content';
 import { GeneralContent } from './general-content';
 import { TrendsContent } from './trends-content';
-import { UpperLowerBalanceContent } from './upper-lower-balance-content';
 
 interface BalanceTabProps {
   records: WorkoutRecord[];

@@ -32,6 +32,12 @@ export const useAssignments = (selectedDay: DayOfWeek, exercises: Exercise[], is
   const loadAssignments = useCallback(async () => {
     if (!isOnline) return;
 
+    // Validar que selectedDay sea válido antes de hacer la consulta
+    if (!selectedDay) {
+      console.warn('⚠️ selectedDay es undefined en useAssignments, saltando carga');
+      return;
+    }
+
     try {
       const assignmentsData = await getAssignmentsByDay(selectedDay);
       const assignmentsWithExercises = assignmentsData.map((assignment: ExerciseAssignment) => ({

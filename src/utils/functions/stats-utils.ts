@@ -858,7 +858,7 @@ const calculateQualityMetrics = (sortedRecords: WorkoutRecord[]): AdvancedStreng
   const volumeOptimization = avgVolume > 0 ? Math.min(100, (avgStrength / avgVolume) * 100) : 0;
 
   // Indicadores de recuperación (basado en progresión después de descansos)
-  let recoveryScore = 50; // Base neutral
+  const recoveryScore = 50; // Base neutral
 
   // Analizar patrones de recuperación sería más complejo y requeriría datos de descanso
   // Por ahora, usamos la consistencia de progresión como proxy
