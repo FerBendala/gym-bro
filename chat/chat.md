@@ -9,16 +9,18 @@
 - Las importaciones absolutas se hacen usando "@".
 - Añade index.ts para exportar el componente principal.
 
-estructura esperada:  
-|- Componente  
- |-- components  
- |-- hooks  
- |-- utils  
- |-- Componente.tsx  
- |-- types.ts (opcional)  
- |-- constants.ts (opcional)  
+```plain-text
+estructura esperada:
+|- Componente
+ |-- components
+ |-- hooks
+ |-- utils
+ |-- Componente.tsx
+ |-- types.ts (opcional)
+ |-- constants.ts (opcional)
  |-- index.ts
+```
 
-⸻
-
-No añadas carpetas extra ni mezcles lógica que no corresponda. Todo debe ser escalable y mantenible.
+✅ No añadas carpetas extra ni mezcles lógica que no corresponda. Todo debe ser escalable y mantenible.
+✅ Elimina archivos o código no usado.
+✅ Corrige todos los errores de linter.
