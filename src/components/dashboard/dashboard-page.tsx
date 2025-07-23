@@ -5,6 +5,7 @@ import {
   AdvancedTab,
   BalanceTab,
   DashboardEmptyState,
+  DashboardTabNavigation,
   ExercisesTab,
   HistoryTab,
   PredictionsTab
@@ -60,31 +61,10 @@ export const DashboardPage: React.FC = () => {
       )}
 
       {/* Navegación de tabs moderna */}
-      <div className="flex space-x-1 bg-gray-800/50 p-1 rounded-lg overflow-x-auto">
-        {[
-          { id: 'balance', label: 'Balance', icon: '⚖️' },
-          { id: 'history', label: 'Historial', icon: '📊' },
-          { id: 'exercises', label: 'Ejercicios', icon: '💪' },
-          { id: 'advanced', label: 'Avanzado', icon: '🔬' },
-          { id: 'predictions', label: 'Predicciones', icon: '🔮' }
-        ].map((tab) => {
-          const isActive = activeTab === tab.id;
-
-          return (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as DashboardTab)}
-              className={`flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 whitespace-nowrap ${isActive
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-                }`}
-            >
-              <span>{tab.icon}</span>
-              <span>{tab.label}</span>
-            </button>
-          );
-        })}
-      </div>
+      <DashboardTabNavigation
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+      />
 
       {/* Contenido principal */}
       {renderTabContent()}

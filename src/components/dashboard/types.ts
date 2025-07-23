@@ -17,13 +17,15 @@ export interface DashboardProps {
 }
 
 export interface DashboardHeaderProps {
-  timeFilterLabel: string;
   activeTab: DashboardTab;
   onTabChange: (tab: DashboardTab) => void;
   onClose: () => void;
 }
 
-
+export interface DashboardTabNavigationProps {
+  activeTab: DashboardTab;
+  onTabChange: (tab: DashboardTab) => void;
+}
 
 export interface DashboardEmptyStateProps {
   isOnline: boolean;

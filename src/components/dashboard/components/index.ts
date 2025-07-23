@@ -10,6 +10,7 @@ export { BalanceMetrics } from './balance-metrics';
 export { BalanceTab } from './balance-tab';
 export { DashboardEmptyState } from './dashboard-empty-state';
 export { DashboardHeader } from './dashboard-header';
+export { DashboardTabNavigation } from './dashboard-tab-navigation';
 export { DashboardTabs } from './dashboard-tabs';
 export { ExercisesTab } from './exercises-tab';
 export { GeneralContent } from './general-content';
