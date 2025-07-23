@@ -1,12 +1,24 @@
-componentiza este componente, los archivos tienen muchos archivos y mucha logica, ha de cumplir un mínimo de estándares, max 80 - 120 lineas, hooks, utils dentro de la misma carpeta siempre que afecten al propio componente. solo puede haber una carpeta de componentes, hooks y utils. Recuerda que tenemos zustand para los estados
-recuerda no crear otras carpetas a las mencionadas manteniendo la logica de la aquitectura simple
+# Componentiza este componente siguiendo estos criterios
 
-esta es la arquitectura que espero:
-|- componente
-|-- components
-|-- hooks
-|-- utils
-|-- componente.tsx
-|-- types.ts (opcional)
-|-- constants.ts (opcional)
-|-- index.ts
+- El componente principal debe tener entre 80 y 120 líneas máximo.
+- Divide la lógica en subcomponentes, hooks y utils, siempre dentro de la misma carpeta del componente.
+- Solo puede haber una carpeta components, una carpeta hooks y una carpeta utils dentro de cada carpeta de componente.
+- Si necesitas tipos o constantes, usa types.ts y constants.ts dentro de la carpeta del componente.
+- Mantén la lógica simple y modular, sin crear más carpetas aparte de las mencionadas.
+- Si necesitas estado global/local, recuerda que usamos Zustand.
+- Las importaciones absolutas se hacen usando "@".
+- Añade index.ts para exportar el componente principal.
+
+estructura esperada:  
+|- Componente  
+ |-- components  
+ |-- hooks  
+ |-- utils  
+ |-- Componente.tsx  
+ |-- types.ts (opcional)  
+ |-- constants.ts (opcional)  
+ |-- index.ts
+
+⸻
+
+No añadas carpetas extra ni mezcles lógica que no corresponda. Todo debe ser escalable y mantenible.
