@@ -50,7 +50,7 @@ export const useBalanceTab = (records: WorkoutRecord[]) => {
   const handleUpperLowerItemClick = (itemName: string) => {
     console.log('Upper/Lower item clicked:', itemName);
     // Scroll suave al elemento correspondiente
-    const cardId = `balance-card-${itemName.toLowerCase().replace(/\s+/g, '-')}`;
+    const cardId = `upper-lower-card-${itemName.toLowerCase().replace(/\s+/g, '-')}`;
     scrollToCard(cardId);
   };
 

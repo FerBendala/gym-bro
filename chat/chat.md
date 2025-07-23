@@ -9,8 +9,8 @@
 - Las importaciones absolutas se hacen usando "@".
 - Añade index.ts para exportar el componente principal.
 
-```plain-text
-estructura esperada:
+```plaintext
+Estructura esperada:
 |- Componente
  |-- components
  |-- hooks
