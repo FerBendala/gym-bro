@@ -1,4 +1,4 @@
-import type { DayOfWeek, Exercise, ExerciseAssignment } from '../../interfaces';
+import type { DayOfWeek, Exercise, ExerciseAssignment } from '@/interfaces';
 
 export type ExerciseCategory = 'all' | string;
 export type AdminPanelTab = 'exercises' | 'assignments';

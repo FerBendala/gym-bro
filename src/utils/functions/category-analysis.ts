@@ -2543,7 +2543,7 @@ export const calculateRecentCategoryMetrics = (
 export const getAssignmentsForAnalysis = async (): Promise<ExerciseAssignment[]> => {
   try {
     // Importar dinámicamente para evitar dependencias circulares
-    const { getAllAssignments } = await import('../../api/database');
+    const { getAllAssignments } = await import('@/api/services');
     return await getAllAssignments();
   } catch (error) {
     console.error('Error obteniendo asignaciones para análisis:', error);

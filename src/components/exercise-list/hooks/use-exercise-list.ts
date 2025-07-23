@@ -1,9 +1,9 @@
+import { createWorkoutRecord, getAssignmentsByDay, getExercises, getWorkoutRecords, updateAssignmentsOrder } from '@/api/services';
+import { useNotification } from '@/context/notification-context';
+import { useOnlineStatus } from '@/hooks';
+import type { DayOfWeek, ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
+import { getExercisesTrainedTodayForCurrentDay } from '@/utils/functions/date-filters';
 import { useEffect, useState } from 'react';
-import { createWorkoutRecord, getAssignmentsByDay, getExercises, getWorkoutRecords, updateAssignmentsOrder } from '../../../api/database';
-import { useNotification } from '../../../context/notification-context';
-import { useOnlineStatus } from '../../../hooks';
-import type { DayOfWeek, ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced } from '../../../interfaces';
-import { getExercisesTrainedTodayForCurrentDay } from '../../../utils/functions/date-filters';
 import type { UseExerciseListReturn } from '../types';
 
 // Evento personalizado para escuchar cambios de datos

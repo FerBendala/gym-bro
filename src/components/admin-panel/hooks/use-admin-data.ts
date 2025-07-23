@@ -1,4 +1,3 @@
-import { useCallback, useEffect, useState } from 'react';
 import {
   createExercise,
   createExerciseAssignment,
@@ -7,9 +6,10 @@ import {
   getAssignmentsByDay,
   getExercises,
   updateExercise
-} from '../../../api/database';
-import { useNotification } from '../../../context/notification-context';
-import type { DayOfWeek, Exercise, ExerciseAssignment } from '../../../interfaces';
+} from '@/api/services';
+import { useNotification } from '@/context/notification-context';
+import type { DayOfWeek, Exercise, ExerciseAssignment } from '@/interfaces';
+import { useCallback, useEffect, useState } from 'react';
 import type { ExerciseFormData } from '../types';
 
 // Evento personalizado para notificar cambios en datos

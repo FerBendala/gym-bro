@@ -1,3 +1,11 @@
+import { getAllAssignments } from '@/api/services';
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
+import { useNotification } from '@/context/notification-context';
+import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
+import { formatNumber } from '@/utils/functions';
+import { analyzeMuscleBalance, calculateBalanceScore, calculateCategoryAnalysis } from '@/utils/functions/category-analysis';
+import { calculateTrendsAnalysis } from '@/utils/functions/trends-analysis';
 import type { ApexOptions } from 'apexcharts';
 import {
   Activity,
@@ -20,14 +28,6 @@ import {
 } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import Chart from 'react-apexcharts';
-import { getAllAssignments } from '../../../api/database';
-import { useNotification } from '../../../context/notification-context';
-import { ExerciseAssignment, WorkoutRecord } from '../../../interfaces';
-import { formatNumber } from '../../../utils/functions';
-import { analyzeMuscleBalance, calculateBalanceScore, calculateCategoryAnalysis } from '../../../utils/functions/category-analysis';
-import { calculateTrendsAnalysis } from '../../../utils/functions/trends-analysis';
-import { Card, CardContent, CardHeader } from '../../card';
-import { InfoTooltip } from '../../tooltip';
 
 interface BalanceTabProps {
   records: WorkoutRecord[];

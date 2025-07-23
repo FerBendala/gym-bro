@@ -1,13 +1,13 @@
+import { getWorkoutRecords } from '@/api/services';
+import { LoadingSpinner } from '@/components/loading-spinner';
+import { ModernPage, ModernSection } from '@/components/modern-ui';
+import { InfoTooltip } from '@/components/tooltip';
+import { WorkoutCalendar } from '@/components/workout-calendar';
+import type { WorkoutRecord } from '@/interfaces';
+import { formatNumber } from '@/utils/functions';
 import { Calendar } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
-import { getWorkoutRecords } from '../api/database';
 import { Card, CardContent, CardHeader } from '../components/card';
-import { LoadingSpinner } from '../components/loading-spinner';
-import { ModernPage, ModernSection } from '../components/modern-ui';
-import { InfoTooltip } from '../components/tooltip';
-import { WorkoutCalendar } from '../components/workout-calendar';
-import type { WorkoutRecord } from '../interfaces';
-import { formatNumber } from '../utils/functions';
 
 /**
  * Página de calendario moderna con datos reales

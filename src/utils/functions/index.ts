@@ -3,7 +3,7 @@
  * Funciones reutilizables para validación, filtros, fechas, gráficos, estadísticas, estilos, notificaciones, tiempo, selects, stat-cards y tabs
  */
 
-export { getAllAssignments } from '../../api/database';
+export { getAllAssignments } from '@/api/services';
 export * from './advanced-analysis';
 export * from './calendar-utils';
 export * from './category-analysis';

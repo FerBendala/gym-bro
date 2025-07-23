@@ -1,7 +1,7 @@
+import { AdminPanelModal } from '@/components/admin-panel';
+import { ModernPage } from '@/components/modern-ui';
+import { MODERN_THEME } from '@/constants/modern-theme';
 import React from 'react';
-import { AdminPanel } from '../components/admin-panel';
-import { ModernPage } from '../components/modern-ui';
-import { MODERN_THEME } from '../constants/modern-theme';
 
 interface ModernAdminPanelProps {
   isModal?: boolean;
@@ -17,7 +17,7 @@ export const ModernAdminPanel: React.FC<ModernAdminPanelProps> = ({
 }) => {
   if (isModal) {
     // Renderizar como modal usando el componente existente
-    return <AdminPanel onClose={onClose} />;
+    return <AdminPanelModal onClose={onClose} />;
   }
 
   // Renderizar como página completa

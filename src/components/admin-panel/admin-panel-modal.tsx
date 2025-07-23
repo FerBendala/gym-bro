@@ -1,8 +1,8 @@
+import { URLPreview } from '@/components/url-preview';
+import { useModalOverflow, useOnlineStatus } from '@/hooks';
+import type { DayOfWeek, Exercise } from '@/interfaces';
 import { AlertTriangle, Settings, Wifi, WifiOff, X } from 'lucide-react';
 import React, { useState } from 'react';
-import { useModalOverflow, useOnlineStatus } from '../../hooks';
-import type { DayOfWeek, Exercise } from '../../interfaces';
-import { URLPreview } from '../url-preview';
 import {
   ExerciseAssignments,
   ExerciseForm,
@@ -15,7 +15,7 @@ import type { AdminPanelProps, AdminPanelTab } from './types';
  * Panel de administración responsive con sistema de tabs
  * Optimizado para móvil con modal bottom-sheet mejorado
  */
-export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
+export const AdminPanelModal: React.FC<AdminPanelProps> = ({ onClose }) => {
   const [selectedDay, setSelectedDay] = useState<DayOfWeek>('lunes');
   const [editingExercise, setEditingExercise] = useState<Exercise | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -34,8 +34,7 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     handleUpdateExercise,
     handleDeleteExercise,
     handleCreateAssignment,
-    handleDeleteAssignment,
-    loadData
+    handleDeleteAssignment
   } = useAdminData(selectedDay, isOnline);
 
   const handleEditExercise = (exercise: Exercise) => {
@@ -221,9 +220,3 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({ onClose }) => {
     </div>
   );
 };
-
-// Exportar el nuevo componente AdminPanelPage (página completa)
-export { AdminPanelPage } from './admin-panel-page';
-
-// Exportar tipos
-export type * from './types';

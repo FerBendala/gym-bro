@@ -1,8 +1,8 @@
+import { deleteWorkoutRecord, getExercises, getWorkoutRecords } from '@/api/services';
+import { useNotification } from '@/context/notification-context';
+import { useOnlineStatus } from '@/hooks';
+import type { Exercise, WorkoutRecord } from '@/interfaces';
 import { useEffect, useState } from 'react';
-import { deleteWorkoutRecord, getExercises, getWorkoutRecords } from '../../../api/database';
-import { useNotification } from '../../../context/notification-context';
-import { useOnlineStatus } from '../../../hooks';
-import type { Exercise, WorkoutRecord } from '../../../interfaces';
 
 export const useDashboardData = () => {
   const { showNotification } = useNotification();
