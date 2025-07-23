@@ -60,9 +60,8 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]) => {
     ? records.reduce((sum, r) => sum + r.weight, 0) / records.length
     : 0;
 
-  // Calcular frecuencia promedio
-  const totalWorkouts = new Set(records.map(r => r.date.toDateString())).size;
-  const avgFrequency = totalWorkouts;
+  // Calcular frecuencia promedio CORREGIDA: basada en días únicos de entrenamiento por semana
+  const avgFrequency = calculateWeeklyFrequency(records);
 
   return {
     balanceScore,
@@ -99,4 +98,33 @@ const calculateConsistency = (records: WorkoutRecord[]): number => {
   const workoutDays = new Set(records.map(r => r.date.toDateString())).size;
 
   return totalDays > 0 ? (workoutDays / totalDays) * 100 : 0;
+};
+
+// NUEVA FUNCIÓN: Calcular frecuencia semanal basada en días únicos de entrenamiento
+const calculateWeeklyFrequency = (records: WorkoutRecord[]): number => {
+  if (records.length === 0) return 0;
+
+  // Agrupar por semanas y contar días únicos de entrenamiento por semana
+  const weeklyData = new Map<string, Set<string>>();
+
+  records.forEach(record => {
+    const date = new Date(record.date);
+    // Obtener el lunes de la semana
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (!weeklyData.has(weekKey)) {
+      weeklyData.set(weekKey, new Set());
+    }
+    weeklyData.get(weekKey)!.add(record.date.toDateString());
+  });
+
+  // Calcular promedio de días únicos de entrenamiento por semana
+  if (weeklyData.size > 0) {
+    const totalWorkoutDays = Array.from(weeklyData.values()).reduce((sum, daysSet) => sum + daysSet.size, 0);
+    return totalWorkoutDays / weeklyData.size;
+  }
+
+  return 0;
 }; 
