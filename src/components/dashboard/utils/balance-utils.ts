@@ -157,9 +157,18 @@ const calculateUpperLowerBalance = (categoryMetrics: Array<{ category: string; p
   }
 
   return {
-    upperBody,
-    lowerBody,
-    core,
+    upper: {
+      percentage: upperBody.percentage,
+      volume: upperBody.volume
+    },
+    lower: {
+      percentage: lowerBody.percentage,
+      volume: lowerBody.volume
+    },
+    core: {
+      percentage: core.percentage,
+      volume: core.volume
+    },
     isBalanced,
     recommendation
   };
