@@ -1,6 +1,6 @@
 import { migrateExercisesToMultipleCategories } from '@/api/services';
+import { Layout, useModernNavigation } from '@/components/layout';
 import { Notification } from '@/components/notification';
-import { ModernLayout, useModernNavigation } from '@/components/ui';
 import type { DayOfWeek } from '@/interfaces';
 import { useNotification } from '@/stores/notification-store';
 import { useEffect, useState } from 'react';
@@ -137,7 +137,7 @@ const ModernAppContent = () => {
   };
 
   return (
-    <ModernLayout
+    <Layout
       activeTab={activeTab}
       onTabChange={navigateTo}
       title={pageInfo.title}
@@ -157,7 +157,7 @@ const ModernAppContent = () => {
       )}
 
       <Notification />
-    </ModernLayout>
+    </Layout>
   );
 };
 

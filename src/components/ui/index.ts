@@ -8,18 +8,7 @@ export {
   ModernButton, ModernFloatingButton, ModernIconButton
 } from './modern-button';
 
-export {
-  ModernCard, ModernCardContent,
-  ModernCardFooter, ModernCardHeader, ModernExerciseCard, ModernStatsCard
-} from './modern-card';
-
-// Layout components
-export {
-  ModernLayout,
-  ModernPage,
-  ModernSection,
-  useModernNavigation
-} from '../layout';
+export { ModernCard } from './modern-card';
 
 // Tipos
 export type { ModernNavItem, NavigationType } from '../layout';

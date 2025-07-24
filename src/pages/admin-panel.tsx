@@ -1,5 +1,5 @@
 import { AdminPanelModal } from '@/components/admin-panel';
-import { ModernPage } from '@/components/ui';
+import { ModernPage } from '@/components/layout';
 import { MODERN_THEME } from '@/constants/modern-theme';
 import React from 'react';
 
@@ -29,7 +29,7 @@ export const ModernAdminPanel: React.FC<ModernAdminPanelProps> = ({
       <div className="space-y-6">
         {/* Contenido del admin panel sin el modal wrapper */}
         <div className={MODERN_THEME.components.card.base}>
-          <AdminPanel onClose={onClose} />
+          <ModernAdminPanel onClose={onClose} />
         </div>
       </div>
     </ModernPage>

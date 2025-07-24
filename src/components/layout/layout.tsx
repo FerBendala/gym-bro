@@ -4,14 +4,14 @@ import { cn } from '@/utils/functions/style-utils';
 import React from 'react';
 import { BottomNavigation } from './components/bottom-navigation';
 import { TopNavigation } from './components/top-navigation';
-import { ModernLayoutProps } from './types';
+import { LayoutProps } from './types';
 
 /**
  * Layout moderno con navegación bottom-sheet
  * Optimizado para móvil con soporte completo para desktop
  * Usa Zustand para el estado global
  */
-export const Layout: React.FC<ModernLayoutProps> = ({
+export const Layout: React.FC<LayoutProps> = ({
   children,
   activeTab,
   onTabChange,

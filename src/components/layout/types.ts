@@ -4,7 +4,7 @@ import React from 'react';
 export type ModernNavItem = 'home' | 'progress' | 'calendar' | 'history' | 'settings' | 'more';
 export type NavigationType = 'grid' | 'horizontal' | 'compact' | 'iconsOnly';
 
-export interface ModernLayoutProps {
+export interface LayoutProps {
   children: React.ReactNode;
   activeTab: ModernNavItem;
   onTabChange: (tab: ModernNavItem) => void;

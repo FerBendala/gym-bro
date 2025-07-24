@@ -1,7 +1,8 @@
 import { ChevronDown } from 'lucide-react';
 import React, { useState } from 'react';
 import { ExerciseList } from '../components/exercise-list';
-import { ModernButton, ModernPage, ModernSection } from '../components/ui';
+import { ModernPage, ModernSection } from '../components/layout';
+import { ModernButton } from '../components/ui';
 import { DAYS } from '../constants/days';
 import { MODERN_THEME } from '../constants/modern-theme';
 import type { DayOfWeek } from '../interfaces';

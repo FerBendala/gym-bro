@@ -1,7 +1,7 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { calculateAdvancedAnalysis } from '@/utils/functions';
-import { useMemo } from 'react';
 import { AlertTriangle, Calendar, Clock, Target, TrendingUp, Zap } from 'lucide-react';
+import { useMemo } from 'react';
 
 export const useAdvancedTab = (records: WorkoutRecord[]) => {
   const analysis = useMemo(() => calculateAdvancedAnalysis(records), [records]);
@@ -370,7 +370,7 @@ export const useAdvancedTab = (records: WorkoutRecord[]) => {
     // Análisis de volumen (nuevo)
     const recentVolume = records.slice(-7).reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
     const avgVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / records.length;
-    
+
     if (recentVolume > avgVolume * 1.5) {
       suggestions.push({
         category: 'intensity',
