@@ -25,6 +25,7 @@ export const useAdminDataLoader = () => {
 
   // Verificar si el store está completamente inicializado
   const validDays = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
+  const isStoreReady = selectedDay !== undefined && selectedDay !== null && validDays.includes(selectedDay);
 
   // Cargar ejercicios
   const loadExercises = useCallback(async () => {
