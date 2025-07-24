@@ -1,0 +1,48 @@
+import React from 'react';
+
+// Tipos para la navegación
+export type ModernNavItem = 'home' | 'progress' | 'calendar' | 'history' | 'settings' | 'more';
+export type NavigationType = 'grid' | 'horizontal' | 'compact' | 'iconsOnly';
+
+export interface ModernLayoutProps {
+  children: React.ReactNode;
+  activeTab: ModernNavItem;
+  onTabChange: (tab: ModernNavItem) => void;
+  title?: string;
+  subtitle?: string;
+  headerActions?: React.ReactNode;
+  showBackButton?: boolean;
+  onBackClick?: () => void;
+  navigationType?: NavigationType;
+}
+
+export interface NavigationItem {
+  id: ModernNavItem;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badge?: number;
+}
+
+export interface ModernPageProps {
+  title: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  headerActions?: React.ReactNode;
+  className?: string;
+  showBackButton?: boolean;
+  onBackClick?: () => void;
+}
+
+export interface ModernSectionProps {
+  title?: string;
+  subtitle?: string;
+  children: React.ReactNode;
+  className?: string;
+  headerActions?: React.ReactNode;
+}
+
+export interface NavigationConfig {
+  item: string;
+  active: string;
+  inactive: string;
+} 
