@@ -1,6 +1,6 @@
 import { ALL_MUSCLE_GROUPS } from '../../constants';
 import type { Exercise } from '../../interfaces';
-import type { SelectGroup, SelectOption } from '../../interfaces/ui';
+import type { SelectGroup, SelectOption } from '../../interfaces/ui.interfaces';
 import { groupExercisesByCategory } from './select-utils';
 
 /**

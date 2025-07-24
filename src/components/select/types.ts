@@ -44,4 +44,4 @@ export interface SelectFeedbackProps {
 }
 
 // Re-exportar tipos de interfaces/ui para mantener compatibilidad
-export type { SelectGroup, SelectOption } from '@/interfaces/ui';
+export type { SelectGroup, SelectOption } from '@/interfaces/ui.interfaces';

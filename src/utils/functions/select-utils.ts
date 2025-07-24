@@ -5,7 +5,7 @@
 
 import { EXERCISE_CATEGORIES } from '../../constants/exercise.constants';
 import type { Exercise } from '../../interfaces';
-import type { SelectGroup, SelectOption } from '../../interfaces/ui';
+import type { SelectGroup, SelectOption } from '../../interfaces/ui.interfaces';
 
 /**
  * Crea una opción de select estándar

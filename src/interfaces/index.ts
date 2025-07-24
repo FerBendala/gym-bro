@@ -1,60 +1,14 @@
-export interface Exercise {
-  id: string;
-  name: string;
-  categories: string[];
-  description?: string;
-  url?: string;
-}
+/**
+ * Reexportaciones de interfaces organizadas por contexto
+ * Punto de entrada centralizado para todas las interfaces
+ */
 
-export interface ExerciseAssignment {
-  id: string;
-  exerciseId: string;
-  dayOfWeek: DayOfWeek;
-  exercise?: Exercise;
-  order?: number;
-}
+// Interfaces de dominio del negocio
+export * from './domain.interfaces';
 
-// Interface para una serie individual
-export interface WorkoutSet {
-  weight: number;
-  reps: number;
-}
+// Interfaces de UI genéricas
+export * from './ui.interfaces';
 
-export interface WorkoutRecord {
-  id: string;
-  exerciseId: string;
-  weight: number;
-  reps: number;
-  sets: number;
-  date: Date;
-  dayOfWeek: DayOfWeek;
-  exercise?: Exercise;
-  // Nuevos campos opcionales para series individuales
-  individualSets?: WorkoutSet[];
-}
-
-export type DayOfWeek = 'lunes' | 'martes' | 'miércoles' | 'jueves' | 'viernes' | 'sábado' | 'domingo';
-
-// Nueva interface para formulario con series individuales
-export interface WorkoutFormDataAdvanced {
-  sets: WorkoutSet[];
-  date?: Date; // Fecha opcional para registrar entrenamientos pasados
-}
-
-// Interface original mantenida para compatibilidad
-export interface WorkoutFormData {
-  weight: number;
-  reps: number;
-  sets: number;
-  date?: Date; // Fecha opcional para registrar entrenamientos pasados
-}
-
-export interface NotificationState {
-  show: boolean;
-  message: string;
-  type: 'success' | 'error' | 'info' | 'warning';
-}
-
-// UI types
-export type { BaseUIProps, ContainerProps, UISize, UIVariant } from './ui';
+// Interfaces de estado de la aplicación
+export * from './state.interfaces';
 
