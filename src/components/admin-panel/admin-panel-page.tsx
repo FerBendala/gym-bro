@@ -1,10 +1,11 @@
 import { useAdminStore } from '@/stores/admin';
+import { useOnlineStatus } from '@/stores/connection-store';
 import { AlertTriangle, Wifi, WifiOff } from 'lucide-react';
 import React from 'react';
-import { useAdminDataLoader, useOnlineStatus } from '../../hooks';
 import { OfflineWarning } from '../offline-warning';
 import { URLPreview } from '../url-preview';
 import { AdminContent, AdminTabs } from './components';
+import { useAdminDataLoader } from './hooks';
 
 /**
  * Panel de administración como página completa sin modal

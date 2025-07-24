@@ -1,6 +1,6 @@
 import { createExerciseAssignment } from '@/api/services';
-import { useOnlineStatus } from '@/hooks';
 import { useAdminStore } from '@/stores/admin';
+import { useOnlineStatus } from '@/stores/connection-store';
 import { useNotification } from '@/stores/notification-store';
 import { Plus } from 'lucide-react';
 import React, { useEffect } from 'react';

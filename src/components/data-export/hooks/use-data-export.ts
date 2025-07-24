@@ -1,4 +1,4 @@
-import { useOnlineStatus } from '@/hooks';
+import { useOnlineStatus } from '@/stores/connection-store';
 import { useNotification } from '@/stores/notification-store';
 import {
   downloadFile,

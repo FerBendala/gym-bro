@@ -1,5 +1,5 @@
-import { useOnlineStatus } from '@/hooks';
 import { useAdminStore } from '@/stores/admin';
+import { useOnlineStatus } from '@/stores/connection-store';
 import React from 'react';
 import { DAYS } from '../../../constants/days';
 import { Button } from '../../button';

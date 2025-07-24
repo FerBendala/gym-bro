@@ -1,5 +1,5 @@
-import { useOnlineStatus } from '@/hooks';
 import { useAdminStore } from '@/stores/admin';
+import { useOnlineStatus } from '@/stores/connection-store';
 import React, { useMemo, useState } from 'react';
 import { Card, CardContent, CardHeader } from '../../card';
 import type { ExerciseCategory } from '../types';

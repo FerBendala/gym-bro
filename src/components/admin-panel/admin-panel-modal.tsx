@@ -1,8 +1,10 @@
 import { URLPreview } from '@/components/url-preview';
-import { useAdminDataLoader, useModalOverflow, useOnlineStatus } from '@/hooks';
+import { useModalOverflow } from '@/hooks';
 import { useAdminStore } from '@/stores/admin';
+import { useOnlineStatus } from '@/stores/connection-store';
 import React from 'react';
 import { AdminContent, AdminHeader, AdminTabs } from './components';
+import { useAdminDataLoader } from './hooks';
 import type { AdminPanelProps } from './types';
 
 /**

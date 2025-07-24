@@ -1,6 +1,6 @@
 import { createWorkoutRecord, getAssignmentsByDay, getExercises, getWorkoutRecords, updateAssignmentsOrder } from '@/api/services';
-import { useOnlineStatus } from '@/hooks';
 import type { DayOfWeek, ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
+import { useOnlineStatus } from '@/stores/connection-store';
 import { useNotification } from '@/stores/notification-store';
 import { getExercisesTrainedTodayForCurrentDay } from '@/utils/functions';
 import { useCallback, useEffect, useState } from 'react';

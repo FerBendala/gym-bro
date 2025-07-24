@@ -9,9 +9,9 @@ import {
 } from '@/api/services';
 import type { ExerciseFormData } from '@/components/admin-panel/types';
 import { useAdminStore } from '@/stores/admin';
+import { useOnlineStatus } from '@/stores/connection-store';
 import { useNotification } from '@/stores/notification-store';
 import { useCallback, useEffect } from 'react';
-import { useOnlineStatus } from './use-online-status';
 
 /**
  * Hook personalizado que integra Zustand con los servicios existentes

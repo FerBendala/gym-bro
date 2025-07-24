@@ -1,6 +1,6 @@
 import { deleteWorkoutRecord, getExercises, getWorkoutRecords } from '@/api/services';
-import { useOnlineStatus } from '@/hooks';
 import type { Exercise, WorkoutRecord } from '@/interfaces';
+import { useOnlineStatus } from '@/stores/connection-store';
 import { useNotification } from '@/stores/notification-store';
 import { useEffect, useState } from 'react';
 

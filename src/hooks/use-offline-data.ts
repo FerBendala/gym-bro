@@ -1,3 +1,4 @@
+import { useOnlineStatus } from '@/stores/connection-store';
 import { useCallback, useEffect, useState } from 'react';
 import type { Exercise, WorkoutRecord } from '../interfaces';
 import { STORES } from '../utils/data/indexeddb-config';
@@ -22,7 +23,6 @@ import {
   removeSyncEventListener,
   startSync
 } from '../utils/data/sync-manager';
-import { useOnlineStatus } from './use-online-status';
 // Función helper para generar IDs únicos
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 

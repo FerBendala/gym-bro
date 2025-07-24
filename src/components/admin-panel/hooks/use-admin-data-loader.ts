@@ -3,9 +3,9 @@ import {
   getExercises
 } from '@/api/services';
 import { useAdminStore } from '@/stores/admin';
+import { useOnlineStatus } from '@/stores/connection-store';
 import { useNotification } from '@/stores/notification-store';
 import { useCallback, useEffect } from 'react';
-import { useOnlineStatus } from './use-online-status';
 
 /**
  * Hook para cargar datos iniciales del admin panel
@@ -25,9 +25,6 @@ export const useAdminDataLoader = () => {
 
   // Verificar si el store está completamente inicializado
   const validDays = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
-  const isStoreReady = selectedDay !== undefined && selectedDay !== null && validDays.includes(selectedDay);
-
-
 
   // Cargar ejercicios
   const loadExercises = useCallback(async () => {
@@ -68,8 +65,6 @@ export const useAdminDataLoader = () => {
       console.warn('⚠️ selectedDay no es un día válido:', selectedDay);
       return;
     }
-
-
 
     setLoading('assignments', true);
     setError('assignments', null);
