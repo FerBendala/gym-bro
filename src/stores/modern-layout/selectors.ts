@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useModernLayoutStore } from './store';
 
 // Selectores para navegación - usando selectores individuales para evitar objetos
@@ -15,26 +16,61 @@ export const useTitle = () => useModernLayoutStore((state) => state.title);
 export const useSubtitle = () => useModernLayoutStore((state) => state.subtitle);
 export const useShowBackButton = () => useModernLayoutStore((state) => state.showBackButton);
 
-// Acciones - estas son estables y no causan re-renders
-export const useNavigationActions = () => useModernLayoutStore((state) => ({
-  setActiveTab: state.setActiveTab,
-  navigateTo: state.navigateTo,
-  goBack: state.goBack,
-  clearHistory: state.clearHistory,
-}));
+// Acciones individuales - más estables
+export const useSetActiveTab = () => useModernLayoutStore((state) => state.setActiveTab);
+export const useNavigateTo = () => useModernLayoutStore((state) => state.navigateTo);
+export const useGoBack = () => useModernLayoutStore((state) => state.goBack);
+export const useClearHistory = () => useModernLayoutStore((state) => state.clearHistory);
 
-export const useUIActions = () => useModernLayoutStore((state) => ({
-  setNavigationVisible: state.setNavigationVisible,
-  toggleMoreMenu: state.toggleMoreMenu,
-  closeMoreMenu: state.closeMoreMenu,
-}));
+export const useSetNavigationVisible = () => useModernLayoutStore((state) => state.setNavigationVisible);
+export const useToggleMoreMenu = () => useModernLayoutStore((state) => state.toggleMoreMenu);
+export const useCloseMoreMenu = () => useModernLayoutStore((state) => state.closeMoreMenu);
 
-export const useConfigActions = () => useModernLayoutStore((state) => ({
-  setNavigationType: state.setNavigationType,
-  setTitle: state.setTitle,
-  setSubtitle: state.setSubtitle,
-  setShowBackButton: state.setShowBackButton,
-}));
+export const useSetNavigationType = () => useModernLayoutStore((state) => state.setNavigationType);
+export const useSetTitle = () => useModernLayoutStore((state) => state.setTitle);
+export const useSetSubtitle = () => useModernLayoutStore((state) => state.setSubtitle);
+export const useSetShowBackButton = () => useModernLayoutStore((state) => state.setShowBackButton);
+
+// Acciones agrupadas con useCallback para estabilidad
+export const useNavigationActions = () => {
+  const setActiveTab = useSetActiveTab();
+  const navigateTo = useNavigateTo();
+  const goBack = useGoBack();
+  const clearHistory = useClearHistory();
+
+  return useCallback(() => ({
+    setActiveTab,
+    navigateTo,
+    goBack,
+    clearHistory,
+  }), [setActiveTab, navigateTo, goBack, clearHistory])();
+};
+
+export const useUIActions = () => {
+  const setNavigationVisible = useSetNavigationVisible();
+  const toggleMoreMenu = useToggleMoreMenu();
+  const closeMoreMenu = useCloseMoreMenu();
+
+  return useCallback(() => ({
+    setNavigationVisible,
+    toggleMoreMenu,
+    closeMoreMenu,
+  }), [setNavigationVisible, toggleMoreMenu, closeMoreMenu])();
+};
+
+export const useConfigActions = () => {
+  const setNavigationType = useSetNavigationType();
+  const setTitle = useSetTitle();
+  const setSubtitle = useSetSubtitle();
+  const setShowBackButton = useSetShowBackButton();
+
+  return useCallback(() => ({
+    setNavigationType,
+    setTitle,
+    setSubtitle,
+    setShowBackButton,
+  }), [setNavigationType, setTitle, setSubtitle, setShowBackButton])();
+};
 
 // Selectores compuestos para compatibilidad (solo si es necesario)
 export const useNavigationState = () => ({

@@ -1,5 +1,5 @@
 import { MODERN_THEME } from '@/constants/modern-theme';
-import { useActiveTab, useNavigationActions, useShowMoreMenu, useUIActions } from '@/stores/modern-layout';
+import { useActiveTab, useCloseMoreMenu, useNavigateTo, useShowMoreMenu, useToggleMoreMenu } from '@/stores/modern-layout';
 import { cn } from '@/utils/functions/style-utils';
 import React from 'react';
 import { compactNavigationItems, moreMenuItems, navigationItems } from '../constants';
@@ -161,10 +161,11 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   navigationType: propNavigationType,
   isNavigationVisible: propIsNavigationVisible
 }) => {
-  // Usar store de Zustand
+  // Usar selectores individuales del store de Zustand
   const storeActiveTab = useActiveTab();
-  const { navigateTo } = useNavigationActions();
-  const { toggleMoreMenu, closeMoreMenu } = useUIActions();
+  const navigateTo = useNavigateTo();
+  const toggleMoreMenu = useToggleMoreMenu();
+  const closeMoreMenu = useCloseMoreMenu();
   const showMoreMenu = useShowMoreMenu();
 
   // Priorizar props sobre store
