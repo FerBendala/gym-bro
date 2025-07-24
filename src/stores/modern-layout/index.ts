@@ -9,41 +9,18 @@ export { INITIAL_STATE, PERSISTENCE_CONFIG } from './constants';
 
 // Exportar acciones
 export {
-  createModernLayoutNavigationActions,
-  createModernLayoutUIActions,
-  createModernLayoutConfigActions,
-  createModernLayoutUtilityActions,
+  createModernLayoutConfigActions, createModernLayoutNavigationActions,
+  createModernLayoutUIActions, createModernLayoutUtilityActions
 } from './actions';
 
 // Exportar selectores individuales
 export {
-  useActiveTab,
-  useNavigationHistory,
-  useCanGoBack,
-  useIsNavigationVisible,
-  useShowMoreMenu,
-  useNavigationType,
-  useTitle,
-  useSubtitle,
-  useShowBackButton,
-  // Acciones individuales
-  useSetActiveTab,
-  useNavigateTo,
-  useGoBack,
-  useClearHistory,
-  useSetNavigationVisible,
-  useToggleMoreMenu,
-  useCloseMoreMenu,
-  useSetNavigationType,
-  useSetTitle,
-  useSetSubtitle,
-  useSetShowBackButton,
+  useActiveTab, useCanGoBack, useClearHistory, useCloseMoreMenu, useConfigActions, useConfigState, useGoBack, useIsNavigationVisible, useNavigateTo,
   // Acciones agrupadas
-  useNavigationActions,
-  useUIActions,
-  useConfigActions,
+  useNavigationActions, useNavigationHistory,
   // Selectores compuestos
-  useNavigationState,
-  useUIState,
-  useConfigState,
+  useNavigationState, useNavigationType,
+  // Acciones individuales
+  useSetActiveTab, useSetNavigationType, useSetNavigationVisible, useSetShowBackButton, useSetSubtitle, useSetTitle, useShowBackButton, useShowMoreMenu, useSubtitle, useTitle, useToggleMoreMenu, useUIActions, useUIState
 } from './selectors';
+
