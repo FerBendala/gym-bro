@@ -1,4 +1,4 @@
-import { useNavigationActions, useActiveTab, useNavigationHistory, useCanGoBack } from '@/stores/modern-layout';
+import { useActiveTab, useCanGoBack, useNavigationActions, useNavigationHistory } from '@/stores/modern-layout';
 
 export const useModernNavigation = () => {
   const activeTab = useActiveTab();

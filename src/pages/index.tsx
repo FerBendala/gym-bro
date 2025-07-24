@@ -12,7 +12,7 @@ import { ModernSettings } from './settings';
 import { WorkoutHistory } from './workout-history';
 
 const ModernAppContent = () => {
-  const { activeTab, navigateTo, goBack, canGoBack } = useModernNavigation('home');
+  const { activeTab, navigateTo, goBack, canGoBack } = useModernNavigation();
   const [showAdmin, setShowAdmin] = useState(false);
   const { showNotification } = useNotification();
 
