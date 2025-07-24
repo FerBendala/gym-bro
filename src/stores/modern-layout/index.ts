@@ -15,6 +15,6 @@ export {
 
 // Exportar selectores optimizados
 export {
-  useActiveTab, useCanGoBack, useConfigActions, useConfigState, useIsNavigationVisible, useNavigationActions, useNavigationState, useNavigationType,
-  useShowMoreMenu, useUIActions, useUIState
+  useActiveTab, useCanGoBack, useConfigActions, useConfigState, useIsNavigationVisible, useNavigationActions, useNavigationHistory, useNavigationState, useNavigationType,
+  useShowMoreMenu, useSubtitle, useTitle, useUIActions, useUIState
 } from './selectors';

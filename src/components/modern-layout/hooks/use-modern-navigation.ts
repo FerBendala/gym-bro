@@ -1,9 +1,11 @@
-import { useNavigationActions, useNavigationState } from '@/stores/modern-layout';
+import { useNavigationActions, useActiveTab, useNavigationHistory, useCanGoBack } from '@/stores/modern-layout';
 import { useEffect } from 'react';
 import { ModernNavItem } from '../types';
 
 export const useModernNavigation = (initialTab?: ModernNavItem) => {
-  const { activeTab, navigationHistory, canGoBack } = useNavigationState();
+  const activeTab = useActiveTab();
+  const navigationHistory = useNavigationHistory();
+  const canGoBack = useCanGoBack();
   const { setActiveTab, navigateTo, goBack, clearHistory } = useNavigationActions();
 
   // Si se proporciona un initialTab, establecerlo (útil para inicialización)

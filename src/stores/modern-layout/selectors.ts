@@ -1,12 +1,21 @@
 import { useModernLayoutStore } from './store';
 
-// Selectores para navegación
-export const useNavigationState = () => useModernLayoutStore((state) => ({
-  activeTab: state.activeTab,
-  navigationHistory: state.navigationHistory,
-  canGoBack: state.canGoBack,
-}));
+// Selectores para navegación - usando selectores individuales para evitar objetos
+export const useActiveTab = () => useModernLayoutStore((state) => state.activeTab);
+export const useNavigationHistory = () => useModernLayoutStore((state) => state.navigationHistory);
+export const useCanGoBack = () => useModernLayoutStore((state) => state.canGoBack);
 
+// Selectores para UI - usando selectores individuales
+export const useIsNavigationVisible = () => useModernLayoutStore((state) => state.isNavigationVisible);
+export const useShowMoreMenu = () => useModernLayoutStore((state) => state.showMoreMenu);
+
+// Selectores para configuración - usando selectores individuales
+export const useNavigationType = () => useModernLayoutStore((state) => state.navigationType);
+export const useTitle = () => useModernLayoutStore((state) => state.title);
+export const useSubtitle = () => useModernLayoutStore((state) => state.subtitle);
+export const useShowBackButton = () => useModernLayoutStore((state) => state.showBackButton);
+
+// Acciones - estas son estables y no causan re-renders
 export const useNavigationActions = () => useModernLayoutStore((state) => ({
   setActiveTab: state.setActiveTab,
   navigateTo: state.navigateTo,
@@ -14,24 +23,10 @@ export const useNavigationActions = () => useModernLayoutStore((state) => ({
   clearHistory: state.clearHistory,
 }));
 
-// Selectores para UI
-export const useUIState = () => useModernLayoutStore((state) => ({
-  isNavigationVisible: state.isNavigationVisible,
-  showMoreMenu: state.showMoreMenu,
-}));
-
 export const useUIActions = () => useModernLayoutStore((state) => ({
   setNavigationVisible: state.setNavigationVisible,
   toggleMoreMenu: state.toggleMoreMenu,
   closeMoreMenu: state.closeMoreMenu,
-}));
-
-// Selectores para configuración
-export const useConfigState = () => useModernLayoutStore((state) => ({
-  navigationType: state.navigationType,
-  title: state.title,
-  subtitle: state.subtitle,
-  showBackButton: state.showBackButton,
 }));
 
 export const useConfigActions = () => useModernLayoutStore((state) => ({
@@ -41,9 +36,21 @@ export const useConfigActions = () => useModernLayoutStore((state) => ({
   setShowBackButton: state.setShowBackButton,
 }));
 
-// Selectores específicos
-export const useActiveTab = () => useModernLayoutStore((state) => state.activeTab);
-export const useNavigationType = () => useModernLayoutStore((state) => state.navigationType);
-export const useShowMoreMenu = () => useModernLayoutStore((state) => state.showMoreMenu);
-export const useIsNavigationVisible = () => useModernLayoutStore((state) => state.isNavigationVisible);
-export const useCanGoBack = () => useModernLayoutStore((state) => state.canGoBack); 
+// Selectores compuestos para compatibilidad (solo si es necesario)
+export const useNavigationState = () => ({
+  activeTab: useActiveTab(),
+  navigationHistory: useNavigationHistory(),
+  canGoBack: useCanGoBack(),
+});
+
+export const useUIState = () => ({
+  isNavigationVisible: useIsNavigationVisible(),
+  showMoreMenu: useShowMoreMenu(),
+});
+
+export const useConfigState = () => ({
+  navigationType: useNavigationType(),
+  title: useTitle(),
+  subtitle: useSubtitle(),
+  showBackButton: useShowBackButton(),
+}); 

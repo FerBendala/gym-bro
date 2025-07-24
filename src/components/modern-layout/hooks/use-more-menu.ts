@@ -1,8 +1,8 @@
-import { useUIActions, useUIState } from '@/stores/modern-layout';
+import { useUIActions, useShowMoreMenu } from '@/stores/modern-layout';
 import { useEffect, useRef } from 'react';
 
 export const useMoreMenu = () => {
-  const { showMoreMenu } = useUIState();
+  const showMoreMenu = useShowMoreMenu();
   const { toggleMoreMenu, closeMoreMenu } = useUIActions();
   const menuRef = useRef<HTMLDivElement>(null);
 

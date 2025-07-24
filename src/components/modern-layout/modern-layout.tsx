@@ -1,5 +1,5 @@
 import { MODERN_THEME } from '@/constants/modern-theme';
-import { useConfigActions, useConfigState } from '@/stores/modern-layout';
+import { useConfigActions, useNavigationType, useSubtitle, useTitle } from '@/stores/modern-layout';
 import { cn } from '@/utils/functions/style-utils';
 import React from 'react';
 import { BottomNavigation } from './components/bottom-navigation';
@@ -23,7 +23,9 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   navigationType,
   isNavigationVisible = true
 }) => {
-  const { title: storeTitle, subtitle: storeSubtitle, navigationType: storeNavigationType } = useConfigState();
+  const storeTitle = useTitle();
+  const storeSubtitle = useSubtitle();
+  const storeNavigationType = useNavigationType();
   const { setTitle, setSubtitle, setNavigationType, setShowBackButton } = useConfigActions();
 
   // Sincronizar props con el store
