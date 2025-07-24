@@ -3,14 +3,14 @@ import { Button } from '@/components/button';
 import { Card, CardContent } from '@/components/card';
 import { DatePicker } from '@/components/date-picker';
 import { Input } from '@/components/input';
-import { ModernPage, ModernSection } from '@/components/layout';
+import { Page, Section } from '@/components/layout';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { Select } from '@/components/select';
-import { EXERCISE_CATEGORIES, getCategoryColor, getCategoryIcon } from '@/constants/exercise-categories';
+import { EXERCISE_CATEGORIES } from '@/constants/exercise.constants';
 import { useModalOverflow } from '@/hooks';
 import type { Exercise, WorkoutRecord } from '@/interfaces';
 import { useNotification } from '@/stores/notification-store';
-import { formatNumber } from '@/utils/functions';
+import { formatNumber, getCategoryColor, getCategoryIcon } from '@/utils/functions';
 import { Calendar, Clock, Dumbbell, Edit, Filter, Search, Target, Trash2, TrendingDown, TrendingUp, X } from 'lucide-react';
 import React, { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
@@ -153,7 +153,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
                   {/* Ejercicio específico */}
                   <div>
-                    <label className="text-sm font-medium text-gray-300 mb-2 block flex items-center">
+                    <label className="text-sm font-medium text-gray-300 mb-2 flex items-center">
                       <Dumbbell className="w-4 h-4 mr-2" />
                       Ejercicio específico
                     </label>
@@ -170,7 +170,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
 
                   {/* Categoría */}
                   <div>
-                    <label className="text-sm font-medium text-gray-300 mb-2 block flex items-center">
+                    <label className="text-sm font-medium text-gray-300 mb-2 flex items-center">
                       <Target className="w-4 h-4 mr-2" />
                       Categoría muscular
                     </label>
@@ -229,7 +229,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                   {/* Ordenamiento */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-sm font-medium text-gray-300 mb-2 block flex items-center">
+                      <label className="text-sm font-medium text-gray-300 mb-2 flex items-center">
                         <TrendingUp className="w-4 h-4 mr-2" />
                         Ordenar por
                       </label>
@@ -247,7 +247,7 @@ const FilterModal: React.FC<FilterModalProps> = ({
                     </div>
 
                     <div>
-                      <label className="text-sm font-medium text-gray-300 mb-2 block flex items-center">
+                      <label className="text-sm font-medium text-gray-300 mb-2 flex items-center">
                         {sortOrder === 'desc' ? <TrendingDown className="w-4 h-4 mr-2" /> : <TrendingUp className="w-4 h-4 mr-2" />}
                         Orden
                       </label>
@@ -490,30 +490,6 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
     }
   }, [filteredAndSortedRecords, hasActiveFilters]);
 
-  // Estadísticas del historial filtrado
-  const stats = useMemo(() => {
-    if (displayRecords.length === 0) {
-      return { total: 0, totalVolume: 0, avgWeight: 0, exercises: 0 };
-    }
-
-    const totalVolume = displayRecords.reduce((sum, record) =>
-      sum + (record.weight * record.reps * record.sets), 0
-    );
-
-    const avgWeight = displayRecords.reduce((sum, record) =>
-      sum + record.weight, 0
-    ) / displayRecords.length;
-
-    const uniqueExercises = new Set(displayRecords.map(r => r.exerciseId)).size;
-
-    return {
-      total: displayRecords.length,
-      totalVolume,
-      avgWeight,
-      exercises: uniqueExercises
-    };
-  }, [displayRecords]);
-
   // Iniciar edición
   const startEditing = (record: WorkoutRecord) => {
     setEditingRecord(record);
@@ -636,7 +612,7 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
 
   if (loading) {
     return (
-      <ModernPage
+      <Page
         title="Historial de Entrenamientos"
         subtitle="Gestiona y revisa tus entrenamientos realizados"
       >
@@ -644,12 +620,12 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
           <LoadingSpinner size="lg" className="mb-4" />
           <p className="text-gray-400 text-sm ml-4">Cargando historial...</p>
         </div>
-      </ModernPage>
+      </Page>
     );
   }
 
   return (
-    <ModernPage
+    <Page
       title="Historial de Entrenamientos"
       subtitle="Gestiona y revisa tus entrenamientos realizados"
       headerActions={
@@ -673,7 +649,7 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
     >
       {/* Indicador compacto de filtros activos */}
       {hasActiveFilters && (
-        <ModernSection>
+        <Section>
           <div className="p-3 bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-700/30 rounded-lg mb-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-3">
@@ -692,11 +668,11 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
               </Button>
             </div>
           </div>
-        </ModernSection>
+        </Section>
       )}
 
       {/* Lista de entrenamientos con diseño del balance muscular */}
-      <ModernSection>
+      <Section>
         <Card>
           <CardContent>
             {displayRecords.length === 0 ? (
@@ -1050,7 +1026,7 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
             )}
           </CardContent>
         </Card>
-      </ModernSection>
+      </Section>
 
       {/* Modal de filtros */}
       <FilterModal
@@ -1073,6 +1049,6 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
         onSortOrderChange={setSortOrder}
         onClearFilters={handleClearFilters}
       />
-    </ModernPage>
+    </Page>
   );
 }; 

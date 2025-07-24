@@ -1,9 +1,9 @@
-import { MODERN_THEME } from '@/constants/modern-theme';
+import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils/functions/style-utils';
 import React from 'react';
-import { ModernPageProps } from '../types';
+import { PageProps } from '../types';
 
-export const ModernPage: React.FC<ModernPageProps> = ({
+export const Page: React.FC<PageProps> = ({
   title,
   subtitle,
   children,

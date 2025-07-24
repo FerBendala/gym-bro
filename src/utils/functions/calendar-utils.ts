@@ -1,3 +1,4 @@
+import { THEME_CALENDAR } from '@/constants/theme';
 import {
   addMonths,
   eachDayOfInterval,
@@ -11,7 +12,6 @@ import {
   subMonths
 } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { THEME_CALENDAR } from '../../constants/theme';
 import type { WorkoutRecord } from '../../interfaces';
 
 /**

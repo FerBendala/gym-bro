@@ -3,7 +3,7 @@
  * Reutilizable en formularios, filtros, configuraciones, etc.
  */
 
-import { EXERCISE_CATEGORIES } from '../../constants/exercise-categories';
+import { EXERCISE_CATEGORIES } from '../../constants/exercise.constants';
 import type { Exercise } from '../../interfaces';
 import type { SelectGroup, SelectOption } from '../../interfaces/ui';
 

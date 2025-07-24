@@ -1,8 +1,7 @@
 import { Calendar, Target, TrendingDown, TrendingUp, Trophy, Zap } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import { getCategoryColor, getCategoryIcon } from '../../../constants/exercise-categories';
 import type { WorkoutRecord } from '../../../interfaces';
-import { calculateExerciseProgress, formatNumber } from '../../../utils/functions';
+import { calculateExerciseProgress, formatNumber, getCategoryColor, getCategoryIcon } from '../../../utils/functions';
 import { Button } from '../../button';
 import { Card, CardContent, CardHeader } from '../../card';
 import { StatCard } from '../../stat-card';

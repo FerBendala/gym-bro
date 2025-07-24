@@ -1,4 +1,4 @@
-import type { ThemeNotificationType } from '../../constants/theme';
+import type { ThemeNotificationType } from '@/constants/theme';
 
 /**
  * Utilidades para toast/notificaciones

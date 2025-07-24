@@ -24,7 +24,7 @@ export interface NavigationItem {
   badge?: number;
 }
 
-export interface ModernPageProps {
+export interface PageProps {
   title: string;
   subtitle?: string;
   children: React.ReactNode;
@@ -34,7 +34,7 @@ export interface ModernPageProps {
   onBackClick?: () => void;
 }
 
-export interface ModernSectionProps {
+export interface SectionProps {
   title?: string;
   subtitle?: string;
   children: React.ReactNode;

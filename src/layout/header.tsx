@@ -1,7 +1,7 @@
+import { THEME_RESPONSIVE } from '@/constants/theme';
 import { BarChart3, Settings } from 'lucide-react';
 import React from 'react';
 import { Button } from '../components/button';
-import { THEME_RESPONSIVE } from '../constants/theme';
 import { cn } from '../utils/functions/style-utils';
 
 interface HeaderProps {

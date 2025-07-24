@@ -1,4 +1,4 @@
-import type { ThemeUrlPreviewType } from '../../constants/theme';
+import type { ThemeUrlPreviewType } from '@/constants/theme';
 
 /**
  * Utilidades genéricas para URL previews

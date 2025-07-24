@@ -1,7 +1,7 @@
 import { endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { calculateCategoryEffortDistribution } from '../../constants/exercise-categories';
 import type { WorkoutRecord } from '../../interfaces';
+import { calculateCategoryEffortDistribution } from './exercise-utils';
 
 /**
  * FUNCIÓN DE DEBUGGING: Analiza exactamente qué está pasando con los cálculos de hombros

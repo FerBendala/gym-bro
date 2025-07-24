@@ -1,4 +1,4 @@
-import { MODERN_THEME } from '@/constants/modern-theme';
+import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils/functions';
 import { EXPORT_INCLUDES } from '../constants';
 

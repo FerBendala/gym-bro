@@ -1,5 +1,5 @@
+import { THEME_CHART } from '@/constants/theme';
 import React from 'react';
-import { THEME_CHART } from '../../../constants/theme';
 import { generateGridPoints, getChartY } from '../../../utils/functions';
 import type { ChartGridProps } from '../types';
 

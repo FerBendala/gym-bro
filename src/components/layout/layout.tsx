@@ -1,4 +1,4 @@
-import { MODERN_THEME } from '@/constants/modern-theme';
+import { MODERN_THEME } from '@/constants/theme';
 import { useNavigationType, useSubtitle, useTitle } from '@/stores/modern-layout';
 import { cn } from '@/utils/functions/style-utils';
 import React from 'react';
@@ -42,7 +42,7 @@ export const Layout: React.FC<LayoutProps> = ({
       <main className={cn(
         'min-h-max py-8 grow', // Espaciado ajustado para menú sticky
         MODERN_THEME.layout.container.base,
-        MODERN_THEME.responsive.spacing.section
+        MODERN_THEME.layout.section.padding.mobile
       )}>
         <div className={cn(
           MODERN_THEME.animations.fade.in,

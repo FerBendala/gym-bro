@@ -1,7 +1,8 @@
 import { differenceInDays, endOfMonth, endOfWeek, format, getDay, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { EXERCISE_CATEGORIES, IDEAL_VOLUME_DISTRIBUTION, calculateCategoryEffortDistribution } from '../../constants/exercise-categories';
+import { EXERCISE_CATEGORIES, IDEAL_VOLUME_DISTRIBUTION } from '../../constants/exercise.constants';
 import type { ExerciseAssignment, WorkoutRecord } from '../../interfaces';
+import { calculateCategoryEffortDistribution } from './exercise-utils';
 
 /**
  * Parejas de grupos musculares antagonistas

@@ -1,6 +1,6 @@
 import { AdminPanelModal } from '@/components/admin-panel';
-import { ModernPage } from '@/components/layout';
-import { MODERN_THEME } from '@/constants/modern-theme';
+import { Page } from '@/components/layout';
+import { MODERN_THEME } from '@/constants/theme';
 import React from 'react';
 
 interface ModernAdminPanelProps {
@@ -22,7 +22,7 @@ export const ModernAdminPanel: React.FC<ModernAdminPanelProps> = ({
 
   // Renderizar como página completa
   return (
-    <ModernPage
+    <Page
       title="Configuración"
       subtitle="Gestión de ejercicios y asignaciones"
     >
@@ -32,6 +32,6 @@ export const ModernAdminPanel: React.FC<ModernAdminPanelProps> = ({
           <ModernAdminPanel onClose={onClose} />
         </div>
       </div>
-    </ModernPage>
+    </Page>
   );
 }; 

@@ -1,9 +1,9 @@
-import { MODERN_THEME } from '@/constants/modern-theme';
+import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils/functions/style-utils';
 import React from 'react';
-import { ModernSectionProps } from '../types';
+import { SectionProps } from '../types';
 
-export const ModernSection: React.FC<ModernSectionProps> = ({
+export const Section: React.FC<SectionProps> = ({
   title,
   subtitle,
   children,

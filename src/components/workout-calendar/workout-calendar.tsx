@@ -1,5 +1,5 @@
+import { THEME_CALENDAR } from '@/constants/theme';
 import React from 'react';
-import { THEME_CALENDAR } from '../../constants/theme';
 import type { CalendarDayData } from '../../utils/functions/calendar-utils';
 import {
   CalendarGrid,

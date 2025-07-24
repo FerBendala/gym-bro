@@ -1,5 +1,5 @@
+import { MODERN_THEME } from '@/constants/theme';
 import React from 'react';
-import { MODERN_THEME } from '../../../constants/modern-theme';
 import { cn } from '../../../utils/functions';
 import { DASHBOARD_TABS } from '../constants';
 import type { DashboardTab } from '../types';

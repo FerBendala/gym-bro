@@ -1,5 +1,5 @@
 // Componentes principales
-export { ModernPage, ModernSection } from './components';
+export { Page, Section } from './components';
 export { Layout } from './layout';
 
 // Hooks
@@ -7,10 +7,10 @@ export { useModernNavigation } from './hooks';
 
 // Tipos
 export type {
-  LayoutProps, ModernNavItem,
-  ModernPageProps,
-  ModernSectionProps, NavigationConfig,
+  LayoutProps,
+  ModernNavItem, NavigationConfig,
   NavigationItem,
-  NavigationType
+  NavigationType, PageProps,
+  SectionProps
 } from './types';
 

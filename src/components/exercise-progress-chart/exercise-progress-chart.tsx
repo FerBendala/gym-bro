@@ -1,6 +1,6 @@
+import { THEME_CHART } from '@/constants/theme';
 import { BarChart3, TrendingUp } from 'lucide-react';
 import React, { useState } from 'react';
-import { THEME_CHART } from '../../constants/theme';
 import type { ChartDimensions } from '../../utils/functions';
 import { ChartLegend } from '../chart-legend';
 import { InfoTooltip } from '../tooltip';

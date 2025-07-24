@@ -1,6 +1,6 @@
+import { THEME_URL_PREVIEW } from '@/constants/theme';
 import { ExternalLink, FileText, Globe, Image, Play } from 'lucide-react';
 import React from 'react';
-import { THEME_URL_PREVIEW } from '../../../constants/theme';
 import { cn } from '../../../utils/functions/style-utils';
 import type { PreviewCompactProps } from '../types';
 

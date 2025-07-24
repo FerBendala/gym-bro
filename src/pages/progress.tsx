@@ -1,6 +1,6 @@
 import React from 'react';
 import { DashboardPage } from '../components/dashboard/dashboard-page';
-import { ModernPage } from '../components/layout';
+import { Page } from '../components/layout';
 
 /**
  * Página de progreso moderna que muestra el dashboard como página completa
@@ -8,11 +8,11 @@ import { ModernPage } from '../components/layout';
  */
 export const ModernProgress: React.FC = () => {
   return (
-    <ModernPage
+    <Page
       title="Mi Progreso"
       subtitle="Análisis de rendimiento y mejoras"
     >
       <DashboardPage />
-    </ModernPage>
+    </Page>
   );
 }; 

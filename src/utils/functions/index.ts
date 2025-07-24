@@ -10,6 +10,7 @@ export * from './category-analysis';
 export * from './chart-utils';
 export * from './date-filters';
 export * from './debug-shoulders';
+export * from './exercise-utils';
 export * from './export-utils';
 export * from './filter-utils';
 export * from './select-utils';
@@ -37,4 +38,10 @@ export {
   calculateIntensityScore,
   calculateRecentCategoryMetrics
 } from './category-analysis';
+
+// 🏋️ Exportaciones específicas para utilidades de ejercicios
+export {
+  calculateCategoryEffortDistribution, createCategoryTag, getCategoryColor, getCategoryIcon, getIdealVolumeDistributionAsync, getIdealVolumePercentage,
+  getIdealVolumePercentageAsync
+} from './exercise-utils';
 

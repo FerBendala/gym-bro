@@ -1,5 +1,5 @@
+import { THEME_WORKOUTS } from '@/constants/theme';
 import React from 'react';
-import { THEME_WORKOUTS } from '../../../constants/theme';
 
 interface WorkoutFooterProps {
   recordCount: number;

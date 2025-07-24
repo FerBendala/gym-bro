@@ -1,8 +1,10 @@
 
+import type { ExerciseCategory } from './exercise.constants';
+
 export interface MuscleGroup {
   id: string;
   name: string;
-  categories: readonly string[];
+  categories: readonly ExerciseCategory[];
   icon: string;
   color: string;
 }
@@ -87,6 +89,6 @@ export const exerciseBelongsToMuscleGroup = (
 ): boolean => {
   const muscleGroup = MUSCLE_GROUPS[muscleGroupId];
   return exerciseCategories.some(category =>
-    Array.from(muscleGroup.categories).includes(category)
+    (muscleGroup.categories as readonly ExerciseCategory[]).includes(category as ExerciseCategory)
   );
 }; 

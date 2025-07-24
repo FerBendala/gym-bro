@@ -1,10 +1,10 @@
+import { MODERN_THEME } from '@/constants/theme';
 import { ChevronDown } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from '../components/button';
 import { ExerciseList } from '../components/exercise-list';
-import { ModernPage, ModernSection } from '../components/layout';
+import { Page, Section } from '../components/layout';
 import { DAYS } from '../constants/days';
-import { MODERN_THEME } from '../constants/modern-theme';
 import type { DayOfWeek } from '../interfaces';
 import { cn } from '../utils/functions/style-utils';
 
@@ -47,7 +47,7 @@ export const ModernHome: React.FC<ModernHomeProps> = ({
   const dayInfo = getCurrentDayInfo();
 
   return (
-    <ModernPage
+    <Page
       title="Entrenamientos"
       subtitle={`${activeDay.charAt(0).toUpperCase() + activeDay.slice(1)} • ${dayInfo.formattedDate}`}
       headerActions={
@@ -111,7 +111,7 @@ export const ModernHome: React.FC<ModernHomeProps> = ({
       }
     >
       {/* Navegación rápida entre días */}
-      <ModernSection title="" className="mt-8">
+      <Section title="" className="mt-8">
         <div className="grid grid-cols-7 gap-2">
           {DAYS.map((day) => {
             const isActive = day === activeDay;
@@ -145,18 +145,16 @@ export const ModernHome: React.FC<ModernHomeProps> = ({
             );
           })}
         </div>
-      </ModernSection>
+      </Section>
 
       {/* Lista de ejercicios */}
-      <ModernSection>
+      <Section>
         <ExerciseList
           dayOfWeek={activeDay}
           onOpenAdmin={onOpenAdmin}
           onGoToHistory={onGoToHistory}
         />
-      </ModernSection>
-
-
-    </ModernPage>
+      </Section>
+    </Page>
   );
 }; 

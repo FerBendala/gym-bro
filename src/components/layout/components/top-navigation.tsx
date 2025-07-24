@@ -1,4 +1,4 @@
-import { MODERN_THEME } from '@/constants/modern-theme';
+import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils/functions/style-utils';
 import { Dumbbell } from 'lucide-react';
 import React from 'react';

@@ -1,5 +1,5 @@
+import { COLOR_VARIANTS, COMPONENT_SIZES, THEME_RESPONSIVE } from '@/constants/theme';
 import React from 'react';
-import { THEME_COLORS, THEME_RESPONSIVE } from '../../constants/theme';
 import type { UISize, UIVariant } from '../../interfaces';
 import { cn } from '../../utils/functions/style-utils';
 import { LoadingSpinner } from '../loading-spinner';
@@ -29,15 +29,9 @@ export const Button: React.FC<ButtonProps> = ({
   const isDisabled = disabled || loading;
 
   const baseClasses = cn(
-    'inline-flex items-center justify-center font-medium rounded-lg',
-    THEME_COLORS.transition,
-    THEME_COLORS.focus,
-    THEME_COLORS.disabled,
+    'inline-flex items-center justify-center font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-900 disabled:opacity-50 disabled:cursor-not-allowed',
     // Touch targets responsive
-    size === 'sm' ? cn(
-      THEME_RESPONSIVE.touch.button.mobile,
-      THEME_RESPONSIVE.touch.button.tablet
-    ) : THEME_COLORS.sizes[size],
+    size === 'sm' ? THEME_RESPONSIVE.touch.minTarget : COMPONENT_SIZES[size],
     fullWidth && 'w-full',
     isDisabled && 'opacity-50 cursor-not-allowed'
   );
@@ -46,8 +40,8 @@ export const Button: React.FC<ButtonProps> = ({
     <button
       className={cn(
         baseClasses,
-        THEME_COLORS.variants[variant],
-        size !== 'sm' && THEME_COLORS.sizes[size],
+        COLOR_VARIANTS[variant],
+        size !== 'sm' && COMPONENT_SIZES[size],
         className
       )}
       disabled={isDisabled}

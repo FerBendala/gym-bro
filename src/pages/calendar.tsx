@@ -1,5 +1,5 @@
 import { getWorkoutRecords } from '@/api/services';
-import { ModernPage, ModernSection } from '@/components/layout';
+import { Page, Section } from '@/components/layout';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { InfoTooltip } from '@/components/tooltip';
 import { WorkoutCalendar } from '@/components/workout-calendar';
@@ -65,20 +65,20 @@ export const ModernCalendar: React.FC = () => {
 
   if (loading) {
     return (
-      <ModernPage
+      <Page
         title="Calendario"
         subtitle="Vista mensual de entrenamientos"
       >
         <div className="flex items-center justify-center py-12">
           <LoadingSpinner />
         </div>
-      </ModernPage>
+      </Page>
     );
   }
 
   if (error) {
     return (
-      <ModernPage
+      <Page
         title="Calendario"
         subtitle="Vista mensual de entrenamientos"
       >
@@ -90,19 +90,19 @@ export const ModernCalendar: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </ModernPage>
+      </Page>
     );
   }
 
   const monthStats = getCurrentMonthStats();
 
   return (
-    <ModernPage
+    <Page
       title="Calendario"
       subtitle="Vista mensual de entrenamientos"
     >
       {/* Estadísticas del mes actual */}
-      <ModernSection
+      <Section
         title="Resumen del Mes"
         subtitle="Estadísticas de entrenamientos del mes actual"
       >
@@ -171,10 +171,10 @@ export const ModernCalendar: React.FC = () => {
             </CardContent>
           </Card>
         </div>
-      </ModernSection>
+      </Section>
 
       {/* Calendario principal */}
-      <ModernSection>
+      <Section>
         <Card>
           <CardHeader>
             <h3 className="text-lg font-semibold text-white flex items-center">
@@ -191,11 +191,11 @@ export const ModernCalendar: React.FC = () => {
             <WorkoutCalendar records={records} />
           </CardContent>
         </Card>
-      </ModernSection>
+      </Section>
 
       {/* Información adicional */}
       {records.length === 0 && (
-        <ModernSection>
+        <Section>
           <Card>
             <CardContent>
               <div className="text-center py-8">
@@ -209,8 +209,8 @@ export const ModernCalendar: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-        </ModernSection>
+        </Section>
       )}
-    </ModernPage>
+    </Page>
   );
 }; 
