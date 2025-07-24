@@ -1,8 +1,9 @@
-import { Activity, AlertTriangle, Shield, Target } from 'lucide-react';
+import { Activity, AlertTriangle, Brain, Shield, Target } from 'lucide-react';
 import React from 'react';
 import type { WorkoutRecord } from '../../../interfaces';
 import { Card, CardContent, CardHeader } from '../../card';
 import { StatCard } from '../../stat-card';
+import { InfoTooltip } from '../../tooltip';
 import { useAdvancedTab } from '../hooks/use-advanced-tab';
 
 interface AdvancedTabProps {
@@ -10,7 +11,7 @@ interface AdvancedTabProps {
 }
 
 export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
-  const { analysis, enhancedPerformanceIndicators } = useAdvancedTab(records);
+  const { analysis, enhancedPerformanceIndicators, categorizedSuggestions } = useAdvancedTab(records);
 
   if (records.length === 0) {
     return (
@@ -226,6 +227,87 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
             ) : (
               <p className="text-gray-400 text-center py-4">
                 Continúa entrenando para desarrollar indicadores de rendimiento
+              </p>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Sugerencias de Optimización */}
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <Brain className="w-5 h-5 mr-2" />
+            Sugerencias de Optimización
+            <InfoTooltip
+              content="Recomendaciones personalizadas y priorizadas basadas en análisis detallado de tus datos de entrenamiento."
+              position="top"
+              className="ml-2"
+            />
+          </h3>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {categorizedSuggestions.length > 0 ? (
+              categorizedSuggestions.map((suggestion, index) => {
+                const getCategoryStyles = (category: string) => {
+                  switch (category) {
+                    case 'intensity':
+                      return 'bg-red-900/20 border-red-500/30 text-red-400';
+                    case 'recovery':
+                      return 'bg-green-900/20 border-green-500/30 text-green-400';
+                    case 'frequency':
+                      return 'bg-purple-900/20 border-purple-500/30 text-purple-400';
+                    case 'planning':
+                      return 'bg-indigo-900/20 border-indigo-500/30 text-indigo-400';
+                    case 'progress':
+                      return 'bg-blue-900/20 border-blue-500/30 text-blue-400';
+                    case 'technique':
+                      return 'bg-yellow-900/20 border-yellow-500/30 text-yellow-400';
+                    case 'balance':
+                      return 'bg-cyan-900/20 border-cyan-500/30 text-cyan-400';
+                    default:
+                      return 'bg-gray-900/20 border-gray-500/30 text-gray-400';
+                  }
+                };
+
+                const getPriorityBadge = (priority: string) => {
+                  switch (priority) {
+                    case 'high':
+                      return 'bg-red-600 text-white';
+                    case 'medium':
+                      return 'bg-yellow-600 text-white';
+                    case 'low':
+                      return 'bg-gray-600 text-white';
+                    default:
+                      return 'bg-gray-600 text-white';
+                  }
+                };
+
+                return (
+                  <div
+                    key={index}
+                    className={`p-3 sm:p-4 border rounded-lg ${getCategoryStyles(suggestion.category)}`}
+                  >
+                    <div className="flex items-start space-x-3">
+                      <suggestion.icon className="w-4 h-4 sm:w-5 sm:h-5 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
+                          <h4 className="font-medium text-sm mb-1 sm:mb-0">{suggestion.title}</h4>
+                          <span className={`px-2 py-1 rounded-full text-xs font-bold ${getPriorityBadge(suggestion.priority)} w-fit`}>
+                            {suggestion.priority === 'high' ? 'Alta' : suggestion.priority === 'medium' ? 'Media' : 'Baja'}
+                          </span>
+                        </div>
+                        <p className="text-xs opacity-90 mb-2">{suggestion.description}</p>
+                        <p className="text-xs font-medium opacity-80">{suggestion.action}</p>
+                      </div>
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-gray-400 text-center py-4">
+                Tu entrenamiento está bien optimizado - mantén la consistencia
               </p>
             )}
           </div>
