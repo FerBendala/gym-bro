@@ -1,10 +1,10 @@
 import { MODERN_THEME } from '@/constants/modern-theme';
+import { useActiveTab, useNavigationActions, useShowMoreMenu, useUIActions } from '@/stores/modern-layout';
 import { cn } from '@/utils/functions/style-utils';
 import React from 'react';
 import { compactNavigationItems, moreMenuItems, navigationItems } from '../constants';
 import { ModernNavItem, NavigationItem, NavigationType } from '../types';
 import { navigationUtils } from '../utils/navigation-utils';
-import { useActiveTab, useNavigationActions, useShowMoreMenu, useUIActions } from '@/stores/modern-layout';
 
 interface BottomNavigationProps {
   activeTab?: ModernNavItem;

@@ -1,10 +1,10 @@
 import { MODERN_THEME } from '@/constants/modern-theme';
+import { useConfigActions, useConfigState } from '@/stores/modern-layout';
 import { cn } from '@/utils/functions/style-utils';
 import React from 'react';
 import { BottomNavigation } from './components/bottom-navigation';
 import { TopNavigation } from './components/top-navigation';
 import { ModernLayoutProps } from './types';
-import { useConfigState, useConfigActions } from '@/stores/modern-layout';
 
 /**
  * Layout moderno con navegación bottom-sheet
@@ -32,7 +32,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
     if (subtitle !== undefined) setSubtitle(subtitle);
     if (navigationType !== undefined) setNavigationType(navigationType);
     if (showBackButton !== undefined) setShowBackButton(showBackButton);
-  }, [title, subtitle, navigationType, showBackButton, setTitle, setSubtitle, setNavigationType, setShowBackButton]);
+  }, [title, subtitle, navigationType, showBackButton]); // Removidas las funciones del store de las dependencias
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 relative flex flex-col">

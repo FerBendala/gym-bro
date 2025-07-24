@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react';
 import { useUIActions, useUIState } from '@/stores/modern-layout';
+import { useEffect, useRef } from 'react';
 
 export const useMoreMenu = () => {
   const { showMoreMenu } = useUIState();
@@ -21,7 +21,7 @@ export const useMoreMenu = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showMoreMenu, closeMoreMenu]);
+  }, [showMoreMenu]); // Removida closeMoreMenu de las dependencias
 
   return {
     showMoreMenu,
