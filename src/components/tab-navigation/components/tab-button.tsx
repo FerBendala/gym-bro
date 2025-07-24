@@ -15,8 +15,8 @@ export const TabButton: React.FC<TabButtonProps> = ({
 
   const buttonClasses = getTabButtonClasses(
     isActive,
-    variant,
-    size,
+    variant || { active: '', inactive: '' },
+    size || '',
     isMobile
   );
 

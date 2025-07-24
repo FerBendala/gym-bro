@@ -12,8 +12,8 @@ export interface TabButtonProps {
   day: DayOfWeek;
   isActive: boolean;
   onClick: (day: DayOfWeek) => void;
-  size?: ThemeTabSize;
-  variant?: ThemeTabVariant;
+  size?: string;
+  variant?: { active: string; inactive: string };
   isMobile?: boolean;
 }
 
