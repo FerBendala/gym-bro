@@ -2,30 +2,19 @@
 export { useModernLayoutStore } from './store';
 
 // Exportar tipos
-export type { ModernLayoutState, ModernLayoutActions, ModernLayoutStore } from './types';
+export type { ModernLayoutActions, ModernLayoutState, ModernLayoutStore } from './types';
 
 // Exportar constantes
 export { INITIAL_STATE, PERSISTENCE_CONFIG } from './constants';
 
 // Exportar acciones (para testing o uso directo)
 export {
-  createModernLayoutNavigationActions,
-  createModernLayoutUIActions,
-  createModernLayoutConfigActions,
-  createModernLayoutUtilityActions,
+  createModernLayoutConfigActions, createModernLayoutNavigationActions,
+  createModernLayoutUIActions, createModernLayoutUtilityActions
 } from './actions';
 
 // Exportar selectores optimizados
 export {
-  useNavigationState,
-  useNavigationActions,
-  useUIState,
-  useUIActions,
-  useConfigState,
-  useConfigActions,
-  useActiveTab,
-  useNavigationType,
-  useShowMoreMenu,
-  useIsNavigationVisible,
-  useCanGoBack,
-} from './selectors'; 
+  useActiveTab, useCanGoBack, useConfigActions, useConfigState, useIsNavigationVisible, useNavigationActions, useNavigationState, useNavigationType,
+  useShowMoreMenu, useUIActions, useUIState
+} from './selectors';

@@ -13,7 +13,7 @@ export const createModernLayoutNavigationActions = (
   navigateTo: (tab: ModernNavItem) => {
     const { navigationHistory } = get();
     const newHistory = [...navigationHistory, tab];
-    
+
     set((_state) => ({
       activeTab: tab,
       navigationHistory: newHistory,
@@ -23,20 +23,20 @@ export const createModernLayoutNavigationActions = (
 
   goBack: () => {
     const { navigationHistory } = get();
-    
+
     if (navigationHistory.length > 1) {
       const newHistory = navigationHistory.slice(0, -1);
       const previousTab = newHistory[newHistory.length - 1];
-      
+
       set((_state) => ({
         activeTab: previousTab,
         navigationHistory: newHistory,
         canGoBack: newHistory.length > 1,
       }));
-      
+
       return true;
     }
-    
+
     return false;
   },
 

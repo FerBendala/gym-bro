@@ -6,16 +6,16 @@ export const INITIAL_STATE = {
   activeTab: 'home' as ModernNavItem,
   navigationHistory: ['home'] as ModernNavItem[],
   navigationType: 'grid' as NavigationType,
-  
+
   // UI
   isNavigationVisible: true,
   showMoreMenu: false,
-  
+
   // Configuración
   title: 'Gym Tracker',
   subtitle: undefined,
   showBackButton: false,
-  
+
   // Computed values
   canGoBack: false,
 } as const;

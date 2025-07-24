@@ -6,16 +6,16 @@ export interface ModernLayoutState {
   activeTab: ModernNavItem;
   navigationHistory: ModernNavItem[];
   navigationType: NavigationType;
-  
+
   // UI
   isNavigationVisible: boolean;
   showMoreMenu: boolean;
-  
+
   // Configuración
   title: string;
   subtitle?: string;
   showBackButton: boolean;
-  
+
   // Computed values
   canGoBack: boolean;
 }
@@ -27,21 +27,21 @@ export interface ModernLayoutActions {
   navigateTo: (tab: ModernNavItem) => void;
   goBack: () => boolean;
   clearHistory: () => void;
-  
+
   // UI
   setNavigationVisible: (visible: boolean) => void;
   toggleMoreMenu: () => void;
   closeMoreMenu: () => void;
-  
+
   // Configuración
   setNavigationType: (type: NavigationType) => void;
   setTitle: (title: string) => void;
   setSubtitle: (subtitle?: string) => void;
   setShowBackButton: (show: boolean) => void;
-  
+
   // Utilidades
   reset: () => void;
 }
 
 // Store completo
-export interface ModernLayoutStore extends ModernLayoutState, ModernLayoutActions {} 
+export interface ModernLayoutStore extends ModernLayoutState, ModernLayoutActions { } 
