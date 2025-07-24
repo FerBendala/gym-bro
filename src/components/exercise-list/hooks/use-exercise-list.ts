@@ -3,7 +3,7 @@ import { useOnlineStatus } from '@/hooks';
 import type { DayOfWeek, ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
 import { useNotification } from '@/stores/notification-store';
 import { getExercisesTrainedTodayForCurrentDay } from '@/utils/functions';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { UseExerciseListReturn } from '../types';
 
 // Evento personalizado para escuchar cambios de datos
@@ -21,7 +21,7 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
   const [exercisesTrainedToday, setExercisesTrainedToday] = useState<string[]>([]);
   const [workoutRecords, setWorkoutRecords] = useState<WorkoutRecord[]>([]);
 
-  const loadAssignments = async () => {
+  const loadAssignments = useCallback(async () => {
     if (!isOnline) {
       showNotification('Sin conexión. Los datos pueden estar desactualizados.', 'warning');
       setLoading(false);
@@ -54,12 +54,13 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
       // Determinar qué ejercicios se entrenaron hoy Y están en el tab correcto
       const trainedToday = getExercisesTrainedTodayForCurrentDay(workoutRecords, dayOfWeek);
       setExercisesTrainedToday(trainedToday);
-    } catch (error: any) {
-      showNotification(error.message || 'Error al cargar los ejercicios', 'error');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al cargar los ejercicios';
+      showNotification(errorMessage, 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [dayOfWeek, isOnline, showNotification]);
 
   const handleRecordWorkout = async (assignmentId: string, data: WorkoutFormData | WorkoutFormDataAdvanced) => {
     if (!isOnline) {
@@ -121,8 +122,9 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
 
       // Recargar datos para actualizar el estado de "entrenado hoy"
       await loadAssignments();
-    } catch (error: any) {
-      showNotification(error.message || 'Error al registrar el entrenamiento', 'error');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Error al registrar el entrenamiento';
+      showNotification(errorMessage, 'error');
       throw error;
     }
   };
@@ -141,9 +143,10 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
       await updateAssignmentsOrder(reorderedAssignments);
 
       showNotification('Orden de ejercicios actualizado', 'success');
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Si hay error, recargar los datos para revertir cambios
-      showNotification(error.message || 'Error al reordenar ejercicios', 'error');
+      const errorMessage = error instanceof Error ? error.message : 'Error al reordenar ejercicios';
+      showNotification(errorMessage, 'error');
       await loadAssignments();
     }
   };
@@ -151,7 +154,7 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
   // Cargar assignments cuando cambie el día o el estado de conexión
   useEffect(() => {
     loadAssignments();
-  }, [dayOfWeek, isOnline]);
+  }, [loadAssignments]);
 
   // Escuchar cambios de datos del AdminPanel
   useEffect(() => {
@@ -184,7 +187,7 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
     return () => {
       window.removeEventListener(DATA_CHANGE_EVENT, listener);
     };
-  }, [showNotification]); // loadAssignments se define arriba y cambia con dayOfWeek/isOnline
+  }, [loadAssignments, showNotification]);
 
   return {
     assignments,
