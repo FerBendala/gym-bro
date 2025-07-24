@@ -2,13 +2,13 @@ import { MODERN_THEME } from '@/constants/modern-theme';
 import { cn } from '@/utils/functions/style-utils';
 import React from 'react';
 import { compactNavigationItems, moreMenuItems, navigationItems } from '../constants';
-import { useMoreMenu } from '../hooks/use-more-menu';
 import { ModernNavItem, NavigationItem, NavigationType } from '../types';
 import { navigationUtils } from '../utils/navigation-utils';
+import { useActiveTab, useNavigationActions, useShowMoreMenu, useUIActions } from '@/stores/modern-layout';
 
 interface BottomNavigationProps {
-  activeTab: ModernNavItem;
-  onTabChange: (tab: ModernNavItem) => void;
+  activeTab?: ModernNavItem;
+  onTabChange?: (tab: ModernNavItem) => void;
   navigationType?: NavigationType;
   isNavigationVisible?: boolean;
 }
@@ -156,16 +156,31 @@ const NavItemMore: React.FC<{
 };
 
 export const BottomNavigation: React.FC<BottomNavigationProps> = ({
-  activeTab,
-  onTabChange,
-  navigationType = 'grid',
-  isNavigationVisible = true
+  activeTab: propActiveTab,
+  onTabChange: propOnTabChange,
+  navigationType: propNavigationType,
+  isNavigationVisible: propIsNavigationVisible
 }) => {
-  const { showMoreMenu, menuRef, toggleMoreMenu, closeMoreMenu } = useMoreMenu();
+  // Usar store de Zustand
+  const storeActiveTab = useActiveTab();
+  const { navigateTo } = useNavigationActions();
+  const { toggleMoreMenu, closeMoreMenu } = useUIActions();
+  const showMoreMenu = useShowMoreMenu();
+
+  // Priorizar props sobre store
+  const activeTab = propActiveTab ?? storeActiveTab;
+  const navigationType = propNavigationType ?? 'grid';
+  const isNavigationVisible = propIsNavigationVisible ?? true;
 
   // Función para manejar el cambio de tab
   const handleTabChange = (tab: ModernNavItem) => {
-    navigationUtils.handleTabChange(tab, onTabChange, toggleMoreMenu, closeMoreMenu);
+    if (propOnTabChange) {
+      // Si se proporciona prop, usar callback
+      navigationUtils.handleTabChange(tab, propOnTabChange, toggleMoreMenu, closeMoreMenu);
+    } else {
+      // Si no, usar store
+      navigationUtils.handleTabChange(tab, navigateTo, toggleMoreMenu, closeMoreMenu);
+    }
   };
 
   // Función para renderizar la navegación según el tipo
@@ -207,7 +222,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
 
       default: // 'grid' y 'compact' - usar diseño compacto
         return (
-          <div className="relative" ref={menuRef}>
+          <div className="relative">
             <div className={MODERN_THEME.navigation.bottomNavCompact.grid}>
               {items.map((item) => (
                 <NavItemCompact

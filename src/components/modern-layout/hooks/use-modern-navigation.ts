@@ -1,32 +1,22 @@
-import { useState } from 'react';
+import { useNavigationActions, useNavigationState } from '@/stores/modern-layout';
 import { ModernNavItem } from '../types';
 
-export const useModernNavigation = (initialTab: ModernNavItem = 'home') => {
-  const [activeTab, setActiveTab] = useState<ModernNavItem>(initialTab);
-  const [navigationHistory, setNavigationHistory] = useState<ModernNavItem[]>([initialTab]);
+export const useModernNavigation = (initialTab?: ModernNavItem) => {
+  const { activeTab, navigationHistory, canGoBack } = useNavigationState();
+  const { setActiveTab, navigateTo, goBack, clearHistory } = useNavigationActions();
 
-  const navigateTo = (tab: ModernNavItem) => {
-    setActiveTab(tab);
-    setNavigationHistory(prev => [...prev, tab]);
-  };
-
-  const goBack = () => {
-    if (navigationHistory.length > 1) {
-      const newHistory = navigationHistory.slice(0, -1);
-      setNavigationHistory(newHistory);
-      setActiveTab(newHistory[newHistory.length - 1]);
-      return true;
-    }
-    return false;
-  };
-
-  const canGoBack = navigationHistory.length > 1;
+  // Si se proporciona un initialTab, establecerlo (útil para inicialización)
+  if (initialTab && initialTab !== activeTab) {
+    setActiveTab(initialTab);
+  }
 
   return {
     activeTab,
     navigateTo,
     goBack,
     canGoBack,
-    navigationHistory
+    navigationHistory,
+    setActiveTab,
+    clearHistory,
   };
 }; 

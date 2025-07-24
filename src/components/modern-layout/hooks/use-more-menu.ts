@@ -1,14 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
+import { useUIActions, useUIState } from '@/stores/modern-layout';
 
 export const useMoreMenu = () => {
-  const [showMoreMenu, setShowMoreMenu] = useState(false);
+  const { showMoreMenu } = useUIState();
+  const { toggleMoreMenu, closeMoreMenu } = useUIActions();
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Cerrar menú al hacer click fuera
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowMoreMenu(false);
+        closeMoreMenu();
       }
     };
 
@@ -19,15 +21,7 @@ export const useMoreMenu = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showMoreMenu]);
-
-  const toggleMoreMenu = () => {
-    setShowMoreMenu(!showMoreMenu);
-  };
-
-  const closeMoreMenu = () => {
-    setShowMoreMenu(false);
-  };
+  }, [showMoreMenu, closeMoreMenu]);
 
   return {
     showMoreMenu,

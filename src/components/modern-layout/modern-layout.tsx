@@ -1,34 +1,45 @@
 import { MODERN_THEME } from '@/constants/modern-theme';
 import { cn } from '@/utils/functions/style-utils';
-import React, { useState } from 'react';
+import React from 'react';
 import { BottomNavigation } from './components/bottom-navigation';
 import { TopNavigation } from './components/top-navigation';
-import { DEFAULT_NAVIGATION_TYPE, DEFAULT_TITLE } from './constants';
 import { ModernLayoutProps } from './types';
+import { useConfigState, useConfigActions } from '@/stores/modern-layout';
 
 /**
  * Layout moderno con navegación bottom-sheet
  * Optimizado para móvil con soporte completo para desktop
+ * Usa Zustand para el estado global
  */
 export const ModernLayout: React.FC<ModernLayoutProps> = ({
   children,
   activeTab,
   onTabChange,
-  title = DEFAULT_TITLE,
+  title,
   subtitle,
   headerActions,
   showBackButton = false,
   onBackClick,
-  navigationType = DEFAULT_NAVIGATION_TYPE
+  navigationType,
+  isNavigationVisible = true
 }) => {
-  const [isNavigationVisible] = useState(true);
+  const { title: storeTitle, subtitle: storeSubtitle, navigationType: storeNavigationType } = useConfigState();
+  const { setTitle, setSubtitle, setNavigationType, setShowBackButton } = useConfigActions();
+
+  // Sincronizar props con el store
+  React.useEffect(() => {
+    if (title !== undefined) setTitle(title);
+    if (subtitle !== undefined) setSubtitle(subtitle);
+    if (navigationType !== undefined) setNavigationType(navigationType);
+    if (showBackButton !== undefined) setShowBackButton(showBackButton);
+  }, [title, subtitle, navigationType, showBackButton, setTitle, setSubtitle, setNavigationType, setShowBackButton]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 relative flex flex-col">
       {/* Top Navigation */}
       <TopNavigation
-        title={title}
-        subtitle={subtitle}
+        title={title ?? storeTitle}
+        subtitle={subtitle ?? storeSubtitle}
         headerActions={headerActions}
         showBackButton={showBackButton}
         onBackClick={onBackClick}
@@ -52,7 +63,7 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
       <BottomNavigation
         activeTab={activeTab}
         onTabChange={onTabChange}
-        navigationType={navigationType}
+        navigationType={navigationType ?? storeNavigationType}
         isNavigationVisible={isNavigationVisible}
       />
 

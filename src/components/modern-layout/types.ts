@@ -14,6 +14,7 @@ export interface ModernLayoutProps {
   showBackButton?: boolean;
   onBackClick?: () => void;
   navigationType?: NavigationType;
+  isNavigationVisible?: boolean;
 }
 
 export interface NavigationItem {
