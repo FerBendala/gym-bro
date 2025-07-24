@@ -6,4 +6,5 @@ export * from './admin';
 export * from './connection-store';
 export * from './data-store';
 export * from './notification-store';
+export * from './modern-layout';
 

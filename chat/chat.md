@@ -8,6 +8,7 @@
 - Si necesitas estado global/local, recuerda que usamos Zustand.
 - Las importaciones absolutas se hacen usando "@".
 - Añade index.ts para exportar el componente principal.
+- revisa si se puede usar zustand
 
 ```plaintext
 Estructura esperada:
