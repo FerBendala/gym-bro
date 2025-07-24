@@ -151,7 +151,7 @@ export const StrengthByCategories: React.FC<StrengthByCategoriesProps> = ({ reco
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {analysis.categories.map((category, index) => (
+            {analysis.categories.map((category) => (
               <div
                 key={category.categoryName}
                 className="p-4 bg-gray-800 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
