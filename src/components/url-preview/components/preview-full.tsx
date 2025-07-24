@@ -51,7 +51,7 @@ export const PreviewFull: React.FC<PreviewFullProps> = ({ url, previewData, onCl
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10" />
           <div className="relative p-6">
             <div className="flex items-start justify-between">
-              <div className="flex items-start space-x-4 items-center">
+              <div className="flex space-x-4 items-center">
                 {/* Icono del preview */}
                 <div className="p-3 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl shadow-lg transform hover:scale-105 transition-transform duration-200">
                   <Globe className="w-6 h-6 text-white" />
