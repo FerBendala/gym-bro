@@ -73,7 +73,146 @@ export const useAdvancedTab = (records: WorkoutRecord[]) => {
       });
     }
 
-    return indicators.slice(0, 4);
+    // Análisis de progreso de fuerza
+    if (analysis.progressPrediction.strengthTrend > 0) {
+      indicators.push({
+        type: 'excellent',
+        icon: '💪',
+        title: 'Progreso de Fuerza',
+        description: 'Tendencia positiva en desarrollo de fuerza',
+        value: `+${analysis.progressPrediction.strengthTrend.toFixed(1)}kg/sem`,
+        progress: Math.min(100, (analysis.progressPrediction.strengthTrend / 5) * 100)
+      });
+    } else if (analysis.progressPrediction.strengthTrend < -2) {
+      indicators.push({
+        type: 'warning',
+        icon: '📉',
+        title: 'Regresión de Fuerza',
+        description: 'Tendencia negativa en desarrollo de fuerza',
+        value: `${analysis.progressPrediction.strengthTrend.toFixed(1)}kg/sem`,
+        progress: Math.abs(analysis.progressPrediction.strengthTrend)
+      });
+    }
+
+    // Análisis de eficiencia temporal
+    if (analysis.trainingEfficiency.timeEfficiencyScore >= 80) {
+      indicators.push({
+        type: 'excellent',
+        icon: '⚡',
+        title: 'Eficiencia Temporal',
+        description: 'Excelente aprovechamiento del tiempo de entrenamiento',
+        value: `${analysis.trainingEfficiency.timeEfficiencyScore}%`,
+        progress: analysis.trainingEfficiency.timeEfficiencyScore
+      });
+    } else if (analysis.trainingEfficiency.timeEfficiencyScore < 50) {
+      indicators.push({
+        type: 'warning',
+        icon: '⏰',
+        title: 'Baja Eficiencia',
+        description: 'Oportunidad de optimizar tiempo de entrenamiento',
+        value: `${analysis.trainingEfficiency.timeEfficiencyScore}%`,
+        progress: analysis.trainingEfficiency.timeEfficiencyScore
+      });
+    }
+
+    // Análisis de riesgo de meseta
+    if (analysis.progressPrediction.plateauRisk < 20) {
+      indicators.push({
+        type: 'excellent',
+        icon: '🎯',
+        title: 'Progreso Sostenible',
+        description: 'Bajo riesgo de estancamiento',
+        value: `${analysis.progressPrediction.plateauRisk}% riesgo`,
+        progress: 100 - analysis.progressPrediction.plateauRisk
+      });
+    } else if (analysis.progressPrediction.plateauRisk > 70) {
+      indicators.push({
+        type: 'critical',
+        icon: '🛑',
+        title: 'Riesgo de Meseta',
+        description: 'Alto riesgo de estancamiento',
+        value: `${analysis.progressPrediction.plateauRisk}% riesgo`,
+        progress: analysis.progressPrediction.plateauRisk
+      });
+    }
+
+    // Análisis de volumen de entrenamiento
+    const recentVolume = records.slice(-7).reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+    const avgVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / records.length;
+    const volumeRatio = recentVolume / avgVolume;
+
+    if (volumeRatio > 1.3) {
+      indicators.push({
+        type: 'good',
+        icon: '📈',
+        title: 'Volumen Alto',
+        description: 'Volumen superior al promedio histórico',
+        value: `${(volumeRatio * 100).toFixed(0)}% del promedio`,
+        progress: Math.min(100, volumeRatio * 50)
+      });
+    } else if (volumeRatio < 0.7) {
+      indicators.push({
+        type: 'warning',
+        icon: '📉',
+        title: 'Volumen Bajo',
+        description: 'Volumen inferior al promedio histórico',
+        value: `${(volumeRatio * 100).toFixed(0)}% del promedio`,
+        progress: volumeRatio * 100
+      });
+    }
+
+    // Análisis de intensidad
+    if (analysis.intensityMetrics.overallIntensity === 'Óptima') {
+      indicators.push({
+        type: 'excellent',
+        icon: '⚖️',
+        title: 'Intensidad Balanceada',
+        description: 'Balance ideal entre peso y volumen',
+        value: analysis.intensityMetrics.overallIntensity,
+        progress: 90
+      });
+    } else if (analysis.intensityMetrics.overallIntensity === 'Excesiva') {
+      indicators.push({
+        type: 'critical',
+        icon: '🔥',
+        title: 'Intensidad Excesiva',
+        description: 'Riesgo de sobrecarga y lesión',
+        value: analysis.intensityMetrics.overallIntensity,
+        progress: 100
+      });
+    } else if (analysis.intensityMetrics.overallIntensity === 'Baja') {
+      indicators.push({
+        type: 'warning',
+        icon: '📊',
+        title: 'Intensidad Baja',
+        description: 'Oportunidad de aumentar carga',
+        value: analysis.intensityMetrics.overallIntensity,
+        progress: 30
+      });
+    }
+
+    // Análisis de confianza en predicciones
+    if (analysis.progressPrediction.confidenceLevel >= 85) {
+      indicators.push({
+        type: 'excellent',
+        icon: '🎯',
+        title: 'Predicciones Confiables',
+        description: 'Alta confianza en análisis de progreso',
+        value: `${analysis.progressPrediction.confidenceLevel}% confianza`,
+        progress: analysis.progressPrediction.confidenceLevel
+      });
+    } else if (analysis.progressPrediction.confidenceLevel < 60) {
+      indicators.push({
+        type: 'warning',
+        icon: '❓',
+        title: 'Datos Insuficientes',
+        description: 'Baja confianza en predicciones',
+        value: `${analysis.progressPrediction.confidenceLevel}% confianza`,
+        progress: analysis.progressPrediction.confidenceLevel
+      });
+    }
+
+    return indicators.slice(0, 6);
   }, [records, analysis]);
 
   // Generar sugerencias de optimización categorizadas
