@@ -1,5 +1,5 @@
 import { MODERN_THEME } from '@/constants/modern-theme';
-import { useConfigActions, useNavigationType, useSubtitle, useTitle } from '@/stores/modern-layout';
+import { useNavigationType, useSubtitle, useTitle } from '@/stores/modern-layout';
 import { cn } from '@/utils/functions/style-utils';
 import React from 'react';
 import { BottomNavigation } from './components/bottom-navigation';
@@ -26,15 +26,6 @@ export const ModernLayout: React.FC<ModernLayoutProps> = ({
   const storeTitle = useTitle();
   const storeSubtitle = useSubtitle();
   const storeNavigationType = useNavigationType();
-  const { setTitle, setSubtitle, setNavigationType, setShowBackButton } = useConfigActions();
-
-  // Sincronizar props con el store
-  React.useEffect(() => {
-    if (title !== undefined) setTitle(title);
-    if (subtitle !== undefined) setSubtitle(subtitle);
-    if (navigationType !== undefined) setNavigationType(navigationType);
-    if (showBackButton !== undefined) setShowBackButton(showBackButton);
-  }, [title, subtitle, navigationType, showBackButton]); // Removidas las funciones del store de las dependencias
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 relative flex flex-col">
