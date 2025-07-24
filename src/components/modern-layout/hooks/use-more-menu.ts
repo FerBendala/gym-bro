@@ -1,4 +1,4 @@
-import { useUIActions, useShowMoreMenu } from '@/stores/modern-layout';
+import { useShowMoreMenu, useUIActions } from '@/stores/modern-layout';
 import { useEffect, useRef } from 'react';
 
 export const useMoreMenu = () => {
