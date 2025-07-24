@@ -1,6 +1,6 @@
 // Componentes principales
 export { ModernPage, ModernSection } from './components';
-export { ModernLayout } from './modern-layout';
+export { Layout as ModernLayout } from './layout';
 
 // Hooks
 export { useModernNavigation } from './hooks';

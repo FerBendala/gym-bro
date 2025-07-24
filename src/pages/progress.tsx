@@ -1,6 +1,6 @@
 import React from 'react';
 import { DashboardPage } from '../components/dashboard/dashboard-page';
-import { ModernPage } from '../components/modern-ui';
+import { ModernPage } from '../components/ui';
 
 /**
  * Página de progreso moderna que muestra el dashboard como página completa

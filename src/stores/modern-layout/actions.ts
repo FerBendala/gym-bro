@@ -1,4 +1,4 @@
-import { ModernNavItem, NavigationType } from '@/components/modern-layout/types';
+import { ModernNavItem, NavigationType } from '@/components/layout/types';
 import { ModernLayoutStore } from './types';
 
 // Acciones de navegación

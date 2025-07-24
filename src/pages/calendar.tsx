@@ -1,7 +1,7 @@
 import { getWorkoutRecords } from '@/api/services';
 import { LoadingSpinner } from '@/components/loading-spinner';
-import { ModernPage, ModernSection } from '@/components/modern-ui';
 import { InfoTooltip } from '@/components/tooltip';
+import { ModernPage, ModernSection } from '@/components/ui';
 import { WorkoutCalendar } from '@/components/workout-calendar';
 import type { WorkoutRecord } from '@/interfaces';
 import { formatNumber } from '@/utils/functions';

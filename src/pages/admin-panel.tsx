@@ -1,5 +1,5 @@
 import { AdminPanelModal } from '@/components/admin-panel';
-import { ModernPage } from '@/components/modern-ui';
+import { ModernPage } from '@/components/ui';
 import { MODERN_THEME } from '@/constants/modern-theme';
 import React from 'react';
 

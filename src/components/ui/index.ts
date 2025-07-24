@@ -19,7 +19,7 @@ export {
   ModernPage,
   ModernSection,
   useModernNavigation
-} from '../modern-layout';
+} from '../layout';
 
 // Tipos
-export type { ModernNavItem, NavigationType } from '../modern-layout';
+export type { ModernNavItem, NavigationType } from '../layout';

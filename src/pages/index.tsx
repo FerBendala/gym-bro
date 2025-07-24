@@ -1,6 +1,6 @@
 import { migrateExercisesToMultipleCategories } from '@/api/services';
-import { ModernLayout, useModernNavigation } from '@/components/modern-ui';
 import { Notification } from '@/components/notification';
+import { ModernLayout, useModernNavigation } from '@/components/ui';
 import type { DayOfWeek } from '@/interfaces';
 import { useNotification } from '@/stores/notification-store';
 import { useEffect, useState } from 'react';

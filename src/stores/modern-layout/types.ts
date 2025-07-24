@@ -1,4 +1,4 @@
-import { ModernNavItem, NavigationType } from '@/components/modern-layout/types';
+import { ModernNavItem, NavigationType } from '@/components/layout/types';
 
 // Estado del store
 export interface ModernLayoutState {

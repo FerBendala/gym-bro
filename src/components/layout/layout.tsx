@@ -11,7 +11,7 @@ import { ModernLayoutProps } from './types';
  * Optimizado para móvil con soporte completo para desktop
  * Usa Zustand para el estado global
  */
-export const ModernLayout: React.FC<ModernLayoutProps> = ({
+export const Layout: React.FC<ModernLayoutProps> = ({
   children,
   activeTab,
   onTabChange,
