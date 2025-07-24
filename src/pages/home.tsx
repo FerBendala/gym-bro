@@ -1,8 +1,8 @@
 import { ChevronDown } from 'lucide-react';
 import React, { useState } from 'react';
+import { Button } from '../components/button';
 import { ExerciseList } from '../components/exercise-list';
 import { ModernPage, ModernSection } from '../components/layout';
-import { ModernButton } from '../components/ui';
 import { DAYS } from '../constants/days';
 import { MODERN_THEME } from '../constants/modern-theme';
 import type { DayOfWeek } from '../interfaces';
@@ -54,14 +54,14 @@ export const ModernHome: React.FC<ModernHomeProps> = ({
         <div className="flex items-center space-x-2">
           {/* Selector de día moderno */}
           <div className="relative">
-            <ModernButton
+            <Button
               variant="secondary"
               size="sm"
               onClick={() => setShowDaySelector(!showDaySelector)}
               rightIcon={<ChevronDown className="w-4 h-4" />}
             >
               {activeDay.charAt(0).toUpperCase() + activeDay.slice(1)}
-            </ModernButton>
+            </Button>
 
             {showDaySelector && (
               <div className={cn(

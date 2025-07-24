@@ -1,1 +1,2 @@
-export { Card, CardContent, CardHeader } from './card';
+export { Card, CardContent, CardHeader, ExerciseCard, StatsCard } from './card';
+

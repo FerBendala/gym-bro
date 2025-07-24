@@ -440,7 +440,4 @@ export type ModernColorScale = keyof typeof MODERN_COLORS.gray;
 export type ModernFontSize = keyof typeof MODERN_TYPOGRAPHY.fontSize;
 export type ModernSpacing = keyof typeof MODERN_SPACING;
 export type ModernRadius = keyof typeof MODERN_RADIUS;
-export type ModernButtonSize = keyof typeof MODERN_COMPONENTS.button.sizes;
-export type ModernButtonVariant = keyof typeof MODERN_COMPONENTS.button.variants;
-export type ModernCardVariant = keyof typeof MODERN_COMPONENTS.card.variants;
 export type ModernInputVariant = keyof typeof MODERN_COMPONENTS.input.variants; 
