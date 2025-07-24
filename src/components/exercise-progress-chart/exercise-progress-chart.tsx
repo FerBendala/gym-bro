@@ -5,6 +5,7 @@ import type { ChartDimensions } from '../../utils/functions';
 import { ChartLegend } from '../chart-legend';
 import { InfoTooltip } from '../tooltip';
 import { ChartEmptyState, ChartGrid, ChartStatistics, EnhancedChartLines } from './components';
+import { CHART_DIMENSIONS, CHART_EMPTY_STATE, CHART_INFO_ITEMS } from './constants';
 import { useChartData, useChartStatistics } from './hooks';
 import type { ExerciseProgressChartProps } from './types';
 
@@ -18,14 +19,10 @@ export const ExerciseProgressChart: React.FC<ExerciseProgressChartProps> = ({ re
   const [showStatistics, setShowStatistics] = useState(false);
 
   // Dimensiones del gráfico más grandes para mejor visualización
-  const dimensions: ChartDimensions = {
-    width: 600,
-    height: 300,
-    padding: 50
-  };
+  const dimensions: ChartDimensions = CHART_DIMENSIONS;
 
   if (isEmpty || !chartData) {
-    return <ChartEmptyState height={120} />;
+    return <ChartEmptyState height={CHART_EMPTY_STATE.defaultHeight} />;
   }
 
   const { exerciseData, weightRange, dateRange, legendItems } = chartData;
@@ -90,22 +87,12 @@ export const ExerciseProgressChart: React.FC<ExerciseProgressChartProps> = ({ re
 
         {/* Información adicional */}
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-gray-400">
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-            <span>Líneas ascendentes = Mejora en fuerza</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
-            <span>Considera peso × repeticiones</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <span>1RM = Fórmula de Epley</span>
-          </div>
-          <div className="flex items-center space-x-2">
-            <div className="w-2 h-2 bg-purple-500 rounded-full"></div>
-            <span>Hover para ver peso real + estimado</span>
-          </div>
+          {CHART_INFO_ITEMS.map((item, index) => (
+            <div key={index} className="flex items-center space-x-2">
+              <div className={`w-2 h-2 ${item.color} rounded-full`}></div>
+              <span>{item.text}</span>
+            </div>
+          ))}
         </div>
       </div>
 

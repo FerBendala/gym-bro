@@ -156,19 +156,19 @@ export const BalanceByGroupContent: React.FC<BalanceByGroupContentProps> = ({
                   </div>
 
                   <div className="flex items-center space-x-1">
-                    {balance.progressTrend === 'improving' && (
+                    {balance.balanceHistory?.trend === 'improving' && (
                       <>
                         <TrendingUp className="w-4 h-4 text-green-400" />
                         <span className="text-xs lg:text-sm text-green-400">Mejorando</span>
                       </>
                     )}
-                    {balance.progressTrend === 'declining' && (
+                    {balance.balanceHistory?.trend === 'declining' && (
                       <>
                         <TrendingDown className="w-4 h-4 text-red-400" />
                         <span className="text-xs lg:text-sm text-red-400">Declinando</span>
                       </>
                     )}
-                    {balance.progressTrend === 'stable' && (
+                    {balance.balanceHistory?.trend === 'stable' && (
                       <>
                         <Timer className="w-4 h-4 text-gray-400" />
                         <span className="text-xs lg:text-sm text-gray-400">Estable</span>

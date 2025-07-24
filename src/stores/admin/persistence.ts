@@ -39,8 +39,6 @@ export const persistenceConfig = {
           state.adminPanel.selectedDay = getCurrentDay();
         }
       }
-
-      console.log('🔄 Persistence - Estado rehidratado:', state.adminPanel);
     }
   },
 }; 

@@ -17,9 +17,6 @@ export const ExerciseList: React.FC = () => {
   const exercises = useAdminStore((state) => state.exercises);
   const setPreviewUrl = useAdminStore((state) => state.setPreviewUrl);
 
-  console.log('📋 ExerciseList - Renderizando con ejercicios:', exercises);
-  console.log('📋 ExerciseList - Longitud de ejercicios:', exercises?.length);
-
   const [selectedCategory, setSelectedCategory] = useState<ExerciseCategory>('all');
 
   // Crear lista de categorías con contador

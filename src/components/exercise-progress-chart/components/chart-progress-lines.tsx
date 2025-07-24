@@ -1,6 +1,6 @@
 import React from 'react';
-import { getChartX, getChartY } from '../../../utils/functions';
 import type { ChartProgressLinesProps } from '../types';
+import { generateProgressPath, getChartCoordinates } from '../utils';
 
 /**
  * Líneas de progreso del ExerciseProgressChart
@@ -21,9 +21,7 @@ export const ChartProgressLines: React.FC<ChartProgressLinesProps> = ({
         if (exerciseRecords.length < 2) {
           // Si solo hay un punto, mostrar un círculo
           const record = exerciseRecords[0];
-          const estimated1RM = record.weight * (1 + Math.min(record.reps, 20) / 30);
-          const x = getChartX(record.date.getTime(), dateRange, dimensions);
-          const y = getChartY(estimated1RM, weightRange, dimensions);
+          const { x, y } = getChartCoordinates(record, dateRange, weightRange, dimensions);
 
           return (
             <circle
@@ -37,12 +35,7 @@ export const ChartProgressLines: React.FC<ChartProgressLinesProps> = ({
         }
 
         // Crear la línea de progreso usando 1RM estimado
-        const pathData = exerciseRecords.map((record, index) => {
-          const estimated1RM = record.weight * (1 + Math.min(record.reps, 20) / 30);
-          const x = getChartX(record.date.getTime(), dateRange, dimensions);
-          const y = getChartY(estimated1RM, weightRange, dimensions);
-          return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-        }).join(' ');
+        const pathData = generateProgressPath(exerciseRecords, dateRange, weightRange, dimensions);
 
         return (
           <g key={exerciseName}>
@@ -57,9 +50,7 @@ export const ChartProgressLines: React.FC<ChartProgressLinesProps> = ({
             />
             {/* Puntos */}
             {exerciseRecords.map((record, pointIndex) => {
-              const estimated1RM = record.weight * (1 + Math.min(record.reps, 20) / 30);
-              const x = getChartX(record.date.getTime(), dateRange, dimensions);
-              const y = getChartY(estimated1RM, weightRange, dimensions);
+              const { x, y } = getChartCoordinates(record, dateRange, weightRange, dimensions);
 
               return (
                 <circle

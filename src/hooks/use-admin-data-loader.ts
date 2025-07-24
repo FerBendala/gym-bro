@@ -31,10 +31,7 @@ export const useAdminDataLoader = () => {
 
   // Cargar ejercicios
   const loadExercises = useCallback(async () => {
-    console.log('📡 loadExercises - Iniciando carga:', { isOnline });
-
     if (!isOnline) {
-      console.log('📡 loadExercises - Sin conexión, saltando carga');
       showNotification('Sin conexión. Los datos pueden estar desactualizados.', 'warning');
       return;
     }
@@ -43,13 +40,8 @@ export const useAdminDataLoader = () => {
     setError('exercises', null);
 
     try {
-      console.log('📡 loadExercises - Llamando a getExercises()');
       const exercisesData = await getExercises();
-      console.log('📡 loadExercises - Datos recibidos:', exercisesData);
-      console.log('📡 loadExercises - Tipo de datos:', typeof exercisesData, Array.isArray(exercisesData));
-      console.log('📡 loadExercises - Longitud:', exercisesData?.length);
       setExercises(exercisesData);
-      console.log('📡 loadExercises - setExercises llamado');
     } catch (error: any) {
       console.error('📡 loadExercises - Error:', error);
       const message = error.message || 'Error al cargar los ejercicios';
@@ -104,13 +96,11 @@ export const useAdminDataLoader = () => {
 
   // Cargar datos iniciales
   useEffect(() => {
-    console.log('🔄 useAdminDataLoader - Cargando ejercicios:', { isOnline, isStoreReady, selectedDay });
     loadExercises();
   }, [isOnline, loadExercises]);
 
   useEffect(() => {
     // Solo cargar asignaciones si el store está listo y selectedDay está definido
-    console.log('🔄 useAdminDataLoader - Cargando asignaciones:', { isOnline, isStoreReady, selectedDay });
     if (selectedDay) {
       loadAssignments();
     }

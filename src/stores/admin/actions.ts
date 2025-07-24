@@ -43,15 +43,10 @@ export const createLoadingActions = (set: any) => ({
 // Acciones de datos
 export const createDataActions = (set: any) => ({
   setExercises: (exercises: Exercise[]) => {
-    console.log('🏪 setExercises - Llamado con:', exercises);
-    console.log('🏪 setExercises - Tipo:', typeof exercises, Array.isArray(exercises));
-    console.log('🏪 setExercises - Longitud:', exercises?.length);
     set((state: AdminStore) => {
       const newState = { ...state, exercises };
-      console.log('🏪 setExercises - Nuevo estado:', newState.exercises);
       return newState;
     });
-    console.log('🏪 setExercises - Estado actualizado');
   },
 
   setAssignments: (assignments: ExerciseAssignment[]) => set({ assignments }),

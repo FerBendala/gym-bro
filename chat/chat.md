@@ -15,7 +15,7 @@ Estructura esperada:
  |-- components
  |-- hooks
  |-- utils
- |-- Componente.tsx
+ |-- componente.tsx (nombre de la carpeta)
  |-- types.ts (opcional)
  |-- constants.ts (opcional)
  |-- index.ts

@@ -9,8 +9,7 @@ import type { ChartGridProps } from '../types';
  */
 export const ChartGrid: React.FC<ChartGridProps> = ({
   dimensions,
-  weightRange,
-  dateRange
+  weightRange
 }) => {
   const { width, height, padding } = dimensions;
   const gridPoints = generateGridPoints(weightRange);

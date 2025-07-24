@@ -20,8 +20,6 @@ export const useAdminStore = create<AdminStore>()(
         const currentDay = getInitialState().adminPanel.selectedDay;
         const initialState = getInitialState();
 
-        console.log('🏪 Admin Store - Inicializando con activeTab:', initialState.adminPanel.activeTab);
-
         const store = {
           ...initialState,
           // Asegurar que selectedDay siempre tenga un valor válido
@@ -38,8 +36,6 @@ export const useAdminStore = create<AdminStore>()(
           ...createFilterActions(set),
           ...createUtilityActions(set, get),
         };
-
-        console.log('🏪 Admin Store - Store creado con activeTab:', store.adminPanel.activeTab);
 
         return store;
       },

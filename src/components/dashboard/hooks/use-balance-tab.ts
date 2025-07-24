@@ -41,14 +41,12 @@ export const useBalanceTab = (records: WorkoutRecord[]) => {
   };
 
   const handleBalanceItemClick = (itemName: string) => {
-    console.log('Balance item clicked:', itemName);
     // Scroll suave al elemento correspondiente
     const cardId = `balance-card-${itemName.toLowerCase().replace(/\s+/g, '-')}`;
     scrollToCard(cardId);
   };
 
   const handleUpperLowerItemClick = (itemName: string) => {
-    console.log('Upper/Lower item clicked:', itemName);
     // Scroll suave al elemento correspondiente
     const cardId = `upper-lower-card-${itemName.toLowerCase().replace(/\s+/g, '-')}`;
     scrollToCard(cardId);

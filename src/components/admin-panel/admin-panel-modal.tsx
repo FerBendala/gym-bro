@@ -1,7 +1,7 @@
 import { URLPreview } from '@/components/url-preview';
 import { useAdminDataLoader, useModalOverflow, useOnlineStatus } from '@/hooks';
 import { useAdminStore } from '@/stores/admin';
-import React, { useEffect } from 'react';
+import React from 'react';
 import { AdminContent, AdminHeader, AdminTabs } from './components';
 import type { AdminPanelProps } from './types';
 
@@ -24,15 +24,6 @@ export const AdminPanelModal: React.FC<AdminPanelProps> = ({ onClose }) => {
   const previewUrl = useAdminStore((state) => state.adminPanel.previewUrl);
   const setTab = useAdminStore((state) => state.setTab);
   const setPreviewUrl = useAdminStore((state) => state.setPreviewUrl);
-
-  console.log('🎯 AdminPanelModal - Estado del store:', { activeTab, previewUrl });
-  console.log('🎯 AdminPanelModal - Tipo de activeTab:', typeof activeTab);
-  console.log('🎯 AdminPanelModal - activeTab === undefined:', activeTab === undefined);
-
-  // Log de verificación
-  useEffect(() => {
-    console.log('🎯 AdminPanelModal - activeTab actualizado:', activeTab);
-  }, [activeTab]);
 
   const handleBackdropClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) {

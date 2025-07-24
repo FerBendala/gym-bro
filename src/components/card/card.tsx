@@ -1,7 +1,7 @@
+import { THEME_CONTAINERS, THEME_RESPONSIVE } from '@/constants/theme';
+import type { UISize, UIVariant } from '@/interfaces';
+import { cn } from '@/utils/functions/style-utils';
 import React from 'react';
-import { THEME_CONTAINERS, THEME_RESPONSIVE } from '../../constants/theme';
-import type { UISize, UIVariant } from '../../interfaces';
-import { cn } from '../../utils/functions/style-utils';
 import { CardContent, CardHeader } from './components';
 
 export interface CardProps {

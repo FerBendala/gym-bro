@@ -90,18 +90,6 @@ export const normalizeByWeekday = (
       5: cumulativePercentages[5], // Viernes
       6: cumulativePercentages[6]  // Sábado
     };
-
-    // **DEBUG**: Log del patrón detectado
-    if (currentWeekday === 1 || currentWeekday === 2) { // Lunes o martes
-      console.log('[PATRÓN DE ASIGNACIONES DETECTADO]', {
-        weekdayDistribution,
-        weekdayPercentages,
-        cumulativePercentages,
-        weekdayFactors,
-        currentWeekday,
-        totalAssignments
-      });
-    }
   } else {
     // Fallback: distribución típica (lunes a viernes)
     weekdayFactors = {
@@ -357,7 +345,7 @@ const calculateWeightProgression = (categoryRecords: WorkoutRecord[], targetCate
 
   // **MEJORA CRÍTICA**: Normalizar por día de la semana para comparaciones justas
   const currentDate = new Date();
-  const { normalizedCurrent: normalizedSecondHalf, normalizedComparison: normalizedFirstHalf, weekdayFactor } = normalizeByWeekday(
+  const { normalizedCurrent: normalizedSecondHalf, normalizedComparison: normalizedFirstHalf } = normalizeByWeekday(
     secondHalfAvg1RM,
     firstHalfAvg1RM,
     currentDate,
@@ -365,19 +353,6 @@ const calculateWeightProgression = (categoryRecords: WorkoutRecord[], targetCate
   );
 
   const densityProgression = normalizedFirstHalf > 0 ? ((normalizedSecondHalf - normalizedFirstHalf) / normalizedFirstHalf) * 100 : 0;
-
-  // **DEBUG**: Log para verificar la normalización
-  if (categoryName === 'Pecho' || categoryName === 'Espalda' || categoryName === 'Piernas') {
-    console.log(`[NORMALIZACIÓN WEIGHT ${categoryName}]`, {
-      originalSecondHalf: secondHalfAvg1RM,
-      originalFirstHalf: firstHalfAvg1RM,
-      normalizedSecondHalf,
-      normalizedFirstHalf,
-      weekdayFactor,
-      densityProgression,
-      currentWeekday: currentDate.getDay()
-    });
-  }
 
   // **MEJORA HÍBRIDA**: Combinar densidad de entrenamiento + progresión individual de ejercicios
   const exerciseNames = [...new Set(sortedRecords.map(r => r.exercise?.name).filter(Boolean))];
@@ -514,7 +489,7 @@ const calculateVolumeProgression = (categoryRecords: WorkoutRecord[], targetCate
 
   // **MEJORA CRÍTICA**: Normalizar por día de la semana para comparaciones justas
   const currentDate = new Date();
-  const { normalizedCurrent: normalizedSecondHalf, normalizedComparison: normalizedFirstHalf, weekdayFactor } = normalizeByWeekday(
+  const { normalizedCurrent: normalizedSecondHalf, normalizedComparison: normalizedFirstHalf } = normalizeByWeekday(
     secondHalfAvgVolume,
     firstHalfAvgVolume,
     currentDate,
@@ -523,18 +498,6 @@ const calculateVolumeProgression = (categoryRecords: WorkoutRecord[], targetCate
 
   const densityProgression = normalizedFirstHalf > 0 ? ((normalizedSecondHalf - normalizedFirstHalf) / normalizedFirstHalf) * 100 : 0;
 
-  // **DEBUG**: Log para verificar la normalización
-  if (categoryName === 'Pecho' || categoryName === 'Espalda' || categoryName === 'Piernas') {
-    console.log(`[NORMALIZACIÓN VOLUME ${categoryName}]`, {
-      originalSecondHalf: secondHalfAvgVolume,
-      originalFirstHalf: firstHalfAvgVolume,
-      normalizedSecondHalf,
-      normalizedFirstHalf,
-      weekdayFactor,
-      densityProgression,
-      currentWeekday: currentDate.getDay()
-    });
-  }
 
   // **MEJORA HÍBRIDA**: Combinar densidad de entrenamiento + progresión individual de ejercicios  
   const individualExerciseProgressions: number[] = [];
@@ -1428,45 +1391,13 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[], allAssignment
     // Usar fecha actual basada en los datos reales en lugar de new Date()
     const daysSinceLastWorkout = Math.floor((currentDate.getTime() - lastWorkout.getTime()) / (1000 * 60 * 60 * 24));
 
-    // Determinar tendencia basada en progresión de peso y volumen
-    // Ser más conservador con pocas semanas de datos
-    const weeksWithData = new Set(categoryRecords.map(r => {
-      const date = new Date(r.date);
-      const monday = new Date(date);
-      monday.setDate(date.getDate() - date.getDay() + 1);
-      return monday.toISOString().split('T')[0];
-    })).size;
 
     let trend: 'improving' | 'stable' | 'declining' = 'stable';
-
-    // **CORRECCIÓN CRÍTICA**: Implementar lógica mejorada que considera contexto completo
-    // Calcular factores de contexto para evaluar tendencias con precisión
-    const recentDays = daysSinceLastWorkout;
-    const avgVolumePerSession = categoryVolume / categoryRecords.length;
-
-    // **CORRECCIÓN**: Fórmula de fatiga más realista para volúmenes altos
-    const fatigueIndex = Math.min(100, Math.max(0, (avgVolumePerSession / 1500) * 60));
 
     // **CENTRALIZACIÓN**: Usar directamente la lógica de balanceHistory.trend
     // Esto elimina la duplicación y usa el sistema más inteligente
     const balanceHistory = analyzeBalanceHistory(categoryRecords, records, allAssignments);
     trend = balanceHistory.trend; // Usar directamente el resultado del análisis de balance
-
-    // **DEBUG**: Log para verificar la centralización
-    if (category === 'Pecho' || category === 'Espalda' || category === 'Piernas') {
-      console.log(`[CENTRALIZACIÓN ${category}] Categoría: ${category}`, {
-        weightProgression,
-        volumeProgression,
-        weeksWithData,
-        balanceHistoryTrend: balanceHistory.trend,
-        finalTrend: trend,
-        balanceHistoryConsistency: balanceHistory.consistency,
-        balanceHistoryVolatility: balanceHistory.volatility
-      });
-
-      // **VERIFICACIÓN FINAL**: Confirmar que la centralización funciona
-      console.log(`[VERIFICACIÓN FINAL ${category}] Tendencia final: ${trend}`);
-    }
 
     const strengthLevel = determineStrengthLevel(estimatedOneRM, category);
 
@@ -1760,31 +1691,30 @@ const analyzeProgressTrend = (
 
   let trend: 'improving' | 'stable' | 'declining';
 
-  // Aplicar la misma lógica que en CategoryMetrics
-  if (volumeProgression > 25) {
-    // **CORRECCIÓN**: Si hay progreso significativo en peso (>15%), no es aumento excesivo
-    if (improvement > 15) {
-      trend = 'improving'; // Progreso válido en ambos aspectos ✅
+  // **CORRECCIÓN MEJORADA**: Lógica más tolerante que favorece tendencias positivas
+  // Si hay cualquier progreso positivo, es improving
+  if (improvement > 0 || volumeProgression > 0) {
+    if (improvement > 2 || volumeProgression > 5) {
+      trend = 'improving';
     } else {
-      trend = 'declining'; // Aumento excesivo de volumen sin progreso de peso
+      trend = 'stable'; // Progreso leve pero positivo
     }
-  } else if (volumeProgression > 15) {
-    // **CORRECCIÓN DE CONTEXTO**: Evaluar contexto para aumento 15-25%
-    if (fatigueIndex < 50 && recentDays <= 2) {
-      trend = 'improving'; // Progreso controlado ✅
+  } else if (volumeProgression > 25) {
+    // Solo marcar como declining si hay aumento excesivo SIN progreso de peso
+    if (improvement <= -5) {
+      trend = 'declining';
     } else {
-      trend = 'declining'; // Aumento problemático
+      trend = 'stable'; // Aumento de volumen pero sin progreso negativo claro
     }
-  } else if (improvement > 5 || volumeProgression > 5) {
-    trend = 'improving';
-  } else if (improvement < -5 || volumeProgression < -5) {
+  } else if (improvement < -10 || volumeProgression < -15) {
+    // Solo declining si hay regresión significativa
     trend = 'declining';
   } else {
-    // **NUEVA CORRECCIÓN DE PROGRESO**: Considerar volumen cuando progreso de fuerza es mínimo
-    if (Math.abs(improvement) < 2.5 && volumeProgression > 5) {
-      // Aplicar factor 30% como progreso de fuerza equivalente
-      const adjustedProgress = improvement + (volumeProgression * 0.3);
-      trend = adjustedProgress > 2.0 ? 'improving' : 'stable';
+    // **MEJORA**: Si hay actividad reciente (últimos 7 días), favorecer stable sobre declining
+    if (recentDays <= 7 && (improvement >= -2 || volumeProgression >= -5)) {
+      trend = 'stable';
+    } else if (improvement < -5 || volumeProgression < -10) {
+      trend = 'declining';
     } else {
       trend = 'stable';
     }
@@ -1883,18 +1813,6 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: Wo
     const balanceConsistency = calculateBalanceConsistency(categoryRecords, allRecords);
     const weeklyBalanceData = calculateWeeklyBalancePercentages(categoryRecords, allRecords);
 
-    // **DEBUG**: Ver qué camino está tomando
-    const categoryName = categoryRecords[0]?.exercise?.categories?.[0];
-    if (categoryName === 'Pecho' || categoryName === 'Espalda' || categoryName === 'Piernas') {
-      console.log(`[ANALYZE BALANCE HISTORY ${categoryName} - CAMINO]`, {
-        allRecordsLength: allRecords.length,
-        categoryRecordsLength: categoryRecords.length,
-        weeklyBalanceDataLength: weeklyBalanceData.length,
-        usingMainPath: weeklyBalanceData.length >= 3,
-        usingFallback: weeklyBalanceData.length < 3
-      });
-    }
-
     if (weeklyBalanceData.length >= 3) {
       // Analizar tendencia de balance (se acerca o aleja del ideal)
       const idealPercentage = IDEAL_VOLUME_DISTRIBUTION[categoryRecords[0]?.exercise?.categories?.[0] || ''] || 15;
@@ -1954,22 +1872,6 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: Wo
         if (iqrRatio < 0.5) {
           adjustedVolatility *= 0.7; // Reducir volatilidad 30% más si es sistemático
         }
-      }
-
-      // **DEBUG**: Log para el camino principal
-      if (categoryRecords[0]?.exercise?.categories?.[0] === 'Pecho' ||
-        categoryRecords[0]?.exercise?.categories?.[0] === 'Espalda' ||
-        categoryRecords[0]?.exercise?.categories?.[0] === 'Piernas') {
-        console.log(`[ANALYZE BALANCE HISTORY ${categoryRecords[0]?.exercise?.categories?.[0]}]`, {
-          trendTowardsIdeal,
-          weightProgression,
-          volumeProgression,
-          finalTrend: trend,
-          balanceConsistency,
-          adjustedVolatility,
-          usingFallback: false,
-          logic: weightProgression > 5 || volumeProgression > 10 ? 'progression-based' : 'balance-based'
-        });
       }
 
       return {
@@ -2041,22 +1943,6 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: Wo
     trend = 'declining';
   } else {
     trend = 'stable';
-  }
-
-  // **DEBUG**: Log para verificar el cálculo
-  if (categoryName === 'Pecho' || categoryName === 'Espalda' || categoryName === 'Piernas') {
-    console.log(`[ANALYZE BALANCE HISTORY ${categoryName}]`, {
-      trendChange,
-      improvingThreshold,
-      decliningThreshold,
-      volumeProgression,
-      weightProgression,
-      finalTrend: trend,
-      firstHalfAvg1RM,
-      secondHalfAvg1RM,
-      usingFallback: true,
-      logic: weightProgression > 5 || volumeProgression > 10 ? 'progression-based' : 'trendChange-based'
-    });
   }
 
   // Calcular consistencia de progreso (no de balance, pero mejor que nada)
@@ -2293,20 +2179,6 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[], allAssignments?: 
     const balanceMargin = 3 + (7 * (1 - temporalAdjustmentFactor)); // Margen más estricto: máximo 10% en lugar de 20%
     const isBalanced = Math.abs(deviation) <= balanceMargin;
 
-    // DEBUG: Log para verificar la lógica de balance más estricta
-    if (process.env.NODE_ENV === 'development' && (metric.category === 'Pecho' || metric.category === 'Espalda' || metric.category === 'Piernas')) {
-      console.log(`🔧 DEBUG - Balance ${metric.category} (MARGEN ESTRICTO):`, {
-        category: metric.category,
-        actualPercentage,
-        idealPercentage,
-        deviation,
-        balanceMargin,
-        temporalAdjustmentFactor,
-        isBalanced,
-        status: isBalanced ? 'Equilibrado' : 'Desequilibrado'
-      });
-    }
-
     // Obtener registros específicos para esta categoría
     const categoryRecords = recordsByCategory[metric.category] || [];
 
@@ -2333,6 +2205,10 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[], allAssignments?: 
     const balanceHistory = analyzeBalanceHistory(categoryRecords, records, allAssignments);
     // Ajustar consistencia del historial
     balanceHistory.consistency = adjustMetricsForLimitedData(balanceHistory.consistency, temporalAdjustmentFactor, 'percentage');
+
+    // **CORRECCIÓN CRÍTICA**: Usar la misma tendencia en ambos lugares para consistencia
+    // balanceHistory.trend ahora usa progressAnalysis.trend en lugar de su propio cálculo
+    balanceHistory.trend = progressAnalysis.trend;
 
     // Determinar características con ajustes para datos limitados
     const adjustedDeviation = deviation * temporalAdjustmentFactor; // Reducir la importancia de la desviación con pocos datos

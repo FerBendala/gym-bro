@@ -19,8 +19,6 @@ export const AdminContent: React.FC<AdminContentProps> = ({
   const setEditingExercise = useAdminStore((state) => state.setEditingExercise);
   const setPreviewUrl = useAdminStore((state) => state.setPreviewUrl);
 
-  console.log('🎯 AdminContent - Renderizando:', { activeTab, isModal, editingExercise });
-
   const content = (
     <div className="space-y-6">
       {/* Tab: Ejercicios */}

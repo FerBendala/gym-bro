@@ -25,13 +25,6 @@ export const useDashboardData = () => {
         getExercises()
       ]);
 
-      console.log('📊 Dashboard Data Debug:', {
-        recordsCount: recordsData.length,
-        exercisesCount: exercisesData.length,
-        sampleRecord: recordsData[0],
-        sampleExercise: exercisesData[0]
-      });
-
       // Enriquecer los registros con información del ejercicio
       const enrichedRecords = recordsData.map((record: WorkoutRecord) => {
         const exercise = exercisesData.find((ex: Exercise) => ex.id === record.exerciseId);
@@ -44,17 +37,6 @@ export const useDashboardData = () => {
           ...record,
           exercise
         };
-      });
-
-      // Verificar enriquecimiento
-      const recordsWithExercise = enrichedRecords.filter((r: WorkoutRecord) => r.exercise);
-      const recordsWithoutExercise = enrichedRecords.filter((r: WorkoutRecord) => !r.exercise);
-
-      console.log('🔍 Enriquecimiento de datos:', {
-        totalRecords: enrichedRecords.length,
-        withExercise: recordsWithExercise.length,
-        withoutExercise: recordsWithoutExercise.length,
-        sampleEnriched: enrichedRecords[0]
       });
 
       setWorkoutRecords(enrichedRecords);

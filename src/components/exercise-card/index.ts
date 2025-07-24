@@ -3,6 +3,6 @@
  * Arquitectura modular con componentes, hooks y utilidades específicas
  */
 
-export { ExerciseCard } from './index.tsx';
+export { ExerciseCard } from './exercise-card';
 export type { ExerciseCardProps } from './types';
 

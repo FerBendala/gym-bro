@@ -32,9 +32,6 @@ export class MigrationService {
 
       if (migratedCount > 0) {
         await batch.commit();
-        console.log(`✅ Migración completada: ${migratedCount} ejercicios actualizados`);
-      } else {
-        console.log('ℹ️ No se encontraron ejercicios que requieran migración');
       }
 
       return migratedCount;

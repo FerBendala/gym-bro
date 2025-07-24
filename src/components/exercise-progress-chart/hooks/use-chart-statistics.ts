@@ -79,7 +79,6 @@ export const useChartStatistics = (records: WorkoutRecord[]): ChartStatistics =>
     // Rango de tiempo
     const sortedDates = [...records].sort((a, b) => a.date.getTime() - b.date.getTime());
     const firstDate = sortedDates[0].date;
-    const lastDate = sortedDates[sortedDates.length - 1].date;
 
     const timeRange = records.length > 1
       ? formatDistanceToNow(firstDate, { locale: es, addSuffix: false })

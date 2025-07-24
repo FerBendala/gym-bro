@@ -31,8 +31,6 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
   const isOnline = useOnlineStatus();
   const { showNotification } = useNotification();
 
-  console.log('📝 ExerciseForm - Renderizando formulario:', { exercise, isOnline });
-
   // Usar selectores específicos para acceder al estado correctamente
   const editingExercise = useAdminStore((state) => state.adminPanel.editingExercise);
   const setEditingExercise = useAdminStore((state) => state.setEditingExercise);
