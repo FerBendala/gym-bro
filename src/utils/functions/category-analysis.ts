@@ -1353,7 +1353,7 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[], allAssignment
 /**
  * Calcula el índice de simetría para un grupo muscular
  */
-const calculateSymmetryScore = (category: string, categoryRecords: WorkoutRecord[]): number => {
+const calculateSymmetryScore = (_: string, categoryRecords: WorkoutRecord[]): number => {
   if (categoryRecords.length === 0) return 0;
 
   // Análisis de simetría basado en variabilidad de pesos y repeticiones
