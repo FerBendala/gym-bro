@@ -1,16 +1,36 @@
 
 /**
+ * Interfaz para errores de Firebase con propiedades específicas
+ */
+interface FirebaseError {
+  code?: string;
+  message?: string;
+  name?: string;
+  stack?: string;
+}
+
+/**
+ * Tipo unión para diferentes tipos de errores que pueden ocurrir
+ */
+type AppError = FirebaseError | Error | { message?: string; code?: string } | unknown;
+
+/**
  * Maneja errores de Firebase de manera centralizada
- * @param {Object} error - Error de Firebase
+ * @param {AppError} error - Error de Firebase u otro error de la aplicación
  * @param {string} operation - Operación en la que se produjo el error
  * @throws {Error} Error con mensaje para el usuario
  */
-export const handleFirebaseError = (error: any, operation: string) => {
+export const handleFirebaseError = (error: AppError, operation: string) => {
   console.error(`Error in ${operation}:`, error);
 
+  // Normalizar el error para extraer propiedades comunes
+  const errorObj = error as FirebaseError;
+  const errorCode = errorObj.code;
+  const errorMessage = errorObj.message || 'Error desconocido';
+
   // Errores específicos de Firebase
-  if (error.code) {
-    switch (error.code) {
+  if (errorCode) {
+    switch (errorCode) {
       case 'unavailable':
         throw new Error('Base de datos no disponible. Verifica tu conexión a internet.');
       case 'permission-denied':
@@ -30,15 +50,15 @@ export const handleFirebaseError = (error: any, operation: string) => {
       case 'unauthenticated':
         throw new Error('No estás autenticado. Inicia sesión nuevamente.');
       default:
-        throw new Error(`Error de Firebase: ${error.message || 'Error desconocido'}`);
+        throw new Error(`Error de Firebase: ${errorMessage}`);
     }
   }
 
   // Errores de red
-  if (error.message?.includes('network') || error.message?.includes('fetch')) {
+  if (errorMessage.includes('network') || errorMessage.includes('fetch')) {
     throw new Error('Error de conexión. Verifica tu internet e intenta nuevamente.');
   }
 
   // Error genérico
-  throw new Error(`Error en ${operation}: ${error.message || 'Error desconocido'}`);
+  throw new Error(`Error en ${operation}: ${errorMessage}`);
 }; 
