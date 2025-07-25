@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { WORKOUT_HISTORY_CONSTANTS } from '../constants';
 import type { FilterState, WorkoutRecordWithExercise } from '../types';
 
@@ -84,11 +84,11 @@ export const useFilters = (records: WorkoutRecordWithExercise[], initialFilter?:
     }
   }, [filteredAndSortedRecords, hasActiveFilters]);
 
-  const updateFilter = <K extends keyof FilterState>(key: K, value: FilterState[K]) => {
+  const updateFilter = useCallback(<K extends keyof FilterState>(key: K, value: FilterState[K]) => {
     setFilters(prev => ({ ...prev, [key]: value }));
-  };
+  }, []);
 
-  const clearFilters = () => {
+  const clearFilters = useCallback(() => {
     setFilters({
       searchTerm: '',
       selectedExercise: 'all',
@@ -98,7 +98,7 @@ export const useFilters = (records: WorkoutRecordWithExercise[], initialFilter?:
       sortBy: 'date',
       sortOrder: 'desc'
     });
-  };
+  }, []);
 
   return {
     filters,

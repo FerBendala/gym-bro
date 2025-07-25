@@ -301,22 +301,6 @@ export const formatVolume = (volume: number): string => {
 };
 
 /**
- * Formatea la descripción de un entrenamiento mostrando series individuales si están disponibles
- */
-export const formatWorkoutDescription = (record: WorkoutRecord): string => {
-  // Si tiene series individuales, mostrar detalle por serie
-  if (record.individualSets && record.individualSets.length > 0) {
-    const seriesTexts = record.individualSets.map((set, index) =>
-      `Serie ${index + 1}: ${set.weight}kg × ${set.reps}`
-    );
-    return seriesTexts.join(', ');
-  }
-
-  // Fallback al formato tradicional
-  return `${record.weight}kg × ${record.reps} × ${record.sets}`;
-};
-
-/**
  * Obtiene el número total de series de un entrenamiento
  */
 export const getTotalSets = (record: WorkoutRecord): number => {
@@ -438,7 +422,6 @@ export const calculateAdvancedStrengthAnalysis = (records: WorkoutRecord[]): Adv
 
   // Recomendaciones de entrenamiento
   const trainingRecommendations = generateTrainingRecommendations(
-    sortedRecords,
     predictions,
     strengthCurve
   );
@@ -725,7 +708,6 @@ const analyzeStrengthCurve = (sortedRecords: WorkoutRecord[]): AdvancedStrengthA
  * Genera recomendaciones de entrenamiento basadas en el análisis
  */
 const generateTrainingRecommendations = (
-  sortedRecords: WorkoutRecord[],
   predictions: AdvancedStrengthAnalysis['predictions'],
   strengthCurve: AdvancedStrengthAnalysis['strengthCurve']
 ): AdvancedStrengthAnalysis['trainingRecommendations'] => {
@@ -857,9 +839,6 @@ const calculateQualityMetrics = (sortedRecords: WorkoutRecord[]): AdvancedStreng
   const avgStrength = calculateAverage(strengthValues);
   const volumeOptimization = avgVolume > 0 ? Math.min(100, (avgStrength / avgVolume) * 100) : 0;
 
-  // Indicadores de recuperación (basado en progresión después de descansos)
-  const recoveryScore = 50; // Base neutral
-
   // Analizar patrones de recuperación sería más complejo y requeriría datos de descanso
   // Por ahora, usamos la consistencia de progresión como proxy
   const consistencyMetrics = analyzeProgressionConsistency(sortedRecords);
@@ -943,7 +922,7 @@ export const calculateEnhanced1RMPrediction = (records: WorkoutRecord[]): Enhanc
   const predictions = combineRredictions(linearPredictions, exponentialPredictions, seasonalPredictions, dataQuality);
 
   // Evaluar factores de riesgo
-  const riskFactors = assessRiskFactors(sortedRecords, trends);
+  const riskFactors = assessRiskFactors(trends);
 
   // Generar escenarios
   const scenarios = generatePredictionScenarios(predictions, riskFactors);
@@ -1046,7 +1025,6 @@ const assessDataQuality = (sortedRecords: WorkoutRecord[]) => {
     intervals.push(daysDiff);
   }
 
-  const avgInterval = intervals.reduce((sum, int) => sum + int, 0) / intervals.length;
   const intervalVariability = calculateCoefficientsOfVariation(intervals);
   const temporalConsistency = Math.max(0, 100 - intervalVariability);
 
@@ -1212,7 +1190,7 @@ const combineRredictions = (linear: any, exponential: any, seasonal: any, dataQu
 /**
  * Evalúa factores de riesgo para las predicciones
  */
-const assessRiskFactors = (sortedRecords: WorkoutRecord[], trends: any) => {
+const assessRiskFactors = (trends: any) => {
   // Riesgo de meseta basado en tendencia reciente
   const plateauRisk = trends.shortTerm < 0.1 ? 80 : Math.max(10, 50 - (trends.shortTerm * 20));
 
