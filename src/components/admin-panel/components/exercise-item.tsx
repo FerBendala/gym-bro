@@ -1,8 +1,8 @@
 import { deleteExercise } from '@/api/services';
 import type { Exercise } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
-import { useOnlineStatus } from '@/stores/connection-store';
-import { useNotification } from '@/stores/notification-store';
+import { useOnlineStatus } from '@/stores/connection';
+import { useNotification } from '@/stores/notification';
 import { Edit2, Trash2 } from 'lucide-react';
 import React from 'react';
 import { Button } from '../../button';

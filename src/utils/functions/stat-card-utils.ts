@@ -1,4 +1,4 @@
-import type { ThemeStatCardVariant } from '@/constants/theme';
+import type { ThemeStatCardVariant } from '@/constants/theme/index.constants';
 
 /**
  * Utilidades genéricas para StatCard

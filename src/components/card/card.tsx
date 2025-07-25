@@ -1,4 +1,4 @@
-import { THEME_CONTAINERS, THEME_RESPONSIVE } from '@/constants/theme';
+import { THEME_CONTAINERS, THEME_RESPONSIVE } from '@/constants/theme/index.constants';
 import type { UISize, UIVariant } from '@/interfaces';
 import { cn } from '@/utils/functions/style-utils';
 import React from 'react';

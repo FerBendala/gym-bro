@@ -1,7 +1,7 @@
 import { URLPreview } from '@/components/url-preview';
 import { useModalOverflow } from '@/hooks';
 import { useAdminStore } from '@/stores/admin';
-import { useOnlineStatus } from '@/stores/connection-store';
+import { useOnlineStatus } from '@/stores/connection';
 import React from 'react';
 import { AdminContent, AdminHeader, AdminTabs } from './components';
 import { useAdminDataLoader } from './hooks';

@@ -1,5 +1,5 @@
-import { THEME_RESPONSIVE } from '@/constants/theme';
-import { useOnlineStatus } from '@/stores/connection-store';
+import { THEME_RESPONSIVE } from '@/constants/theme/index.constants';
+import { useOnlineStatus } from '@/stores/connection';
 import React, { useState } from 'react';
 import type { DayOfWeek } from '../../interfaces';
 import { cn } from '../../utils/functions/style-utils';

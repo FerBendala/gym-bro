@@ -1,4 +1,4 @@
-import { useOnlineStatus } from '@/stores/connection-store';
+import { useOnlineStatus } from '@/stores/connection';
 import { useEffect, useState } from 'react';
 import type { SyncEvent } from '../utils/data/indexeddb-types';
 import { initializeDB } from '../utils/data/indexeddb-utils';

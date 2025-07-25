@@ -1,4 +1,4 @@
-import { THEME_URL_PREVIEW } from '@/constants/theme';
+import { THEME_URL_PREVIEW } from '@/constants/theme/index.constants';
 import { ExternalLink, Globe } from 'lucide-react';
 import React from 'react';
 import { openURLSafely } from '../../../utils/functions/url-preview-utils';

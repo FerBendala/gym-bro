@@ -1,4 +1,4 @@
-import { MODERN_THEME } from '@/constants/theme';
+import { MODERN_THEME } from '@/constants/theme/index.constants';
 import { useNavigationType, useSubtitle, useTitle } from '@/stores/modern-layout';
 import { cn } from '@/utils/functions/style-utils';
 import React from 'react';

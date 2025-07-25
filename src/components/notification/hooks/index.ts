@@ -1,4 +1,4 @@
-import { useNotification } from '@/stores/notification-store';
+import { useNotification } from '@/stores/notification';
 import { useEffect, useState } from 'react';
 import { EXIT_ANIMATION_DELAY } from '../constants';
 import type { NotificationAnimationState } from '../types';

@@ -1,5 +1,5 @@
 import { migrateExercisesToMultipleCategories } from '@/api/services';
-import { useNotification } from '@/stores/notification-store';
+import { useNotification } from '@/stores/notification';
 import { useEffect } from 'react';
 
 export const useMigration = () => {

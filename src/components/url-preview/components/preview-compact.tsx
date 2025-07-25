@@ -1,4 +1,4 @@
-import { THEME_URL_PREVIEW } from '@/constants/theme';
+import { THEME_URL_PREVIEW } from '@/constants/theme/index.constants';
 import { ExternalLink, FileText, Globe, Image, Play } from 'lucide-react';
 import React from 'react';
 import { cn } from '../../../utils/functions/style-utils';

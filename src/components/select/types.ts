@@ -1,4 +1,4 @@
-import { ThemeSelectSize, ThemeSelectValidation, ThemeSelectVariant } from '@/constants/theme';
+import { ThemeSelectSize, ThemeSelectValidation, ThemeSelectVariant } from '@/constants/theme/index.constants';
 import React from 'react';
 
 export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'size'> {

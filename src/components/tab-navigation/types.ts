@@ -1,4 +1,4 @@
-import type { ThemeTabSize, ThemeTabVariant } from '@/constants/theme';
+import type { ThemeTabSize, ThemeTabVariant } from '@/constants/theme/index.constants';
 import type { DayOfWeek } from '@/interfaces';
 
 export interface TabNavigationProps {

@@ -1,6 +1,6 @@
 import { useAdminDataLoader } from '@/components/admin-panel/hooks';
 import { useAdminStore } from '@/stores/admin';
-import { useOnlineStatus } from '@/stores/connection-store';
+import { useOnlineStatus } from '@/stores/connection';
 import type { AdminPanelHookState } from '../types';
 
 /**

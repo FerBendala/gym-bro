@@ -1,4 +1,4 @@
-import type { ThemeTabSize, ThemeTabVariant } from '@/constants/theme';
+import type { ThemeTabSize, ThemeTabVariant } from '@/constants/theme/index.constants';
 import { useMemo } from 'react';
 import { getTabStyles } from '../utils';
 

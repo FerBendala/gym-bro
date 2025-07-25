@@ -1,6 +1,6 @@
 import { Button } from '@/components/button';
-import { DAYS } from '@/constants/days';
-import { MODERN_THEME } from '@/constants/theme';
+import { DAYS } from '@/constants/days.constants';
+import { MODERN_THEME } from '@/constants/theme/index.constants';
 import { cn } from '@/utils/functions/style-utils';
 import { ChevronDown } from 'lucide-react';
 import React from 'react';

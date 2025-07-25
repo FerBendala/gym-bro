@@ -1,4 +1,4 @@
-import { THEME_CALENDAR } from '@/constants/theme';
+import { THEME_CALENDAR } from '@/constants/theme/index.constants';
 import React from 'react';
 import { cn } from '../../../utils/functions/style-utils';
 import type { CalendarLegendProps } from '../types';

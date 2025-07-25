@@ -3,8 +3,8 @@
  * Breakpoints, grid, navegación y layout responsive
  */
 
-import { RESPONSIVE_SPACING } from './spacing';
-import { RESPONSIVE_TYPOGRAPHY } from './typography';
+import { RESPONSIVE_SPACING } from './spacing.constants';
+import { RESPONSIVE_TYPOGRAPHY } from './typography.constants';
 
 // Breakpoints estándar mobile-first
 export const BREAKPOINTS = {

@@ -1,4 +1,4 @@
-import { THEME_FORM, THEME_INPUT, THEME_RESPONSIVE } from '@/constants/theme';
+import { THEME_FORM, THEME_INPUT, THEME_RESPONSIVE } from '@/constants/theme/index.constants';
 
 export const INPUT_CONSTANTS = {
   DEFAULT_SIZE: 'md' as const,

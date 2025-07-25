@@ -1,4 +1,4 @@
-import { DAYS } from '@/constants/days';
+import { DAYS } from '@/constants/days.constants';
 import type { DayOfWeek } from '@/interfaces';
 import type { DayInfo } from '../types';
 

@@ -1,4 +1,4 @@
-import type { ThemeStatCardSize, ThemeStatCardVariant } from '@/constants/theme';
+import type { ThemeStatCardSize, ThemeStatCardVariant } from '@/constants/theme/index.constants';
 import type { LucideIcon } from 'lucide-react';
 
 export interface StatCardProps {

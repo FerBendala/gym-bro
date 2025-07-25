@@ -1,4 +1,4 @@
-import { useInitializeConnection } from '@/stores/connection-store';
+import { useInitializeConnection } from '@/stores/connection';
 import { useEffect, useRef } from 'react';
 
 /**

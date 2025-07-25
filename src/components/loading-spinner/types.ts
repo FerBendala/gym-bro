@@ -1,4 +1,4 @@
-import type { ThemeSpinnerColor, ThemeSpinnerSize, ThemeSpinnerVariant } from '@/constants/theme';
+import type { ThemeSpinnerColor, ThemeSpinnerSize, ThemeSpinnerVariant } from '@/constants/theme/index.constants';
 
 export interface LoadingSpinnerProps {
   size?: ThemeSpinnerSize;

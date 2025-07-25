@@ -1,4 +1,4 @@
-import { THEME_INPUT } from '@/constants/theme';
+import { THEME_INPUT } from '@/constants/theme/index.constants';
 import { cn } from '@/utils/functions';
 import { ChevronDown } from 'lucide-react';
 import React from 'react';

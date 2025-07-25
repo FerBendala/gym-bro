@@ -1,4 +1,4 @@
-import { THEME_CHART } from '@/constants/theme';
+import { THEME_CHART } from '@/constants/theme/index.constants';
 import type { WorkoutRecord } from '@/interfaces';
 import { useMemo } from 'react';
 import { calculateDataRange, groupRecordsByProperty, sortRecordsByDate } from '../../../utils/functions';

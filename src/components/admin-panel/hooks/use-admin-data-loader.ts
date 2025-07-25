@@ -3,8 +3,8 @@ import {
   getExercises
 } from '@/api/services';
 import { useAdminStore } from '@/stores/admin';
-import { useOnlineStatus } from '@/stores/connection-store';
-import { useNotification } from '@/stores/notification-store';
+import { useOnlineStatus } from '@/stores/connection';
+import { useNotification } from '@/stores/notification';
 import { useCallback, useEffect } from 'react';
 
 /**

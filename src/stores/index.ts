@@ -3,8 +3,8 @@ export * from './types';
 
 // Exportar stores específicos
 export * from './admin';
-export * from './connection-store';
-export * from './data-store';
+export * from './connection';
+export * from './data';
 export * from './modern-layout';
-export * from './notification-store';
+export * from './notification';
 

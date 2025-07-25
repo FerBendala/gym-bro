@@ -1,5 +1,5 @@
 import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants/exercise.constants';
-import { useNotification } from '@/stores/notification-store';
+import { useNotification } from '@/stores/notification';
 import type { UserSettings } from '@/utils/data/indexeddb-types';
 import { getItem, updateItem } from '@/utils/data/indexeddb-utils';
 import { useEffect, useState } from 'react';

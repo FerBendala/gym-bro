@@ -1,6 +1,6 @@
 import { deleteWorkoutRecord, getExercises, getWorkoutRecords, updateWorkoutRecord } from '@/api/services';
 import type { Exercise, WorkoutRecord } from '@/interfaces';
-import { useNotification } from '@/stores/notification-store';
+import { useNotification } from '@/stores/notification';
 import { useEffect, useState } from 'react';
 import type { WorkoutRecordWithExercise } from '../types';
 

@@ -1,5 +1,5 @@
-import { useOnlineStatus } from '@/stores/connection-store';
-import { useNotification } from '@/stores/notification-store';
+import { useOnlineStatus } from '@/stores/connection';
+import { useNotification } from '@/stores/notification';
 import {
   downloadFile,
   exportToCSV,

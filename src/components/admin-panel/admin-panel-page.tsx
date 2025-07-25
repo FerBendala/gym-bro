@@ -1,5 +1,5 @@
 import { useAdminStore } from '@/stores/admin';
-import { useOnlineStatus } from '@/stores/connection-store';
+import { useOnlineStatus } from '@/stores/connection';
 import { AlertTriangle, Wifi, WifiOff } from 'lucide-react';
 import React from 'react';
 import { OfflineWarning } from '../offline-warning';

@@ -1,4 +1,4 @@
-import { THEME_SPINNER } from '@/constants/theme';
+import { THEME_SPINNER } from '@/constants/theme/index.constants';
 import { cn, validateSize, validateVariant } from '@/utils/functions';
 import { DEFAULT_SPINNER_PROPS, SPINNER_COLORS, SPINNER_SIZES, SPINNER_VARIANTS } from '../constants';
 import type { LoadingSpinnerProps } from '../types';

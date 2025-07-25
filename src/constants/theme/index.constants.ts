@@ -5,11 +5,11 @@
  */
 
 // Exportar todos los módulos del tema
-export * from './colors';
-export * from './components';
-export * from './effects';
-export * from './layout';
-export * from './spacing';
-export * from './typography';
+export * from './colors.constants';
+export * from './components.constants';
+export * from './effects.constants';
+export * from './layout.constants';
+export * from './spacing.constants';
+export * from './typography.constants';
 
 // Las constantes legacy ahora están integradas directamente en los módulos correspondientes

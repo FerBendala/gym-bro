@@ -1,4 +1,4 @@
-import { THEME_TABS } from '@/constants/theme';
+import { THEME_TABS } from '@/constants/theme/index.constants';
 import React from 'react';
 import { TabButton, TabContainer } from './components';
 import { TAB_NAVIGATION_CONSTANTS } from './constants';

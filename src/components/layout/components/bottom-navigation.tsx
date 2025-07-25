@@ -1,4 +1,4 @@
-import { MODERN_THEME } from '@/constants/theme';
+import { MODERN_THEME } from '@/constants/theme/index.constants';
 import { useActiveTab, useCloseMoreMenu, useNavigateTo, useShowMoreMenu, useToggleMoreMenu } from '@/stores/modern-layout';
 import { cn } from '@/utils/functions/style-utils';
 import React from 'react';

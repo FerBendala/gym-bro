@@ -1,4 +1,4 @@
-import { useOnlineStatus } from '@/stores/connection-store';
+import { useOnlineStatus } from '@/stores/connection';
 import { useCallback } from 'react';
 import type { Exercise } from '../interfaces';
 import { STORES } from '../utils/data/indexeddb-config';

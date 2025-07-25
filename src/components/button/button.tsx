@@ -1,4 +1,4 @@
-import { COLOR_VARIANTS, COMPONENT_SIZES, THEME_RESPONSIVE } from '@/constants/theme';
+import { COLOR_VARIANTS, COMPONENT_SIZES, THEME_RESPONSIVE } from '@/constants/theme/index.constants';
 import React from 'react';
 import type { UISize, UIVariant } from '../../interfaces';
 import { cn } from '../../utils/functions/style-utils';

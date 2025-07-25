@@ -5,7 +5,7 @@ import {
   updateExercise
 } from '@/api/services';
 import type { Exercise } from '@/interfaces';
-import { useNotification } from '@/stores/notification-store';
+import { useNotification } from '@/stores/notification';
 import { useCallback, useState } from 'react';
 import type { ExerciseFormData } from '../types';
 

@@ -1,4 +1,4 @@
-import { THEME_RESPONSIVE } from '@/constants/theme';
+import { THEME_RESPONSIVE } from '@/constants/theme/index.constants';
 import React from 'react';
 import type { TabContainerProps } from '../types';
 import { getDesktopContainerClasses, getMobileContainerClasses } from '../utils';

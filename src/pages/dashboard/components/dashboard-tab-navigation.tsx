@@ -1,4 +1,4 @@
-import { MODERN_THEME } from '@/constants/theme';
+import { MODERN_THEME } from '@/constants/theme/index.constants';
 import React from 'react';
 import { cn } from '../../../utils/functions';
 import { DASHBOARD_TABS } from '../constants';

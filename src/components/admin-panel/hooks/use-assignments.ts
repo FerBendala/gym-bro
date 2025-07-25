@@ -1,6 +1,6 @@
 import { createExerciseAssignment, deleteExerciseAssignment, getAssignmentsByDay } from '@/api/services';
 import type { DayOfWeek, Exercise, ExerciseAssignment } from '@/interfaces';
-import { useNotification } from '@/stores/notification-store';
+import { useNotification } from '@/stores/notification';
 import { useCallback, useState } from 'react';
 
 // Evento personalizado para notificar cambios en datos
