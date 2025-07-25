@@ -42,5 +42,5 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     };
   }, [setOnlineStatus, showNotification]);
 
-  return <>{children}</>;
+  return children;
 }; 
