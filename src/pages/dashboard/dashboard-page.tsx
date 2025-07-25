@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { LoadingSpinner } from '../loading-spinner';
-import { OfflineWarning } from '../offline-warning';
+import { Page } from '../../components/layout';
+import { LoadingSpinner } from '../../components/loading-spinner';
+import { OfflineWarning } from '../../components/offline-warning';
 import {
   BalanceTab,
   DashboardEmptyState,
@@ -26,10 +27,15 @@ export const DashboardPage: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center py-12">
-        <LoadingSpinner size="lg" className="mb-4" />
-        <p className="text-gray-400 text-sm">Cargando dashboard...</p>
-      </div>
+      <Page
+        title="Mi Progreso"
+        subtitle="Análisis de rendimiento y mejoras"
+      >
+        <div className="flex flex-col items-center justify-center py-12">
+          <LoadingSpinner size="lg" className="mb-4" />
+          <p className="text-gray-400 text-sm">Cargando dashboard...</p>
+        </div>
+      </Page>
     );
   }
 
@@ -56,21 +62,26 @@ export const DashboardPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Warning de conexión */}
-      {!isOnline && (
-        <OfflineWarning message="Sin conexión. Los datos mostrados pueden estar desactualizados." />
-      )}
+    <Page
+      title="Mi Progreso"
+      subtitle="Análisis de rendimiento y mejoras"
+    >
+      <div className="space-y-6">
+        {/* Warning de conexión */}
+        {!isOnline && (
+          <OfflineWarning message="Sin conexión. Los datos mostrados pueden estar desactualizados." />
+        )}
 
-      {/* Navegación de tabs moderna */}
-      <DashboardTabNavigation
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        timeFilterLabel="Últimos 30 días"
-      />
+        {/* Navegación de tabs moderna */}
+        <DashboardTabNavigation
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          timeFilterLabel="Últimos 30 días"
+        />
 
-      {/* Contenido principal */}
-      {renderTabContent()}
-    </div>
+        {/* Contenido principal */}
+        {renderTabContent()}
+      </div>
+    </Page>
   );
 }; 

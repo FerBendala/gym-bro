@@ -17,12 +17,12 @@ import React, { useMemo } from 'react';
 import { formatNumber } from '../../../utils/functions';
 import { calculateAdvancedAnalysis } from '../../../utils/functions/advanced-analysis';
 // 🎯 NUEVAS IMPORTACIONES: Funciones para normalización por día de la semana
+import { Card, CardContent, CardHeader } from '../../../components/card';
+import { StatCard } from '../../../components/stat-card';
+import { InfoTooltip } from '../../../components/tooltip';
 import {
   calculateNormalizedVolumeTrend
 } from '../../../utils/functions';
-import { Card, CardContent, CardHeader } from '../../card';
-import { StatCard } from '../../stat-card';
-import { InfoTooltip } from '../../tooltip';
 import { usePredictionMetrics, type EnhancedPredictionMetrics } from '../hooks';
 import {
   ConfidenceGauge,

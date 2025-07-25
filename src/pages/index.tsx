@@ -6,8 +6,8 @@ import { useNotification } from '@/stores/notification-store';
 import { useEffect, useState } from 'react';
 import { AdminPanel } from './admin-panel';
 import { ModernCalendar } from './calendar';
+import { DashboardPage } from './dashboard';
 import { ModernHome } from './home';
-import { ModernProgress } from './progress';
 import { ModernSettings } from './settings';
 import { WorkoutHistory } from './workout-history';
 
@@ -117,7 +117,7 @@ const AppContent = () => {
           />
         );
       case 'progress':
-        return <ModernProgress />;
+        return <DashboardPage />;
       case 'calendar':
         return <ModernCalendar />;
       case 'settings':

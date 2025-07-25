@@ -1,7 +1,7 @@
 import { BarChart } from 'lucide-react';
 import React from 'react';
+import { Card, CardContent, CardHeader } from '../../../components/card';
 import { formatNumber } from '../../../utils/functions';
-import { Card, CardContent, CardHeader } from '../../card';
 import { BalanceRadarChart } from './balance-radar-chart';
 
 interface GeneralContentProps {

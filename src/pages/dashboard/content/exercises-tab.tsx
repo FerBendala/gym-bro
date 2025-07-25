@@ -1,11 +1,11 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { Calendar, Target, TrendingDown, TrendingUp, Trophy, Zap } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
+import { Button } from '../../../components/button';
+import { Card, CardContent, CardHeader } from '../../../components/card';
+import { StatCard } from '../../../components/stat-card';
+import { InfoTooltip } from '../../../components/tooltip';
 import { calculateExerciseProgress, formatNumber, getCategoryColor, getCategoryIcon } from '../../../utils/functions';
-import { Button } from '../../button';
-import { Card, CardContent, CardHeader } from '../../card';
-import { StatCard } from '../../stat-card';
-import { InfoTooltip } from '../../tooltip';
 
 /**
  * Props para el componente ExercisesTab

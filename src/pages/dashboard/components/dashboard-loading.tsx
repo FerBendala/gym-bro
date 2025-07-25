@@ -1,5 +1,5 @@
 import React from 'react';
-import { LoadingSpinner } from '../../loading-spinner';
+import { LoadingSpinner } from '../../../components/loading-spinner';
 
 export const DashboardLoading: React.FC = () => {
   return (

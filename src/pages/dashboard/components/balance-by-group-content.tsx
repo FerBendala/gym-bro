@@ -1,7 +1,7 @@
 import { AlertTriangle, BarChart, CheckCircle, Timer, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
+import { Card, CardContent, CardHeader } from '../../../components/card';
 import { formatNumber } from '../../../utils/functions';
-import { Card, CardContent, CardHeader } from '../../card';
 import { CategoryDashboardChart } from './category-dashboard-chart';
 import { HorizontalBarChart } from './horizontal-bar-chart';
 

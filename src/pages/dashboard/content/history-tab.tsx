@@ -5,9 +5,9 @@ import { es } from 'date-fns/locale';
 import { ArrowDown, ArrowUp, Calendar, Clock, History, Minus, TrendingDown, TrendingUp, Trophy, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
 import Chart from 'react-apexcharts';
-import { Card, CardContent, CardHeader } from '../../card';
-import { StatCard } from '../../stat-card';
-import { InfoTooltip } from '../../tooltip';
+import { Card, CardContent, CardHeader } from '../../../components/card';
+import { StatCard } from '../../../components/stat-card';
+import { InfoTooltip } from '../../../components/tooltip';
 
 /**
  * Props para el componente HistoryTab

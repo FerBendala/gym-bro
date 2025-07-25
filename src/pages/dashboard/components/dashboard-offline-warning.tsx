@@ -1,5 +1,5 @@
 import React from 'react';
-import { OfflineWarning } from '../../offline-warning';
+import { OfflineWarning } from '../../../components/offline-warning';
 
 export const DashboardOfflineWarning: React.FC = () => {
   return (
