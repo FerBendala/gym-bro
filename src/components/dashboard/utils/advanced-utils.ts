@@ -1,4 +1,4 @@
-import type { WorkoutRecord } from '../../../interfaces';
+import type { WorkoutRecord } from '@/interfaces';
 
 export const calculateAdvancedAnalysis = (records: WorkoutRecord[]) => {
   if (records.length === 0) {

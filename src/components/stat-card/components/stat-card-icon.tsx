@@ -14,11 +14,10 @@ export const StatCardIcon: React.FC<StatCardIconProps> = ({
   return (
     <div className={cn(
       THEME_STAT_CARD.icon.container,
-      variantStyles.background
+      variantStyles
     )}>
       <Icon className={cn(
-        iconSize,
-        variantStyles.icon
+        iconSize
       )} />
     </div>
   );

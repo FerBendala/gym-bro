@@ -1,10 +1,10 @@
 import { deleteExerciseAssignment } from '@/api/services';
+import type { ExerciseAssignment } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection-store';
 import { useNotification } from '@/stores/notification-store';
 import { Trash2 } from 'lucide-react';
 import React from 'react';
-import type { ExerciseAssignment } from '../../../interfaces';
 import { Button } from '../../button';
 import { URLPreview } from '../../url-preview';
 

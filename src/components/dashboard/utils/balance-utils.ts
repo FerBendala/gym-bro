@@ -1,4 +1,4 @@
-import type { WorkoutRecord } from '../../../interfaces';
+import type { WorkoutRecord } from '@/interfaces';
 import { analyzeMuscleBalance, calculateBalanceScore, calculateCategoryAnalysis } from '../../../utils/functions/category-analysis';
 
 // Constantes para meta-categorías (como en main)
@@ -38,8 +38,9 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]) => {
         categoryMetrics: []
       },
       upperLowerBalance: {
-        upper: { volume: 0, percentage: 0 },
-        lower: { volume: 0, percentage: 0 }
+        upperBody: { volume: 0, percentage: 0, categories: [] },
+        lowerBody: { volume: 0, percentage: 0, categories: [] },
+        core: { volume: 0, percentage: 0, categories: [] }
       },
       selectedView: 'general' as const
     };
@@ -79,7 +80,7 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]) => {
       isBalanced: balance.isBalanced,
       priorityLevel: balance.priorityLevel,
       progressTrend: balance.progressTrend,
-      personalRecords: categoryAnalysis.categoryMetrics.find(m => m.category === balance.category)?.personalRecords || 0,
+      personalRecords: categoryAnalysis.categoryMetrics.find(m => m.category === balance.category)?.personalRecords || [],
       balanceHistory: balance.balanceHistory
     })),
     categoryAnalysis,

@@ -1,4 +1,5 @@
 import { Card, CardContent } from '@/components/card';
+import type { ThemeStatCardSize, ThemeStatCardVariant } from '@/constants/theme';
 import { THEME_STAT_CARD } from '@/constants/theme';
 import { cn } from '@/utils/functions';
 import React from 'react';
@@ -37,7 +38,7 @@ export const StatCardContent: React.FC<StatCardContentProps> = ({
 };
 
 // Función auxiliar para obtener estilos
-const getStatCardStyles = (variant: string, size: string) => {
-  const padding = THEME_STAT_CARD.padding[size as keyof typeof THEME_STAT_CARD.padding];
+const getStatCardStyles = (variant: ThemeStatCardVariant, size: ThemeStatCardSize) => {
+  const padding = THEME_STAT_CARD.padding[size];
   return { padding };
 }; 

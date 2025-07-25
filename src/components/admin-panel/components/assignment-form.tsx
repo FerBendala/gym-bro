@@ -1,11 +1,11 @@
 import { createExerciseAssignment } from '@/api/services';
+import type { DayOfWeek } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection-store';
 import { useNotification } from '@/stores/notification-store';
 import { Plus } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import type { DayOfWeek } from '../../../interfaces';
 import { groupExercisesByCategory } from '../../../utils/functions/select-utils';
 import { Button } from '../../button';
 import { Select } from '../../select';

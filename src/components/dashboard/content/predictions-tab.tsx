@@ -1,3 +1,4 @@
+import type { WorkoutRecord } from '@/interfaces';
 import {
   Activity,
   AlertTriangle,
@@ -13,7 +14,6 @@ import {
   Weight
 } from 'lucide-react';
 import React, { useMemo } from 'react';
-import type { WorkoutRecord } from '../../../interfaces';
 import { formatNumber } from '../../../utils/functions';
 import { calculateAdvancedAnalysis } from '../../../utils/functions/advanced-analysis';
 // 🎯 NUEVAS IMPORTACIONES: Funciones para normalización por día de la semana

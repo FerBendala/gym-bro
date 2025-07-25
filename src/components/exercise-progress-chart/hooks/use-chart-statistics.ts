@@ -1,7 +1,7 @@
+import type { WorkoutRecord } from '@/interfaces';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useMemo } from 'react';
-import type { WorkoutRecord } from '../../../interfaces';
 import type { ChartStatistics } from '../types';
 
 /**

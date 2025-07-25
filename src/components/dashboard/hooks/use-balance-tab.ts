@@ -1,5 +1,5 @@
+import type { WorkoutRecord } from '@/interfaces';
 import { useMemo, useState } from 'react';
-import type { WorkoutRecord } from '../../../interfaces';
 import { calculateBalanceAnalysis } from '../utils/balance-utils';
 
 export type BalanceSubTab = 'general' | 'balanceByGroup' | 'upperLower' | 'trends';

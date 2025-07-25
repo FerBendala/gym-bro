@@ -1,10 +1,10 @@
+import type { WorkoutRecord } from '@/interfaces';
+import { calculateTotalGrowth, formatNumber } from '@/utils/functions';
 import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ArrowDown, ArrowUp, Calendar, Clock, History, Minus, TrendingDown, TrendingUp, Trophy, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
 import Chart from 'react-apexcharts';
-import type { WorkoutRecord } from '../../../interfaces';
-import { calculateTotalGrowth, formatNumber } from '../../../utils/functions';
 import { Card, CardContent, CardHeader } from '../../card';
 import { StatCard } from '../../stat-card';
 import { InfoTooltip } from '../../tooltip';
@@ -385,7 +385,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
           title="Semanas Registradas"
           value={historyData.length.toString()}
           icon={Calendar}
-          variant="indigo"
+          variant="primary"
           tooltip="Número total de semanas con entrenamientos registrados."
           tooltipPosition="top"
         />
@@ -421,7 +421,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
           title="Duración Promedio"
           value={`${Math.round(historyData.reduce((sum, p) => sum + p.totalWorkouts, 0) / Math.max(historyData.length, 1))} ent/sem`}
           icon={Clock}
-          variant="indigo"
+          variant="secondary"
           tooltip="Número promedio de entrenamientos por semana."
           tooltipPosition="top"
         />

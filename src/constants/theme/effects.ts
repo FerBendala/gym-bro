@@ -447,4 +447,8 @@ export const THEME_TABS = {
 
 // Tipos legacy para compatibilidad
 export type ThemeAlertVariant = keyof typeof THEME_CONTAINERS.alert.variants;
-export type ThemeUrlPreviewType = 'youtube' | 'video' | 'image' | 'website' | 'default'; 
+export type ThemeUrlPreviewType = 'youtube' | 'video' | 'image' | 'website' | 'default';
+
+// Tipos para StatCard
+export type ThemeStatCardVariant = keyof typeof THEME_STAT_CARD.variants;
+export type ThemeStatCardSize = keyof typeof THEME_STAT_CARD.icon.sizes; 

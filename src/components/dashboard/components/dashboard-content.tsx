@@ -1,5 +1,5 @@
+import type { WorkoutRecord } from '@/interfaces';
 import React from 'react';
-import type { WorkoutRecord } from '../../../interfaces';
 import { AdvancedTab, ExercisesTab, HistoryTab, PredictionsTab } from '../dashboard-tabs';
 import type { DashboardTab } from '../types';
 import { BalanceTab } from './balance-tab';

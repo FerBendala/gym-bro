@@ -1,6 +1,6 @@
+import type { WorkoutRecord } from '@/interfaces';
 import { Activity, AlertTriangle, Brain, Shield, Target } from 'lucide-react';
 import React from 'react';
-import type { WorkoutRecord } from '../../../interfaces';
 import { Card, CardContent, CardHeader } from '../../card';
 import { StatCard } from '../../stat-card';
 import { InfoTooltip } from '../../tooltip';
@@ -89,8 +89,8 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                     </h4>
                     <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${analysis.fatigueAnalysis.fatigueIndex <= 30 ? 'bg-green-500 text-white' :
-                          analysis.fatigueAnalysis.fatigueIndex <= 70 ? 'bg-yellow-500 text-black' :
-                            'bg-red-500 text-white'
+                        analysis.fatigueAnalysis.fatigueIndex <= 70 ? 'bg-yellow-500 text-black' :
+                          'bg-red-500 text-white'
                         }`}>
                         {analysis.fatigueAnalysis.fatigueIndex <= 30 ? 'Baja' :
                           analysis.fatigueAnalysis.fatigueIndex <= 70 ? 'Moderada' : 'Alta'}
@@ -212,8 +212,8 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
                           <div className="w-full bg-gray-700 rounded-full h-1.5">
                             <div
                               className={`h-1.5 rounded-full transition-all duration-500 ${indicator.type === 'excellent' ? 'bg-green-500' :
-                                  indicator.type === 'good' ? 'bg-blue-500' :
-                                    indicator.type === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
+                                indicator.type === 'good' ? 'bg-blue-500' :
+                                  indicator.type === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
                                 }`}
                               style={{ width: `${Math.min(100, indicator.progress)}%` }}
                             />

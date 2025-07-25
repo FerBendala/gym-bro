@@ -1,11 +1,9 @@
+import { UpperLowerBalanceContent } from '@/components/dashboard-upper-lower-balance-content';
+import type { WorkoutRecord } from '@/interfaces';
 import { BarChart3, Brain, PieChart, Scale } from 'lucide-react';
 import React from 'react';
-import type { WorkoutRecord } from '../../../interfaces';
-import { UpperLowerBalanceContent } from '../../dashboard-upper-lower-balance-content';
+import { BalanceByGroupContent, GeneralContent, TrendsContent } from '.';
 import { useBalanceTab } from '../hooks/use-balance-tab';
-import { BalanceByGroupContent } from './balance-by-group-content';
-import { GeneralContent } from './general-content';
-import { TrendsContent } from './trends-content';
 
 interface BalanceTabProps {
   records: WorkoutRecord[];
@@ -111,17 +109,17 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
 
       {activeSubTab === 'balanceByGroup' && (
         <BalanceByGroupContent
-          muscleBalance={muscleBalance}
-          categoryAnalysis={categoryAnalysis}
+          muscleBalance={muscleBalance as any}
+          categoryAnalysis={categoryAnalysis as any}
           onItemClick={handleBalanceItemClick}
         />
       )}
 
       {activeSubTab === 'upperLower' && (
         <UpperLowerBalanceContent
-          upperLowerBalance={upperLowerBalance}
-          categoryAnalysis={categoryAnalysis}
-          muscleBalance={muscleBalance}
+          upperLowerBalance={upperLowerBalance as any}
+          categoryAnalysis={categoryAnalysis as any}
+          muscleBalance={muscleBalance as any}
           onItemClick={handleUpperLowerItemClick}
         />
       )}

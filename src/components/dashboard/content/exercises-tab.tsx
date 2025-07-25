@@ -1,6 +1,6 @@
+import type { WorkoutRecord } from '@/interfaces';
 import { Calendar, Target, TrendingDown, TrendingUp, Trophy, Zap } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import type { WorkoutRecord } from '../../../interfaces';
 import { calculateExerciseProgress, formatNumber, getCategoryColor, getCategoryIcon } from '../../../utils/functions';
 import { Button } from '../../button';
 import { Card, CardContent, CardHeader } from '../../card';
@@ -208,7 +208,7 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
           title="Ejercicios Analizados"
           value={allExercises.length.toString()}
           icon={Target}
-          variant="indigo"
+          variant="primary"
           tooltip="Número total de ejercicios únicos en la categoría seleccionada."
           tooltipPosition="top"
         />
@@ -235,7 +235,7 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
           title="Sesiones Totales"
           value={globalMetrics.totalSessions.toString()}
           icon={Trophy}
-          variant="purple"
+          variant="secondary"
           tooltip="Número total de sesiones de entrenamiento sumando todos los ejercicios."
           tooltipPosition="top"
         />

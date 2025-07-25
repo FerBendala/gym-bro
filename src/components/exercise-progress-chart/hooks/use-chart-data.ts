@@ -1,6 +1,6 @@
 import { THEME_CHART } from '@/constants/theme';
+import type { WorkoutRecord } from '@/interfaces';
 import { useMemo } from 'react';
-import type { WorkoutRecord } from '../../../interfaces';
 import { calculateDataRange, groupRecordsByProperty, sortRecordsByDate } from '../../../utils/functions';
 import type { ProcessedChartData, UseChartDataReturn } from '../types';
 

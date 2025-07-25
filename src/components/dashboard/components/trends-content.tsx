@@ -1,6 +1,6 @@
+import type { WorkoutRecord } from '@/interfaces';
 import { Activity, AlertTriangle, Calendar, CheckCircle, TrendingDown, TrendingUp, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
-import type { WorkoutRecord } from '../../../interfaces';
 import { formatNumber } from '../../../utils/functions';
 import { calculateTrendsAnalysis } from '../../../utils/functions/trends-analysis';
 import { Card, CardContent, CardHeader } from '../../card';

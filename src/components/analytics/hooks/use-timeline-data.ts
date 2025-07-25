@@ -1,7 +1,7 @@
+import type { WorkoutRecord } from '@/interfaces';
 import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useMemo } from 'react';
-import type { WorkoutRecord } from '../../../interfaces';
 import { calculateTotalGrowth, formatNumber } from '../../../utils/functions';
 
 /**

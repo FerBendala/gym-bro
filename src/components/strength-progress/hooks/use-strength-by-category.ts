@@ -1,5 +1,5 @@
+import type { WorkoutRecord } from '@/interfaces';
 import { useMemo } from 'react';
-import type { WorkoutRecord } from '../../../interfaces';
 import { calculateAdvancedStrengthAnalysis, calculateIntensityScore } from '../../../utils/functions';
 import type { CategoryMetrics } from '../../../utils/functions/category-analysis';
 

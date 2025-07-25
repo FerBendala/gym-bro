@@ -2,7 +2,7 @@
  * Utilidades específicas del componente ExerciseProgressChart
  */
 
-import type { WorkoutRecord } from '../../../interfaces';
+import type { WorkoutRecord } from '@/interfaces';
 import type { ChartDimensions, DataRange } from '../../../utils/functions';
 import { getChartX, getChartY } from '../../../utils/functions';
 

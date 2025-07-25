@@ -1,5 +1,5 @@
+import type { WorkoutRecord } from '@/interfaces';
 import { useMemo, useState } from 'react';
-import type { WorkoutRecord } from '../../../interfaces';
 import {
   formatCalendarHeader,
   getCalendarDays,

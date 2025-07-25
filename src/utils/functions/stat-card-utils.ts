@@ -71,12 +71,12 @@ export const getVariantByContext = (context: string): ThemeStatCardVariant => {
     volume: 'danger',
 
     // Métricas de tiempo
-    duration: 'purple',
-    frequency: 'indigo',
+    duration: 'secondary',
+    frequency: 'primary',
 
     // Métricas de progreso
-    improvement: 'teal',
-    total: 'pink',
+    improvement: 'success',
+    total: 'secondary',
 
     // Fallbacks
     default: 'primary'

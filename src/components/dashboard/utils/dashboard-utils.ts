@@ -1,4 +1,4 @@
-import type { WorkoutRecord } from '../../../interfaces';
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Valida si hay suficientes registros para mostrar el dashboard
