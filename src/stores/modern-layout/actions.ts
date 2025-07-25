@@ -7,14 +7,14 @@ export const createModernLayoutNavigationActions = (
   get: () => ModernLayoutStore
 ) => ({
   setActiveTab: (tab: ModernNavItem) => {
-    set((_state) => ({ activeTab: tab }));
+    set(() => ({ activeTab: tab }));
   },
 
   navigateTo: (tab: ModernNavItem) => {
     const { navigationHistory } = get();
     const newHistory = [...navigationHistory, tab];
 
-    set((_state) => ({
+    set(() => ({
       activeTab: tab,
       navigationHistory: newHistory,
       canGoBack: newHistory.length > 1,
@@ -28,7 +28,7 @@ export const createModernLayoutNavigationActions = (
       const newHistory = navigationHistory.slice(0, -1);
       const previousTab = newHistory[newHistory.length - 1];
 
-      set((_state) => ({
+      set(() => ({
         activeTab: previousTab,
         navigationHistory: newHistory,
         canGoBack: newHistory.length > 1,
@@ -42,7 +42,7 @@ export const createModernLayoutNavigationActions = (
 
   clearHistory: () => {
     const { activeTab } = get();
-    set((_state) => ({
+    set(() => ({
       navigationHistory: [activeTab],
       canGoBack: false,
     }));
@@ -54,7 +54,7 @@ export const createModernLayoutUIActions = (
   set: (fn: (state: ModernLayoutStore) => Partial<ModernLayoutStore>) => void
 ) => ({
   setNavigationVisible: (visible: boolean) => {
-    set((_state) => ({ isNavigationVisible: visible }));
+    set(() => ({ isNavigationVisible: visible }));
   },
 
   toggleMoreMenu: () => {
@@ -62,7 +62,7 @@ export const createModernLayoutUIActions = (
   },
 
   closeMoreMenu: () => {
-    set((_state) => ({ showMoreMenu: false }));
+    set(() => ({ showMoreMenu: false }));
   },
 });
 
@@ -71,19 +71,19 @@ export const createModernLayoutConfigActions = (
   set: (fn: (state: ModernLayoutStore) => Partial<ModernLayoutStore>) => void
 ) => ({
   setNavigationType: (type: NavigationType) => {
-    set((_state) => ({ navigationType: type }));
+    set(() => ({ navigationType: type }));
   },
 
   setTitle: (title: string) => {
-    set((_state) => ({ title }));
+    set(() => ({ title }));
   },
 
   setSubtitle: (subtitle?: string) => {
-    set((_state) => ({ subtitle }));
+    set(() => ({ subtitle }));
   },
 
   setShowBackButton: (show: boolean) => {
-    set((_state) => ({ showBackButton: show }));
+    set(() => ({ showBackButton: show }));
   },
 });
 
@@ -92,7 +92,7 @@ export const createModernLayoutUtilityActions = (
   set: (fn: (state: ModernLayoutStore) => Partial<ModernLayoutStore>) => void
 ) => ({
   reset: () => {
-    set((_state) => ({
+    set(() => ({
       activeTab: 'home',
       navigationHistory: ['home'],
       navigationType: 'grid',

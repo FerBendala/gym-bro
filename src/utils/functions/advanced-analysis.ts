@@ -533,7 +533,6 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
 
   // OPCIÓN A: Usar semanas completas (excluyendo semana actual) para consistencia temporal
   const now = new Date();
-  const currentWeekStart = startOfWeek(now, { locale: es });
 
   // Semana anterior completa (base de referencia)
   const lastWeekStart = startOfWeek(subWeeks(now, 1), { locale: es });
@@ -826,7 +825,6 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
     // Validación silenciosa de datos
 
     const currentWorkouts = currentRecords.length;
-    const prevWorkouts = prevRecords.length;
 
     let totalVolume = 0;
     let avgWeight = 0;
@@ -1000,7 +998,7 @@ const calculateBasicMetrics = (validRecords: WorkoutRecord[]) => {
 /**
  * Calcula progresión general entre primer y último registro
  */
-const calculateOverallProgress = (validRecords: WorkoutRecord[], daysBetween: number) => {
+const calculateOverallProgress = (validRecords: WorkoutRecord[]) => {
   const firstRecord = validRecords[0];
   const lastRecord = validRecords[validRecords.length - 1];
 
@@ -1067,11 +1065,6 @@ const calculateTrends = (
       if (isCurrentWeekIncomplete) {
         // SEMANA ACTUAL INCOMPLETA: Usar enfoque alternativo
         // Calcular días únicos de entrenamiento en la semana reciente
-        const recentWeekRecordsCount = validRecords.filter(r => {
-          const rDate = new Date(r.date);
-          return rDate >= recentWeekStart && rDate <= recentWeekEnd;
-        }).length;
-
         const uniqueDaysInRecentWeek = new Set(
           validRecords
             .filter(r => {
@@ -1251,19 +1244,16 @@ const calculateNextWeekPredictions = (
   // CORRECCIÓN: Usar misma base temporal que calculateBasicMetrics (última semana completa)
   const lastCompleteWeekRecords = getLastCompleteWeekRecords(validRecords);
 
-  let avgRecentWorking = 0;
   let maxRecentWorking = 0;
 
   if (lastCompleteWeekRecords.length > 0) {
     // Usar peso de trabajo promedio de la última semana completa
     const lastWeekWorkingWeights = lastCompleteWeekRecords.map(r => r.weight);
-    avgRecentWorking = lastWeekWorkingWeights.reduce((sum, w) => sum + w, 0) / lastWeekWorkingWeights.length;
     maxRecentWorking = Math.max(...lastWeekWorkingWeights);
   } else {
     // Fallback: últimos 5 entrenamientos si no hay semana anterior completa
     const recentWorkingWeights = validRecords.slice(-5).map(r => r.weight);
     if (recentWorkingWeights.length > 0) {
-      avgRecentWorking = recentWorkingWeights.reduce((sum, w) => sum + w, 0) / recentWorkingWeights.length;
       maxRecentWorking = Math.max(...recentWorkingWeights);
     }
   }
@@ -1655,7 +1645,7 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
 
   // Calcular métricas básicas usando funciones auxiliares
   const basicMetrics = calculateBasicMetrics(validation.validRecords);
-  const overallProgressData = calculateOverallProgress(validation.validRecords, validation.daysBetween);
+  const overallProgressData = calculateOverallProgress(validation.validRecords);
 
   // Calcular tendencias usando la función auxiliar
   const trendsData = calculateTrends(

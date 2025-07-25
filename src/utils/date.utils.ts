@@ -42,13 +42,15 @@ export const filterRecordsByTime = <T extends { date: Date }>(
   const now = new Date();
 
   switch (timeFilter) {
-    case 'week':
+    case 'week': {
       const weekStart = startOfWeek(now, { locale: es });
       return records.filter(record => record.date >= weekStart);
+    }
 
-    case 'month':
+    case 'month': {
       const monthStart = new Date(now.getFullYear(), now.getMonth(), 1);
       return records.filter(record => record.date >= monthStart);
+    }
 
     case 'all':
     default:
@@ -298,7 +300,7 @@ export const getLegendData = () => {
 /**
  * Valida si una fecha es válida
  */
-export const isValidDate = (date: any): boolean => {
+export const isValidDate = (date: unknown): boolean => {
   return date instanceof Date && !isNaN(date.getTime());
 };
 

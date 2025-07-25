@@ -47,7 +47,7 @@ export interface SyncQueueItem {
   operation: SyncOperation;
   status: SyncStatus;
   priority: SyncPriority;
-  data: any; // Los datos a sincronizar
+  data: Record<string, unknown>; // Los datos a sincronizar
   error?: string;
   retryCount: number;
   maxRetries: number;
@@ -61,7 +61,7 @@ export interface SyncQueueItem {
  */
 export interface SystemMetadata {
   key: string;
-  value: any;
+  value: Record<string, unknown>;
   updatedAt: number;
 }
 
@@ -123,7 +123,7 @@ export interface DatabaseOptions {
 /**
  * Resultado de operaciones de base de datos
  */
-export interface DatabaseResult<T = any> {
+export interface DatabaseResult<T = Record<string, unknown>> {
   success: boolean;
   data?: T;
   error?: string;
@@ -138,7 +138,7 @@ export interface DatabaseResult<T = any> {
 export interface QueryFilter {
   field: string;
   operator: 'equals' | 'gt' | 'gte' | 'lt' | 'lte' | 'between' | 'in';
-  value: any;
+  value: string | number | boolean | Array<string | number>;
 }
 
 /**
@@ -158,7 +158,7 @@ export interface QueryOptions {
 /**
  * Conflicto de sincronización
  */
-export interface SyncConflict<T = any> {
+export interface SyncConflict<T = Record<string, unknown>> {
   entityType: string;
   entityId: string;
   localData: T;
@@ -187,7 +187,7 @@ export type SyncEvent =
 export interface DatabaseConfig {
   name: string;
   version: number;
-  stores: Record<string, any>;
+  stores: Record<string, Record<string, unknown>>;
   syncEnabled: boolean;
   offlineMode: boolean;
   conflictResolution: 'local' | 'remote' | 'timestamp' | 'manual';

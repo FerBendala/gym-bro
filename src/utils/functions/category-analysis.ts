@@ -78,7 +78,7 @@ export const normalizeByWeekday = (
     const weekdayPercentages = weekdayDistribution.map(count => count / totalAssignments);
 
     // Crear factores basados en distribución de asignaciones
-    const cumulativePercentages = weekdayPercentages.map((_, index) =>
+    const cumulativePercentages = weekdayPercentages.map((_percentage, index) =>
       weekdayPercentages.slice(0, index + 1).reduce((sum, p) => sum + p, 0)
     );
 
@@ -712,16 +712,7 @@ const calculateRegularityScore = (categoryRecords: WorkoutRecord[]): number => {
   return Math.round(regularityScore);
 };
 
-/**
- * Métricas de consistencia independientes
- * Cada eje se mide por separado sin mezclar conceptos
- */
-interface ConsistencyMetrics {
-  balanceConsistency: number;      // 0-100: Estabilidad del % de volumen
-  activityConsistency: number;     // 0-100: Regularidad de actividad
-  frequencyConsistency: number;    // 0-100: Estabilidad de frecuencia semanal
-  globalConsistency: number;       // 0-100: Promedio ponderado
-}
+
 
 /**
  * Estándares de fuerza por categoría muscular (1RM estimado en kg)
@@ -813,101 +804,9 @@ const calculateBalanceConsistency = (
   return Math.round(score);
 };
 
-/**
- * Calcula la consistencia de actividad (regularidad de entrenamiento)
- * Mide qué tan regularmente se entrena esta categoría
- */
-const calculateActivityConsistency = (categoryRecords: WorkoutRecord[]): number => {
-  if (categoryRecords.length === 0) return 0;
 
-  // Agrupar por semanas
-  const weeklyData = groupRecordsByWeek(categoryRecords);
 
-  // Necesitamos mínimo 4 semanas para una medición confiable
-  if (weeklyData.length < 4) return 0;
 
-  // Calcular semanas totales en el período
-  const firstWeek = weeklyData[0][0].date;
-  const lastWeek = weeklyData[weeklyData.length - 1][0].date;
-  const totalWeeks = Math.ceil((new Date(lastWeek).getTime() - new Date(firstWeek).getTime()) / (7 * 24 * 60 * 60 * 1000)) + 1;
-
-  // Contar semanas activas (con al menos 1 entrenamiento)
-  const activeWeeks = weeklyData.length;
-
-  // % de semanas con actividad en esta categoría
-  const activityRate = (activeWeeks / totalWeeks) * 100;
-
-  return Math.round(Math.min(100, activityRate));
-};
-
-/**
- * Calcula la consistencia de frecuencia (estabilidad de entrenamientos/semana)
- * Mide qué tan estable es el número de entrenamientos por semana
- */
-const calculateFrequencyConsistency = (categoryRecords: WorkoutRecord[]): number => {
-  if (categoryRecords.length === 0) return 0;
-
-  // Agrupar por semanas y contar entrenamientos
-  const weeklyData = groupRecordsByWeek(categoryRecords);
-
-  // Necesitamos mínimo 4 semanas para una medición confiable
-  if (weeklyData.length < 4) return 0;
-
-  // Contar entrenamientos por semana
-  const weeklyFrequencies = weeklyData.map(week => {
-    // Contar días únicos de entrenamiento en la semana
-    const uniqueDays = Array.from(new Set(week.map(record => new Date(record.date).toDateString())));
-    return uniqueDays.length;
-  });
-
-  // Calcular desviación estándar de la frecuencia
-  const mean = weeklyFrequencies.reduce((sum, val) => sum + val, 0) / weeklyFrequencies.length;
-  const variance = weeklyFrequencies.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / weeklyFrequencies.length;
-  const stdDev = Math.sqrt(variance);
-
-  // Límites lógicos:
-  // - Si stdDev = 0 → score = 100 (frecuencia perfectamente estable)
-  // - Si stdDev > 2 → score = 0 (frecuencia muy variable)
-  // - Escala entre 0-2 de stdDev a 100-0 de score
-  const maxAcceptableStdDev = 2; // 2 días de desviación es el límite
-  const score = Math.max(0, Math.min(100, 100 - (stdDev / maxAcceptableStdDev) * 100));
-
-  return Math.round(score);
-};
-
-/**
- * Calcula todas las métricas de consistencia de forma independiente
- * Cada eje se mide por separado sin mezclar conceptos
- */
-const calculateConsistencyMetrics = (
-  categoryRecords: WorkoutRecord[],
-  allRecords: WorkoutRecord[]
-): ConsistencyMetrics => {
-  // Calcular cada métrica de forma independiente
-  const balanceConsistency = calculateBalanceConsistency(categoryRecords, allRecords);
-  const activityConsistency = calculateActivityConsistency(categoryRecords);
-  const frequencyConsistency = calculateFrequencyConsistency(categoryRecords);
-
-  // Promedio ponderado con pesos claros
-  const weights = {
-    balance: 0.4,      // 40% - Lo más importante para balance muscular
-    activity: 0.35,    // 35% - Regularidad de entrenamiento
-    frequency: 0.25    // 25% - Estabilidad de frecuencia
-  };
-
-  const globalConsistency = Math.round(
-    (balanceConsistency * weights.balance) +
-    (activityConsistency * weights.activity) +
-    (frequencyConsistency * weights.frequency)
-  );
-
-  return {
-    balanceConsistency,
-    activityConsistency,
-    frequencyConsistency,
-    globalConsistency
-  };
-};
 
 /**
  * Función auxiliar para agrupar registros por semana
@@ -987,7 +886,7 @@ const calculateWeeklyBalancePercentages = (categoryRecords: WorkoutRecord[], all
 
   // Convertir a array con porcentajes
   return Object.entries(weeklyData)
-    .filter(([_, data]) => data.totalVolume > 0)
+    .filter(([, data]) => data.totalVolume > 0)
     .map(([week, data]) => ({
       week,
       percentage: (data.categoryVolume / data.totalVolume) * 100,
@@ -1000,7 +899,7 @@ const calculateWeeklyBalancePercentages = (categoryRecords: WorkoutRecord[], all
 /**
  * Analiza la tendencia hacia el balance ideal
  */
-const analyzeTrendTowardsIdeal = (weeklyData: any[], idealPercentage: number): number => {
+const analyzeTrendTowardsIdeal = (weeklyData: Array<{ percentage: number }>, idealPercentage: number): number => {
   if (weeklyData.length < 3) return 0;
 
   const midpoint = Math.floor(weeklyData.length / 2);
@@ -1278,7 +1177,6 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[], allAssignment
 
   // Calcular totalVolume para porcentajes consistentes
   const totalVolume = Object.values(volumeByCategory).reduce((sum, volume) => sum + volume, 0);
-  const totalWorkouts = Object.values(workoutsByCategory).reduce((sum, count) => sum + count, 0);
   const metrics: CategoryMetrics[] = [];
 
   // Obtener fecha actual basada en los datos reales
@@ -1305,7 +1203,6 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[], allAssignment
 
     // Calcular entrenamientos por semana aproximado - CORREGIDO
     const dates = categoryRecords.map(record => new Date(record.date));
-    const uniqueDates = Array.from(new Set(dates.map(d => d.toDateString())));
 
     // Agrupar por semanas para calcular frecuencia semanal real
     const weeklyData = new Map<string, Set<string>>();
@@ -1342,8 +1239,8 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[], allAssignment
           const recentWeeks = sortedWeeks.slice(-2);
           const olderWeeks = sortedWeeks.slice(0, -2);
 
-          const recentAvg = recentWeeks.reduce((sum, [_, daysSet]) => sum + daysSet.size, 0) / recentWeeks.length;
-          const olderAvg = olderWeeks.reduce((sum, [_, daysSet]) => sum + daysSet.size, 0) / olderWeeks.length;
+          const recentAvg = recentWeeks.reduce((sum, [, daysSet]) => sum + daysSet.size, 0) / recentWeeks.length;
+          const olderAvg = olderWeeks.reduce((sum, [, daysSet]) => sum + daysSet.size, 0) / olderWeeks.length;
 
           if (recentAvg > olderAvg * 1.4) { // 40% mejora
             recentImprovement = true;
@@ -1357,7 +1254,7 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[], allAssignment
           const previousWeeks = sortedWeeks.slice(0, -1);
 
           const lastWeekFreq = lastWeek[1].size;
-          const previousAvg = previousWeeks.reduce((sum, [_, daysSet]) => sum + daysSet.size, 0) / previousWeeks.length;
+          const previousAvg = previousWeeks.reduce((sum, [, daysSet]) => sum + daysSet.size, 0) / previousWeeks.length;
 
           // Con pocas semanas, ser más liberal: 50% mejora
           if (lastWeekFreq > previousAvg * 1.5 && lastWeekFreq >= 2) {
@@ -1685,10 +1582,6 @@ const analyzeProgressTrend = (
 
   // Calcular factores de contexto
   const recentDays = Math.floor((new Date().getTime() - new Date(sortedRecords[sortedRecords.length - 1].date).getTime()) / (1000 * 60 * 60 * 24));
-  const avgVolumePerSession = volumeProgression > 0 ? sortedRecords.slice(-Math.ceil(sortedRecords.length / 4)).reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / Math.ceil(sortedRecords.length / 4) : 0;
-  const fatigueIndex = Math.min(100, Math.max(0, (avgVolumePerSession / 1500) * 60));
-
-
 
   let trend: 'improving' | 'stable' | 'declining';
 
@@ -1919,9 +1812,6 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: Wo
 
   let trend: 'improving' | 'stable' | 'declining';
 
-  // **MEJORA**: Umbrales más tolerantes para todas las categorías
-  const categoryName = categoryRecords[0]?.exercise?.categories?.[0];
-
   // Umbrales extremadamente tolerantes para todas las categorías
   const improvingThreshold = 0.1;  // 0.1% para todas las categorías
   const decliningThreshold = -2.0; // -2.0% para todas las categorías (muy tolerante)
@@ -1953,8 +1843,7 @@ const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: Wo
   const stdDev = Math.sqrt(variance);
   const consistency = mean > 0 ? Math.max(0, 100 - ((stdDev / mean) * 100)) : 0;
 
-  // Calcular volatilidad
-  const volatility = mean > 0 ? (stdDev / mean) * 100 : 0;
+
 
   // **MEJORA**: Calcular volatilidad más tolerante también en el fallback
   const rawVolatility = mean > 0 ? (stdDev / mean) * 100 : 0;

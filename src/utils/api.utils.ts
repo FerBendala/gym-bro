@@ -235,7 +235,7 @@ export const openURLSafely = (url: string): void => {
  * Muestra notificación de éxito
  */
 export const showSuccessToast = (
-  showNotification: (message: string, type: any) => void,
+  showNotification: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
   message: string
 ) => {
   showNotification(message, 'success');
@@ -245,7 +245,7 @@ export const showSuccessToast = (
  * Muestra notificación de error
  */
 export const showErrorToast = (
-  showNotification: (message: string, type: any) => void,
+  showNotification: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
   message: string
 ) => {
   showNotification(message, 'error');
@@ -255,7 +255,7 @@ export const showErrorToast = (
  * Muestra notificación de advertencia
  */
 export const showWarningToast = (
-  showNotification: (message: string, type: any) => void,
+  showNotification: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
   message: string
 ) => {
   showNotification(message, 'warning');
@@ -265,7 +265,7 @@ export const showWarningToast = (
  * Muestra notificación informativa
  */
 export const showInfoToast = (
-  showNotification: (message: string, type: any) => void,
+  showNotification: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
   message: string
 ) => {
   showNotification(message, 'info');

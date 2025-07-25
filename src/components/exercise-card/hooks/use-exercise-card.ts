@@ -2,6 +2,7 @@ import type { Exercise, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord 
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { useCallback } from 'react';
 import { EXERCISE_CARD_CONSTANTS } from '../constants';
 import type { ExerciseCardProps, UseExerciseCardReturn } from '../types';
 import { exerciseCardUtils } from '../utils';
@@ -36,7 +37,7 @@ export const useExerciseCard = (
   });
 
   // Función para obtener el último registro usando utilidades
-  const fetchLastRecord = () => {
+  const fetchLastRecord = useCallback(() => {
     if (!exerciseId || !workoutRecords) return;
     setLoadingLast(true);
 
@@ -49,7 +50,7 @@ export const useExerciseCard = (
     setLastRecord(record);
     setLastWorkoutSeries(series);
     setLoadingLast(false);
-  };
+  }, [exerciseId, workoutRecords, exerciseObj]);
 
   const toggleModal = () => {
     setShowModal(!showModal);
@@ -86,7 +87,7 @@ export const useExerciseCard = (
   // Obtener el último registro del ejercicio al abrir el modal o cuando cambian los registros
   useEffect(() => {
     fetchLastRecord();
-  }, [exerciseId, showModal, workoutRecords]);
+  }, [exerciseId, showModal, workoutRecords, fetchLastRecord]);
 
   return {
     showModal,

@@ -9,7 +9,7 @@ interface InputMessageProps {
 /**
  * Subcomponente que renderiza mensajes de error o ayuda
  */
-export const InputMessage: React.FC<InputMessageProps> = ({ message, className, type }) => {
+export const InputMessage: React.FC<InputMessageProps> = ({ message, className }) => {
   return (
     <p className={className}>
       {message}

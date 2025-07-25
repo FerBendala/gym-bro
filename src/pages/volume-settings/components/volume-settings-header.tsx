@@ -3,7 +3,7 @@ import { cn } from '@/utils';
 import React from 'react';
 import type { VolumeSettingsProps } from '../types';
 
-interface VolumeSettingsHeaderProps extends VolumeSettingsProps { }
+type VolumeSettingsHeaderProps = VolumeSettingsProps;
 
 export const VolumeSettingsHeader: React.FC<VolumeSettingsHeaderProps> = ({ onBack }) => {
   return (

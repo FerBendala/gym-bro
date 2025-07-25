@@ -5,7 +5,6 @@ import {
   type StoreName
 } from './indexeddb-config';
 import type {
-  DatabaseOptions,
   DatabaseResult,
   QueryFilter,
   QueryOptions
@@ -70,14 +69,12 @@ export const initializeDB = (): Promise<IDBDatabase> => {
  */
 const createStores = (db: IDBDatabase) => {
   Object.entries(STORE_CONFIG).forEach(([storeName, config]) => {
-    let store: IDBObjectStore;
-
     if (db.objectStoreNames.contains(storeName)) {
       // Si el store existe, necesitamos recrearlo si cambió la configuración
       db.deleteObjectStore(storeName);
     }
 
-    store = db.createObjectStore(storeName, {
+    const store = db.createObjectStore(storeName, {
       keyPath: config.keyPath,
       autoIncrement: config.autoIncrement
     });
@@ -158,8 +155,7 @@ export const executeTransaction = async <T>(
  */
 export const addItem = async <T>(
   storeName: StoreName,
-  data: T,
-  options?: DatabaseOptions
+  data: T
 ): Promise<DatabaseResult<T>> => {
   return executeTransaction(storeName, 'readwrite', async (store) => {
     const request = (store as IDBObjectStore).add(data);
@@ -175,8 +171,7 @@ export const addItem = async <T>(
  */
 export const updateItem = async <T>(
   storeName: StoreName,
-  data: T,
-  options?: DatabaseOptions
+  data: T
 ): Promise<DatabaseResult<T>> => {
   return executeTransaction(storeName, 'readwrite', async (store) => {
     const request = (store as IDBObjectStore).put(data);
@@ -192,8 +187,7 @@ export const updateItem = async <T>(
  */
 export const getItem = async <T>(
   storeName: StoreName,
-  id: string,
-  options?: DatabaseOptions
+  id: string
 ): Promise<DatabaseResult<T>> => {
   return executeTransaction(storeName, 'readonly', async (store) => {
     const request = (store as IDBObjectStore).get(id);
@@ -209,8 +203,7 @@ export const getItem = async <T>(
  */
 export const deleteItem = async (
   storeName: StoreName,
-  id: string,
-  options?: DatabaseOptions
+  id: string
 ): Promise<DatabaseResult<boolean>> => {
   return executeTransaction(storeName, 'readwrite', async (store) => {
     const request = (store as IDBObjectStore).delete(id);
@@ -264,7 +257,7 @@ export const getAllItems = async <T>(
 export const getItemsByIndex = async <T>(
   storeName: StoreName,
   indexName: string,
-  value: any,
+  value: unknown,
   options?: QueryOptions
 ): Promise<DatabaseResult<T[]>> => {
   return executeTransaction(storeName, 'readonly', async (store) => {
@@ -300,8 +293,7 @@ export const getItemsByIndex = async <T>(
  * Cuenta elementos en un store
  */
 export const countItems = async (
-  storeName: StoreName,
-  options?: QueryOptions
+  storeName: StoreName
 ): Promise<DatabaseResult<number>> => {
   return executeTransaction(storeName, 'readonly', async (store) => {
     const request = (store as IDBObjectStore).count();
@@ -374,7 +366,7 @@ const applySorting = <T>(items: T[], orderBy: { field: string; direction: 'asc' 
 /**
  * Obtiene un valor anidado de un objeto usando notación de punto
  */
-const getNestedValue = (obj: any, path: string): any => {
+const getNestedValue = (obj: Record<string, unknown>, path: string): unknown => {
   return path.split('.').reduce((current, key) => current?.[key], obj);
 };
 

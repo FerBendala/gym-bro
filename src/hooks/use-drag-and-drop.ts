@@ -9,14 +9,14 @@ import {
 } from '@dnd-kit/core';
 import { useState } from 'react';
 
-interface UseDragAndDropOptions {
-  onReorder?: (items: any[]) => void;
-  items: any[];
-  getItemId: (item: any) => string;
+interface UseDragAndDropOptions<T> {
+  onReorder?: (items: T[]) => void;
+  items: T[];
+  getItemId: (item: T) => string;
   enabled?: boolean; // Nuevo parámetro para habilitar/deshabilitar
 }
 
-export const useDragAndDrop = ({ onReorder, items, getItemId, enabled = true }: UseDragAndDropOptions) => {
+export const useDragAndDrop = <T>({ onReorder, items, getItemId, enabled = true }: UseDragAndDropOptions<T>) => {
   const [isDragging, setIsDragging] = useState(false);
 
   // Configuración optimizada de sensores para móvil - solo si está habilitado

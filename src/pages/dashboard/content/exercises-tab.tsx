@@ -17,8 +17,8 @@ interface ExercisesTabProps {
 /**
  * Función helper para manejar valores numéricos seguros
  */
-const safeNumber = (value: any, defaultValue: number = 0): number => {
-  if (value === null || value === undefined || isNaN(value)) {
+const safeNumber = (value: unknown, defaultValue: number = 0): number => {
+  if (value === null || value === undefined || isNaN(Number(value))) {
     return defaultValue;
   }
   return Number(value);

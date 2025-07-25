@@ -2,7 +2,7 @@ import { deleteWorkoutRecord, getExercises, getWorkoutRecords } from '@/api/serv
 import type { Exercise, WorkoutRecord } from '@/interfaces';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 export const useDashboardData = () => {
   const { showNotification } = useNotification();
@@ -11,7 +11,7 @@ export const useDashboardData = () => {
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     if (!isOnline) {
       showNotification('Sin conexión. Los datos pueden estar desactualizados.', 'warning');
       setLoading(false);
@@ -41,13 +41,14 @@ export const useDashboardData = () => {
 
       setWorkoutRecords(enrichedRecords);
       setExercises(exercisesData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ Error cargando datos del dashboard:', error);
-      showNotification(error.message || 'Error al cargar los datos del dashboard', 'error');
+      const errorMessage = error instanceof Error ? error.message : 'Error al cargar los datos del dashboard';
+      showNotification(errorMessage, 'error');
     } finally {
       setLoading(false);
     }
-  };
+  }, [isOnline, showNotification]);
 
   const handleDeleteRecord = async (recordId: string): Promise<void> => {
     if (!isOnline) {
@@ -71,16 +72,17 @@ export const useDashboardData = () => {
       const exerciseName = recordToDelete?.exercise?.name || 'Ejercicio';
       showNotification(`Entrenamiento de ${exerciseName} eliminado exitosamente`, 'success');
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error eliminando entrenamiento:', error);
-      showNotification(error.message || 'Error al eliminar el entrenamiento', 'error');
+      const errorMessage = error instanceof Error ? error.message : 'Error al eliminar el entrenamiento';
+      showNotification(errorMessage, 'error');
       throw error;
     }
   };
 
   useEffect(() => {
     loadData();
-  }, [isOnline]);
+  }, [loadData]);
 
   return {
     workoutRecords,

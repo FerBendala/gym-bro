@@ -181,8 +181,26 @@ export const generateExportData = async (
     appVersion: '1.0.0'
   };
 
+  // Interfaces para estadísticas de ejercicios
+  interface ExerciseStats {
+    workouts: number;
+    totalVolume: number;
+    weights: number[];
+    lastDate: Date;
+    firstWeight: number;
+    lastWeight: number;
+  }
+
+  interface DayExerciseStats {
+    exerciseName: string;
+    categories: string[];
+    frequency: number;
+    totalVolume: number;
+    volumes: number[];
+  }
+
   // Exercises con estadísticas
-  const exerciseStats = new Map<string, any>();
+  const exerciseStats = new Map<string, ExerciseStats>();
   sortedRecords.forEach(record => {
     const exerciseId = record.exerciseId;
     if (!exerciseStats.has(exerciseId)) {
@@ -197,17 +215,19 @@ export const generateExportData = async (
     }
 
     const stats = exerciseStats.get(exerciseId);
-    stats.workouts++;
-    stats.totalVolume += calculateWorkoutVolume(record);
-    stats.weights.push(record.weight);
+    if (stats) {
+      stats.workouts++;
+      stats.totalVolume += calculateWorkoutVolume(record);
+      stats.weights.push(record.weight);
 
-    if (new Date(record.date) > stats.lastDate) {
-      stats.lastDate = new Date(record.date);
-      stats.lastWeight = record.weight;
-    }
+      if (new Date(record.date) > stats.lastDate) {
+        stats.lastDate = new Date(record.date);
+        stats.lastWeight = record.weight;
+      }
 
-    if (stats.firstWeight === 0) {
-      stats.firstWeight = record.weight;
+      if (stats.firstWeight === 0) {
+        stats.firstWeight = record.weight;
+      }
     }
   });
 
@@ -270,7 +290,7 @@ export const generateExportData = async (
 
   daysOfWeek.forEach(day => {
     const dayRecords = sortedRecords.filter(record => record.dayOfWeek === day);
-    const exerciseMap = new Map<string, any>();
+    const exerciseMap = new Map<string, DayExerciseStats>();
 
     dayRecords.forEach(record => {
       const exercise = exercises.find(ex => ex.id === record.exerciseId);
@@ -287,10 +307,12 @@ export const generateExportData = async (
       }
 
       const exerciseData = exerciseMap.get(exerciseName);
-      exerciseData.frequency++;
-      const volume = calculateWorkoutVolume(record);
-      exerciseData.totalVolume += volume;
-      exerciseData.volumes.push(volume);
+      if (exerciseData) {
+        exerciseData.frequency++;
+        const volume = calculateWorkoutVolume(record);
+        exerciseData.totalVolume += volume;
+        exerciseData.volumes.push(volume);
+      }
     });
 
     const dayExercises = Array.from(exerciseMap.values()).map(ex => ({
@@ -421,7 +443,14 @@ export const generateExportData = async (
   }));
 
   // Monthly Stats
-  const monthlyStatsMap = new Map<string, any>();
+  const monthlyStatsMap = new Map<string, {
+    year: number;
+    month: string;
+    volume: number;
+    workouts: number;
+    exercises: Set<string>;
+    categories: Map<string, number>;
+  }>();
   sortedRecords.forEach(record => {
     const date = new Date(record.date);
     const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -437,7 +466,7 @@ export const generateExportData = async (
       });
     }
 
-    const monthData = monthlyStatsMap.get(monthKey);
+    const monthData = monthlyStatsMap.get(monthKey)!;
     monthData.volume += calculateWorkoutVolume(record);
     monthData.workouts++;
 
@@ -452,7 +481,7 @@ export const generateExportData = async (
     }
   });
 
-  const monthlyStats: MonthlyStatsData[] = Array.from(monthlyStatsMap.entries()).map(([key, data]) => {
+  const monthlyStats: MonthlyStatsData[] = Array.from(monthlyStatsMap.entries()).map(([, data]) => {
     let strongestCategory = 'N/A';
     if (data.categories.size > 0) {
       const entries = Array.from(data.categories.entries()) as [string, number][];
@@ -546,7 +575,7 @@ export const exportToJSON = (data: ExportData): string => {
 /**
  * Convierte un objeto a formato CSV
  */
-const objectToCSV = (data: any[]): string => {
+const objectToCSV = (data: Array<Record<string, unknown>>): string => {
   if (data.length === 0) return '';
 
   const headers = Object.keys(data[0]);
@@ -573,18 +602,18 @@ const objectToCSV = (data: any[]): string => {
  */
 export const exportToCSV = (data: ExportData): { [filename: string]: string } => {
   return {
-    'metadata.csv': objectToCSV([data.metadata]),
-    'exercises.csv': objectToCSV(data.exercises),
-    'workout_records.csv': objectToCSV(data.workoutRecords),
+    'metadata.csv': objectToCSV([data.metadata] as unknown as Record<string, unknown>[]),
+    'exercises.csv': objectToCSV(data.exercises as unknown as Record<string, unknown>[]),
+    'workout_records.csv': objectToCSV(data.workoutRecords as unknown as Record<string, unknown>[]),
     'exercises_by_day.csv': objectToCSV(data.exercisesByDay.map(day => ({
       dayOfWeek: day.dayOfWeek,
       totalVolume: day.totalVolume,
       averageVolume: day.averageVolume,
       workoutCount: day.workoutCount,
       exercisesCount: day.exercises.length
-    }))),
-    'volume_by_category.csv': objectToCSV(data.volumeAnalysis.volumeByCategory),
-    'volume_by_exercise.csv': objectToCSV(data.volumeAnalysis.volumeByExercise),
+    })) as unknown as Record<string, unknown>[]),
+    'volume_by_category.csv': objectToCSV(data.volumeAnalysis.volumeByCategory as unknown as Record<string, unknown>[]),
+    'volume_by_exercise.csv': objectToCSV(data.volumeAnalysis.volumeByExercise as unknown as Record<string, unknown>[]),
     'weekly_data.csv': objectToCSV(data.weeklyData.map(week => ({
       weekStart: week.weekStart,
       weekEnd: week.weekEnd,
@@ -592,10 +621,10 @@ export const exportToCSV = (data: ExportData): { [filename: string]: string } =>
       workoutCount: week.workoutCount,
       averageVolumePerWorkout: week.averageVolumePerWorkout,
       uniqueExercises: week.uniqueExercises
-    }))),
-    'category_metrics.csv': objectToCSV(data.categoryMetrics),
-    'monthly_stats.csv': objectToCSV(data.monthlyStats),
-    'personal_records.csv': objectToCSV(data.progressSummary.personalRecords)
+    })) as unknown as Record<string, unknown>[]),
+    'category_metrics.csv': objectToCSV(data.categoryMetrics as unknown as Record<string, unknown>[]),
+    'monthly_stats.csv': objectToCSV(data.monthlyStats as unknown as Record<string, unknown>[]),
+    'personal_records.csv': objectToCSV(data.progressSummary.personalRecords as unknown as Record<string, unknown>[])
   };
 };
 

@@ -2,25 +2,13 @@ import { Card, CardContent, CardHeader } from '@/components/card';
 import { formatNumberToString } from '@/utils';
 import { AlertTriangle, BarChart, CheckCircle, Timer, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
+import type { CategoryAnalysis, CategoryMetric, MuscleBalanceItem } from '../types';
 import { CategoryDashboardChart } from './category-dashboard-chart';
 import { HorizontalBarChart } from './horizontal-bar-chart';
 
 interface BalanceByGroupContentProps {
-  muscleBalance: Array<{
-    category: string;
-    percentage: number;
-    totalVolume: number;
-    idealPercentage: number;
-    volume?: number;
-    intensityScore?: number;
-    weeklyFrequency?: number;
-    isBalanced?: boolean;
-    priorityLevel?: string;
-    progressTrend?: string;
-    personalRecords?: any[];
-    balanceHistory?: any;
-  }>;
-  categoryAnalysis: Record<string, any>;
+  muscleBalance: MuscleBalanceItem[];
+  categoryAnalysis: CategoryAnalysis;
   onItemClick?: (itemName: string) => void;
 }
 
@@ -105,7 +93,7 @@ export const BalanceByGroupContent: React.FC<BalanceByGroupContentProps> = ({
         .map((balance) => {
           const Icon = getCategoryIcon(balance.category);
           const colorGradient = getCategoryColor(balance.category);
-          const categoryMetric = categoryAnalysis.categoryMetrics?.find((m: any) => m.category === balance.category);
+          const categoryMetric = categoryAnalysis.categoryMetrics?.find((m: CategoryMetric) => m.category === balance.category);
 
           return (
             <Card key={balance.category} className="p-4 lg:p-5">

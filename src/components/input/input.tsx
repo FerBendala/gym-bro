@@ -12,7 +12,6 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
   const {
     inputProps,
     classes,
-    hasError,
     shouldShowHelper,
     label,
     error,

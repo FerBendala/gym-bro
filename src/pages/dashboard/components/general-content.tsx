@@ -15,7 +15,7 @@ interface GeneralContentProps {
     totalVolume: number;
     idealPercentage: number;
   }>;
-  onItemClick?: (itemName: string) => void;
+
 }
 
 export const GeneralContent: React.FC<GeneralContentProps> = ({
@@ -23,8 +23,7 @@ export const GeneralContent: React.FC<GeneralContentProps> = ({
   finalConsistency,
   avgIntensity,
   avgFrequency,
-  muscleBalance,
-  onItemClick
+  muscleBalance
 }) => {
   const balanceLevel = balanceScore >= 70 ? 'excellent' :
     balanceScore >= 50 ? 'good' :

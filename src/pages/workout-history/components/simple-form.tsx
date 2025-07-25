@@ -4,7 +4,7 @@ import React from 'react';
 
 interface SimpleFormProps {
   editMode: EditMode;
-  onFieldChange: (key: keyof EditMode, value: any) => void;
+  onFieldChange: <K extends keyof EditMode>(key: K, value: EditMode[K]) => void;
 }
 
 export const SimpleForm: React.FC<SimpleFormProps> = ({

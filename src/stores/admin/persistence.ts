@@ -1,9 +1,10 @@
+import type { AdminStore } from './types';
 import { getCurrentDay } from './utils';
 
 // Configuración de persistencia
 export const persistenceConfig = {
   name: 'gymbro-admin',
-  partialize: (state: any) => ({
+  partialize: (state: AdminStore) => ({
     // Persistir solo los datos que no cambian frecuentemente
     // NO persistir selectedDay para evitar problemas de inicialización
     exercises: state.exercises,
@@ -11,7 +12,7 @@ export const persistenceConfig = {
     filters: state.filters,
   }),
   // Función para restaurar el estado con valores por defecto válidos
-  onRehydrateStorage: () => (state: any) => {
+  onRehydrateStorage: () => (state: AdminStore | null) => {
     if (state) {
       if (!state.adminPanel) {
         state.adminPanel = {

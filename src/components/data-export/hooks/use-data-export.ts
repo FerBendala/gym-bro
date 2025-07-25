@@ -97,7 +97,7 @@ export const useDataExport = () => {
         }
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Error durante la exportación:', error);
       showNotification(
         error.message || 'Error al exportar los datos. Inténtalo de nuevo.',

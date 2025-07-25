@@ -1,7 +1,7 @@
 import { deleteWorkoutRecord, getExercises, getWorkoutRecords, updateWorkoutRecord } from '@/api/services';
 import type { Exercise, WorkoutRecord } from '@/interfaces';
 import { useNotification } from '@/stores/notification';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { WorkoutRecordWithExercise } from '../types';
 
 export const useWorkoutHistory = () => {
@@ -10,7 +10,7 @@ export const useWorkoutHistory = () => {
   const [loading, setLoading] = useState(true);
   const { showNotification } = useNotification();
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [workoutRecords, exerciseList] = await Promise.all([
@@ -32,7 +32,7 @@ export const useWorkoutHistory = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showNotification]);
 
   const updateRecord = async (recordId: string, updatedRecord: WorkoutRecord) => {
     try {
@@ -64,7 +64,7 @@ export const useWorkoutHistory = () => {
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
   return {
     records,

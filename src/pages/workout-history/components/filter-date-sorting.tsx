@@ -77,8 +77,8 @@ export const DateSorting: React.FC<DateSortingProps> = ({
               </label>
               <Select
                 value={sortBy}
-                onChange={(e) => onSortByChange(e.target.value as any)}
-                options={WORKOUT_HISTORY_CONSTANTS.SORT_OPTIONS as any}
+                onChange={(e) => onSortByChange(e.target.value as 'date' | 'exercise' | 'weight' | 'volume')}
+                options={WORKOUT_HISTORY_CONSTANTS.SORT_OPTIONS}
                 className="border-gray-600/50 focus:border-indigo-500"
               />
             </div>
@@ -90,8 +90,8 @@ export const DateSorting: React.FC<DateSortingProps> = ({
               </label>
               <Select
                 value={sortOrder}
-                onChange={(e) => onSortOrderChange(e.target.value as any)}
-                options={WORKOUT_HISTORY_CONSTANTS.SORT_ORDER_OPTIONS as any}
+                onChange={(e) => onSortOrderChange(e.target.value as 'asc' | 'desc')}
+                options={WORKOUT_HISTORY_CONSTANTS.SORT_ORDER_OPTIONS}
                 className="border-gray-600/50 focus:border-teal-500"
               />
             </div>

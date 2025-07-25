@@ -3,6 +3,7 @@
  * Funciones puras para operaciones con texto
  */
 
+import type { WorkoutRecord } from '@/interfaces';
 import type { ClassValue } from 'clsx';
 import { clsx } from 'clsx';
 
@@ -147,7 +148,7 @@ export const formatVolumeToKg = (volume: number): string => {
 /**
  * Formatea descripción de entrenamiento
  */
-export const formatWorkoutDescription = (record: any): string => {
+export const formatWorkoutDescription = (record: WorkoutRecord): string => {
   if (!record) return '';
 
   const weight = formatWeight(record.weight || 0);

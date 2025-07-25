@@ -1160,7 +1160,12 @@ const analyzeMonthlyVariations = (sortedRecords: WorkoutRecord[]) => {
 /**
  * Combina diferentes predicciones con pesos apropiados
  */
-const combineRredictions = (linear: any, exponential: any, seasonal: any, dataQuality: any) => {
+const combineRredictions = (
+  linear: { fourWeeks: number; twelveWeeks: number; sixMonths: number },
+  exponential: { fourWeeks: number; twelveWeeks: number; sixMonths: number },
+  seasonal: { fourWeeks: number; twelveWeeks: number; sixMonths: number },
+  dataQuality: { temporalConsistency: number; dataStability: number; dataCompleteness: number }
+) => {
   // Pesos basados en calidad de datos
   const linearWeight = 0.4 + (dataQuality.temporalConsistency / 100) * 0.2;
   const exponentialWeight = 0.3 + (dataQuality.dataStability / 100) * 0.2;
@@ -1190,7 +1195,7 @@ const combineRredictions = (linear: any, exponential: any, seasonal: any, dataQu
 /**
  * Evalúa factores de riesgo para las predicciones
  */
-const assessRiskFactors = (trends: any) => {
+const assessRiskFactors = (trends: { shortTerm: number; acceleration: number }) => {
   // Riesgo de meseta basado en tendencia reciente
   const plateauRisk = trends.shortTerm < 0.1 ? 80 : Math.max(10, 50 - (trends.shortTerm * 20));
 
@@ -1211,7 +1216,10 @@ const assessRiskFactors = (trends: any) => {
 /**
  * Genera escenarios de predicción conservador, realista y optimista
  */
-const generatePredictionScenarios = (predictions: any, riskFactors: any) => {
+const generatePredictionScenarios = (
+  predictions: { twelveWeeks: number },
+  riskFactors: { plateauRisk: number }
+) => {
   // Factores de ajuste basados en riesgos
   const conservativeFactor = 0.7 + (riskFactors.plateauRisk / 100) * 0.2;
   const optimisticFactor = 1.3 - (riskFactors.plateauRisk / 100) * 0.2;
@@ -1226,7 +1234,11 @@ const generatePredictionScenarios = (predictions: any, riskFactors: any) => {
 /**
  * Calcula confianza general de la predicción
  */
-const calculatePredictionConfidence = (dataQuality: any, trends: any, riskFactors: any) => {
+const calculatePredictionConfidence = (
+  dataQuality: { overall: number },
+  trends: { shortTerm: number; longTerm: number },
+  riskFactors: { plateauRisk: number; overtrainingRisk: number; injuryRisk: number }
+) => {
   // Factores positivos
   const dataQualityScore = dataQuality.overall;
   const trendConsistency = Math.abs(trends.shortTerm - trends.longTerm) < 1 ? 80 : 50;
@@ -1242,7 +1254,7 @@ const calculatePredictionConfidence = (dataQuality: any, trends: any, riskFactor
 /**
  * Calcula confiabilidad del modelo
  */
-const calculateModelReliability = (trends: any) => {
+const calculateModelReliability = (trends: { shortTerm: number; longTerm: number }) => {
   // Basado en consistencia de tendencias
   const trendConsistency = 1 - Math.abs(trends.shortTerm - trends.longTerm) / Math.max(Math.abs(trends.shortTerm), Math.abs(trends.longTerm), 1);
   return Math.round(Math.max(20, Math.min(95, trendConsistency * 100)));
@@ -1251,7 +1263,11 @@ const calculateModelReliability = (trends: any) => {
 /**
  * Genera recomendaciones específicas para 1RM
  */
-const generateTrainingRecommendations1RM = (trends: any, riskFactors: any, current1RM: number) => {
+const generateTrainingRecommendations1RM = (
+  trends: { shortTerm: number },
+  riskFactors: { overtrainingRisk: number; plateauRisk: number },
+  current1RM: number
+) => {
   // Frecuencia óptima basada en fase y riesgos
   let frequency = 3;
   if (riskFactors.overtrainingRisk > 60) frequency = 2;

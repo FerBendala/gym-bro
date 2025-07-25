@@ -53,7 +53,7 @@ class SyncManager {
       if (navigator.onLine && !this.isSyncing) {
         this.processSyncQueue();
       }
-    }, intervalMinutes * 60 * 1000) as any;
+    }, intervalMinutes * 60 * 1000) as number;
   }
 
   /**
@@ -103,7 +103,7 @@ class SyncManager {
     entityType: 'exercise' | 'workoutRecord',
     entityId: string,
     operation: keyof typeof SYNC_OPERATIONS,
-    data: any,
+    data: Record<string, unknown>,
     priority: keyof typeof SYNC_PRIORITY = 'MEDIUM'
   ): Promise<DatabaseResult<SyncQueueItem>> {
     const queueItem: SyncQueueItem = {
@@ -204,31 +204,26 @@ class SyncManager {
     };
     await updateItem(STORES.SYNC_QUEUE, updatedItem);
 
-    try {
-      // Simular llamada a Firebase - aquí iría la lógica real
-      await this.syncWithFirebase(item);
+    // Simular llamada a Firebase - aquí iría la lógica real
+    await this.syncWithFirebase(item);
 
-      // Marcar como completado
-      await updateItem(STORES.SYNC_QUEUE, {
-        ...updatedItem,
-        status: SYNC_STATUS.COMPLETED,
-        updatedAt: Date.now()
-      });
+    // Marcar como completado
+    await updateItem(STORES.SYNC_QUEUE, {
+      ...updatedItem,
+      status: SYNC_STATUS.COMPLETED,
+      updatedAt: Date.now()
+    });
 
-      // Opcional: limpiar elementos completados después de un tiempo
-      setTimeout(() => {
-        this.cleanupCompletedItems();
-      }, 60000); // 1 minuto
-
-    } catch (error) {
-      throw error;
-    }
+    // Opcional: limpiar elementos completados después de un tiempo
+    setTimeout(() => {
+      this.cleanupCompletedItems();
+    }, 60000); // 1 minuto
   }
 
   /**
    * Sincroniza con Firebase (placeholder - implementar con API real)
    */
-  private async syncWithFirebase(item: SyncQueueItem): Promise<void> {
+  private async syncWithFirebase(): Promise<void> {
     // Aquí iría la lógica real de sincronización con Firebase
     // Por ahora simulamos la operación
 
@@ -313,8 +308,8 @@ class SyncManager {
           item => item.updatedAt < cutoffTime
         );
 
-        for (const item of oldItems) {
-          await deleteItem(STORES.SYNC_QUEUE, item.id!.toString());
+        for (const oldItem of oldItems) {
+          await deleteItem(STORES.SYNC_QUEUE, oldItem.id!.toString());
         }
       }
     } catch (error) {
@@ -390,7 +385,7 @@ export const queueSyncOperation = (
   entityType: 'exercise' | 'workoutRecord',
   entityId: string,
   operation: keyof typeof SYNC_OPERATIONS,
-  data: any,
+  data: Record<string, unknown>,
   priority?: keyof typeof SYNC_PRIORITY
 ) => syncManager.queueOperation(entityType, entityId, operation, data, priority);
 

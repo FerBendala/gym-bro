@@ -45,12 +45,12 @@ export const EditWorkoutForm: React.FC<EditWorkoutFormProps> = ({
       {editMode.mode === 'simple' ? (
         <SimpleForm
           editMode={editMode}
-          onFieldChange={onFieldChange as any}
+          onFieldChange={onFieldChange}
         />
       ) : (
         <AdvancedForm
           editMode={editMode}
-          onFieldChange={onFieldChange as any}
+          onFieldChange={onFieldChange}
           onIndividualSetAdd={onIndividualSetAdd}
           onIndividualSetRemove={onIndividualSetRemove}
           onIndividualSetUpdate={onIndividualSetUpdate}

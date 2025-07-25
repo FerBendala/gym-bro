@@ -6,7 +6,7 @@ import type { EditMode } from '../types';
 
 interface AdvancedFormProps {
   editMode: EditMode;
-  onFieldChange: (key: keyof EditMode, value: any) => void;
+  onFieldChange: <K extends keyof EditMode>(key: K, value: EditMode[K]) => void;
   onIndividualSetAdd: () => void;
   onIndividualSetRemove: (index: number) => void;
   onIndividualSetUpdate: (index: number, field: 'weight' | 'reps', value: number) => void;

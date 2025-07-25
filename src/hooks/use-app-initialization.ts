@@ -15,7 +15,7 @@ export const useAppInitialization = () => {
       hasInitialized.current = true;
       initializeConnection();
     }
-  }, []); // Sin dependencias para ejecutar solo una vez
+  }, [isInitialized, initializeConnection]); // Incluidas las dependencias necesarias
 
   return {
     isInitialized

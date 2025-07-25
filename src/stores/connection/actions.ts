@@ -16,7 +16,7 @@ const handleConnectionChange = (isOnline: boolean, setOnlineStatus: (status: boo
 };
 
 // Acciones de conexión
-export const createConnectionActions = (set: any, get: () => ConnectionStore) => ({
+export const createConnectionActions = (set: (fn: (state: ConnectionStore) => Partial<ConnectionStore>) => void, get: () => ConnectionStore) => ({
   setOnlineStatus: (isOnline: boolean) => set({ isOnline }),
 
   initializeConnection: () => {

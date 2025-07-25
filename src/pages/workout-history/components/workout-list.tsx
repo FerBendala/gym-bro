@@ -2,19 +2,19 @@ import { Card, CardContent } from '@/components/card';
 import { Calendar } from 'lucide-react';
 import React from 'react';
 import { WORKOUT_HISTORY_CONSTANTS } from '../constants';
-import type { WorkoutRecordWithExercise } from '../types';
+import type { EditMode, WorkoutRecordWithExercise } from '../types';
 import { EditWorkoutForm, WorkoutRecordCard } from './';
 
 interface WorkoutListProps {
   records: WorkoutRecordWithExercise[];
   editingRecord: WorkoutRecordWithExercise | null;
-  editMode: any;
+  editMode: EditMode;
   onEdit: (record: WorkoutRecordWithExercise) => void;
   onDelete: (recordId: string) => void;
   onSaveEdit: () => void;
   onCancelEdit: () => void;
   onModeChange: (mode: 'simple' | 'advanced') => void;
-  onFieldChange: <K extends keyof any>(key: K, value: any) => void;
+  onFieldChange: <K extends keyof EditMode>(key: K, value: EditMode[K]) => void;
   onIndividualSetAdd: () => void;
   onIndividualSetRemove: (index: number) => void;
   onIndividualSetUpdate: (index: number, field: 'weight' | 'reps', value: number) => void;

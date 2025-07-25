@@ -68,7 +68,7 @@ export const exerciseCardUtils = {
   /**
    * Obtiene el último registro y series del último día de entrenamiento
    */
-  getLastWorkoutData(exerciseId: string, workoutRecords: WorkoutRecord[], exerciseObj?: any) {
+  getLastWorkoutData(exerciseId: string, workoutRecords: WorkoutRecord[], exerciseObj?: Exercise) {
     if (!exerciseId || !workoutRecords) {
       return { lastRecord: null, lastWorkoutSeries: [] };
     }

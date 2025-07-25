@@ -21,7 +21,7 @@ export const useMoreMenu = () => {
     return () => {
       document.removeEventListener('mousedown', handleClickOutside);
     };
-  }, [showMoreMenu]); // Removida closeMoreMenu de las dependencias
+  }, [showMoreMenu, closeMoreMenu]);
 
   return {
     showMoreMenu,

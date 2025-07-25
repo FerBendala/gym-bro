@@ -6,7 +6,7 @@ import type { InputClasses, InputProps, InputValidation } from '../types';
  * Valida y normaliza el tamaño del input
  */
 export const validateInputSize = (size: string | undefined): 'sm' | 'md' | 'lg' => {
-  if (!size || !INPUT_CONSTANTS.VALID_SIZES.includes(size as any)) {
+  if (!size || !INPUT_CONSTANTS.VALID_SIZES.includes(size as 'sm' | 'md' | 'lg')) {
     return INPUT_CONSTANTS.DEFAULT_SIZE;
   }
   return size as 'sm' | 'md' | 'lg';
@@ -16,7 +16,7 @@ export const validateInputSize = (size: string | undefined): 'sm' | 'md' | 'lg' 
  * Valida y normaliza la variante del input
  */
 export const validateInputVariant = (variant: string | undefined): 'default' | 'filled' | 'outline' => {
-  if (!variant || !INPUT_CONSTANTS.VALID_VARIANTS.includes(variant as any)) {
+  if (!variant || !INPUT_CONSTANTS.VALID_VARIANTS.includes(variant as 'default' | 'filled' | 'outline')) {
     return INPUT_CONSTANTS.DEFAULT_VARIANT;
   }
   return variant as 'default' | 'filled' | 'outline';

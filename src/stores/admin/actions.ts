@@ -3,7 +3,7 @@ import type { AdminStore } from './types';
 import { getInitialState } from './utils';
 
 // Acciones de UI
-export const createUIActions = (set: any, get: () => AdminStore) => ({
+export const createUIActions = (set: (fn: (state: AdminStore) => Partial<AdminStore>) => void) => ({
   openPanel: () => set((state: AdminStore) => ({
     adminPanel: { ...state.adminPanel, isOpen: true }
   })),
@@ -30,7 +30,7 @@ export const createUIActions = (set: any, get: () => AdminStore) => ({
 });
 
 // Acciones de carga
-export const createLoadingActions = (set: any) => ({
+export const createLoadingActions = (set: (fn: (state: AdminStore) => Partial<AdminStore>) => void) => ({
   setLoading: (key: keyof AdminStore['loading'], value: boolean) => set((state: AdminStore) => ({
     loading: { ...state.loading, [key]: value }
   })),
@@ -41,7 +41,7 @@ export const createLoadingActions = (set: any) => ({
 });
 
 // Acciones de datos
-export const createDataActions = (set: any) => ({
+export const createDataActions = (set: (fn: (state: AdminStore) => Partial<AdminStore>) => void) => ({
   setExercises: (exercises: Exercise[]) => {
     set((state: AdminStore) => {
       const newState = { ...state, exercises };
@@ -53,7 +53,7 @@ export const createDataActions = (set: any) => ({
 });
 
 // Acciones auxiliares para CRUD
-export const createCRUDActions = (set: any) => ({
+export const createCRUDActions = (set: (fn: (state: AdminStore) => Partial<AdminStore>) => void) => ({
   addExercise: (exercise: Exercise) => set((state: AdminStore) => ({
     exercises: [...state.exercises, exercise]
   })),
@@ -78,7 +78,7 @@ export const createCRUDActions = (set: any) => ({
 });
 
 // Acciones de filtros
-export const createFilterActions = (set: any) => ({
+export const createFilterActions = (set: (fn: (state: AdminStore) => Partial<AdminStore>) => void) => ({
   setExerciseCategory: (exerciseCategory: string) => set((state: AdminStore) => ({
     filters: { ...state.filters, exerciseCategory }
   })),
@@ -89,7 +89,7 @@ export const createFilterActions = (set: any) => ({
 });
 
 // Utilidades
-export const createUtilityActions = (set: any, get: () => AdminStore) => ({
+export const createUtilityActions = (set: (fn: (state: AdminStore) => Partial<AdminStore>) => void, get: () => AdminStore) => ({
   getFilteredExercises: () => {
     const { exercises, filters } = get();
     let filtered = exercises;

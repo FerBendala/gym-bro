@@ -152,21 +152,7 @@ const calculateValidatedCurrentWeight = (records: WorkoutRecord[]): number => {
   return Math.round(currentWeight * 100) / 100; // Redondear a 2 decimales
 };
 
-const calculateValidatedBaseline1RM = (records: WorkoutRecord[]): number => {
-  const recentRecords = getRecentRecords(records);
-  if (recentRecords.length === 0) return 0;
 
-  // Calcular 1RM estimado promedio de registros recientes
-  const estimated1RMs = recentRecords.map(r => r.weight * (1 + r.reps / 30));
-  const baseline = estimated1RMs.reduce((sum, val) => sum + val, 0) / estimated1RMs.length;
-  return Math.round(baseline * 100) / 100; // Redondear a 2 decimales
-};
-
-const calculateValidatedImprovement = (records: WorkoutRecord[], predictedPR: number): number => {
-  const recentMaxWeight = calculateValidatedCurrentWeight(records);
-  const improvement = predictedPR - recentMaxWeight;
-  return Math.max(0, Math.min(15, improvement)); // Limitar mejora a 15kg máximo
-};
 
 export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
   const analysis = useMemo(() => calculateAdvancedAnalysis(records), [records]);
@@ -222,13 +208,7 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
     analysis.progressPrediction.predictedPR.weight
   );
 
-  // Función utilitaria para validar valores numéricos
-  const safeNumber = (value: number | undefined | null, defaultValue: number = 0): number => {
-    if (typeof value !== 'number' || isNaN(value) || !isFinite(value)) {
-      return defaultValue;
-    }
-    return value;
-  };
+
 
   // Función para obtener explicación de nivel de confianza
   const getConfidenceExplanation = (confidence: number): {

@@ -14,7 +14,7 @@ const safeNumber = (value: number | undefined, fallback: number = 0): number => 
 };
 
 // Iconos y colores para días de la semana (como en main)
-const dayIcons: Record<string, any> = {
+const dayIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   'Lunes': Calendar,
   'Martes': Activity,
   'Miércoles': Zap,
