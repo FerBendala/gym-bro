@@ -4,7 +4,7 @@ import { Notification } from '@/components/notification';
 import type { DayOfWeek } from '@/interfaces';
 import { useNotification } from '@/stores/notification-store';
 import { useEffect, useState } from 'react';
-import { ModernAdminPanel } from './admin-panel';
+import { AdminPanel } from './admin-panel';
 import { ModernCalendar } from './calendar';
 import { ModernHome } from './home';
 import { ModernProgress } from './progress';
@@ -150,7 +150,7 @@ const AppContent = () => {
 
       {/* Modal del panel de administración */}
       {showAdmin && (
-        <ModernAdminPanel
+        <AdminPanel
           isModal={true}
           onClose={() => setShowAdmin(false)}
         />

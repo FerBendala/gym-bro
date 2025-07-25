@@ -1,9 +1,9 @@
 import { MODERN_THEME } from '@/constants/theme';
 import { Bell, Database, Download, Info, Shield, Sliders, User } from 'lucide-react';
 import React, { useState } from 'react';
-import { AdminPanelPage } from '../components/admin-panel/admin-panel-page';
 import { DataExport } from '../components/data-export';
 import { cn } from '../utils/functions';
+import { AdminPanel } from './admin-panel';
 import { VolumeSettings } from './volume-settings';
 
 type SettingsSection = 'main' | 'admin' | 'export' | 'profile' | 'notifications' | 'about' | 'volume';
@@ -170,7 +170,7 @@ export const ModernSettings: React.FC = () => {
         return (
           <div>
             {renderSectionHeader('Administración de Ejercicios', () => setActiveSection('main'))}
-            <AdminPanelPage />
+            <AdminPanel isModal={false} onClose={() => setActiveSection('main')} />
           </div>
         );
 
