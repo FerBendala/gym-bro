@@ -16,12 +16,10 @@ export const AdminPanelPage: React.FC = () => {
   const isOnline = useOnlineStatus();
   useAdminDataLoader();
 
-  const {
-    activeTab,
-    previewUrl,
-    setTab,
-    setPreviewUrl,
-  } = useAdminStore();
+  const activeTab = useAdminStore((state) => state.adminPanel.activeTab);
+  const previewUrl = useAdminStore((state) => state.adminPanel.previewUrl);
+  const setTab = useAdminStore((state) => state.setTab);
+  const setPreviewUrl = useAdminStore((state) => state.setPreviewUrl);
 
   return (
     <div className="space-y-6">

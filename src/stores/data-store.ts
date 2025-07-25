@@ -110,7 +110,7 @@ export const useDataStore = create<DataStore>()(
         })),
       }),
       {
-        name: 'follow-gym-data',
+        name: 'gymbro-data',
         partialize: (state) => ({
           // Persistir solo los datos, no los estados de carga/error
           exercises: { items: state.exercises.items },

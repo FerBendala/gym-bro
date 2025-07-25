@@ -104,7 +104,7 @@ persist(
     // ... tu store
   }),
   {
-    name: 'follow-gym-store',
+    name: 'gymbro-store',
     partialize: (state) => ({
       // Solo persistir datos específicos
       exercises: { items: state.exercises.items },
@@ -124,10 +124,10 @@ devtools(
     (set, get) => ({
       // ... tu store
     }),
-    { name: 'follow-gym-store' }
+    { name: 'gymbro-store' }
   ),
   {
-    name: 'follow-gym-store',
+    name: 'gymbro-store',
   }
 );
 ```

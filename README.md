@@ -182,7 +182,7 @@ interface ExerciseAssignment {
 
 ```bash
 git clone <repository>
-cd follow-gym
+cd gymbro
 npm install
 npm run dev
 ```

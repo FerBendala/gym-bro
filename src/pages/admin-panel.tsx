@@ -29,7 +29,7 @@ export const ModernAdminPanel: React.FC<ModernAdminPanelProps> = ({
       <div className="space-y-6">
         {/* Contenido del admin panel sin el modal wrapper */}
         <div className={MODERN_THEME.components.card.base}>
-          <ModernAdminPanel onClose={onClose} />
+          <AdminPanelModal onClose={onClose} isPage={true} />
         </div>
       </div>
     </Page>

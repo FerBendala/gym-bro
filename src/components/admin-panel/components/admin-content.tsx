@@ -55,5 +55,10 @@ export const AdminContent: React.FC<AdminContentProps> = ({
     );
   }
 
-  return content;
+  // Para modo página completa, envolver en un contenedor apropiado
+  return (
+    <div className="p-6 space-y-6">
+      {content}
+    </div>
+  );
 }; 

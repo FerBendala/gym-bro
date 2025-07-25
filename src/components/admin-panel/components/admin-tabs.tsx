@@ -46,8 +46,8 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
             className={`flex-1 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${activeTab === tab.id
-                ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                : 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50'
+              ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
+              : 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50'
               }`}
           >
             {tab.label}

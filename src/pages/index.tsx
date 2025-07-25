@@ -11,7 +11,7 @@ import { ModernProgress } from './progress';
 import { ModernSettings } from './settings';
 import { WorkoutHistory } from './workout-history';
 
-const ModernAppContent = () => {
+const AppContent = () => {
   const { activeTab, navigateTo, goBack, canGoBack } = useModernNavigation();
   const [showAdmin, setShowAdmin] = useState(false);
   const { showNotification } = useNotification();
@@ -161,8 +161,8 @@ const ModernAppContent = () => {
   );
 };
 
-const ModernApp = () => {
-  return <ModernAppContent />;
+const App = () => {
+  return <AppContent />;
 };
 
-export default ModernApp; 
+export default App; 

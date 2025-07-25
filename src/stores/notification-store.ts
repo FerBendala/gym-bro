@@ -76,7 +76,7 @@ export const useNotificationStore = create<NotificationStore>()(
         })),
       }),
       {
-        name: 'follow-gym-notifications',
+        name: 'gymbro-notifications',
         partialize: (state) => ({
           // Solo persistir la lista de notificaciones, no la actual
           items: state.items,

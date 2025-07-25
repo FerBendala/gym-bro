@@ -23,10 +23,6 @@ export const useAdminDataLoader = () => {
     setError
   } = useAdminStore();
 
-  // Verificar si el store está completamente inicializado
-  const validDays = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
-  const isStoreReady = selectedDay !== undefined && selectedDay !== null && validDays.includes(selectedDay);
-
   // Cargar ejercicios
   const loadExercises = useCallback(async () => {
     if (!isOnline) {
@@ -41,7 +37,7 @@ export const useAdminDataLoader = () => {
       const exercisesData = await getExercises();
       setExercises(exercisesData);
     } catch (error: any) {
-      console.error('📡 loadExercises - Error:', error);
+      console.error('❌ loadExercises - Error:', error);
       const message = error.message || 'Error al cargar los ejercicios';
       setError('exercises', message);
       showNotification(message, 'error');

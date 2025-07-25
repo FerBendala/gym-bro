@@ -5,6 +5,7 @@ export type AdminPanelTab = 'exercises' | 'assignments';
 
 export interface AdminPanelProps {
   onClose: () => void;
+  isPage?: boolean;
 }
 
 export interface ExerciseFormData {

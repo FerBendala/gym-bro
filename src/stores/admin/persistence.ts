@@ -2,7 +2,7 @@ import { getCurrentDay } from './utils';
 
 // Configuración de persistencia
 export const persistenceConfig = {
-  name: 'follow-gym-admin',
+  name: 'gymbro-admin',
   partialize: (state: any) => ({
     // Persistir solo los datos que no cambian frecuentemente
     // NO persistir selectedDay para evitar problemas de inicialización
@@ -13,7 +13,6 @@ export const persistenceConfig = {
   // Función para restaurar el estado con valores por defecto válidos
   onRehydrateStorage: () => (state: any) => {
     if (state) {
-      // Asegurar que adminPanel tenga valores válidos después de la rehidratación
       if (!state.adminPanel) {
         state.adminPanel = {
           isOpen: false,
@@ -23,19 +22,14 @@ export const persistenceConfig = {
           previewUrl: null,
         };
       } else {
-        // Asegurar que activeTab tenga un valor válido
-        if (!state.adminPanel.activeTab) {
+        // Refuerzo: si activeTab es undefined o no es válido, pon 'exercises'
+        const validTabs = ['exercises', 'assignments'];
+        if (!state.adminPanel.activeTab || !validTabs.includes(state.adminPanel.activeTab)) {
           state.adminPanel.activeTab = 'exercises';
         }
-
-        // Asegurar que selectedDay tenga un valor válido
-        if (!state.adminPanel.selectedDay) {
-          state.adminPanel.selectedDay = getCurrentDay();
-        }
-
-        // Validación adicional: asegurar que selectedDay siempre tenga un valor válido
+        // Refuerzo: si selectedDay es undefined o no es válido, pon el día actual
         const validDays = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
-        if (!validDays.includes(state.adminPanel.selectedDay)) {
+        if (!state.adminPanel.selectedDay || !validDays.includes(state.adminPanel.selectedDay)) {
           state.adminPanel.selectedDay = getCurrentDay();
         }
       }
