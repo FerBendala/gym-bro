@@ -1,3 +1,4 @@
+export { useAppInitialization } from './use-app-initialization';
 export { useDragAndDrop } from './use-drag-and-drop';
 export { useExerciseForm } from './use-exercise-form';
 export { useModalOverflow } from './use-modal-overflow';
