@@ -1,5 +1,5 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { analyzeMuscleBalance, calculateBalanceScore, calculateCategoryAnalysis } from '../../../utils/functions/category-analysis';
+import { analyzeMuscleBalance, calculateBalanceScore, calculateCategoryAnalysis } from '@/utils';
 
 // Constantes para meta-categorías (como en main)
 const META_CATEGORIES = {

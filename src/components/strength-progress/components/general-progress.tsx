@@ -1,5 +1,5 @@
+import { formatNumberToString } from '@/utils';
 import { TrendingUp } from 'lucide-react';
-import { formatNumber } from '../../../utils/functions';
 import { Card, CardContent, CardHeader } from '../../card';
 import { InfoTooltip } from '../../tooltip';
 import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
@@ -30,7 +30,7 @@ export const GeneralProgress: React.FC<GeneralProgressProps> = ({ analysis }) =>
             <span className="text-gray-400">Progreso Total</span>
             <div className="text-right">
               <p className="text-lg font-bold text-green-400">
-                +{formatNumber(analysis.overallProgress.absolute)}kg
+                +{formatNumberToString(analysis.overallProgress.absolute)}kg
               </p>
               <p className="text-sm text-gray-400">
                 ({analysis.overallProgress.percentage > 0 ? '+' : ''}{analysis.overallProgress.percentage.toFixed(1)}%)
@@ -42,7 +42,7 @@ export const GeneralProgress: React.FC<GeneralProgressProps> = ({ analysis }) =>
             <span className="text-gray-400">Ganancia Mensual</span>
             <div className="text-right">
               <p className="text-lg font-bold text-blue-400">
-                {formatNumber(analysis.strengthCurve.gainRate)}kg/mes
+                {formatNumberToString(analysis.strengthCurve.gainRate)}kg/mes
               </p>
               <p className="text-sm text-gray-400">Promedio actual</p>
             </div>

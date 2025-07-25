@@ -1,5 +1,5 @@
+import { formatNumberToString } from '@/utils';
 import { BarChart3 } from 'lucide-react';
-import { formatNumber } from '../../../utils/functions';
 import { Card, CardContent, CardHeader } from '../../card';
 import { InfoTooltip } from '../../tooltip';
 import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
@@ -37,7 +37,7 @@ export const RepRangeAnalysis: React.FC<RepRangeAnalysisProps> = ({ analysis }) 
               <div className="flex-1">
                 <h4 className="font-medium text-white">{range.range}</h4>
                 <p className="text-sm text-gray-400">
-                  {formatNumber(range.volume)}kg volumen • {formatNumber(range.maxWeight)}kg máximo
+                  {formatNumberToString(range.volume)}kg volumen • {formatNumberToString(range.maxWeight)}kg máximo
                 </p>
               </div>
               <div className="text-right">

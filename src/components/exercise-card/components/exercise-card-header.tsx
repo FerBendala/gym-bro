@@ -1,4 +1,4 @@
-import { getCategoryColor, getCategoryIcon } from '@/utils/functions';
+import { getCategoryColor, getCategoryIcon } from '@/utils';
 import { ClipboardList, Plus, WifiOff } from 'lucide-react';
 import React from 'react';
 import type { ExerciseCardHeaderProps } from '../types';

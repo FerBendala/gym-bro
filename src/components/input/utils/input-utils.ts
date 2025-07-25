@@ -1,4 +1,4 @@
-import { cn } from '@/utils/functions';
+import { cn } from '@/utils';
 import { INPUT_CONSTANTS, INPUT_THEME } from '../constants';
 import type { InputClasses, InputProps, InputValidation } from '../types';
 

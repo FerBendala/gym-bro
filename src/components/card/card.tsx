@@ -1,6 +1,6 @@
 import { THEME_CONTAINERS, THEME_RESPONSIVE } from '@/constants/theme/index.constants';
 import type { UISize, UIVariant } from '@/interfaces';
-import { cn } from '@/utils/functions/style-utils';
+import { cn } from '@/utils';
 import React from 'react';
 import { CardContent, CardHeader } from './components';
 

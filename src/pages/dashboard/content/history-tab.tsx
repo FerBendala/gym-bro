@@ -1,13 +1,13 @@
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { StatCard } from '@/components/stat-card';
+import { InfoTooltip } from '@/components/tooltip';
 import type { WorkoutRecord } from '@/interfaces';
-import { calculateTotalGrowth, formatNumber } from '@/utils/functions';
+import { calculateTotalGrowth, formatNumberToString } from '@/utils';
 import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { ArrowDown, ArrowUp, Calendar, Clock, History, Minus, TrendingDown, TrendingUp, Trophy, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
 import Chart from 'react-apexcharts';
-import { Card, CardContent, CardHeader } from '../../../components/card';
-import { StatCard } from '../../../components/stat-card';
-import { InfoTooltip } from '../../../components/tooltip';
 
 /**
  * Props para el componente HistoryTab
@@ -107,8 +107,8 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
       .map(([weekKey, data]) => ({
         date: new Date(weekKey),
         value: data.totalVolume,
-        label: `${formatNumber(data.totalVolume)} kg`,
-        details: `${data.workouts} entrenamientos • Fuerza promedio: ${formatNumber(data.avgWeight)} kg (1RM est.)`,
+        label: `${formatNumberToString(data.totalVolume)} kg`,
+        details: `${data.workouts} entrenamientos • Fuerza promedio: ${formatNumberToString(data.avgWeight)} kg (1RM est.)`,
         weekNumber: 0, // Se calculará después
         totalWorkouts: data.workouts,
         avgWeight: data.avgWeight,
@@ -291,7 +291,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
             colors: '#9ca3af',
             fontSize: '12px'
           },
-          formatter: (value: number) => `${formatNumber(value)} kg`
+          formatter: (value: number) => `${formatNumberToString(value)} kg`
         }
       },
       tooltip: {
@@ -312,9 +312,9 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
             year: 'numeric'
           })}</div>
               <div class="space-y-1">
-                <div class="text-blue-400 font-medium">${formatNumber(point.value)} kg</div>
+                <div class="text-blue-400 font-medium">${formatNumberToString(point.value)} kg</div>
                 <div class="text-gray-400 text-xs">${point.totalWorkouts} entrenamientos</div>
-                <div class="text-gray-400 text-xs">Peso máximo: ${formatNumber(point.maxWeight)} kg</div>
+                <div class="text-gray-400 text-xs">Peso máximo: ${formatNumberToString(point.maxWeight)} kg</div>
                 <div class="text-gray-400 text-xs">${point.uniqueExercises} ejercicios únicos</div>
               </div>
             </div>
@@ -392,7 +392,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
 
         <StatCard
           title="Mejor Semana"
-          value={`${formatNumber(maxValue)} kg`}
+          value={`${formatNumberToString(maxValue)} kg`}
           icon={Trophy}
           variant="success"
           tooltip="Semana con mayor volumen total de entrenamiento."
@@ -401,7 +401,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
 
         <StatCard
           title="Promedio Semanal"
-          value={`${formatNumber(avgValue)} kg`}
+          value={`${formatNumberToString(avgValue)} kg`}
           icon={Zap}
           variant="warning"
           tooltip="Volumen promedio por semana durante todo el período."
@@ -410,7 +410,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
 
         <StatCard
           title="Crecimiento Total"
-          value={`${totalGrowthPercent >= 0 ? '+' : ''}${formatNumber(safeNumber(totalGrowthPercent, 0), 1)}%`}
+          value={`${totalGrowthPercent >= 0 ? '+' : ''}${formatNumberToString(safeNumber(totalGrowthPercent, 0), 1)}%`}
           icon={totalGrowthPercent >= 0 ? TrendingUp : TrendingDown}
           variant={totalGrowthPercent >= 10 ? 'success' : totalGrowthPercent >= 0 ? 'warning' : 'danger'}
           tooltip="Cambio porcentual en volumen promedio por sesión comparando las primeras semanas con las últimas semanas (más estable que primera vs última)."
@@ -522,7 +522,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
                         volumen total
                       </div>
                       <div className="text-lg sm:text-xl md:text-2xl font-bold text-blue-400">
-                        {formatNumber(point.value)} kg
+                        {formatNumberToString(point.value)} kg
                       </div>
                     </div>
                   </div>
@@ -540,7 +540,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
                     <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                       <div className="text-xs text-gray-400 mb-1">Peso Máximo</div>
                       <div className="text-sm sm:text-lg font-semibold text-white">
-                        {formatNumber(point.maxWeight)}
+                        {formatNumberToString(point.maxWeight)}
                       </div>
                       <div className="text-xs text-gray-500">kg</div>
                     </div>
@@ -573,13 +573,13 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
                         <div className="flex justify-between items-center">
                           <span className="text-xs text-gray-400">Volumen/sesión:</span>
                           <span className={`text-xs font-medium ${point.change > 0 ? 'text-green-400' : point.change < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                            {point.change > 0 ? '+' : ''}{formatNumber(point.change)} kg ({point.changePercent > 0 ? '+' : ''}{formatNumber(point.changePercent, 1)}%)
+                            {point.change > 0 ? '+' : ''}{formatNumberToString(point.change)} kg ({point.changePercent > 0 ? '+' : ''}{formatNumberToString(point.changePercent, 1)}%)
                           </span>
                         </div>
                         <div className="flex justify-between items-center">
                           <span className="text-xs text-gray-500">Volumen total:</span>
                           <span className={`text-xs font-medium ${point.totalVolumeChangePercent > 0 ? 'text-green-400' : point.totalVolumeChangePercent < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                            {point.totalVolumeChangePercent > 0 ? '+' : ''}{formatNumber(point.totalVolumeChangePercent, 1)}%
+                            {point.totalVolumeChangePercent > 0 ? '+' : ''}{formatNumberToString(point.totalVolumeChangePercent, 1)}%
                           </span>
                         </div>
                       </div>

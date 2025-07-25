@@ -1,4 +1,4 @@
-import { formatNumber } from '@/utils/functions';
+import { formatNumberToString } from '@/utils';
 import React from 'react';
 import type { WorkoutStats } from '../../utils';
 
@@ -16,8 +16,8 @@ export const WorkoutMetrics: React.FC<WorkoutMetricsProps> = ({
       <div className="bg-gray-800/50 rounded-lg p-3 text-center">
         <p className="text-lg font-bold text-white">
           {hasIndividualSets ?
-            `${formatNumber(stats.minWeight)}-${formatNumber(stats.maxWeight)}` :
-            formatNumber(stats.avgWeight)
+            `${formatNumberToString(stats.minWeight)}-${formatNumberToString(stats.maxWeight)}` :
+            formatNumberToString(stats.avgWeight)
           } kg
         </p>
         <p className="text-xs text-gray-400">
@@ -41,7 +41,7 @@ export const WorkoutMetrics: React.FC<WorkoutMetricsProps> = ({
 
       <div className="bg-gray-800/50 rounded-lg p-3 text-center">
         <p className="text-lg font-bold text-green-400">
-          {formatNumber(stats.totalVolume)} kg
+          {formatNumberToString(stats.totalVolume)} kg
         </p>
         <p className="text-xs text-gray-400">Volumen</p>
       </div>

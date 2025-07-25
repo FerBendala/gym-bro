@@ -1,7 +1,7 @@
+import { DAYS } from '@/constants/days.constants';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import React from 'react';
-import { DAYS } from '../../../constants/days.constants';
 import { Button } from '../../button';
 import { Card, CardContent, CardHeader } from '../../card';
 import { formatDayName } from '../utils/admin-utils';

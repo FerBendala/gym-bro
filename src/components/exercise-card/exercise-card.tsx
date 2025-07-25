@@ -1,7 +1,7 @@
 import { WifiOff } from 'lucide-react';
 import React from 'react';
 import type { WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '../../interfaces';
-import { getCategoryColor } from '../../utils/functions';
+import { getCategoryColor } from '../../utils';
 import { Card, CardContent } from '../card';
 import { OfflineWarning } from '../offline-warning';
 import { URLPreview } from '../url-preview';

@@ -1,8 +1,8 @@
+import { useModalOverflow } from '@/hooks';
+import { openURLSafely } from '@/utils';
 import { ExternalLink, Globe, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
-import { useModalOverflow } from '../../../hooks';
-import { openURLSafely } from '../../../utils/functions/url-preview-utils';
 import { Button } from '../../button';
 import type { PreviewFullProps } from '../types';
 import { PreviewContent } from './preview-content';

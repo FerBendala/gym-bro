@@ -1,5 +1,5 @@
 import type { WorkoutRecord } from '../../interfaces';
-import type { CalendarDayData, CalendarStats } from '../../utils/functions/calendar-utils';
+import type { CalendarDayData, CalendarStats } from '../../utils';
 
 /**
  * Interfaces específicas para WorkoutCalendar

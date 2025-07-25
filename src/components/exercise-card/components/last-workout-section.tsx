@@ -1,7 +1,7 @@
 import { Calendar, Dumbbell, TrendingUp } from 'lucide-react';
 import React from 'react';
 
-import { formatNumber } from '@/utils/functions';
+import { formatNumberToString } from '@/utils';
 import { EXERCISE_CARD_CONSTANTS } from '../constants';
 
 interface LastWorkoutSectionProps {
@@ -50,7 +50,7 @@ export const LastWorkoutSection: React.FC<LastWorkoutSectionProps> = ({
       {/* Estadísticas generales */}
       <div className="grid grid-cols-3 gap-3 mb-4">
         <div className="text-center p-3 bg-green-800/20 rounded-lg border border-green-700/30">
-          <p className="text-lg font-bold text-green-300">{formatNumber(lastWorkoutStats.totalVolume)} {EXERCISE_CARD_CONSTANTS.STATS.volumeUnit}</p>
+          <p className="text-lg font-bold text-green-300">{formatNumberToString(lastWorkoutStats.totalVolume)} {EXERCISE_CARD_CONSTANTS.STATS.volumeUnit}</p>
           <p className="text-xs text-green-400">Volumen Total</p>
         </div>
         <div className="text-center p-3 bg-green-800/20 rounded-lg border border-green-700/30">
@@ -58,7 +58,7 @@ export const LastWorkoutSection: React.FC<LastWorkoutSectionProps> = ({
           <p className="text-xs text-green-400">Series Totales</p>
         </div>
         <div className="text-center p-3 bg-green-800/20 rounded-lg border border-green-700/30">
-          <p className="text-lg font-bold text-green-300">{formatNumber(lastWorkoutStats.maxWeight)} {EXERCISE_CARD_CONSTANTS.STATS.volumeUnit}</p>
+          <p className="text-lg font-bold text-green-300">{formatNumberToString(lastWorkoutStats.maxWeight)} {EXERCISE_CARD_CONSTANTS.STATS.volumeUnit}</p>
           <p className="text-xs text-green-400">Peso Máximo</p>
         </div>
       </div>
@@ -78,13 +78,13 @@ export const LastWorkoutSection: React.FC<LastWorkoutSectionProps> = ({
                   S{index + 1}
                 </span>
                 <div className="text-sm text-green-300">
-                  <span className="font-medium">{formatNumber(series.weight)} {EXERCISE_CARD_CONSTANTS.STATS.volumeUnit}</span>
+                  <span className="font-medium">{formatNumberToString(series.weight)} {EXERCISE_CARD_CONSTANTS.STATS.volumeUnit}</span>
                   <span className="text-green-400 mx-1">×</span>
                   <span className="font-medium">{series.reps} reps</span>
                 </div>
               </div>
               <div className="text-xs text-green-400 font-medium">
-                {formatNumber(series.volume)} {EXERCISE_CARD_CONSTANTS.STATS.volumeUnit}
+                {formatNumberToString(series.volume)} {EXERCISE_CARD_CONSTANTS.STATS.volumeUnit}
               </div>
             </div>
           ))}

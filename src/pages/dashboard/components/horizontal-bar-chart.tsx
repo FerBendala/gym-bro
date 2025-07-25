@@ -1,5 +1,5 @@
+import { formatNumberToString } from '@/utils';
 import React from 'react';
-import { formatNumber } from '../../../utils/functions';
 
 interface HorizontalBarChartProps {
   data: Array<{
@@ -34,9 +34,9 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({
           <div className="flex items-center justify-between">
             <span className="text-sm font-medium text-gray-300">{item.name}</span>
             <div className="flex items-center space-x-2">
-              <span className="text-sm text-white">{formatNumber(item.value, 1)}%</span>
+              <span className="text-sm text-white">{formatNumberToString(item.value, 1)}%</span>
               {item.ideal && (
-                <span className="text-xs text-gray-400">({formatNumber(item.ideal, 0)}% ideal)</span>
+                <span className="text-xs text-gray-400">({formatNumberToString(item.ideal, 0)}% ideal)</span>
               )}
             </div>
           </div>

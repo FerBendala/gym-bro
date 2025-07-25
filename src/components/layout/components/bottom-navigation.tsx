@@ -1,6 +1,6 @@
 import { MODERN_THEME } from '@/constants/theme/index.constants';
 import { useActiveTab, useCloseMoreMenu, useNavigateTo, useShowMoreMenu, useToggleMoreMenu } from '@/stores/modern-layout';
-import { cn } from '@/utils/functions/style-utils';
+import { cn } from '@/utils';
 import React from 'react';
 import { compactNavigationItems, moreMenuItems } from '../constants';
 import { ModernNavItem } from '../types';

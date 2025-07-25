@@ -1,6 +1,6 @@
+import { formatNumberToString } from '@/utils';
 import { TrendingUp } from 'lucide-react';
 import React from 'react';
-import { formatNumber } from '../../../utils/functions';
 
 interface ExerciseData {
   name: string;
@@ -51,7 +51,7 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({ exercise, index, sel
 
         <div className="text-right">
           <p className="text-lg font-bold text-blue-400">
-            {formatNumber(exercise.totalVolume)} kg
+            {formatNumberToString(exercise.totalVolume)} kg
           </p>
           <p className="text-xs text-gray-400">Volumen total</p>
         </div>
@@ -60,14 +60,14 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({ exercise, index, sel
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div className="text-center">
           <p className="text-sm font-bold text-white">
-            {formatNumber(exercise.maxWeight)} kg
+            {formatNumberToString(exercise.maxWeight)} kg
           </p>
           <p className="text-xs text-gray-400">Peso máximo</p>
         </div>
 
         <div className="text-center">
           <p className="text-sm font-bold text-white">
-            {formatNumber(exercise.avgWeight)} kg
+            {formatNumberToString(exercise.avgWeight)} kg
           </p>
           <p className="text-xs text-gray-400">Peso promedio</p>
         </div>
@@ -77,7 +77,7 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({ exercise, index, sel
             <p className={`text-sm font-bold ${exercise.progress > 0 ? 'text-green-400' :
               exercise.progress < 0 ? 'text-red-400' : 'text-gray-400'
               }`}>
-              {exercise.progress > 0 ? '+' : ''}{formatNumber(exercise.progress)} kg
+              {exercise.progress > 0 ? '+' : ''}{formatNumberToString(exercise.progress)} kg
             </p>
             {exercise.progress !== 0 && (
               <TrendingUp className={`w-3 h-3 ${exercise.progress > 0 ? 'text-green-400' : 'text-red-400 rotate-180'
@@ -98,7 +98,7 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({ exercise, index, sel
       {/* Barra de progreso */}
       <div className="mt-3">
         <div className="flex justify-between text-xs text-gray-400 mb-1">
-          <span>Evolución: {formatNumber(exercise.firstWeight)} kg → {formatNumber(exercise.lastWeight)} kg</span>
+          <span>Evolución: {formatNumberToString(exercise.firstWeight)} kg → {formatNumberToString(exercise.lastWeight)} kg</span>
           <span className={exercise.progressPercent > 0 ? 'text-green-400' : exercise.progressPercent < 0 ? 'text-red-400' : 'text-gray-400'}>
             {exercise.progressPercent > 0 ? '+' : ''}{exercise.progressPercent.toFixed(1)}%
           </span>

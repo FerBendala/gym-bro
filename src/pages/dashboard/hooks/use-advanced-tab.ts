@@ -1,5 +1,5 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { calculateAdvancedAnalysis } from '@/utils/functions';
+import { calculateAdvancedAnalysis } from '@/utils';
 import { AlertTriangle, Calendar, Clock, Target, TrendingUp, Zap } from 'lucide-react';
 import { useMemo } from 'react';
 

@@ -1,5 +1,5 @@
+import { formatNumberToString } from '@/utils';
 import { Zap } from 'lucide-react';
-import { formatNumber } from '../../../utils/functions';
 import { Card, CardContent, CardHeader } from '../../card';
 import { InfoTooltip } from '../../tooltip';
 import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
@@ -30,10 +30,10 @@ export const Predictions: React.FC<PredictionsProps> = ({ analysis }) => {
             <span className="text-gray-400">PR en 4 semanas</span>
             <div className="text-right">
               <p className="text-lg font-bold text-green-400">
-                {formatNumber(analysis.predictions.next4WeeksPR)}kg
+                {formatNumberToString(analysis.predictions.next4WeeksPR)}kg
               </p>
               <p className="text-sm text-gray-400">
-                +{formatNumber(analysis.predictions.next4WeeksPR - analysis.currentMax1RM)}kg
+                +{formatNumberToString(analysis.predictions.next4WeeksPR - analysis.currentMax1RM)}kg
               </p>
             </div>
           </div>
@@ -42,10 +42,10 @@ export const Predictions: React.FC<PredictionsProps> = ({ analysis }) => {
             <span className="text-gray-400">PR en 12 semanas</span>
             <div className="text-right">
               <p className="text-lg font-bold text-blue-400">
-                {formatNumber(analysis.predictions.next12WeeksPR)}kg
+                {formatNumberToString(analysis.predictions.next12WeeksPR)}kg
               </p>
               <p className="text-sm text-gray-400">
-                +{formatNumber(analysis.predictions.next12WeeksPR - analysis.currentMax1RM)}kg
+                +{formatNumberToString(analysis.predictions.next12WeeksPR - analysis.currentMax1RM)}kg
               </p>
             </div>
           </div>

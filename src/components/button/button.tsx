@@ -1,7 +1,7 @@
 import { COLOR_VARIANTS, COMPONENT_SIZES, THEME_RESPONSIVE } from '@/constants/theme/index.constants';
 import React from 'react';
 import type { UISize, UIVariant } from '../../interfaces';
-import { cn } from '../../utils/functions/style-utils';
+import { cn } from '../../utils';
 import { LoadingSpinner } from '../loading-spinner';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {

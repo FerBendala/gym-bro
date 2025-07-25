@@ -1,7 +1,7 @@
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { formatNumberToString } from '@/utils';
 import { AlertTriangle, BarChart, CheckCircle, Timer, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
-import { Card, CardContent, CardHeader } from '../../../components/card';
-import { formatNumber } from '../../../utils/functions';
 import { CategoryDashboardChart } from './category-dashboard-chart';
 import { HorizontalBarChart } from './horizontal-bar-chart';
 
@@ -32,7 +32,7 @@ const safeNumber = (value: number | undefined, fallback: number = 0): number => 
 // Función para formatear porcentajes de forma consistente
 const formatSafePercentage = (value: number, decimals: number = 1): string => {
   const safeValue = safeNumber(value, 0);
-  return formatNumber(safeValue, decimals) + '%';
+  return formatNumberToString(safeValue, decimals) + '%';
 };
 
 // Funciones auxiliares para colores e iconos de categorías
@@ -118,7 +118,7 @@ export const BalanceByGroupContent: React.FC<BalanceByGroupContentProps> = ({
                   <div className="min-w-0 flex-1">
                     <h4 className="font-bold text-white text-base lg:text-lg truncate">{balance.category}</h4>
                     <div className="text-xs lg:text-sm text-gray-400">
-                      {formatNumber(balance.totalVolume, 0)} kg total • {formatSafePercentage(balance.percentage)} del volumen
+                      {formatNumberToString(balance.totalVolume, 0)} kg total • {formatSafePercentage(balance.percentage)} del volumen
                     </div>
                   </div>
                 </div>
@@ -183,11 +183,11 @@ export const BalanceByGroupContent: React.FC<BalanceByGroupContentProps> = ({
                   <div className="grid grid-cols-2 gap-2 text-xs">
                     <div className="flex justify-between">
                       <span className="text-gray-500">Frecuencia:</span>
-                      <span className="text-gray-400">{formatNumber(balance.weeklyFrequency || 0, 1)}/sem</span>
+                      <span className="text-gray-400">{formatNumberToString(balance.weeklyFrequency || 0, 1)}/sem</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">Intensidad:</span>
-                      <span className="text-gray-400">{formatNumber(balance.intensityScore || 0, 0)}%</span>
+                      <span className="text-gray-400">{formatNumberToString(balance.intensityScore || 0, 0)}%</span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-500">PRs:</span>

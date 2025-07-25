@@ -1,6 +1,6 @@
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
-import { cn } from '@/utils/functions';
+import { cn } from '@/utils';
 import React from 'react';
 import { getTotalStatus } from '../utils';
 

@@ -1,5 +1,5 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { formatNumber } from '@/utils/functions';
+import { formatNumberToString } from '@/utils';
 import type { MonthStats } from '../types';
 
 export const getCurrentMonthStats = (records: WorkoutRecord[]): MonthStats => {
@@ -31,7 +31,7 @@ export const getCurrentMonthStats = (records: WorkoutRecord[]): MonthStats => {
 
 export const formatStatsValue = (key: string, value: number): string => {
   if (key === 'totalVolume' || key === 'averageVolumePerDay') {
-    return `${formatNumber(value)} kg`;
+    return `${formatNumberToString(value)} kg`;
   }
   return value.toString();
 }; 

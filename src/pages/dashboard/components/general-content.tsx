@@ -1,7 +1,7 @@
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { formatNumberToString } from '@/utils';
 import { BarChart } from 'lucide-react';
 import React from 'react';
-import { Card, CardContent, CardHeader } from '../../../components/card';
-import { formatNumber } from '../../../utils/functions';
 import { BalanceRadarChart } from './balance-radar-chart';
 
 interface GeneralContentProps {
@@ -66,7 +66,7 @@ export const GeneralContent: React.FC<GeneralContentProps> = ({
                       balanceScore >= 50 ? 'text-blue-400' :
                         balanceScore >= 30 ? 'text-yellow-400' :
                           'text-red-400'}`}>
-                      {formatNumber(balanceScore, 1)}%
+                      {formatNumberToString(balanceScore, 1)}%
                     </div>
                     <div className="text-xs text-gray-400">score</div>
                   </div>
@@ -106,15 +106,15 @@ export const GeneralContent: React.FC<GeneralContentProps> = ({
             {/* Métricas Rápidas */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="text-center p-3 rounded-lg bg-gray-800/50 border border-gray-700/50">
-                <div className="text-lg font-bold text-blue-400">{formatNumber(finalConsistency, 1)}%</div>
+                <div className="text-lg font-bold text-blue-400">{formatNumberToString(finalConsistency, 1)}%</div>
                 <div className="text-xs text-gray-400">Consistencia</div>
               </div>
               <div className="text-center p-3 rounded-lg bg-gray-800/50 border border-gray-700/50">
-                <div className="text-lg font-bold text-purple-400">{formatNumber(avgIntensity, 1)}%</div>
+                <div className="text-lg font-bold text-purple-400">{formatNumberToString(avgIntensity, 1)}%</div>
                 <div className="text-xs text-gray-400">Intensidad</div>
               </div>
               <div className="text-center p-3 rounded-lg bg-gray-800/50 border border-gray-700/50">
-                <div className="text-lg font-bold text-green-400">{formatNumber(avgFrequency, 1)}/sem</div>
+                <div className="text-lg font-bold text-green-400">{formatNumberToString(avgFrequency, 1)}/sem</div>
                 <div className="text-xs text-gray-400">Frecuencia</div>
               </div>
               <div className="text-center p-3 rounded-lg bg-gray-800/50 border border-gray-700/50">

@@ -1,3 +1,4 @@
+import { useDragAndDrop } from '@/hooks';
 import type { ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
 import { DndContext } from '@dnd-kit/core';
 import {
@@ -8,7 +9,6 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
 import React from 'react';
-import { useDragAndDrop } from '../../../hooks';
 import { ExerciseCard } from '../../exercise-card';
 import type { ExerciseListContentProps } from '../types';
 

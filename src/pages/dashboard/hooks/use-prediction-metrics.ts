@@ -1,10 +1,10 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { useMemo } from 'react';
 import {
   calculatePredictionMetrics,
+  normalizeByWeekday,
   type PredictionMetrics
-} from '../../../utils/functions/advanced-analysis';
-import { normalizeByWeekday } from '../../../utils/functions/category-analysis';
+} from '@/utils';
+import { useMemo } from 'react';
 
 /**
  * Valida un registro de entrenamiento para predicciones

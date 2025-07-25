@@ -1,11 +1,11 @@
+import { Button } from '@/components/button';
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { StatCard } from '@/components/stat-card';
+import { InfoTooltip } from '@/components/tooltip';
 import type { WorkoutRecord } from '@/interfaces';
+import { calculateExerciseProgress, formatNumberToString, getCategoryColor, getCategoryIcon } from '@/utils';
 import { Calendar, Target, TrendingDown, TrendingUp, Trophy, Zap } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
-import { Button } from '../../../components/button';
-import { Card, CardContent, CardHeader } from '../../../components/card';
-import { StatCard } from '../../../components/stat-card';
-import { InfoTooltip } from '../../../components/tooltip';
-import { calculateExerciseProgress, formatNumber, getCategoryColor, getCategoryIcon } from '../../../utils/functions';
 
 /**
  * Props para el componente ExercisesTab
@@ -197,7 +197,7 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
         <StatCard
           title="Volumen Total"
-          value={formatNumber(globalMetrics.totalVolume)}
+          value={formatNumberToString(globalMetrics.totalVolume)}
           icon={Zap}
           variant="success"
           tooltip="Volumen total de todos los ejercicios en la categoría seleccionada."
@@ -224,7 +224,7 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
 
         <StatCard
           title="Progreso Promedio"
-          value={`${globalMetrics.avgProgress > 0 ? '+' : ''}${formatNumber(safeNumber(globalMetrics.avgProgress, 0), 1)}%`}
+          value={`${globalMetrics.avgProgress > 0 ? '+' : ''}${formatNumberToString(safeNumber(globalMetrics.avgProgress, 0), 1)}%`}
           icon={Calendar}
           variant={globalMetrics.avgProgress > 0 ? 'success' : globalMetrics.avgProgress < 0 ? 'danger' : 'warning'}
           tooltip="Progreso promedio de todos los ejercicios basado en 1RM estimado."
@@ -369,7 +369,7 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
                       {/* Volumen total */}
                       <div className="text-right flex-shrink-0">
                         <div className="text-lg sm:text-xl font-bold text-blue-400">
-                          {formatNumber(exercise.totalVolume)}
+                          {formatNumberToString(exercise.totalVolume)}
                         </div>
                         <div className="text-xs text-gray-400">
                           kg totales
@@ -382,7 +382,7 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
                       <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                         <div className="text-xs text-gray-400 mb-1">Peso Máximo</div>
                         <div className="text-sm sm:text-lg font-semibold text-white">
-                          {formatNumber(exercise.maxWeight)}
+                          {formatNumberToString(exercise.maxWeight)}
                         </div>
                         <div className="text-xs text-gray-500">kg</div>
                       </div>
@@ -390,7 +390,7 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
                       <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                         <div className="text-xs text-gray-400 mb-1">Peso Promedio</div>
                         <div className="text-sm sm:text-lg font-semibold text-white">
-                          {formatNumber(exercise.avgWeight)}
+                          {formatNumberToString(exercise.avgWeight)}
                         </div>
                         <div className="text-xs text-gray-500">kg</div>
                       </div>
@@ -398,7 +398,7 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
                       <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                         <div className="text-xs text-gray-400 mb-1">Progreso 1RM</div>
                         <div className={`text-sm sm:text-lg font-semibold ${exercise.progress > 0 ? 'text-green-400' : exercise.progress < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                          {exercise.progress > 0 ? '+' : ''}{formatNumber(exercise.progress)}
+                          {exercise.progress > 0 ? '+' : ''}{formatNumberToString(exercise.progress)}
                         </div>
                         <div className="text-xs text-gray-500">kg</div>
                       </div>
@@ -415,9 +415,9 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
                     {/* Barra de progreso y evolución */}
                     <div className="mb-4">
                       <div className="flex justify-between text-xs text-gray-400 mb-2">
-                        <span>Evolución: {formatNumber(exercise.firstWeight)} kg → {formatNumber(exercise.lastWeight)} kg</span>
+                        <span>Evolución: {formatNumberToString(exercise.firstWeight)} kg → {formatNumberToString(exercise.lastWeight)} kg</span>
                         <span className={`font-medium ${exercise.progressPercent > 0 ? 'text-green-400' : exercise.progressPercent < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-                          {exercise.progressPercent > 0 ? '+' : ''}{formatNumber(safeNumber(exercise.progressPercent, 0), 1)}%
+                          {exercise.progressPercent > 0 ? '+' : ''}{formatNumberToString(safeNumber(exercise.progressPercent, 0), 1)}%
                         </span>
                       </div>
                       <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">

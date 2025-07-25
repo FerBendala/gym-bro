@@ -3,8 +3,8 @@
  */
 
 import type { WorkoutRecord } from '@/interfaces';
-import type { ChartDimensions, DataRange } from '../../../utils/functions';
-import { getChartX, getChartY } from '../../../utils/functions';
+import type { ChartDimensions, DataRange } from '@/utils';
+import { getChartX, getChartY } from '@/utils';
 
 /**
  * Calcula el 1RM estimado usando la fórmula de Epley

@@ -2,7 +2,7 @@ import { createWorkoutRecord, getAssignmentsByDay, getExercises, getWorkoutRecor
 import type { DayOfWeek, ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
-import { getExercisesTrainedTodayForCurrentDay } from '@/utils/functions';
+import { getExercisesTrainedTodayForCurrentDay } from '@/utils';
 import { useCallback, useEffect, useState } from 'react';
 import type { UseExerciseListReturn } from '../types';
 

@@ -1,4 +1,4 @@
-import { cn } from '@/utils/functions';
+import { cn } from '@/utils';
 import React from 'react';
 import { TooltipContent, TooltipTrigger } from './components';
 import { TOOLTIP_DEFAULTS } from './constants';

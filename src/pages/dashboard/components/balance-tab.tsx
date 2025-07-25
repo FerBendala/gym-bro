@@ -1,8 +1,8 @@
+import { UpperLowerBalanceContent } from '@/components/dashboard-upper-lower-balance-content';
 import type { WorkoutRecord } from '@/interfaces';
 import { BarChart3, Brain, PieChart, Scale } from 'lucide-react';
 import React from 'react';
 import { BalanceByGroupContent, GeneralContent, TrendsContent } from '.';
-import { UpperLowerBalanceContent } from '../../../components/dashboard-upper-lower-balance-content';
 import { useBalanceTab } from '../hooks/use-balance-tab';
 
 interface BalanceTabProps {

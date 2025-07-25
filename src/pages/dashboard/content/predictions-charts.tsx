@@ -1,7 +1,7 @@
+import { formatNumberToString } from '@/utils';
 import { ApexOptions } from 'apexcharts';
 import React from 'react';
 import Chart from 'react-apexcharts';
-import { formatNumber } from '../../../utils/functions';
 
 // Tipos para los props de los gráficos
 export interface ConfidenceGaugeProps {
@@ -325,7 +325,7 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
         style: {
           colors: '#9ca3af'
         },
-        formatter: (val: number) => `${formatNumber(val, 1)}kg`
+        formatter: (val: number) => `${formatNumberToString(val, 1)}kg`
       },
       title: {
         text: 'Peso (kg)',
@@ -344,7 +344,7 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
     tooltip: {
       theme: 'dark',
       y: {
-        formatter: (val: number) => `${formatNumber(val, 1)}kg`
+        formatter: (val: number) => `${formatNumberToString(val, 1)}kg`
       }
     },
     annotations: {
@@ -569,11 +569,11 @@ export const TrendAnalysisChart: React.FC<TrendAnalysisChartProps> = ({
 
           switch (category) {
             case 'Tendencia Fuerza':
-              return `${formatNumber(strengthTrend, 2)}kg/semana`;
+              return `${formatNumberToString(strengthTrend, 2)}kg/semana`;
             case 'Tendencia Volumen':
-              return `${formatNumber(volumeTrend, 1)}kg/semana`;
+              return `${formatNumberToString(volumeTrend, 1)}kg/semana`;
             case 'Crecimiento Mensual':
-              return `${formatNumber(monthlyGrowthRate, 1)}kg/mes`;
+              return `${formatNumberToString(monthlyGrowthRate, 1)}kg/mes`;
             case 'Confianza IA':
               return `${confidenceLevel}%`;
             case 'Estabilidad':
@@ -667,7 +667,7 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
             fontWeight: 700,
             color: getProgressColor(progressPercentage),
             offsetY: 5,
-            formatter: () => `${formatNumber(validCurrentWeight, 1)}kg`
+            formatter: () => `${formatNumberToString(validCurrentWeight, 1)}kg`
           }
         }
       }
@@ -707,11 +707,11 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
       <div className="grid grid-cols-3 gap-4 pt-4 border-t border-purple-500/20">
         <div className="text-center">
           <div className="text-xs text-gray-400">Baseline</div>
-          <div className="text-sm font-medium text-white">{formatNumber(validBaseline1RM, 1)}kg</div>
+          <div className="text-sm font-medium text-white">{formatNumberToString(validBaseline1RM, 1)}kg</div>
         </div>
         <div className="text-center">
           <div className="text-xs text-gray-400">Objetivo PR</div>
-          <div className="text-sm font-medium text-purple-400">{formatNumber(validPredictedPR, 1)}kg</div>
+          <div className="text-sm font-medium text-purple-400">{formatNumberToString(validPredictedPR, 1)}kg</div>
         </div>
         <div className="text-center">
           <div className="text-xs text-gray-400">Tiempo</div>

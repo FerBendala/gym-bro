@@ -2,14 +2,14 @@ import {
   createExercise,
   updateExercise
 } from '@/api/services';
+import { EXERCISE_CATEGORIES } from '@/constants';
+import { useExerciseForm } from '@/hooks';
 import type { Exercise } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
 import { Plus, Save, XCircle } from 'lucide-react';
 import React from 'react';
-import { EXERCISE_CATEGORIES } from '../../../constants';
-import { useExerciseForm } from '../../../hooks';
 import { Button } from '../../button';
 import { Card, CardContent, CardHeader } from '../../card';
 import { Input } from '../../input';

@@ -1,4 +1,4 @@
-import { formatNumber } from '@/utils/functions';
+import { formatNumberToString } from '@/utils';
 import { Clock } from 'lucide-react';
 import React from 'react';
 
@@ -24,11 +24,11 @@ export const IndividualSets: React.FC<IndividualSetsProps> = ({
             <div className="flex items-center justify-between">
               <span className="text-xs text-gray-400">Serie {index + 1}</span>
               <span className="text-xs text-gray-400">
-                {formatNumber(set.weight * set.reps)} kg
+                {formatNumberToString(set.weight * set.reps)} kg
               </span>
             </div>
             <div className="text-sm text-white font-medium">
-              {formatNumber(set.weight)} kg × {set.reps} reps
+              {formatNumberToString(set.weight)} kg × {set.reps} reps
             </div>
           </div>
         ))}

@@ -1,8 +1,8 @@
 import type { WorkoutRecord } from '@/interfaces';
+import { calculateTotalGrowth, formatNumberToString } from '@/utils';
 import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useMemo } from 'react';
-import { calculateTotalGrowth, formatNumber } from '../../../utils/functions';
 
 /**
  * Interfaz extendida para datos de timeline con comparativas
@@ -84,8 +84,8 @@ export const useTimelineData = (records: WorkoutRecord[]) => {
       .map(([weekKey, data]) => ({
         date: new Date(weekKey),
         value: data.totalVolume,
-        label: `${formatNumber(data.totalVolume)} kg`,
-        details: `${data.workouts} entrenamientos • Fuerza promedio: ${formatNumber(data.avgWeight)} kg (1RM est.)`,
+        label: `${formatNumberToString(data.totalVolume)} kg`,
+        details: `${data.workouts} entrenamientos • Fuerza promedio: ${formatNumberToString(data.avgWeight)} kg (1RM est.)`,
         weekNumber: 0, // Se calculará después
         totalWorkouts: data.workouts,
         avgWeight: data.avgWeight,

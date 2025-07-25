@@ -1,5 +1,5 @@
 import { THEME_FORM, THEME_SELECT, ThemeSelectSize, ThemeSelectValidation, ThemeSelectVariant } from '@/constants/theme/index.constants';
-import { cn } from '@/utils/functions';
+import { cn } from '@/utils';
 
 export const buildSelectClasses = (
   size: ThemeSelectSize,

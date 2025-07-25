@@ -1,6 +1,6 @@
 import type { WorkoutRecord } from '@/interfaces';
+import { calculateWeightProgress } from '@/utils';
 import { useMemo } from 'react';
-import { calculateWeightProgress } from '../../../utils/functions';
 import type { AnalyticsMetric } from '../types';
 
 /**

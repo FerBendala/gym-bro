@@ -2,7 +2,7 @@ import { Button } from '@/components/button';
 import { DatePicker } from '@/components/date-picker';
 import { Input } from '@/components/input';
 import type { WorkoutFormDataAdvanced } from '@/interfaces';
-import { formatNumber } from '@/utils/functions';
+import { formatNumberToString } from '@/utils';
 import { Plus, Trash2 } from 'lucide-react';
 import React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
@@ -108,7 +108,7 @@ export const AdvancedForm: React.FC<AdvancedFormProps> = ({
               <p className="text-xs text-green-300">Reps totales</p>
             </div>
             <div className="bg-purple-600/10 rounded-lg p-3 text-center border border-purple-500/20">
-              <p className="text-lg font-bold text-purple-400">{formatNumber(stats.totalVolume)} {EXERCISE_CARD_CONSTANTS.STATS.volumeUnit}</p>
+              <p className="text-lg font-bold text-purple-400">{formatNumberToString(stats.totalVolume)} {EXERCISE_CARD_CONSTANTS.STATS.volumeUnit}</p>
               <p className="text-xs text-purple-300">Volumen</p>
             </div>
           </div>

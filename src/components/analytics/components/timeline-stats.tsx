@@ -1,6 +1,6 @@
+import { formatNumberToString } from '@/utils';
 import { Calendar, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
-import { formatNumber } from '../../../utils/functions';
 import type { ExtendedTimelinePoint } from '../hooks/use-timeline-data';
 
 interface TimelineStatsProps {
@@ -32,7 +32,7 @@ export const TimelineStats: React.FC<TimelineStatsProps> = ({
           <div className="flex items-center justify-center">
             <Calendar className="w-6 h-6 text-green-400 mr-2" />
             <p className="text-3xl font-bold text-green-400">
-              {formatNumber(maxValue)} kg
+              {formatNumberToString(maxValue)} kg
             </p>
           </div>
           <p className="text-sm text-gray-400">Mejor semana</p>

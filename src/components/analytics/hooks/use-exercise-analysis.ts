@@ -1,6 +1,6 @@
 import type { WorkoutRecord } from '@/interfaces';
+import { calculateExerciseProgress } from '@/utils';
 import { useMemo } from 'react';
-import { calculateExerciseProgress } from '../../../utils/functions';
 
 interface ExerciseAnalysis {
   name: string;

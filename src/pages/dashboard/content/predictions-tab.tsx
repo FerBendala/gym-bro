@@ -1,4 +1,5 @@
 import type { WorkoutRecord } from '@/interfaces';
+import { calculateAdvancedAnalysis, formatNumberToString } from '@/utils';
 import {
   Activity,
   AlertTriangle,
@@ -14,15 +15,13 @@ import {
   Weight
 } from 'lucide-react';
 import React, { useMemo } from 'react';
-import { formatNumber } from '../../../utils/functions';
-import { calculateAdvancedAnalysis } from '../../../utils/functions/advanced-analysis';
 // 🎯 NUEVAS IMPORTACIONES: Funciones para normalización por día de la semana
-import { Card, CardContent, CardHeader } from '../../../components/card';
-import { StatCard } from '../../../components/stat-card';
-import { InfoTooltip } from '../../../components/tooltip';
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { StatCard } from '@/components/stat-card';
+import { InfoTooltip } from '@/components/tooltip';
 import {
   calculateNormalizedVolumeTrend
-} from '../../../utils/functions';
+} from '@/utils';
 import { usePredictionMetrics, type EnhancedPredictionMetrics } from '../hooks';
 import {
   ConfidenceGauge,
@@ -197,7 +196,7 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
       monthlyGrowth,
       timeToNextPR,
       improvement: prWeight - currentWeight,
-      improvementPercentage: formatNumber(((prWeight / currentWeight - 1) * 100), 1),
+      improvementPercentage: formatNumberToString(((prWeight / currentWeight - 1) * 100), 1),
       nextWeekIncrease: nextWeekWeight - currentWeight,
       prIncrease: prWeight - nextWeekWeight,
 
@@ -748,7 +747,7 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
                   {centralizedMetrics.nextWeekWeight}kg
                 </div>
                 <div className="text-xs text-emerald-300 opacity-75">
-                  +{formatNumber(centralizedMetrics.nextWeekIncrease, 1)}kg esperado
+                  +{formatNumberToString(centralizedMetrics.nextWeekIncrease, 1)}kg esperado
                 </div>
               </div>
 
@@ -761,7 +760,7 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
                   <span className="text-sm font-medium text-amber-200">Mejora Total</span>
                 </div>
                 <div className="text-2xl font-bold text-amber-400 mb-1">
-                  +{formatNumber(centralizedMetrics.improvement, 1)}kg
+                  +{formatNumberToString(centralizedMetrics.improvement, 1)}kg
                 </div>
                 <div className="text-xs text-amber-300 opacity-75">
                   {centralizedMetrics.improvementPercentage}% incremento
@@ -1101,30 +1100,30 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
                   factors={[
                     {
                       name: 'Datos Recientes',
-                      value: formatNumber(predictionMetrics.dataQuality.hasRecentData ? 100 : 0),
+                      value: formatNumberToString(predictionMetrics.dataQuality.hasRecentData ? 100 : 0),
                       status: predictionMetrics.dataQuality.hasRecentData ? 'good' : 'bad'
                     },
                     {
                       name: 'Registros Suficientes',
-                      value: formatNumber(Math.min(100, (predictionMetrics.dataQuality.validRecords / 15) * 100)),
+                      value: formatNumberToString(Math.min(100, (predictionMetrics.dataQuality.validRecords / 15) * 100)),
                       status: predictionMetrics.dataQuality.validRecords >= 15 ? 'good' :
                         predictionMetrics.dataQuality.validRecords >= 8 ? 'warning' : 'bad'
                     },
                     {
                       name: 'Historial Temporal',
-                      value: formatNumber(Math.min(100, (predictionMetrics.dataQuality.dataSpan / 90) * 100)),
+                      value: formatNumberToString(Math.min(100, (predictionMetrics.dataQuality.dataSpan / 90) * 100)),
                       status: predictionMetrics.dataQuality.dataSpan >= 30 ? 'good' :
                         predictionMetrics.dataQuality.dataSpan >= 14 ? 'warning' : 'bad'
                     },
                     {
                       name: 'Tendencia Clara',
-                      value: formatNumber(Math.min(100, Math.abs(centralizedMetrics.strengthTrend) * 50)),
+                      value: formatNumberToString(Math.min(100, Math.abs(centralizedMetrics.strengthTrend) * 50)),
                       status: Math.abs(centralizedMetrics.strengthTrend) > 0.1 ? 'good' :
                         Math.abs(centralizedMetrics.strengthTrend) > 0.05 ? 'warning' : 'bad'
                     },
                     {
                       name: 'Validación Alta',
-                      value: formatNumber(predictionMetrics.dataQuality.validationRate),
+                      value: formatNumberToString(predictionMetrics.dataQuality.validationRate),
                       status: predictionMetrics.dataQuality.validationRate >= 90 ? 'good' :
                         predictionMetrics.dataQuality.validationRate >= 70 ? 'warning' : 'bad'
                     }

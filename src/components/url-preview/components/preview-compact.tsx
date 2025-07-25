@@ -1,7 +1,7 @@
 import { THEME_URL_PREVIEW } from '@/constants/theme/index.constants';
+import { cn } from '@/utils';
 import { ExternalLink, FileText, Globe, Image, Play } from 'lucide-react';
 import React from 'react';
-import { cn } from '../../../utils/functions/style-utils';
 import type { PreviewCompactProps } from '../types';
 
 export const PreviewCompact: React.FC<PreviewCompactProps> = ({

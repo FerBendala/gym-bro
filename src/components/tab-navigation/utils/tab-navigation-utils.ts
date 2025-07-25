@@ -1,6 +1,6 @@
 import type { ThemeTabSize, ThemeTabVariant } from '@/constants/theme/index.constants';
 import { THEME_RESPONSIVE, THEME_TABS } from '@/constants/theme/index.constants';
-import { cn } from '@/utils/functions';
+import { cn } from '@/utils';
 
 export const getTabStyles = (variant: ThemeTabVariant, size: ThemeTabSize) => {
   const variantStyles = THEME_TABS.variants[variant];

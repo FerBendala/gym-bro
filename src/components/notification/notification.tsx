@@ -1,4 +1,4 @@
-import { cn } from '@/utils/functions';
+import { cn } from '@/utils';
 import React from 'react';
 import { NotificationContent } from './components';
 import { useNotificationAnimation } from './hooks';

@@ -1,7 +1,7 @@
+import { formatNumberToString } from '@/utils';
 import type { ApexOptions } from 'apexcharts';
 import React from 'react';
 import Chart from 'react-apexcharts';
-import { formatNumber } from '../../../utils/functions';
 
 interface BalanceRadarChartProps {
   balanceScore: number;
@@ -92,17 +92,17 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
 
           switch (category) {
             case 'Balance':
-              return `${formatNumber(balanceScore, 1)}% equilibrado`;
+              return `${formatNumberToString(balanceScore, 1)}% equilibrado`;
             case 'Consistencia':
-              return `${formatNumber(consistency, 1)}% regular`;
+              return `${formatNumberToString(consistency, 1)}% regular`;
             case 'Intensidad':
-              return `${formatNumber(intensity, 1)}% efectiva`;
+              return `${formatNumberToString(intensity, 1)}% efectiva`;
             case 'Frecuencia':
-              return `${formatNumber(frequency, 1)}% óptima`;
+              return `${formatNumberToString(frequency, 1)}% óptima`;
             case 'Progreso':
-              return `${formatNumber(progress, 1)}% mejorando`;
+              return `${formatNumberToString(progress, 1)}% mejorando`;
             default:
-              return `${formatNumber(val, 1)}%`;
+              return `${formatNumberToString(val, 1)}%`;
           }
         }
       }

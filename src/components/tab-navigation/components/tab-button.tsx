@@ -1,4 +1,4 @@
-import { formatDayLabel } from '@/utils/functions';
+import { formatDayLabel } from '@/utils';
 import React from 'react';
 import type { TabButtonProps } from '../types';
 import { getTabButtonClasses } from '../utils';

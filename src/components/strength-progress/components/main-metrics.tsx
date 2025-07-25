@@ -1,5 +1,5 @@
+import { formatNumberToString } from '@/utils';
 import { Award, BarChart3, Target, TrendingUp } from 'lucide-react';
-import { formatNumber } from '../../../utils/functions';
 import { Card, CardContent } from '../../card';
 import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
 import type { StrengthProgressAnalysis } from '../types';
@@ -17,7 +17,7 @@ export const MainMetrics: React.FC<MainMetricsProps> = ({ analysis }) => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-2xl font-bold text-white">
-                {formatNumber(analysis.currentMax1RM)}kg
+                {formatNumberToString(analysis.currentMax1RM)}kg
               </p>
               <p className="text-sm text-gray-400">
                 {STRENGTH_PROGRESS_CONSTANTS.METRICS.MAX_1RM}

@@ -1,5 +1,4 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { useMemo, useState } from 'react';
 import {
   formatCalendarHeader,
   getCalendarDays,
@@ -12,7 +11,8 @@ import {
   navigateToNextMonth,
   navigateToPreviousMonth,
   type CalendarDayData
-} from '../../../utils/functions/calendar-utils';
+} from '@/utils';
+import { useMemo, useState } from 'react';
 
 /**
  * Hook para manejar la lógica del calendario de entrenamientos

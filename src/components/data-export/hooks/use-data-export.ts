@@ -7,7 +7,7 @@ import {
   exportToJSON,
   generateExportData,
   generateFilename
-} from '@/utils/functions/export-utils';
+} from '@/utils';
 import { useEffect, useState } from 'react';
 import { EXPORT_INFO } from '../constants';
 import type { DataStats, ExportFormat } from '../types';

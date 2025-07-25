@@ -1,6 +1,6 @@
 import { MODERN_THEME } from '@/constants/theme/index.constants';
 import { useNavigationType, useSubtitle, useTitle } from '@/stores/modern-layout';
-import { cn } from '@/utils/functions/style-utils';
+import { cn } from '@/utils';
 import React from 'react';
 import { BottomNavigation } from './components/bottom-navigation';
 import { TopNavigation } from './components/top-navigation';

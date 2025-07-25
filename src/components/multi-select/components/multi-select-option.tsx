@@ -1,4 +1,4 @@
-import { cn } from '@/utils/functions';
+import { cn } from '@/utils';
 import { Check } from 'lucide-react';
 import React from 'react';
 import { MULTI_SELECT_CLASSES } from '../constants';

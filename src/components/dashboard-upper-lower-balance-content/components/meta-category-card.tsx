@@ -1,5 +1,5 @@
+import { formatNumberToString } from '@/utils';
 import React from 'react';
-import { formatNumber } from '../../../utils/functions';
 import { Card } from '../../card';
 import type { MetaCategoryCardProps } from '../types';
 import { CategoryDashboardChart } from './category-dashboard-chart';
@@ -69,7 +69,7 @@ export const MetaCategoryCard: React.FC<MetaCategoryCardProps> = ({
                 {meta.category}
               </h4>
               <p className="text-xs lg:text-sm text-gray-400">
-                {formatNumber(meta.volume, 0)} kg total • {formatNumber(meta.percentage, 1)}% del volumen
+                {formatNumberToString(meta.volume, 0)} kg total • {formatNumberToString(meta.percentage, 1)}% del volumen
               </p>
             </div>
           </div>
@@ -109,7 +109,7 @@ export const MetaCategoryCard: React.FC<MetaCategoryCardProps> = ({
                 <div key={category} className="flex justify-between text-xs">
                   <span className="text-gray-500">{category}</span>
                   <span className="text-gray-400">
-                    {catData ? formatNumber(catData.percentage, 1) + '%' : '0%'}
+                    {catData ? formatNumberToString(catData.percentage, 1) + '%' : '0%'}
                   </span>
                 </div>
               );

@@ -1,4 +1,4 @@
-import { getCategoryColor, getCategoryIcon } from '@/utils/functions';
+import { getCategoryColor, getCategoryIcon } from '@/utils';
 import { Calendar, Edit, Trash2 } from 'lucide-react';
 import React from 'react';
 import type { WorkoutRecordWithExercise } from '../types';

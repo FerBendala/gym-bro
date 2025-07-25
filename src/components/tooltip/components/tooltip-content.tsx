@@ -1,4 +1,4 @@
-import { cn } from '@/utils/functions';
+import { cn } from '@/utils';
 import React from 'react';
 import { ARROW_CLASSES, POSITION_CLASSES } from '../constants';
 import { TooltipContentProps } from '../types';

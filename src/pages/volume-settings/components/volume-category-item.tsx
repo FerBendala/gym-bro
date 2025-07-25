@@ -1,5 +1,5 @@
 import { Card } from '@/components/card';
-import { cn } from '@/utils/functions';
+import { cn } from '@/utils';
 import React from 'react';
 import { VOLUME_SETTINGS_CONSTANTS } from '../constants';
 import type { VolumeCategoryProps } from '../types';

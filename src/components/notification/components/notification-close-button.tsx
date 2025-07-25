@@ -1,4 +1,4 @@
-import { cn } from '@/utils/functions';
+import { cn } from '@/utils';
 import { X } from 'lucide-react';
 import type { NotificationCloseButtonProps } from '../types';
 

@@ -1,6 +1,6 @@
+import { getDaysAgo } from '@/utils';
 import { Calendar, Target } from 'lucide-react';
 import React from 'react';
-import { getDaysAgo } from '../../../utils/functions';
 import { StatCard } from '../../stat-card';
 import type { AdditionalStatsProps } from '../types';
 

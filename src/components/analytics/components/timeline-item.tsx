@@ -1,6 +1,6 @@
+import { formatNumberToString } from '@/utils';
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import React from 'react';
-import { formatNumber } from '../../../utils/functions';
 import type { ExtendedTimelinePoint } from '../hooks/use-timeline-data';
 
 interface TimelineItemProps {
@@ -44,7 +44,7 @@ export const TimelineItem: React.FC<TimelineItemProps> = ({ point }) => {
         </div>
         <div className="flex items-center space-x-2">
           <span className="text-xl font-bold text-blue-400">
-            {formatNumber(point.value)} kg
+            {formatNumberToString(point.value)} kg
           </span>
           {point.weekNumber > 1 && (
             <div className={`flex items-center space-x-1 ${trendColor}`}>
@@ -64,7 +64,7 @@ export const TimelineItem: React.FC<TimelineItemProps> = ({ point }) => {
         </div>
         <div>
           <span className="text-gray-400">Peso máximo:</span>
-          <span className="ml-2 font-medium text-white">{formatNumber(point.maxWeight)} kg</span>
+          <span className="ml-2 font-medium text-white">{formatNumberToString(point.maxWeight)} kg</span>
         </div>
         <div>
           <span className="text-gray-400">Series totales:</span>
@@ -81,7 +81,7 @@ export const TimelineItem: React.FC<TimelineItemProps> = ({ point }) => {
           <div className="flex items-center space-x-4">
             <span className="text-gray-400">Cambio vs semana anterior (promedio/sesión):</span>
             <span className={`font-medium ${point.change > 0 ? 'text-green-400' : point.change < 0 ? 'text-red-400' : 'text-gray-400'}`}>
-              {point.change > 0 ? '+' : ''}{formatNumber(point.change)} kg ({point.changePercent > 0 ? '+' : ''}{point.changePercent.toFixed(1)}%)
+              {point.change > 0 ? '+' : ''}{formatNumberToString(point.change)} kg ({point.changePercent > 0 ? '+' : ''}{point.changePercent.toFixed(1)}%)
             </span>
           </div>
         </div>

@@ -1,6 +1,6 @@
+import { formatNumberToString } from '@/utils';
 import { Timer, TrendingDown, TrendingUp, Trophy } from 'lucide-react';
 import React from 'react';
-import { formatNumber } from '../../../utils/functions';
 import { TREND_THRESHOLDS } from '../constants';
 import type { CategoryDashboardChartProps } from '../types';
 
@@ -66,15 +66,15 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
               <div className="flex items-center space-x-2">
                 <span className="text-white font-bold">
                   {metric.label === 'Frecuencia'
-                    ? formatNumber(data.frequency, 1) + '/sem'
+                    ? formatNumberToString(data.frequency, 1) + '/sem'
                     : metric.label === 'Fuerza'
-                      ? (data.strength > 0 ? '+' : '') + formatNumber(data.strength, 0) + '%'
-                      : formatNumber(metric.value, 0) + metric.unit
+                      ? (data.strength > 0 ? '+' : '') + formatNumberToString(data.strength, 0) + '%'
+                      : formatNumberToString(metric.value, 0) + metric.unit
                   }
                 </span>
                 {metric.label === 'Volumen' && (
                   <span className="text-gray-500 text-xs">
-                    (ideal: {formatNumber(metric.ideal, 0)}%)
+                    (ideal: {formatNumberToString(metric.ideal, 0)}%)
                   </span>
                 )}
               </div>
@@ -112,7 +112,7 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
           <Trophy className="w-4 h-4 text-yellow-400" />
           <span className="text-xs text-gray-400">PRs:</span>
           <span className="text-sm font-bold text-yellow-400">
-            {formatNumber(data.records, 0)}
+            {formatNumberToString(data.records, 0)}
           </span>
         </div>
 

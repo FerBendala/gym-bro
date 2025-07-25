@@ -1,6 +1,6 @@
+import { THEME_CONTAINERS, THEME_SPACING } from '@/constants';
 import { clsx } from 'clsx';
 import React from 'react';
-import { THEME_CONTAINERS, THEME_SPACING } from '../../../constants';
 import type { CardHeaderProps } from '../types';
 
 export const CardHeader: React.FC<CardHeaderProps> = ({

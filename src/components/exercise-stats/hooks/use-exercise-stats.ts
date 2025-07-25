@@ -1,5 +1,4 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { useMemo } from 'react';
 import {
   calculateAverage,
   calculateMax,
@@ -7,7 +6,8 @@ import {
   countUniqueBy,
   findMostRecent,
   formatDateForComparison
-} from '../../../utils/functions';
+} from '@/utils';
+import { useMemo } from 'react';
 import type { CalculatedStats, UseExerciseStatsReturn } from '../types';
 
 /**

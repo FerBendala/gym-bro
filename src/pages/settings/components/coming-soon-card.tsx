@@ -1,5 +1,5 @@
 import { MODERN_THEME } from '@/constants/theme/index.constants';
-import { cn } from '@/utils/functions';
+import { cn } from '@/utils';
 import React from 'react';
 
 interface ComingSoonCardProps {

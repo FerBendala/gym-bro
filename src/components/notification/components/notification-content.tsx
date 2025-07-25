@@ -1,4 +1,4 @@
-import { cn } from '@/utils/functions';
+import { cn } from '@/utils';
 import type { NotificationContentProps } from '../types';
 import { getNotificationBackground } from '../utils';
 import { NotificationCloseButton } from './notification-close-button';

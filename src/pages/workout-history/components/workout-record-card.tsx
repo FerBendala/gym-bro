@@ -1,4 +1,4 @@
-import { getCategoryColor } from '@/utils/functions';
+import { getCategoryColor } from '@/utils';
 import React from 'react';
 import type { WorkoutRecordWithExercise } from '../types';
 import { calculateWorkoutStats, hasIndividualSets } from '../utils';

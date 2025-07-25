@@ -1,11 +1,11 @@
-import { Clock, Dumbbell, Target, Trash2, TrendingUp, Zap } from 'lucide-react';
-import React, { useState } from 'react';
 import {
   calculateWorkoutVolume,
   formatRelativeTime,
-  formatVolume,
+  formatVolumeToKg,
   getVolumeColor
-} from '../../../utils/functions';
+} from '@/utils';
+import { Clock, Dumbbell, Target, Trash2, TrendingUp, Zap } from 'lucide-react';
+import React, { useState } from 'react';
 import type { WorkoutItemProps } from '../types';
 
 /**
@@ -19,7 +19,7 @@ export const WorkoutItem: React.FC<WorkoutItemProps> = ({ record, index, onDelet
 
   const volume = calculateWorkoutVolume(record);
   const volumeColor = getVolumeColor(volume);
-  const formattedVolume = formatVolume(volume);
+  const formattedVolume = formatVolumeToKg(volume);
   const relativeTime = formatRelativeTime(record.date);
 
   const handleDelete = async () => {

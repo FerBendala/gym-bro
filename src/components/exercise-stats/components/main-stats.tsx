@@ -1,6 +1,6 @@
+import { formatNumberToString } from '@/utils';
 import { Target, TrendingUp, Zap } from 'lucide-react';
 import React from 'react';
-import { formatNumber } from '../../../utils/functions';
 import { StatCard } from '../../stat-card';
 import type { MainStatsProps, StatConfig } from '../types';
 
@@ -22,7 +22,7 @@ export const MainStats: React.FC<MainStatsProps> = ({ stats }) => {
     {
       id: 'totalVolume',
       title: 'Volumen Total',
-      value: `${formatNumber(stats.totalVolume)} kg`,
+      value: `${formatNumberToString(stats.totalVolume)} kg`,
       icon: TrendingUp,
       variant: 'success',
       tooltip: 'Suma total de peso levantado (peso × repeticiones × series) a lo largo de todos los entrenamientos'
@@ -30,7 +30,7 @@ export const MainStats: React.FC<MainStatsProps> = ({ stats }) => {
     {
       id: 'averageWeight',
       title: 'Peso Promedio',
-      value: `${formatNumber(stats.averageWeight)} kg`,
+      value: `${formatNumberToString(stats.averageWeight)} kg`,
       icon: Zap,
       variant: 'warning',
       tooltip: 'Peso promedio utilizado en todas las series de este ejercicio'
@@ -38,7 +38,7 @@ export const MainStats: React.FC<MainStatsProps> = ({ stats }) => {
     {
       id: 'maxWeight',
       title: 'Peso Máximo',
-      value: `${formatNumber(stats.maxWeight)} kg`,
+      value: `${formatNumberToString(stats.maxWeight)} kg`,
       icon: TrendingUp,
       variant: 'danger',
       tooltip: 'Peso máximo levantado en una sola serie para este ejercicio'

@@ -1,8 +1,8 @@
 import { Input } from '@/components/input';
-import { formatNumber } from '@/utils/functions';
+import { formatNumberToString } from '@/utils';
 import { Trash2 } from 'lucide-react';
 import React from 'react';
-import type { EditMode } from '../../types';
+import type { EditMode } from '../types';
 
 interface AdvancedFormProps {
   editMode: EditMode;
@@ -77,7 +77,7 @@ export const AdvancedForm: React.FC<AdvancedFormProps> = ({
         <div className="flex items-center space-x-4 text-sm text-gray-400">
           <span>Series: {editMode.individualSets.length}</span>
           <span>Reps totales: {editMode.individualSets.reduce((sum, set) => sum + set.reps, 0)}</span>
-          <span>Volumen: {formatNumber(editMode.individualSets.reduce((sum, set) => sum + (set.weight * set.reps), 0))} kg</span>
+          <span>Volumen: {formatNumberToString(editMode.individualSets.reduce((sum, set) => sum + (set.weight * set.reps), 0))} kg</span>
         </div>
       </div>
     </div>

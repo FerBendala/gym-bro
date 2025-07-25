@@ -1,4 +1,4 @@
-import { cn } from '@/utils/functions';
+import { cn } from '@/utils';
 import { Info } from 'lucide-react';
 import React from 'react';
 import { TooltipTriggerProps } from '../types';

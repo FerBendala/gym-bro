@@ -1,4 +1,4 @@
-import { cn } from '@/utils/functions';
+import { cn } from '@/utils';
 
 export const OfflineWarning: React.FC = () => {
   return (

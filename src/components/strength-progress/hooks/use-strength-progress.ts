@@ -1,6 +1,6 @@
 import type { WorkoutRecord } from '@/interfaces';
+import { calculateAdvancedStrengthAnalysis } from '@/utils';
 import { useMemo } from 'react';
-import { calculateAdvancedStrengthAnalysis } from '../../../utils/functions';
 import type { StrengthProgressAnalysis } from '../types';
 
 export const useStrengthProgress = (records: WorkoutRecord[]): StrengthProgressAnalysis | null => {

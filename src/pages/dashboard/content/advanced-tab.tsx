@@ -1,9 +1,9 @@
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { StatCard } from '@/components/stat-card';
+import { InfoTooltip } from '@/components/tooltip';
 import type { WorkoutRecord } from '@/interfaces';
 import { Activity, AlertTriangle, Brain, Shield, Target } from 'lucide-react';
 import React from 'react';
-import { Card, CardContent, CardHeader } from '../../../components/card';
-import { StatCard } from '../../../components/stat-card';
-import { InfoTooltip } from '../../../components/tooltip';
 import { useAdvancedTab } from '../hooks/use-advanced-tab';
 
 interface AdvancedTabProps {
