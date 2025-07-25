@@ -10,7 +10,6 @@ interface WorkoutRecordCardProps {
   record: WorkoutRecordWithExercise;
   onEdit: (record: WorkoutRecordWithExercise) => void;
   onDelete: (recordId: string) => void;
-  isEditing: boolean;
 }
 
 export const WorkoutRecordCard: React.FC<WorkoutRecordCardProps> = ({

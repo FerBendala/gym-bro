@@ -84,7 +84,6 @@ export const WorkoutList: React.FC<WorkoutListProps> = ({
                 record={record}
                 onEdit={onEdit}
                 onDelete={onDelete}
-                isEditing={false}
               />
             );
           })}

@@ -1,6 +1,6 @@
 import { Input } from '@/components/input';
+import type { EditMode } from '@/pages/workout-history/types';
 import React from 'react';
-import type { EditMode } from '../../types';
 
 interface SimpleFormProps {
   editMode: EditMode;
