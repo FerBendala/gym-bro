@@ -2,94 +2,23 @@ import { MODERN_THEME } from '@/constants/theme';
 import { useActiveTab, useCloseMoreMenu, useNavigateTo, useShowMoreMenu, useToggleMoreMenu } from '@/stores/modern-layout';
 import { cn } from '@/utils/functions/style-utils';
 import React from 'react';
-import { compactNavigationItems, moreMenuItems, navigationItems } from '../constants';
-import { ModernNavItem, NavigationItem, NavigationType } from '../types';
-import { navigationUtils } from '../utils/navigation-utils';
+import { compactNavigationItems, moreMenuItems } from '../constants';
+import { ModernNavItem } from '../types';
 
 interface BottomNavigationProps {
   activeTab?: ModernNavItem;
   onTabChange?: (tab: ModernNavItem) => void;
-  navigationType?: NavigationType;
   isNavigationVisible?: boolean;
 }
 
-// Componente para renderizar un item de navegación estándar
-const NavItem: React.FC<{
-  item: NavigationItem;
-  navConfig: { item: string; active: string; inactive: string };
-  activeTab: ModernNavItem;
-  onTabClick: (tab: ModernNavItem) => void;
-}> = ({ item, navConfig, activeTab, onTabClick }) => {
-  const Icon = item.icon;
-  const isActive = navigationUtils.isItemActive(item.id, activeTab);
-
-  return (
-    <button
-      key={item.id}
-      onClick={() => onTabClick(item.id)}
-      className={cn(
-        navigationUtils.getNavItemClasses(isActive, navConfig, `${MODERN_THEME.touch.tap} ${MODERN_THEME.accessibility.focusRing}`)
-      )}
-      aria-label={`Ir a ${item.label}`}
-    >
-      <div className="relative">
-        <Icon className={cn(
-          navigationUtils.getIconClasses(isActive, 'sm'),
-          'mb-1'
-        )} />
-        {item.badge && item.badge > 0 && (
-          <span className={navigationUtils.getBadgeClasses('md')}>
-            {navigationUtils.formatBadgeNumber(item.badge)}
-          </span>
-        )}
-      </div>
-      <span className="text-xs">{item.label}</span>
-    </button>
-  );
-};
-
-// Componente para renderizar un item solo con icono
-const NavItemIconOnly: React.FC<{
-  item: NavigationItem;
-  activeTab: ModernNavItem;
-  onTabClick: (tab: ModernNavItem) => void;
-}> = ({ item, activeTab, onTabClick }) => {
-  const Icon = item.icon;
-  const isActive = navigationUtils.isItemActive(item.id, activeTab);
-
-  return (
-    <button
-      key={item.id}
-      onClick={() => onTabClick(item.id)}
-      className={cn(
-        MODERN_THEME.navigation.bottomNavIconsOnly.item,
-        isActive ? MODERN_THEME.navigation.bottomNavIconsOnly.active : MODERN_THEME.navigation.bottomNavIconsOnly.inactive,
-        MODERN_THEME.touch.tap,
-        MODERN_THEME.accessibility.focusRing
-      )}
-      aria-label={`Ir a ${item.label}`}
-      title={item.label}
-    >
-      <div className="relative">
-        <Icon className={cn(navigationUtils.getIconClasses(isActive, 'md'))} />
-        {item.badge && item.badge > 0 && (
-          <span className={navigationUtils.getBadgeClasses('sm')}>
-            {navigationUtils.formatBadgeNumber(item.badge, 9)}
-          </span>
-        )}
-      </div>
-    </button>
-  );
-};
-
 // Componente para renderizar un item en el diseño compacto
 const NavItemCompact: React.FC<{
-  item: NavigationItem;
+  item: { id: ModernNavItem; label: string; icon: React.ComponentType<{ className?: string }>; badge?: number };
   activeTab: ModernNavItem;
   onTabClick: (tab: ModernNavItem) => void;
 }> = ({ item, activeTab, onTabClick }) => {
   const Icon = item.icon;
-  const isActive = navigationUtils.isItemActive(item.id, activeTab);
+  const isActive = item.id === activeTab;
 
   return (
     <button
@@ -105,10 +34,13 @@ const NavItemCompact: React.FC<{
       title={item.label}
     >
       <div className="relative">
-        <Icon className={cn(navigationUtils.getIconClasses(isActive, 'md'))} />
+        <Icon className={cn(
+          'w-6 h-6',
+          isActive ? 'text-blue-400' : 'text-gray-400'
+        )} />
         {item.badge && item.badge > 0 && (
-          <span className={navigationUtils.getBadgeClasses('md')}>
-            {navigationUtils.formatBadgeNumber(item.badge)}
+          <span className="absolute -top-2 -right-2 w-5 h-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+            {item.badge > 99 ? '99+' : item.badge.toString()}
           </span>
         )}
       </div>
@@ -118,30 +50,33 @@ const NavItemCompact: React.FC<{
 
 // Componente para renderizar un item en el menú "más"
 const NavItemMore: React.FC<{
-  item: NavigationItem;
+  item: { id: ModernNavItem; label: string; icon: React.ComponentType<{ className?: string }>; badge?: number };
   activeTab: ModernNavItem;
   onTabClick: (tab: ModernNavItem) => void;
 }> = ({ item, activeTab, onTabClick }) => {
   const Icon = item.icon;
-  const isActive = navigationUtils.isItemActive(item.id, activeTab);
+  const isActive = item.id === activeTab;
 
   return (
     <button
       key={item.id}
       onClick={() => onTabClick(item.id)}
       className={cn(
-        MODERN_THEME.navigation.moreMenu.item,
-        isActive ? MODERN_THEME.navigation.moreMenu.active : MODERN_THEME.navigation.moreMenu.inactive,
+        'flex items-center gap-3 w-full py-3 px-4 rounded-full transition-all duration-200 min-h-[48px]',
+        isActive ? 'bg-blue-600/20 text-blue-400' : 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50',
         MODERN_THEME.touch.tap,
         MODERN_THEME.accessibility.focusRing
       )}
       aria-label={`Ir a ${item.label}`}
     >
       <div className="relative">
-        <Icon className={cn(navigationUtils.getIconClasses(isActive, 'sm'))} />
+        <Icon className={cn(
+          'w-5 h-5',
+          isActive ? 'text-blue-400' : 'text-gray-400'
+        )} />
         {item.badge && item.badge > 0 && (
-          <span className={navigationUtils.getBadgeClasses('sm')}>
-            {navigationUtils.formatBadgeNumber(item.badge, 9)}
+          <span className="absolute -top-1 -right-1 w-4 h-4 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
+            {item.badge > 9 ? '9+' : item.badge.toString()}
           </span>
         )}
       </div>
@@ -158,7 +93,6 @@ const NavItemMore: React.FC<{
 export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   activeTab: propActiveTab,
   onTabChange: propOnTabChange,
-  navigationType: propNavigationType,
   isNavigationVisible: propIsNavigationVisible
 }) => {
   // Usar selectores individuales del store de Zustand
@@ -170,92 +104,19 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
 
   // Priorizar props sobre store
   const activeTab = propActiveTab ?? storeActiveTab;
-  const navigationType = propNavigationType ?? 'grid';
   const isNavigationVisible = propIsNavigationVisible ?? true;
 
   // Función para manejar el cambio de tab
   const handleTabChange = (tab: ModernNavItem) => {
-    if (propOnTabChange) {
-      // Si se proporciona prop, usar callback
-      navigationUtils.handleTabChange(tab, propOnTabChange, toggleMoreMenu, closeMoreMenu);
+    if (tab === 'more') {
+      toggleMoreMenu();
     } else {
-      // Si no, usar store
-      navigationUtils.handleTabChange(tab, navigateTo, toggleMoreMenu, closeMoreMenu);
-    }
-  };
-
-  // Función para renderizar la navegación según el tipo
-  const renderNavigation = () => {
-    // Por defecto usar el diseño compacto
-    const items = compactNavigationItems;
-
-    switch (navigationType) {
-      case 'horizontal':
-        return (
-          <div className={MODERN_THEME.navigation.bottomNavHorizontal.scrollContainer}>
-            <div className={MODERN_THEME.navigation.bottomNavHorizontal.grid}>
-              {navigationItems.map((item) => (
-                <NavItem
-                  key={item.id}
-                  item={item}
-                  navConfig={MODERN_THEME.navigation.bottomNavHorizontal}
-                  activeTab={activeTab}
-                  onTabClick={handleTabChange}
-                />
-              ))}
-            </div>
-          </div>
-        );
-
-      case 'iconsOnly':
-        return (
-          <div className={MODERN_THEME.navigation.bottomNavIconsOnly.grid}>
-            {navigationItems.map((item) => (
-              <NavItemIconOnly
-                key={item.id}
-                item={item}
-                activeTab={activeTab}
-                onTabClick={handleTabChange}
-              />
-            ))}
-          </div>
-        );
-
-      default: // 'grid' y 'compact' - usar diseño compacto
-        return (
-          <div className="relative">
-            <div className={MODERN_THEME.navigation.bottomNavCompact.grid}>
-              {items.map((item) => (
-                <NavItemCompact
-                  key={item.id}
-                  item={item}
-                  activeTab={activeTab}
-                  onTabClick={handleTabChange}
-                />
-              ))}
-            </div>
-
-            {/* Menú "más" desplegable */}
-            {showMoreMenu && (
-              <div className={cn(
-                MODERN_THEME.navigation.moreMenu.container,
-                'z-40',
-                MODERN_THEME.animations.dropDown.in
-              )}>
-                <div className={MODERN_THEME.navigation.moreMenu.grid}>
-                  {moreMenuItems.map((item) => (
-                    <NavItemMore
-                      key={item.id}
-                      item={item}
-                      activeTab={activeTab}
-                      onTabClick={handleTabChange}
-                    />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-        );
+      closeMoreMenu();
+      if (propOnTabChange) {
+        propOnTabChange(tab);
+      } else {
+        navigateTo(tab);
+      }
     }
   };
 
@@ -265,7 +126,37 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
       isNavigationVisible ? 'translate-y-0' : 'translate-y-full',
       MODERN_THEME.animations.transition.normal
     )}>
-      {renderNavigation()}
+      <div className="relative">
+        <div className={MODERN_THEME.navigation.bottomNavCompact.grid}>
+          {compactNavigationItems.map((item) => (
+            <NavItemCompact
+              key={item.id}
+              item={item}
+              activeTab={activeTab}
+              onTabClick={handleTabChange}
+            />
+          ))}
+        </div>
+
+        {/* Menú "más" desplegable */}
+        {showMoreMenu && (
+          <div className={cn(
+            'absolute bottom-full mb-2 left-0 right-0 bg-gray-900/95 backdrop-blur-md border border-gray-700/50 rounded-4xl shadow-2xl p-4 px-3 z-50',
+            MODERN_THEME.animations.dropDown.in
+          )}>
+            <div className="flex flex-col gap-1">
+              {moreMenuItems.map((item) => (
+                <NavItemMore
+                  key={item.id}
+                  item={item}
+                  activeTab={activeTab}
+                  onTabClick={handleTabChange}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </nav>
   );
 }; 
