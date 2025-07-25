@@ -177,7 +177,6 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
     }
   });
 
-  const totalWorkouts = sortedRecords.length;
   const totalVolume = sortedRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
 
   const dayMetrics: DayMetrics[] = [];
@@ -611,7 +610,6 @@ export const analyzeWorkoutHabits = (records: WorkoutRecord[]): WorkoutHabits =>
   )?.[0] || 'N/A';
 
   // Duración promedio estimada (mejorado)
-  const avgVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / records.length;
   const exerciseCount = records.length;
   const avgExercisesPerSession = Math.max(1, Math.round(exerciseCount / Math.max(1, new Set(records.map(r => r.date)).size)));
   const avgSessionDuration = Math.round(Math.max(30, Math.min(180, avgExercisesPerSession * 8 + 15))); // Entre 30-180 minutos
@@ -630,9 +628,6 @@ export const analyzeWorkoutHabits = (records: WorkoutRecord[]): WorkoutHabits =>
   const workoutDays = dayMetrics.filter(d => d.workouts > 0).length;
   const restDayPattern = workoutDays <= 3 ? '4+ días descanso' :
     workoutDays <= 5 ? '1-2 días descanso' : 'Entrenamiento diario';
-
-  // Nuevas métricas - Calcular frecuencia semanal correctamente
-  const uniqueDates = new Set(records.map(r => new Date(r.date).toDateString()));
 
   // **CORRECCIÓN CLAVE**: Calcular frecuencia semanal de entrenamientos (no días)
   const weeklyData = new Map<string, number>();

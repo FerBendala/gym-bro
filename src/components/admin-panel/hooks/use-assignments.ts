@@ -2,26 +2,33 @@ import { createExerciseAssignment, deleteExerciseAssignment, getAssignmentsByDay
 import type { DayOfWeek, Exercise, ExerciseAssignment } from '@/interfaces';
 import { useNotification } from '@/stores/notification';
 import { useCallback, useState } from 'react';
+import { DataChangeEventDetail } from '../types';
 
 // Evento personalizado para notificar cambios en datos
 const DATA_CHANGE_EVENT = 'followgym-data-change';
 
 /**
  * Emite un evento personalizado para notificar cambios en datos
- * @param type Tipo de dato que cambi
+ * @param type Tipo de dato que cambió
  * @param data Datos adicionales del cambio
  */
-const emitDataChange = (type: 'assignments', data?: any) => {
+const emitDataChange = (type: 'assignments', data?: ExerciseAssignment | { deleted: string }) => {
+  const eventDetail: DataChangeEventDetail = {
+    type,
+    data,
+    timestamp: Date.now()
+  };
+
   window.dispatchEvent(new CustomEvent(DATA_CHANGE_EVENT, {
-    detail: { type, data, timestamp: Date.now() }
+    detail: eventDetail
   }));
 };
 
 /**
  * Hook para manejar las asignaciones de ejercicios
- * @param selectedDay D a de la semana seleccionado
+ * @param selectedDay Día de la semana seleccionado
  * @param exercises Lista de ejercicios disponibles
- * @param isOnline Indica si hay conexi n a internet
+ * @param isOnline Indica si hay conexión a internet
  * @returns Un objeto con las asignaciones de ejercicios
  */
 export const useAssignments = (selectedDay: DayOfWeek, exercises: Exercise[], isOnline: boolean) => {
@@ -40,13 +47,14 @@ export const useAssignments = (selectedDay: DayOfWeek, exercises: Exercise[], is
 
     try {
       const assignmentsData = await getAssignmentsByDay(selectedDay);
-      const assignmentsWithExercises = assignmentsData.map((assignment: ExerciseAssignment) => ({
+      const assignmentsWithExercises: ExerciseAssignment[] = assignmentsData.map((assignment: ExerciseAssignment) => ({
         ...assignment,
-        exercise: exercises.find(ex => ex.id === assignment.exerciseId)
+        exercise: exercises.find((exercise: Exercise) => exercise.id === assignment.exerciseId)
       }));
       setAssignments(assignmentsWithExercises);
-    } catch (error: any) {
-      showNotification(error.message || 'Error al cargar las asignaciones', 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al cargar las asignaciones';
+      showNotification(message, 'error');
     }
   }, [selectedDay, exercises, isOnline, showNotification]);
 
@@ -58,11 +66,19 @@ export const useAssignments = (selectedDay: DayOfWeek, exercises: Exercise[], is
 
     setLoading(true);
     try {
-      const exercise = exercises.find(ex => ex.id === exerciseId);
-      const newAssignment = await createExerciseAssignment({
+      const exercise = exercises.find((ex: Exercise) => ex.id === exerciseId);
+      const newAssignmentId = await createExerciseAssignment({
         exerciseId,
         dayOfWeek
       });
+
+      // Crear el objeto ExerciseAssignment completo
+      const newAssignment: ExerciseAssignment = {
+        id: newAssignmentId,
+        exerciseId,
+        dayOfWeek,
+        exercise
+      };
 
       showNotification(
         `"${exercise?.name}" asignado al ${dayOfWeek}`,
@@ -74,8 +90,9 @@ export const useAssignments = (selectedDay: DayOfWeek, exercises: Exercise[], is
 
       await loadAssignments();
       return true;
-    } catch (error: any) {
-      showNotification(error.message || 'Error al asignar el ejercicio', 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al asignar el ejercicio';
+      showNotification(message, 'error');
       return false;
     } finally {
       setLoading(false);
@@ -98,8 +115,9 @@ export const useAssignments = (selectedDay: DayOfWeek, exercises: Exercise[], is
 
       await loadAssignments();
       return true;
-    } catch (error: any) {
-      showNotification(error.message || 'Error al eliminar la asignación', 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al eliminar la asignación';
+      showNotification(message, 'error');
       return false;
     } finally {
       setLoading(false);

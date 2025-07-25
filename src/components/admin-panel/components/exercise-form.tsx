@@ -74,8 +74,8 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
         showNotification(`Ejercicio "${data.name}" creado exitosamente`, 'success');
       }
       return true;
-    } catch (error: any) {
-      const message = error.message || 'Error al guardar el ejercicio';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al guardar el ejercicio';
       setError('exercises', message);
       showNotification(message, 'error');
       return false;

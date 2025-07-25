@@ -39,8 +39,8 @@ export const AssignmentItem: React.FC<AssignmentItemProps> = ({
       await deleteExerciseAssignment(assignment.id);
       removeAssignmentFromStore(assignment.id);
       showNotification('Asignación eliminada exitosamente', 'success');
-    } catch (error: any) {
-      const message = error.message || 'Error al eliminar la asignación';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al eliminar la asignación';
       setError('assignments', message);
       showNotification(message, 'error');
     } finally {

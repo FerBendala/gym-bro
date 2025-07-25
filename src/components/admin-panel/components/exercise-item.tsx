@@ -46,8 +46,8 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
       await deleteExercise(exercise.id);
       removeExerciseFromStore(exercise.id);
       showNotification(`Ejercicio "${exercise.name}" eliminado exitosamente`, 'success');
-    } catch (error: any) {
-      const message = error.message || 'Error al eliminar el ejercicio';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al eliminar el ejercicio';
       setError('exercises', message);
       showNotification(message, 'error');
     } finally {

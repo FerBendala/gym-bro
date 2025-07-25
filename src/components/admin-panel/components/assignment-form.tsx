@@ -75,8 +75,8 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) =
       showNotification(`"${exercise?.name}" asignado al ${data.dayOfWeek}`, 'success');
       reset({ exerciseId: '', dayOfWeek: selectedDay });
       return true;
-    } catch (error: any) {
-      const message = error.message || 'Error al asignar el ejercicio';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al asignar el ejercicio';
       setError('assignments', message);
       showNotification(message, 'error');
       return false;

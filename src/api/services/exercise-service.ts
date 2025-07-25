@@ -1,35 +1,24 @@
 import { db } from '@/api/firebase';
 import { handleFirebaseError } from '@/api/services/error-handler';
 import type { Exercise } from '@/interfaces';
-import { addDoc, collection, deleteDoc, deleteField, doc, getDocs, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, deleteDoc, deleteField, doc, FieldValue, getDocs, updateDoc } from 'firebase/firestore';
 
 /**
- * Filtra campos undefined de un objeto para Firebase (para creación)
+ * Tipo para objetos que pueden tener campos undefined/null/empty
  */
-function filterUndefinedFields(obj: any): any {
-  const filtered: any = {};
+type PartialObject = Record<string, unknown>;
+
+/**
+ * Filtra campos undefined/null/empty de un objeto para Firebase (para creación)
+ */
+function filterUndefinedFields<T extends PartialObject>(obj: T): Partial<T> {
+  const filtered: Partial<T> = {};
   for (const [key, value] of Object.entries(obj)) {
     if (value !== undefined && value !== null && value !== '') {
-      filtered[key] = value;
+      filtered[key as keyof T] = value as T[keyof T];
     }
   }
   return filtered;
-}
-
-/**
- * Filtra campos undefined de un objeto para Firebase y maneja eliminación de campos (para actualización)
- */
-function prepareUpdatesForFirebase(obj: any): any {
-  const prepared: any = {};
-  for (const [key, value] of Object.entries(obj)) {
-    if (value === undefined || value === null || value === '') {
-      // Usar deleteField para eliminar campos vacíos
-      prepared[key] = deleteField();
-    } else {
-      prepared[key] = value;
-    }
-  }
-  return prepared;
 }
 
 /**
@@ -37,7 +26,6 @@ function prepareUpdatesForFirebase(obj: any): any {
  */
 export class ExerciseService {
   private static readonly COLLECTION = 'exercises';
-
 
   /**
    * Crea un nuevo ejercicio
@@ -56,7 +44,6 @@ export class ExerciseService {
     }
   }
 
-
   /**
    * Obtiene todos los ejercicios almacenados en la colección de Firebase
    * @returns Una promesa que resuelve a un arreglo de ejercicios
@@ -73,7 +60,6 @@ export class ExerciseService {
     }
   }
 
-
   /**
    * Actualiza un ejercicio existente
    * @param exerciseId ID del ejercicio a actualizar
@@ -83,14 +69,21 @@ export class ExerciseService {
   static async update(exerciseId: string, updates: Partial<Exercise>): Promise<void> {
     try {
       // Preparar actualizaciones para Firebase (incluyendo eliminación de campos)
-      const preparedUpdates = prepareUpdatesForFirebase(updates);
-      await updateDoc(doc(db, ExerciseService.COLLECTION, exerciseId), preparedUpdates);
+      const preparedUpdates: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(updates)) {
+        if (value === undefined || value === null || value === '') {
+          // Usar deleteField para eliminar campos vacíos
+          preparedUpdates[key] = deleteField();
+        } else {
+          preparedUpdates[key] = value;
+        }
+      }
+      await updateDoc(doc(db, ExerciseService.COLLECTION, exerciseId), preparedUpdates as Record<string, FieldValue>);
     } catch (error) {
       handleFirebaseError(error, 'actualizar ejercicio');
       throw error; // Re-lanzar el error después de manejarlo
     }
   }
-
 
   /**
    * Elimina un ejercicio de la colección de Firebase

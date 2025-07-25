@@ -7,25 +7,31 @@ import {
 import type { Exercise } from '@/interfaces';
 import { useNotification } from '@/stores/notification';
 import { useCallback, useState } from 'react';
-import type { ExerciseFormData } from '../types';
+import type { ExerciseDataChangeEventDetail, ExerciseFormData } from '../types';
 
 // Evento personalizado para notificar cambios en datos
 const DATA_CHANGE_EVENT = 'followgym-data-change';
 
 /**
  * Emite un evento personalizado para notificar cambios en datos
- * @param type Tipo de dato que cambi
+ * @param type Tipo de dato que cambió
  * @param data Datos adicionales del cambio
  */
-const emitDataChange = (type: 'exercises', data?: any) => {
+const emitDataChange = (type: 'exercises', data?: Exercise | Partial<Exercise> | { deleted: string }) => {
+  const eventDetail: ExerciseDataChangeEventDetail = {
+    type,
+    data,
+    timestamp: Date.now()
+  };
+
   window.dispatchEvent(new CustomEvent(DATA_CHANGE_EVENT, {
-    detail: { type, data, timestamp: Date.now() }
+    detail: eventDetail
   }));
 };
 
 /**
  * Hook para manejar los ejercicios
- * @param isOnline Indica si hay conexi n a internet
+ * @param isOnline Indica si hay conexión a internet
  * @returns Un objeto con los ejercicios
  */
 export const useExercises = (isOnline: boolean) => {
@@ -42,8 +48,9 @@ export const useExercises = (isOnline: boolean) => {
     try {
       const exercisesData = await getExercises();
       setExercises(exercisesData);
-    } catch (error: any) {
-      showNotification(error.message || 'Error al cargar los ejercicios', 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al cargar los ejercicios';
+      showNotification(message, 'error');
     }
   }, [isOnline, showNotification]);
 
@@ -62,7 +69,17 @@ export const useExercises = (isOnline: boolean) => {
         url: data.url || undefined
       };
 
-      const newExercise = await createExercise(exerciseData);
+      const newExerciseId = await createExercise(exerciseData);
+
+      // Crear el objeto Exercise completo para el evento
+      const newExercise: Exercise = {
+        id: newExerciseId,
+        name: data.name,
+        categories: data.categories,
+        description: data.description,
+        url: data.url
+      };
+
       showNotification(`Ejercicio "${data.name}" creado exitosamente`, 'success');
 
       // Notificar cambio a otros componentes
@@ -70,8 +87,9 @@ export const useExercises = (isOnline: boolean) => {
 
       await loadExercises();
       return true;
-    } catch (error: any) {
-      showNotification(error.message || 'Error al crear el ejercicio', 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al crear el ejercicio';
+      showNotification(message, 'error');
       return false;
     } finally {
       setLoading(false);
@@ -101,8 +119,9 @@ export const useExercises = (isOnline: boolean) => {
 
       await loadExercises();
       return true;
-    } catch (error: any) {
-      showNotification(error.message || 'Error al actualizar el ejercicio', 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al actualizar el ejercicio';
+      showNotification(message, 'error');
       return false;
     } finally {
       setLoading(false);
@@ -117,7 +136,7 @@ export const useExercises = (isOnline: boolean) => {
 
     setLoading(true);
     try {
-      const exercise = exercises.find(ex => ex.id === exerciseId);
+      const exercise = exercises.find((ex: Exercise) => ex.id === exerciseId);
       await deleteExercise(exerciseId);
       showNotification(`Ejercicio "${exercise?.name}" eliminado exitosamente`, 'success');
 
@@ -126,8 +145,9 @@ export const useExercises = (isOnline: boolean) => {
 
       await loadExercises();
       return true;
-    } catch (error: any) {
-      showNotification(error.message || 'Error al eliminar el ejercicio', 'error');
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al eliminar el ejercicio';
+      showNotification(message, 'error');
       return false;
     } finally {
       setLoading(false);

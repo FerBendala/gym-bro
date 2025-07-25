@@ -8,6 +8,7 @@ import {
   updateExercise
 } from '@/api/services';
 import type { ExerciseFormData } from '@/components/admin-panel/types';
+import type { DayOfWeek, Exercise, ExerciseAssignment } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
@@ -27,6 +28,7 @@ export const useAdminStoreWithServices = () => {
     assignments,
     loading,
     errors,
+    adminPanel: { selectedDay },
 
     // Acciones de UI
     openPanel,
@@ -70,8 +72,8 @@ export const useAdminStoreWithServices = () => {
     try {
       const exercisesData = await getExercises();
       setExercises(exercisesData);
-    } catch (error: any) {
-      const message = error.message || 'Error al cargar los ejercicios';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al cargar los ejercicios';
       setErrorState('exercises', message);
       showNotification(message, 'error');
     } finally {
@@ -80,32 +82,36 @@ export const useAdminStoreWithServices = () => {
   }, [isOnline, showNotification, setExercises, setLoadingState, setErrorState]);
 
   // Cargar asignaciones
-  const loadAssignments = useCallback(async (day?: string) => {
+  const loadAssignments = useCallback(async (day?: DayOfWeek) => {
     if (!isOnline) return;
 
     setLoadingState('assignments', true);
     setErrorState('assignments', null);
 
     try {
-      const selectedDay = day || useAdminStore.getState().selectedDay;
-      const assignmentsData = await getAssignmentsByDay(selectedDay);
+      const targetDay = day || selectedDay;
+      if (!targetDay) {
+        console.warn('⚠️ No hay día seleccionado para cargar asignaciones');
+        return;
+      }
+
+      const assignmentsData = await getAssignmentsByDay(targetDay);
 
       // Enriquecer con datos de ejercicios
-      const exercises = useAdminStore.getState().exercises;
-      const assignmentsWithExercises = assignmentsData.map((assignment) => ({
+      const assignmentsWithExercises: ExerciseAssignment[] = assignmentsData.map((assignment) => ({
         ...assignment,
-        exercise: exercises.find(ex => ex.id === assignment.exerciseId)
+        exercise: exercises.find((exercise: Exercise) => exercise.id === assignment.exerciseId)
       }));
 
       setAssignments(assignmentsWithExercises);
-    } catch (error: any) {
-      const message = error.message || 'Error al cargar las asignaciones';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al cargar las asignaciones';
       setErrorState('assignments', message);
       showNotification(message, 'error');
     } finally {
       setLoadingState('assignments', false);
     }
-  }, [isOnline, showNotification, setAssignments, setLoadingState, setErrorState]);
+  }, [isOnline, showNotification, selectedDay, exercises, setAssignments, setLoadingState, setErrorState]);
 
   // Crear ejercicio
   const handleCreateExercise = useCallback(async (data: ExerciseFormData): Promise<boolean> => {
@@ -125,15 +131,25 @@ export const useAdminStoreWithServices = () => {
         url: data.url || undefined
       };
 
-      const newExercise = await createExercise(exerciseData);
+      const newExerciseId = await createExercise(exerciseData);
+
+      // Crear el objeto Exercise completo para agregar al store
+      const newExercise: Exercise = {
+        id: newExerciseId,
+        name: data.name,
+        categories: data.categories,
+        description: data.description,
+        url: data.url
+      };
+
       addExercise(newExercise);
 
       showNotification(`Ejercicio "${data.name}" creado exitosamente`, 'success');
       await loadExercises(); // Recargar para sincronizar
 
       return true;
-    } catch (error: any) {
-      const message = error.message || 'Error al crear el ejercicio';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al crear el ejercicio';
       setErrorState('exercises', message);
       showNotification(message, 'error');
       return false;
@@ -167,8 +183,8 @@ export const useAdminStoreWithServices = () => {
       await loadExercises(); // Recargar para sincronizar
 
       return true;
-    } catch (error: any) {
-      const message = error.message || 'Error al actualizar el ejercicio';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al actualizar el ejercicio';
       setErrorState('exercises', message);
       showNotification(message, 'error');
       return false;
@@ -196,8 +212,8 @@ export const useAdminStoreWithServices = () => {
       await loadExercises(); // Recargar para sincronizar
 
       return true;
-    } catch (error: any) {
-      const message = error.message || 'Error al eliminar el ejercicio';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al eliminar el ejercicio';
       setErrorState('exercises', message);
       showNotification(message, 'error');
       return false;
@@ -207,7 +223,7 @@ export const useAdminStoreWithServices = () => {
   }, [isOnline, showNotification, exercises, removeExerciseFromStore, loadExercises, setLoadingState, setErrorState]);
 
   // Crear asignación
-  const handleCreateAssignment = useCallback(async (exerciseId: string, dayOfWeek: string): Promise<boolean> => {
+  const handleCreateAssignment = useCallback(async (exerciseId: string, dayOfWeek: DayOfWeek): Promise<boolean> => {
     if (!isOnline) {
       showNotification('Sin conexión. No se puede asignar el ejercicio.', 'error');
       return false;
@@ -218,14 +234,16 @@ export const useAdminStoreWithServices = () => {
 
     try {
       const exercise = exercises.find(ex => ex.id === exerciseId);
-      const newAssignment = await createExerciseAssignment({
+      const newAssignmentId = await createExerciseAssignment({
         exerciseId,
-        dayOfWeek: dayOfWeek as any
+        dayOfWeek
       });
 
-      // Enriquecer con datos del ejercicio
-      const assignmentWithExercise = {
-        ...newAssignment,
+      // Crear el objeto ExerciseAssignment completo para agregar al store
+      const assignmentWithExercise: ExerciseAssignment = {
+        id: newAssignmentId,
+        exerciseId,
+        dayOfWeek,
         exercise
       };
 
@@ -235,8 +253,8 @@ export const useAdminStoreWithServices = () => {
       await loadAssignments(dayOfWeek); // Recargar para sincronizar
 
       return true;
-    } catch (error: any) {
-      const message = error.message || 'Error al asignar el ejercicio';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al asignar el ejercicio';
       setErrorState('assignments', message);
       showNotification(message, 'error');
       return false;
@@ -263,8 +281,8 @@ export const useAdminStoreWithServices = () => {
       await loadAssignments(); // Recargar para sincronizar
 
       return true;
-    } catch (error: any) {
-      const message = error.message || 'Error al eliminar la asignación';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al eliminar la asignación';
       setErrorState('assignments', message);
       showNotification(message, 'error');
       return false;
@@ -276,11 +294,13 @@ export const useAdminStoreWithServices = () => {
   // Cargar datos iniciales
   useEffect(() => {
     loadExercises();
-  }, [isOnline]);
+  }, [loadExercises]);
 
   useEffect(() => {
-    loadAssignments();
-  }, [isOnline, exercises]);
+    if (selectedDay) {
+      loadAssignments();
+    }
+  }, [selectedDay, loadAssignments]);
 
   return {
     // Estado

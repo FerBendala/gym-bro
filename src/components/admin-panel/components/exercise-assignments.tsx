@@ -49,13 +49,7 @@ export const ExerciseAssignments: React.FC = () => {
           </div>
 
           {/* Formulario de asignación */}
-          <AssignmentForm
-            selectedDay={selectedDay}
-            onSubmit={async (data) => {
-              // Esta función se maneja en el componente AssignmentForm
-              return true;
-            }}
-          />
+          <AssignmentForm selectedDay={selectedDay} />
 
           {/* Lista de ejercicios asignados */}
           <div className="mt-6">

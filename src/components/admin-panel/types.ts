@@ -38,4 +38,16 @@ export interface ExerciseAssignmentsProps {
   onCreateAssignment: (exerciseId: string, dayOfWeek: DayOfWeek) => Promise<boolean>;
   onDeleteAssignment: (assignmentId: string) => Promise<boolean>;
   onPreviewUrl: (url: string) => void;
-} 
+}
+
+export interface DataChangeEventDetail {
+  type: 'assignments';
+  data?: ExerciseAssignment | { deleted: string };
+  timestamp: number;
+}
+
+export interface ExerciseDataChangeEventDetail {
+  type: 'exercises';
+  data?: Exercise | Partial<Exercise> | { deleted: string };
+  timestamp: number;
+}

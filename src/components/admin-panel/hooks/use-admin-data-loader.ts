@@ -2,6 +2,7 @@ import {
   getAssignmentsByDay,
   getExercises
 } from '@/api/services';
+import type { Exercise, ExerciseAssignment } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
@@ -36,9 +37,9 @@ export const useAdminDataLoader = () => {
     try {
       const exercisesData = await getExercises();
       setExercises(exercisesData);
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('❌ loadExercises - Error:', error);
-      const message = error.message || 'Error al cargar los ejercicios';
+      const message = error instanceof Error ? error.message : 'Error al cargar los ejercicios';
       setError('exercises', message);
       showNotification(message, 'error');
     } finally {
@@ -57,8 +58,8 @@ export const useAdminDataLoader = () => {
     }
 
     // Validación adicional: asegurar que selectedDay sea un día válido
-    const validDays = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
-    if (!validDays.includes(selectedDay)) {
+    const validDays = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'] as const;
+    if (!validDays.includes(selectedDay as typeof validDays[number])) {
       console.warn('⚠️ selectedDay no es un día válido:', selectedDay);
       return;
     }
@@ -71,14 +72,14 @@ export const useAdminDataLoader = () => {
 
       // Enriquecer con datos de ejercicios
       const exercises = useAdminStore.getState().exercises;
-      const assignmentsWithExercises = assignmentsData.map((assignment) => ({
+      const assignmentsWithExercises: ExerciseAssignment[] = assignmentsData.map((assignment) => ({
         ...assignment,
-        exercise: exercises.find((ex: any) => ex.id === assignment.exerciseId)
+        exercise: exercises.find((exercise: Exercise) => exercise.id === assignment.exerciseId)
       }));
 
       setAssignments(assignmentsWithExercises);
-    } catch (error: any) {
-      const message = error.message || 'Error al cargar las asignaciones';
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : 'Error al cargar las asignaciones';
       setError('assignments', message);
       showNotification(message, 'error');
     } finally {

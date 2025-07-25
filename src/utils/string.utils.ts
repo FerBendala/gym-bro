@@ -31,13 +31,13 @@ export const combineStyles = (
   className?: string
 ): string => {
   const variantClasses = Object.entries(variants)
-    .filter(([_, value]) => value)
-    .map(([_, value]) => value)
+    .filter(([value]) => value)
+    .map(([value]) => value)
     .join(' ');
 
   const modifierClasses = Object.entries(modifiers)
-    .filter(([_, enabled]) => enabled)
-    .map(([key, _]) => key)
+    .filter(([enabled]) => enabled)
+    .map(([key]) => key)
     .join(' ');
 
   return cn(base, variantClasses, modifierClasses, className);
@@ -50,8 +50,8 @@ export const conditionalClasses = (
   conditions: Record<string, boolean | undefined>
 ): string => {
   return Object.entries(conditions)
-    .filter(([_, condition]) => condition)
-    .map(([className, _]) => className)
+    .filter(([condition]) => condition)
+    .map(([className]) => className)
     .join(' ');
 };
 
