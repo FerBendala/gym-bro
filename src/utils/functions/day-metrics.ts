@@ -1,7 +1,7 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { getDay, getHours } from 'date-fns';
+import { getDay } from 'date-fns';
 import type { DayMetrics } from './trends-interfaces';
-import { calculateRealVolume } from './volume-calculations';
+import { calculateVolume } from './volume-calculations';
 
 /**
  * Calcula métricas avanzadas por día de la semana
@@ -25,7 +25,7 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
   sortedRecords.forEach(record => {
     const dayIndex = getDay(new Date(record.date));
     const volume = record.weight * record.reps * record.sets;
-    const hour = getHours(new Date(record.date));
+    const hour = record.date.getHours(); // Assuming hour is directly available
 
     dayStats[dayIndex].workouts.push(record);
     dayStats[dayIndex].volumes.push(volume);
@@ -104,10 +104,10 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
           const recentOccurrences = thisDayRecords.slice(halfPoint);
 
           const olderAvgVolume = olderOccurrences.reduce((sum, r) =>
-            sum + calculateRealVolume(r), 0) / olderOccurrences.length;
+            sum + calculateVolume(r), 0) / olderOccurrences.length;
 
           const recentAvgVolume = recentOccurrences.reduce((sum, r) =>
-            sum + calculateRealVolume(r), 0) / recentOccurrences.length;
+            sum + calculateVolume(r), 0) / recentOccurrences.length;
 
           if (olderAvgVolume > 0) {
             const rawTrend = ((recentAvgVolume - olderAvgVolume) / olderAvgVolume) * 100;
@@ -130,8 +130,8 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
           trend = 8; // Tendencia positiva leve por actividad
         } else {
           // Si hay distribución temporal, comparar primer vs último
-          const firstVolume = calculateRealVolume(thisDayRecords[0]);
-          const lastVolume = calculateRealVolume(thisDayRecords[2]);
+          const firstVolume = calculateVolume(thisDayRecords[0]);
+          const lastVolume = calculateVolume(thisDayRecords[2]);
 
           if (firstVolume > 0) {
             const rawTrend = ((lastVolume - firstVolume) / firstVolume) * 100;
@@ -156,8 +156,8 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
         trend = 6; // Tendencia positiva leve por actividad
       } else {
         // Si están en días diferentes, comparar con mucha cautela
-        const firstVolume = calculateRealVolume(thisDayRecords[0]);
-        const lastVolume = calculateRealVolume(thisDayRecords[1]);
+        const firstVolume = calculateVolume(thisDayRecords[0]);
+        const lastVolume = calculateVolume(thisDayRecords[1]);
 
         if (firstVolume > 0) {
           const rawTrend = ((lastVolume - firstVolume) / firstVolume) * 100;

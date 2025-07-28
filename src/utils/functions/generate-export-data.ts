@@ -1,7 +1,7 @@
 import type { Exercise, WorkoutRecord } from '@/interfaces';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { calculateEstimated1RM } from './calculate-1rm.utils';
+import { calculateOptimal1RM } from './calculate-1rm.utils';
 import { calculateCategoryMetrics } from './calculate-category-metrics';
 import type { ExercisesByDayData, ExportData } from './export-interfaces';
 import { calculateTemporalTrends } from './temporal-trends';
@@ -130,7 +130,7 @@ export const generateExportData = async (
       volume,
       date: format(new Date(record.date), 'dd/MM/yyyy', { locale: es }),
       dayOfWeek: record.dayOfWeek,
-      estimated1RM: Math.round(calculateEstimated1RM(record.weight, record.reps) * 100) / 100,
+      estimated1RM: Math.round(calculateOptimal1RM(record.weight, record.reps) * 100) / 100,
       individualSets: record.individualSets?.map(set => ({
         weight: set.weight,
         reps: set.reps,
@@ -364,9 +364,9 @@ export const generateExportData = async (
   const lastRecord = sortedRecords[sortedRecords.length - 1];
 
   const overallProgress = firstRecord && lastRecord ?
-    ((calculateEstimated1RM(lastRecord.weight, lastRecord.reps) -
-      calculateEstimated1RM(firstRecord.weight, firstRecord.reps)) /
-      calculateEstimated1RM(firstRecord.weight, firstRecord.reps)) * 100 : 0;
+    ((calculateOptimal1RM(lastRecord.weight, lastRecord.reps) -
+      calculateOptimal1RM(firstRecord.weight, firstRecord.reps)) /
+      calculateOptimal1RM(firstRecord.weight, firstRecord.reps)) * 100 : 0;
 
   const personalRecords = exercisesData
     .filter(ex => ex.maxWeight > 0)
@@ -384,7 +384,7 @@ export const generateExportData = async (
         exerciseName: ex.name,
         weight: prRecord.weight,
         date: format(new Date(prRecord.date), 'dd/MM/yyyy', { locale: es }),
-        estimated1RM: Math.round(calculateEstimated1RM(prRecord.weight, prRecord.reps) * 100) / 100
+        estimated1RM: Math.round(calculateOptimal1RM(prRecord.weight, prRecord.reps) * 100) / 100
       };
     })
     .sort((a, b) => b.estimated1RM - a.estimated1RM)

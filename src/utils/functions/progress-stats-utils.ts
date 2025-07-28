@@ -23,8 +23,8 @@ export const calculateTotalGrowth = (timelineData: Array<{ value: number; totalW
   };
 };
 
-import { calculateEstimated1RMStats } from './calculate-1rm.utils';
-import { calculateRealVolume } from './volume-calculations';
+import { calculateOptimal1RM } from './calculate-1rm.utils';
+import { calculateVolume } from './volume-calculations';
 
 /**
  * Calcula el progreso de un ejercicio específico
@@ -49,19 +49,19 @@ export const calculateExerciseProgress = (exerciseRecords: WorkoutRecord[]): {
   if (sortedRecords.length === 1) {
     // Para una sola sesión, usar el valor como referencia
     const record = sortedRecords[0];
-    first1RM = calculateEstimated1RMStats(record.weight, record.reps);
+    first1RM = calculateOptimal1RM(record.weight, record.reps);
     last1RM = first1RM;
-    firstVolume = calculateRealVolume(record);
+    firstVolume = calculateVolume(record);
     lastVolume = firstVolume;
   } else if (sortedRecords.length === 2) {
     // Para dos sesiones, comparar directamente
     const firstRecord = sortedRecords[0];
     const lastRecord = sortedRecords[1];
 
-    first1RM = calculateEstimated1RMStats(firstRecord.weight, firstRecord.reps);
-    last1RM = calculateEstimated1RMStats(lastRecord.weight, lastRecord.reps);
-    firstVolume = calculateRealVolume(firstRecord);
-    lastVolume = calculateRealVolume(lastRecord);
+    first1RM = calculateOptimal1RM(firstRecord.weight, firstRecord.reps);
+    last1RM = calculateOptimal1RM(lastRecord.weight, lastRecord.reps);
+    firstVolume = calculateVolume(firstRecord);
+    lastVolume = calculateVolume(lastRecord);
   } else {
     // Para 3+ sesiones, usar lógica de períodos
     const firstPeriodSize = Math.min(3, Math.floor(sortedRecords.length / 3));
@@ -86,11 +86,11 @@ export const calculateExerciseProgress = (exerciseRecords: WorkoutRecord[]): {
 
     // Calcular volumen total promedio por sesión usando volumen real
     firstVolume = firstPeriod.reduce((sum, r) => {
-      return sum + calculateRealVolume(r);
+      return sum + calculateVolume(r);
     }, 0) / firstPeriod.length;
 
     lastVolume = lastPeriod.reduce((sum, r) => {
-      return sum + calculateRealVolume(r);
+      return sum + calculateVolume(r);
     }, 0) / lastPeriod.length;
   }
 

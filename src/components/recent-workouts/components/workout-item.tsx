@@ -1,5 +1,5 @@
 import {
-  calculateWorkoutVolume,
+  calculateVolume,
   formatRelativeTime,
   formatVolumeToKg,
   getVolumeColor
@@ -17,7 +17,7 @@ import type { WorkoutItemProps } from '../types';
 export const WorkoutItem: React.FC<WorkoutItemProps> = ({ record, onDelete }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const volume = calculateWorkoutVolume(record);
+  const volume = calculateVolume(record);
   const volumeColor = getVolumeColor(volume);
   const formattedVolume = formatVolumeToKg(volume);
   const relativeTime = formatRelativeTime(record.date);
@@ -96,9 +96,9 @@ export const WorkoutItem: React.FC<WorkoutItemProps> = ({ record, onDelete }) =>
                 <span className="hidden sm:inline">{relativeTime}</span>
                 <span className="sm:hidden">{relativeTime.replace('Hace ', '').replace(' minutos', 'min').replace(' horas', 'h')}</span>
               </span>
-              {record.exercise?.category && (
+              {record.exercise?.categories && (
                 <span className="text-xs text-blue-300 bg-blue-500/15 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full font-medium border border-blue-500/20 shrink-0">
-                  {record.exercise.category}
+                  {record.exercise.categories.join(', ')}
                 </span>
               )}
               <span className="text-xs text-gray-500 capitalize font-medium shrink-0">

@@ -3,7 +3,6 @@ import { roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
 
 /**
- * Calcula el volumen real de un registro (sets × reps × peso)
  * @deprecated Usar calculateVolume de volume-calculations.ts
  */
 const calculateRecordVolume = (record: WorkoutRecord): number => {

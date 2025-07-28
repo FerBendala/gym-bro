@@ -1,6 +1,6 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { getDay } from 'date-fns';
-import { calculateRealVolume } from './volume-calculations';
+import { calculateVolume } from './volume-calculations';
 
 /**
  * Calcula tendencia de volumen por día de la semana
@@ -39,10 +39,10 @@ export const calculateVolumeTrendByDay = (records: WorkoutRecord[]): { day: stri
           const recentOccurrences = sortedDayRecords.slice(halfPoint);
 
           const olderAvgVolume = olderOccurrences.reduce((sum, r) =>
-            sum + calculateRealVolume(r), 0) / olderOccurrences.length;
+            sum + calculateVolume(r), 0) / olderOccurrences.length;
 
           const recentAvgVolume = recentOccurrences.reduce((sum, r) =>
-            sum + calculateRealVolume(r), 0) / recentOccurrences.length;
+            sum + calculateVolume(r), 0) / recentOccurrences.length;
 
           if (olderAvgVolume > 0) {
             const rawTrend = ((recentAvgVolume - olderAvgVolume) / olderAvgVolume) * 100;
@@ -65,8 +65,8 @@ export const calculateVolumeTrendByDay = (records: WorkoutRecord[]): { day: stri
           trend = 8; // Tendencia positiva leve por actividad
         } else {
           // Si hay distribución temporal, comparar primer vs último
-          const firstVolume = calculateRealVolume(sortedDayRecords[0]);
-          const lastVolume = calculateRealVolume(sortedDayRecords[2]);
+          const firstVolume = calculateVolume(sortedDayRecords[0]);
+          const lastVolume = calculateVolume(sortedDayRecords[2]);
 
           if (firstVolume > 0) {
             const rawTrend = ((lastVolume - firstVolume) / firstVolume) * 100;
@@ -91,8 +91,8 @@ export const calculateVolumeTrendByDay = (records: WorkoutRecord[]): { day: stri
         trend = 6; // Tendencia positiva leve por actividad
       } else {
         // Si están en días diferentes, comparar con mucha cautela
-        const firstVolume = calculateRealVolume(sortedDayRecords[0]);
-        const lastVolume = calculateRealVolume(sortedDayRecords[1]);
+        const firstVolume = calculateVolume(sortedDayRecords[0]);
+        const lastVolume = calculateVolume(sortedDayRecords[1]);
 
         if (firstVolume > 0) {
           const rawTrend = ((lastVolume - firstVolume) / firstVolume) * 100;
