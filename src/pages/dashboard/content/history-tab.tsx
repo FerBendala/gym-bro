@@ -1,12 +1,13 @@
 import type { WorkoutRecord } from '@/interfaces';
+import { Activity } from 'lucide-react';
 import React from 'react';
 import {
-  HistoryEmptyState,
   HistoryEvolutionChart,
   HistoryMetrics,
   HistoryWeeklyDetails
 } from '../components';
 import { useHistoryData } from '../hooks/use-history-data';
+import { EmptyState } from '../shared/empty-state';
 
 /**
  * Props para el componente HistoryTab
@@ -22,7 +23,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
   const { historyData, totalGrowthPercent } = useHistoryData(records);
 
   if (records.length === 0) {
-    return <HistoryEmptyState />;
+    return <EmptyState icon={Activity} title="No hay datos" description="No hay datos para mostrar" />;
   }
 
   return (

@@ -1,13 +1,14 @@
 import type { WorkoutRecord } from '@/interfaces';
+import { Activity } from 'lucide-react';
 import React from 'react';
 import {
-  AdvancedEmptyState,
   AdvancedMetrics,
   FatigueAnalysis,
   OptimizationSuggestions,
   PerformanceIndicators
 } from '../components';
 import { useAdvancedTab } from '../hooks/use-advanced-tab';
+import { EmptyState } from '../shared/empty-state';
 
 interface AdvancedTabProps {
   records: WorkoutRecord[];
@@ -17,7 +18,7 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
   const { analysis, enhancedPerformanceIndicators, categorizedSuggestions } = useAdvancedTab(records);
 
   if (records.length === 0) {
-    return <AdvancedEmptyState />;
+    return <EmptyState icon={Activity} title="No hay datos" description="No hay datos para mostrar" />;
   }
 
   return (

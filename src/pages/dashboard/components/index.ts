@@ -3,8 +3,6 @@
  * Exportaciones centralizadas de todos los componentes relacionados con el dashboard
  */
 
-export * from '@/components/dashboard-upper-lower-balance-content';
-export * from './advanced-empty-state';
 export * from './advanced-metrics';
 export * from './balance-by-group-content';
 export * from './balance-radar-chart';
@@ -16,13 +14,11 @@ export * from './dashboard-tab-navigation';
 export * from './data-quality-radial';
 export * from './exercises-category-filters';
 export * from './exercises-detailed-analysis';
-export * from './exercises-empty-state';
 export * from './exercises-metrics';
 export * from './exercises-unknown-warning';
 export * from './factors-chart';
 export * from './fatigue-analysis';
 export * from './general-content';
-export * from './history-empty-state';
 export * from './history-evolution-chart';
 export * from './history-metrics';
 export * from './history-weekly-details';

@@ -5,6 +5,7 @@ import type { HistoryPoint } from '@/interfaces';
 import { formatNumberToString } from '@/utils';
 import { ArrowDown, ArrowUp, Calendar, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
+import { MetricsGrid } from '../shared';
 
 interface HistoryWeeklyDetailsProps {
   historyData: HistoryPoint[];
@@ -98,7 +99,7 @@ export const HistoryWeeklyDetails: React.FC<HistoryWeeklyDetailsProps> = ({ hist
                 </div>
 
                 {/* Métricas principales en grid */}
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
+                <MetricsGrid>
                   <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
                     <div className="text-xs text-gray-400 mb-1">Entrenamientos</div>
                     <div className="text-sm sm:text-lg font-semibold text-white">
@@ -130,7 +131,7 @@ export const HistoryWeeklyDetails: React.FC<HistoryWeeklyDetailsProps> = ({ hist
                     </div>
                     <div className="text-xs text-gray-500">únicos</div>
                   </div>
-                </div>
+                </MetricsGrid>
 
                 {/* Información de cambio vs semana anterior */}
                 {point.weekNumber > 1 && (

@@ -1,13 +1,14 @@
 import type { WorkoutRecord } from '@/interfaces';
+import { Activity, AlertTriangle } from 'lucide-react';
 import React from 'react';
 import {
   ExercisesCategoryFilters,
   ExercisesDetailedAnalysis,
-  ExercisesEmptyState,
   ExercisesMetrics,
   ExercisesUnknownWarning
 } from '../components';
 import { useExercisesData } from '../hooks/use-exercises-data';
+import { EmptyState } from '../shared/empty-state';
 
 interface ExercisesTabProps {
   records: WorkoutRecord[];
@@ -25,14 +26,15 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
   } = useExercisesData(records);
 
   if (records.length === 0) {
-    return <ExercisesEmptyState />;
+    return <EmptyState icon={Activity} title="No hay datos" description="No hay datos para mostrar" />;
   }
 
   if (exerciseAnalysis.length === 0) {
     return (
-      <ExercisesEmptyState
-        hasUnknownRecords={true}
-        unknownRecordsCount={unknownRecords.length}
+      <EmptyState
+        icon={AlertTriangle}
+        title="No hay datos"
+        description="No hay datos para mostrar"
       />
     );
   }

@@ -4,6 +4,7 @@ import { BarChart3, Brain, PieChart, Scale } from 'lucide-react';
 import React from 'react';
 import { BalanceByGroupContent, GeneralContent, TrendsContent } from '.';
 import { useBalanceTab } from '../hooks/use-balance-tab';
+import { EmptyState } from '../shared';
 
 
 interface BalanceTabProps {
@@ -27,17 +28,11 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
 
   if (records.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="p-4 bg-gray-800 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-          <span className="text-2xl">⚖️</span>
-        </div>
-        <h3 className="text-lg font-medium text-gray-300 mb-2">
-          Sin datos para análisis de balance
-        </h3>
-        <p className="text-gray-500">
-          Registra algunos entrenamientos para ver tu balance muscular
-        </p>
-      </div>
+      <EmptyState
+        icon={() => <span className="text-2xl">⚖️</span>}
+        title="Sin datos para análisis de balance"
+        description="Registra algunos entrenamientos para ver tu balance muscular"
+      />
     );
   }
 
