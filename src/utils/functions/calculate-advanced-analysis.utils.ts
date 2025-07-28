@@ -1,17 +1,22 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { WorkoutRecord } from '@/interfaces';
 import { analyzeFatigue, analyzeIntensityMetrics, analyzeTrainingEfficiency, calculateTrainingDensity, comparePeriods, predictProgress } from './index';
+import type { TrainingDensity } from './calculate-training-density.utils';
+import type { TrainingEfficiency } from './analyze-training-efficiency.utils';
+import type { FatigueAnalysis } from './analyze-fatigue.utils';
+import type { PeriodComparison } from './compare-periods.utils';
+import type { ProgressPrediction } from './predict-progress.utils';
+import type { IntensityMetrics } from './analyze-intensity-metrics.utils';
 
 /**
  * Interfaz para análisis avanzado
  */
 export interface AdvancedAnalysis {
-  trainingDensity: any[];
-  trainingEfficiency: any;
-  fatigueAnalysis: any;
-  periodComparisons: any[];
-  progressPrediction: any;
-  intensityMetrics: any;
+  trainingDensity: TrainingDensity[];
+  trainingEfficiency: TrainingEfficiency;
+  fatigueAnalysis: FatigueAnalysis;
+  periodComparisons: PeriodComparison[];
+  progressPrediction: ProgressPrediction;
+  intensityMetrics: IntensityMetrics;
   peakPerformanceIndicators: Array<{
     type: 'excellent' | 'good' | 'warning' | 'critical';
     icon: string;
