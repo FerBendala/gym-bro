@@ -1,4 +1,4 @@
-import type { WorkoutRecord } from '../../interfaces';
+import type { WorkoutRecord } from '@/interfaces';
 import { calculateRegularityScore } from './calculate-regularity-score';
 import { getOptimalFrequency } from './get-optimal-frequency';
 

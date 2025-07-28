@@ -1,4 +1,4 @@
-import { THEME_FORM } from '@/constants/theme/index.constants';
+import { THEME_FORM } from '@/constants/theme';
 import { cn } from '@/utils';
 import React from 'react';
 import { MultiSelectLabelProps } from '../types';

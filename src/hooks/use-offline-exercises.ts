@@ -1,20 +1,18 @@
+import type { Exercise } from '@/interfaces';
 import { useOnlineStatus } from '@/stores/connection';
-import { useCallback } from 'react';
-import type { Exercise } from '../interfaces';
-import { STORES } from '../utils/data/indexeddb-config';
-import type {
+import {
   DatabaseResult,
   IndexedDBExercise,
-  QueryOptions
-} from '../utils/data/indexeddb-types';
-import {
+  QueryOptions,
+  STORES,
   addItem,
   deleteItem,
   getAllItems,
   getItemsByIndex,
+  queueSyncOperation,
   updateItem
-} from '../utils/data/indexeddb-utils';
-import { queueSyncOperation } from '../utils/data/sync-manager';
+} from '@/utils';
+import { useCallback } from 'react';
 
 // Función helper para generar IDs únicos
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
@@ -45,7 +43,7 @@ export const useOfflineExercises = (isInitialized: boolean) => {
       const result = await addItem(STORES.EXERCISES, newExercise);
 
       if (result.success) {
-        await queueSyncOperation('exercise', newExercise.id, 'CREATE', newExercise, 'HIGH');
+        await queueSyncOperation('exercise', newExercise.id, 'CREATE', newExercise as unknown as Record<string, unknown>, 'HIGH');
       }
 
       return result;
@@ -73,7 +71,7 @@ export const useOfflineExercises = (isInitialized: boolean) => {
       const result = await updateItem(STORES.EXERCISES, updatedExercise);
 
       if (result.success) {
-        await queueSyncOperation('exercise', exercise.id, 'UPDATE', updatedExercise, 'MEDIUM');
+        await queueSyncOperation('exercise', exercise.id, 'UPDATE', updatedExercise as unknown as Record<string, unknown>, 'MEDIUM');
       }
 
       return result;

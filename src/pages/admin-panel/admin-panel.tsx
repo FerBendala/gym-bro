@@ -1,5 +1,5 @@
 import { Page } from '@/components/layout';
-import { MODERN_THEME } from '@/constants/theme/index.constants';
+import { MODERN_THEME } from '@/constants/theme';
 import React from 'react';
 
 import { AdminPanelContent } from './components';

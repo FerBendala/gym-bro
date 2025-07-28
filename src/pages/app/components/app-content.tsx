@@ -1,12 +1,12 @@
 import { Layout, useModernNavigation } from '@/components/layout';
 import { Notification } from '@/components/notification';
 import type { DayOfWeek } from '@/interfaces';
+import { ModernCalendar } from '@/pages/calendar';
+import { DashboardPage } from '@/pages/dashboard';
+import { ModernHome } from '@/pages/home';
+import { ModernSettings } from '@/pages/settings';
+import { WorkoutHistory } from '@/pages/workout-history';
 import { useState } from 'react';
-import { ModernCalendar } from '../../calendar';
-import { DashboardPage } from '../../dashboard';
-import { ModernHome } from '../../home';
-import { ModernSettings } from '../../settings';
-import { WorkoutHistory } from '../../workout-history';
 import { useHistoryFilter, usePageInfo } from '../hooks';
 import { getCurrentDayInfo } from '../utils';
 import { AdminModal } from './admin-modal';
@@ -59,7 +59,6 @@ export const AppContent = () => {
       subtitle={pageInfo.subtitle}
       showBackButton={canGoBack}
       onBackClick={goBack}
-      navigationType="compact"
     >
       {renderContent()}
 

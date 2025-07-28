@@ -1,6 +1,6 @@
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
 import { Award } from 'lucide-react';
-import { Card, CardContent, CardHeader } from '../../card';
-import { InfoTooltip } from '../../tooltip';
 import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
 import type { StrengthProgressAnalysis } from '../types';
 

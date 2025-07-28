@@ -1,7 +1,7 @@
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
 import { Scale } from 'lucide-react';
 import React from 'react';
-import { Card, CardContent, CardHeader } from '../card';
-import { InfoTooltip } from '../tooltip';
 import { HorizontalBarChart, MetaCategoryCard } from './components';
 import { useUpperLowerBalance } from './hooks';
 import type { UpperLowerBalanceContentProps } from './types';

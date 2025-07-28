@@ -1,4 +1,4 @@
-import { ONE_RM_CONSTANTS } from "@/constants/prediction-utils.constants";
+import { ONE_RM_CONSTANTS } from "@/constants";
 
 /**
  * Calcula el 1RM usando la fórmula de Brzycki (alternativa más precisa para altas repeticiones)

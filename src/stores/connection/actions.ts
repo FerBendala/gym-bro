@@ -5,7 +5,7 @@ const handleConnectionChange = (isOnline: boolean, setOnlineStatus: (status: boo
   setOnlineStatus(isOnline);
 
   // Mostrar notificaciones de cambio de estado usando importación dinámica para evitar circular imports
-  import('../notification').then(({ useNotificationStore }) => {
+  import('@/stores/notification').then(({ useNotificationStore }) => {
     const { showNotification } = useNotificationStore.getState();
     if (isOnline) {
       showNotification('Conexión restaurada', 'success');
@@ -17,7 +17,7 @@ const handleConnectionChange = (isOnline: boolean, setOnlineStatus: (status: boo
 
 // Acciones de conexión
 export const createConnectionActions = (set: (fn: (state: ConnectionStore) => Partial<ConnectionStore>) => void, get: () => ConnectionStore) => ({
-  setOnlineStatus: (isOnline: boolean) => set({ isOnline }),
+  setOnlineStatus: (isOnline: boolean) => set((state) => ({ ...state, isOnline })),
 
   initializeConnection: () => {
     const { setOnlineStatus, isInitialized } = get();
@@ -38,11 +38,11 @@ export const createConnectionActions = (set: (fn: (state: ConnectionStore) => Pa
     window.addEventListener('online', updateOnlineStatus);
     window.addEventListener('offline', updateOnlineStatus);
 
-    set({ isInitialized: true });
+    set((state) => ({ ...state, isInitialized: true }));
   },
 
   cleanupConnection: () => {
     // Solo marcar como no inicializado, los event listeners se limpian automáticamente
-    set({ isInitialized: false });
+    set((state) => ({ ...state, isInitialized: false }));
   },
 }); 

@@ -1,0 +1,15 @@
+---
+description: >
+  Revisa siempre el código existente en las carpetas del proyecto antes de escribir nuevo. 
+  Nunca dupliques lógica ni contenido. Reutiliza y refactoriza el código ya implementado 
+  en `utils`, `services`, `hooks`, `components`, `pages`, `stores` e `interfaces`.
+globs:
+  - 'src/utils/**/*.{ts,tsx,js,jsx}'
+  - 'src/services/**/*.{ts,tsx,js,jsx}'
+  - 'src/hooks/**/*.{ts,tsx,js,jsx}'
+  - 'src/components/**/*.{ts,tsx,js,jsx}'
+  - 'src/pages/**/*.{ts,tsx,js,jsx}'
+  - 'src/stores/**/*.{ts,tsx,js,jsx}'
+  - 'src/interfaces/**/*.{ts,tsx,js,jsx}'
+alwaysApply: true
+---

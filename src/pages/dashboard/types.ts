@@ -1,3 +1,4 @@
+import { DASHBOARD_TABS } from "./constants";
 
 // Tipos para el balance por grupo
 export interface PersonalRecord {
@@ -55,4 +56,13 @@ export interface DashboardError {
   message: string;
   code?: string;
   details?: unknown;
-} 
+}
+
+export interface DashboardTabConfig {
+  id: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+}
+
+export type DashboardTab = (typeof DASHBOARD_TABS)[number]['id'];

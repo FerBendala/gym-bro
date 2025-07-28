@@ -1,9 +1,9 @@
+import { OfflineWarning } from '@/components/offline-warning';
+import { URLPreview } from '@/components/url-preview';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { AlertTriangle, Wifi, WifiOff } from 'lucide-react';
 import React from 'react';
-import { OfflineWarning } from '../offline-warning';
-import { URLPreview } from '../url-preview';
 import { AdminContent, AdminTabs } from './components';
 import { useAdminDataLoader } from './hooks';
 

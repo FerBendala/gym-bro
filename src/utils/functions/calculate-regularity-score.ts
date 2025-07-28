@@ -1,5 +1,5 @@
+import type { WorkoutRecord } from '@/interfaces';
 import { getDay } from 'date-fns';
-import type { WorkoutRecord } from '../../interfaces';
 import { getCurrentDateFromRecords } from './get-current-date-from-records';
 
 /**

@@ -1,5 +1,5 @@
+import { LoadingSpinner } from '@/components/loading-spinner';
 import React from 'react';
-import { LoadingSpinner } from '../../loading-spinner';
 
 /**
  * Estado de carga del ExerciseList usando el LoadingSpinner genérico

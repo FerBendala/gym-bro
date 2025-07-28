@@ -1,4 +1,4 @@
-import { KNOWN_EXERCISE_DISTRIBUTIONS } from '../../constants/exercise.constants';
+import { KNOWN_EXERCISE_DISTRIBUTIONS } from '@/constants';
 
 /**
  * Patrones de ejercicios para detectar distribuciones inteligentes por palabras clave

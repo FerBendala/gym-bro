@@ -1,4 +1,4 @@
-import { THEME_URL_PREVIEW } from '@/constants/theme/index.constants';
+import { THEME_URL_PREVIEW } from '@/constants/theme';
 import { cn } from '@/utils';
 import { Globe } from 'lucide-react';
 import React from 'react';

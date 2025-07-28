@@ -1,12 +1,12 @@
 import { deleteExerciseAssignment } from '@/api/services';
+import { Button } from '@/components/button';
+import { URLPreview } from '@/components/url-preview';
 import type { ExerciseAssignment } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
 import { Trash2 } from 'lucide-react';
 import React from 'react';
-import { Button } from '../../button';
-import { URLPreview } from '../../url-preview';
 
 interface AssignmentItemProps {
   assignment: ExerciseAssignment;

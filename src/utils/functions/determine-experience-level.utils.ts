@@ -1,4 +1,4 @@
-import { EXPERIENCE_CONSTANTS } from '@/constants/prediction-utils.constants';
+import { EXPERIENCE_CONSTANTS } from '@/constants';
 import type { WorkoutRecord } from '@/interfaces';
 import { getValidSortedRecords } from './get-valid-sorted-records.utils';
 

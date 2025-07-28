@@ -1,7 +1,7 @@
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
 import { Calendar } from 'lucide-react';
 import React from 'react';
-import { Card, CardContent, CardHeader } from '../card';
-import { InfoTooltip } from '../tooltip';
 import { TimelineItem, TimelineStats } from './components';
 import { useTimelineData } from './hooks';
 import type { ExtendedTimelinePoint } from './hooks/use-timeline-data';

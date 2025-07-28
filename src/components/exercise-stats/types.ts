@@ -1,5 +1,5 @@
-import type { WorkoutRecord } from '../../interfaces';
-import type { StatCardProps } from '../stat-card';
+import type { StatCardProps } from '@/components/stat-card';
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Props principales del ExerciseStats

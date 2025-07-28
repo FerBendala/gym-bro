@@ -1,0 +1,8 @@
+---
+description: >
+  Los hooks deben contener solo lógica, sin dependencias visuales ni efectos colaterales innecesarios.
+  No uses lógica de presentación dentro de hooks personalizados.
+globs:
+  - 'src/hooks/**/*.{ts,tsx}'
+alwaysApply: true
+---

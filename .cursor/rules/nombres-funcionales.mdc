@@ -1,0 +1,8 @@
+---
+description: >
+  Asegúrate de que el nombre del archivo refleje el componente, hook o función principal que contiene.
+  Renombra si el nombre es genérico, confuso o no representa su propósito.
+globs:
+  - 'src/**/*.{ts,tsx,js,jsx}'
+alwaysApply: false
+---

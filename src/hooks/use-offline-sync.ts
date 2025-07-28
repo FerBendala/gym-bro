@@ -1,12 +1,6 @@
 import { useOnlineStatus } from '@/stores/connection';
+import { addSyncEventListener, initializeDB, removeSyncEventListener, startSync, type SyncEvent } from '@/utils';
 import { useEffect, useState } from 'react';
-import type { SyncEvent } from '../utils/data/indexeddb-types';
-import { initializeDB } from '../utils/data/indexeddb-utils';
-import {
-  addSyncEventListener,
-  removeSyncEventListener,
-  startSync
-} from '../utils/data/sync-manager';
 
 /**
  * Hook especializado para manejar la sincronización offline

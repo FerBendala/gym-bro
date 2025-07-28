@@ -1,5 +1,5 @@
-import { THEME_CHART } from '@/constants/theme/index.constants';
-import { generateGridPoints, getChartY } from '@/utils';
+import { THEME_CHART } from '@/constants/theme';
+import { generateGridPoints } from '@/utils';
 import React from 'react';
 import type { ChartGridProps } from '../types';
 
@@ -12,7 +12,7 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
   weightRange
 }) => {
   const { width, height, padding } = dimensions;
-  const gridPoints = generateGridPoints(weightRange);
+  const gridPoints = generateGridPoints(weightRange, dimensions);
 
   return (
     <>
@@ -53,25 +53,24 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
       />
 
       {/* Etiquetas del eje Y (peso) */}
-      {gridPoints.map((weight, index) => {
-        const y = getChartY(weight, weightRange, dimensions);
+      {gridPoints.map((point, index) => {
         return (
           <g key={index}>
             <line
               x1={padding - 5}
-              y1={y}
+              y1={point.y}
               x2={padding}
-              y2={y}
+              y2={point.y}
               stroke={THEME_CHART.axes.color}
             />
             <text
               x={padding - 10}
-              y={y + 4}
+              y={point.y + 4}
               textAnchor="end"
               fontSize={THEME_CHART.text.size}
               fill={THEME_CHART.text.color}
             >
-              {weight.toFixed(1)}
+              {point.value.toFixed(1)}
             </text>
           </g>
         );

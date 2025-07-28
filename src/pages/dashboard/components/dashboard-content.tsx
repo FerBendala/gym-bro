@@ -1,6 +1,6 @@
 import type { WorkoutRecord } from '@/interfaces';
 import React from 'react';
-import { AdvancedTab, ExercisesTab, HistoryTab, PredictionsTab } from '../dashboard-tabs';
+import { AdvancedTab, ExercisesTab, HistoryTab, PredictionsTab } from '../content';
 import type { DashboardTab } from '../types';
 import { BalanceTab } from './balance-tab';
 import { DashboardEmptyState } from './dashboard-empty-state';

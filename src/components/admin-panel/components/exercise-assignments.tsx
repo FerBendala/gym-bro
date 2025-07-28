@@ -1,10 +1,10 @@
+import { Button } from '@/components/button';
+import { Card, CardContent, CardHeader } from '@/components/card';
 import { DAYS } from '@/constants/days.constants';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import React from 'react';
-import { Button } from '../../button';
-import { Card, CardContent, CardHeader } from '../../card';
-import { formatDayName } from '../utils/admin-utils';
+import { formatDayName } from '../utils';
 import { AssignmentForm } from './assignment-form';
 import { AssignmentItem } from './assignment-item';
 

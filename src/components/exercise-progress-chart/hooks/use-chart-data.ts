@@ -1,6 +1,6 @@
-import { THEME_CHART } from '@/constants/theme/index.constants';
+import { THEME_CHART } from '@/constants/theme';
 import type { WorkoutRecord } from '@/interfaces';
-import { calculateDataRange, groupRecordsByProperty, sortRecordsByDate } from '@/utils';
+import { calculateDataRange } from '@/utils';
 import { useMemo } from 'react';
 import type { ProcessedChartData, UseChartDataReturn } from '../types';
 
@@ -15,14 +15,20 @@ export const useChartData = (records: WorkoutRecord[]): UseChartDataReturn => {
     }
 
     // Agrupar por ejercicio
-    const exerciseData = groupRecordsByProperty(
-      records,
-      (record) => record.exercise?.name || 'Ejercicio desconocido'
-    );
+    const exerciseData: Record<string, WorkoutRecord[]> = {};
+    records.forEach(record => {
+      const exerciseName = record.exercise?.name || 'Ejercicio desconocido';
+      if (!exerciseData[exerciseName]) {
+        exerciseData[exerciseName] = [];
+      }
+      exerciseData[exerciseName].push(record);
+    });
 
     // Ordenar cada ejercicio por fecha
     Object.keys(exerciseData).forEach(exercise => {
-      exerciseData[exercise] = sortRecordsByDate(exerciseData[exercise]);
+      exerciseData[exercise] = exerciseData[exercise].sort((a, b) =>
+        new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
     });
 
     // Calcular rangos de datos usando 1RM estimado para mostrar progreso real

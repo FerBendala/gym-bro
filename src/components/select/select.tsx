@@ -1,4 +1,4 @@
-import { THEME_SELECT } from '@/constants/theme/index.constants';
+import { THEME_SELECT } from '@/constants/theme';
 import { forwardRef } from 'react';
 import { SelectFeedback, SelectGroups, SelectLabel, SelectOptions } from './components';
 import { useSelect } from './hooks';

@@ -1,4 +1,4 @@
-import type { WorkoutRecord } from '../../interfaces';
+import type { WorkoutRecord } from '@/interfaces';
 import { calculateDayMetrics } from './day-metrics';
 import { findBestPerformancePeriod } from './performance-periods';
 import { calculateTemporalEvolution } from './temporal-evolution';

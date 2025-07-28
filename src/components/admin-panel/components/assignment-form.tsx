@@ -1,4 +1,6 @@
 import { createExerciseAssignment } from '@/api/services';
+import { Button } from '@/components/button';
+import { Select } from '@/components/select';
 import type { DayOfWeek } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
@@ -7,10 +9,8 @@ import { groupExercisesByCategory } from '@/utils';
 import { Plus } from 'lucide-react';
 import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import { Button } from '../../button';
-import { Select } from '../../select';
 import type { AssignmentFormData } from '../types';
-import { formatDayName } from '../utils/admin-utils';
+import { formatDayName } from '../utils';
 
 interface AssignmentFormProps {
   selectedDay: DayOfWeek;

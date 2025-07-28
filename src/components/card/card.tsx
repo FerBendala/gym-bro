@@ -1,4 +1,4 @@
-import { THEME_CONTAINERS, THEME_RESPONSIVE } from '@/constants/theme/index.constants';
+import { THEME_CONTAINERS, THEME_RESPONSIVE } from '@/constants/theme';
 import type { UISize, UIVariant } from '@/interfaces';
 import { cn } from '@/utils';
 import React from 'react';
@@ -34,7 +34,7 @@ export const Card: React.FC<CardProps> = ({
 
   const cardClasses = cn(
     THEME_CONTAINERS.card.base,
-    THEME_CONTAINERS.card.variants[variant],
+    THEME_CONTAINERS.card.variants[variant as keyof typeof THEME_CONTAINERS.card.variants],
     THEME_RESPONSIVE.card.container,
     THEME_RESPONSIVE.card.padding,
     (onClick || isClickable) && [

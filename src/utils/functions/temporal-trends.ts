@@ -1,6 +1,6 @@
+import type { WorkoutRecord } from '@/interfaces';
 import { endOfWeek, format, getDay, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
-import type { WorkoutRecord } from '../../interfaces';
 import type { TemporalTrend } from './trends-interfaces';
 
 /**

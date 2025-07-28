@@ -1,6 +1,6 @@
+import { InfoTooltip } from '@/components/tooltip';
 import { TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
-import { InfoTooltip } from '../../tooltip';
 import type { ChartStatisticsProps } from '../types';
 
 /**

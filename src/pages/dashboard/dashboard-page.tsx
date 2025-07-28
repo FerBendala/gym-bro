@@ -1,7 +1,7 @@
+import { Page } from '@/components/layout';
+import { LoadingSpinner } from '@/components/loading-spinner';
+import { OfflineWarning } from '@/components/offline-warning';
 import React, { useState } from 'react';
-import { Page } from '../../components/layout';
-import { LoadingSpinner } from '../../components/loading-spinner';
-import { OfflineWarning } from '../../components/offline-warning';
 import {
   BalanceTab,
   DashboardEmptyState,
@@ -15,7 +15,7 @@ import {
   PredictionsTab
 } from './content';
 import { useDashboardData } from './hooks';
-import type { DashboardTab } from './types';
+import { DashboardTab } from './types';
 
 /**
  * Dashboard como página completa sin modal
@@ -76,7 +76,6 @@ export const DashboardPage: React.FC = () => {
         <DashboardTabNavigation
           activeTab={activeTab}
           onTabChange={setActiveTab}
-          timeFilterLabel="Últimos 30 días"
         />
 
         {/* Contenido principal */}

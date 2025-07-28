@@ -1,4 +1,4 @@
-import type { ExerciseAssignment } from '../../interfaces';
+import type { ExerciseAssignment } from '@/interfaces';
 import { normalizeByWeekday } from './normalize-by-weekday';
 
 /**

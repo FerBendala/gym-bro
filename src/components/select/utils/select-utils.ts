@@ -1,4 +1,4 @@
-import { THEME_FORM, THEME_SELECT, ThemeSelectSize, ThemeSelectValidation, ThemeSelectVariant } from '@/constants/theme/index.constants';
+import { THEME_FORM, THEME_SELECT, ThemeSelectSize, ThemeSelectValidation, ThemeSelectVariant } from '@/constants/theme';
 import { cn } from '@/utils';
 
 export const buildSelectClasses = (

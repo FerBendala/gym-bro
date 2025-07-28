@@ -1,4 +1,4 @@
-import type { ExerciseAssignment, WorkoutRecord } from '../../interfaces';
+import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
 import { calculateCategoryEffortDistribution } from './exercise-patterns';
 import { normalizeByWeekday } from './normalize-by-weekday';
 

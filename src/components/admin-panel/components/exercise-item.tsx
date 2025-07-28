@@ -1,12 +1,12 @@
 import { deleteExercise } from '@/api/services';
+import { Button } from '@/components/button';
+import { URLPreview } from '@/components/url-preview';
 import type { Exercise } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
 import { Edit2, Trash2 } from 'lucide-react';
 import React from 'react';
-import { Button } from '../../button';
-import { URLPreview } from '../../url-preview';
 
 interface ExerciseItemProps {
   exercise: Exercise;

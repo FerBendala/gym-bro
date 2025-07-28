@@ -1,4 +1,4 @@
-import type { Exercise, WorkoutRecord } from '../../interfaces';
+import type { Exercise, WorkoutRecord } from '@/interfaces';
 import type { SyncOperation, SyncPriority, SyncStatus } from './indexeddb-config';
 
 /**

@@ -1,5 +1,5 @@
-import { IDEAL_VOLUME_DISTRIBUTION } from '../../constants/exercise.constants';
-import type { WorkoutRecord } from '../../interfaces';
+import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
+import type { WorkoutRecord } from '@/interfaces';
 import type { CategoryMetrics } from './category-analysis-types';
 import { ANTAGONIST_PAIRS } from './category-analysis-types';
 import { STRENGTH_STANDARDS } from './strength-standards';

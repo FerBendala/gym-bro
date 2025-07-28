@@ -1,10 +1,10 @@
+import { Card, CardContent } from '@/components/card';
+import { OfflineWarning } from '@/components/offline-warning';
+import { URLPreview } from '@/components/url-preview';
+import type { WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
+import { getCategoryColor } from '@/utils';
 import { WifiOff } from 'lucide-react';
 import React from 'react';
-import type { WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '../../interfaces';
-import { getCategoryColor } from '../../utils';
-import { Card, CardContent } from '../card';
-import { OfflineWarning } from '../offline-warning';
-import { URLPreview } from '../url-preview';
 import { ExerciseCardHeader, ExerciseModal } from './components';
 import { LastWorkoutSummary } from './components/last-workout-summary';
 import { useExerciseCard } from './hooks';

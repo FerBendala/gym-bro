@@ -1,9 +1,9 @@
+import { Card, CardContent, CardHeader } from '@/components/card';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import React, { useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader } from '../../card';
 import type { ExerciseCategory } from '../types';
-import { filterExercisesByCategory, getCategoriesWithCount } from '../utils/admin-utils';
+import { filterExercisesByCategory, getCategoriesWithCount } from '../utils';
 import { ExerciseCategoryTabs } from './exercise-category-tabs';
 import { ExerciseItem } from './exercise-item';
 

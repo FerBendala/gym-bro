@@ -1,5 +1,5 @@
-import { EXERCISE_CATEGORIES, IDEAL_VOLUME_DISTRIBUTION } from '../../constants/exercise.constants';
-import type { ExerciseAssignment, WorkoutRecord } from '../../interfaces';
+import { EXERCISE_CATEGORIES, IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
+import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
 import type { MuscleBalance } from './category-analysis-types';
 import {
   analyzeBalanceHistory,
@@ -20,9 +20,6 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[], allAssignments?: 
 
   const categoryMetrics = calculateCategoryMetrics(records, allAssignments);
   const balance: MuscleBalance[] = [];
-
-  // Calcular total de volumen para porcentajes
-  const totalVolume = categoryMetrics.reduce((sum, metric) => sum + metric.totalVolume, 0);
 
   // Analizar cada categoría
   categoryMetrics.forEach(metric => {

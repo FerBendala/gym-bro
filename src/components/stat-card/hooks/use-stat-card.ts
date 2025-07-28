@@ -1,4 +1,4 @@
-import type { ThemeStatCardSize, ThemeStatCardVariant } from '@/constants/theme/index.constants';
+import type { ThemeStatCardSize, ThemeStatCardVariant } from '@/constants/theme';
 import { useMemo } from 'react';
 import { getStatCardStyles } from '../utils';
 

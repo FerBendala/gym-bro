@@ -1,4 +1,4 @@
-import type { URLPreviewData } from '../../utils';
+import type { URLPreviewData } from '@/utils';
 
 /**
  * Interfaces específicas para URLPreview

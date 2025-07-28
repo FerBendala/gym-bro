@@ -1,5 +1,5 @@
+import type { ExerciseAssignment } from '@/interfaces';
 import { getDay } from 'date-fns';
-import type { ExerciseAssignment } from '../../interfaces';
 
 /**
  * Normaliza métricas semanales basándose en el día actual de la semana

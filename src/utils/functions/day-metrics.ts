@@ -1,5 +1,5 @@
+import type { WorkoutRecord } from '@/interfaces';
 import { getDay, getHours } from 'date-fns';
-import type { WorkoutRecord } from '../../interfaces';
 import type { DayMetrics } from './trends-interfaces';
 import { calculateRealVolume } from './volume-calculations';
 

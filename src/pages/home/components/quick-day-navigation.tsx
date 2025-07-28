@@ -1,6 +1,6 @@
 import { Section } from '@/components/layout';
 import { DAYS } from '@/constants/days.constants';
-import { MODERN_THEME } from '@/constants/theme/index.constants';
+import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils';
 import React from 'react';
 import type { QuickDayNavigationProps } from '../types';
