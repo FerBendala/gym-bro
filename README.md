@@ -182,7 +182,7 @@ interface ExerciseAssignment {
 
 ```bash
 git clone <repository>
-cd follow-gym
+cd gymbro
 npm install
 npm run dev
 ```
@@ -216,7 +216,7 @@ component-name/
 
 #### Utilidades Genéricas
 
-- **Genérico**: `src/utils/functions/` para funciones reutilizables
+- **Genérico**: `src/utils/` para funciones reutilizables
 - **Específico**: `component/hooks/` para lógica de componente
 - **Constantes**: `src/constants/` para configuración global
 

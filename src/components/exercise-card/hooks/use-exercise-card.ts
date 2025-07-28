@@ -1,7 +1,11 @@
+import type { Exercise, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
-import type { Exercise, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '../../../interfaces';
+
+import { useCallback } from 'react';
+import { EXERCISE_CARD_CONSTANTS } from '../constants';
 import type { ExerciseCardProps, UseExerciseCardReturn } from '../types';
+import { exerciseCardUtils } from '../utils';
 
 /**
  * Hook específico para manejar el estado y lógica del ExerciseCard
@@ -23,59 +27,30 @@ export const useExerciseCard = (
   // Formulario para modo simple
   const formMethods = useForm<WorkoutFormData>({
     mode: 'onChange',
-    defaultValues: {
-      weight: 0,
-      reps: 1,
-      sets: 1,
-      date: new Date() // Fecha por defecto: hoy
-    }
+    defaultValues: EXERCISE_CARD_CONSTANTS.DEFAULT_FORM_VALUES
   });
 
   // Formulario para modo avanzado
   const advancedFormMethods = useForm<WorkoutFormDataAdvanced>({
     mode: 'onChange',
-    defaultValues: {
-      sets: [],
-      date: new Date() // Fecha por defecto: hoy
-    }
+    defaultValues: EXERCISE_CARD_CONSTANTS.DEFAULT_ADVANCED_FORM_VALUES
   });
 
-  // Función para obtener el último registro y todas las series del último día
-  const fetchLastRecord = () => {
+  // Función para obtener el último registro usando utilidades
+  const fetchLastRecord = useCallback(() => {
     if (!exerciseId || !workoutRecords) return;
     setLoadingLast(true);
 
-    // Filtrar en memoria por exerciseId y ordenar por fecha descendente
-    const filtered = workoutRecords
-      .filter(r => r.exerciseId === exerciseId)
-      .sort((a, b) => b.date.getTime() - a.date.getTime());
+    const { lastRecord: record, lastWorkoutSeries: series } = exerciseCardUtils.getLastWorkoutData(
+      exerciseId,
+      workoutRecords,
+      exerciseObj
+    );
 
-    if (filtered.length === 0) {
-      setLastRecord(null);
-      setLastWorkoutSeries([]);
-      setLoadingLast(false);
-      return;
-    }
-
-    // Obtener el último registro para compatibilidad
-    let lastRecordData: WorkoutRecord | null = filtered[0];
-    if (lastRecordData && exerciseObj) {
-      lastRecordData = { ...lastRecordData, exercise: exerciseObj };
-    }
-    setLastRecord(lastRecordData);
-
-    // Obtener todas las series del último día de entrenamiento
-    const lastWorkoutDate = filtered[0].date;
-    const lastWorkoutDateString = lastWorkoutDate.toDateString();
-
-    const lastDaySeries = filtered
-      .filter(r => r.date.toDateString() === lastWorkoutDateString)
-      .map(r => exerciseObj ? { ...r, exercise: exerciseObj } : r)
-      .sort((a, b) => a.date.getTime() - b.date.getTime()); // Ordenar por hora para mantener el orden de las series
-
-    setLastWorkoutSeries(lastDaySeries);
+    setLastRecord(record);
+    setLastWorkoutSeries(series);
     setLoadingLast(false);
-  };
+  }, [exerciseId, workoutRecords, exerciseObj]);
 
   const toggleModal = () => {
     setShowModal(!showModal);
@@ -100,7 +75,6 @@ export const useExerciseCard = (
     try {
       await onRecord(assignmentId, data);
       resetModal();
-      // Volver a consultar el último registro tras guardar
       fetchLastRecord();
     } catch (error) {
       console.error('Error recording workout:', error);
@@ -113,8 +87,7 @@ export const useExerciseCard = (
   // Obtener el último registro del ejercicio al abrir el modal o cuando cambian los registros
   useEffect(() => {
     fetchLastRecord();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exerciseId, showModal, workoutRecords]);
+  }, [exerciseId, showModal, workoutRecords, fetchLastRecord]);
 
   return {
     showModal,

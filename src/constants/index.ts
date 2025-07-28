@@ -1,6 +1,6 @@
-export * from './days';
-export * from './exercise-categories';
-export * from './modern-theme';
-export * from './muscle-groups';
-export * from './theme';
+export * from './api.constants';
+export * from './days.constants';
+export * from './exercise.constants';
+export * from './muscle-groups.constants';
+export * from './theme/index.constants';
 

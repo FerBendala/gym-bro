@@ -1,6 +1,6 @@
+import { THEME_WORKOUTS } from '@/constants/theme/index.constants';
 import { Dumbbell } from 'lucide-react';
 import React from 'react';
-import { THEME_WORKOUTS } from '../../../constants/theme';
 
 /**
  * Estado vacío para cuando no hay entrenamientos recientes

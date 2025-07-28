@@ -1,0 +1,1 @@
+export { ModernSettings } from './settings';

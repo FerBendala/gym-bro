@@ -1,6 +1,6 @@
+import { THEME_SPACING } from '@/constants';
 import { clsx } from 'clsx';
 import React from 'react';
-import { THEME_SPACING } from '../../../constants';
 import type { CardContentProps } from '../types';
 
 export const CardContent: React.FC<CardContentProps> = ({

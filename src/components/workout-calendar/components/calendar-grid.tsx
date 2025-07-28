@@ -1,6 +1,6 @@
+import { THEME_CALENDAR } from '@/constants/theme/index.constants';
+import { cn } from '@/utils';
 import React from 'react';
-import { THEME_CALENDAR } from '../../../constants/theme';
-import { cn } from '../../../utils/functions/style-utils';
 import type { CalendarGridProps } from '../types';
 
 export const CalendarGrid: React.FC<CalendarGridProps> = ({

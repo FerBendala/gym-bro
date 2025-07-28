@@ -1,6 +1,6 @@
+import { getCategoryColor, getCategoryIcon } from '@/utils';
 import { ClipboardList, Plus, WifiOff } from 'lucide-react';
 import React from 'react';
-import { getCategoryColor, getCategoryIcon } from '../../../constants/exercise-categories';
 import type { ExerciseCardHeaderProps } from '../types';
 
 /**
@@ -11,7 +11,6 @@ export const ExerciseCardHeader: React.FC<ExerciseCardHeaderProps> = ({
   assignment,
   disabled,
   onToggleModal,
-  onShowPreview,
   onGoToHistory
 }) => {
   // Obtener la primera categoría para determinar el color y el icono

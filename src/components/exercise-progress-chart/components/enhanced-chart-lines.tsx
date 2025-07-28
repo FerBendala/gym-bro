@@ -1,6 +1,15 @@
 import React, { useState } from 'react';
-import { getChartX, getChartY } from '../../../utils/functions';
 import type { ChartProgressLinesProps } from '../types';
+import { generateAreaPath, generateProgressPath, getChartCoordinates } from '../utils';
+
+interface TooltipData {
+  exercise: string;
+  weight: number;
+  estimated1RM: number;
+  date: Date;
+  reps: number;
+  sets: number;
+}
 
 /**
  * Líneas de progreso mejoradas con efectos visuales y interactividad
@@ -13,7 +22,7 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
   colors
 }) => {
   const [hoveredExercise, setHoveredExercise] = useState<string | null>(null);
-  const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; data: any } | null>(null);
+  const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; data: TooltipData } | null>(null);
 
   return (
     <>
@@ -50,26 +59,12 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
 
       {/* Área de fondo para cada línea */}
       {Object.entries(exerciseData).map(([exerciseName, exerciseRecords], exerciseIndex) => {
-        const color = colors[exerciseIndex % colors.length];
-        const isHovered = hoveredExercise === exerciseName;
         const isOtherHovered = hoveredExercise && hoveredExercise !== exerciseName;
 
         if (exerciseRecords.length < 2) return null;
 
         // Crear el área bajo la línea usando 1RM estimado
-        const areaPath = exerciseRecords.map((record, index) => {
-          const estimated1RM = record.weight * (1 + Math.min(record.reps, 20) / 30);
-          const x = getChartX(record.date.getTime(), dateRange, dimensions);
-          const y = getChartY(estimated1RM, weightRange, dimensions);
-
-          if (index === 0) {
-            const bottomY = dimensions.height - dimensions.padding;
-            return `M ${x} ${bottomY} L ${x} ${y}`;
-          }
-          return `L ${x} ${y}`;
-        }).join(' ');
-
-        const areaPathClosed = areaPath + ` L ${getChartX(exerciseRecords[exerciseRecords.length - 1].date.getTime(), dateRange, dimensions)} ${dimensions.height - dimensions.padding} Z`;
+        const areaPathClosed = generateAreaPath(exerciseRecords, dateRange, weightRange, dimensions);
 
         return (
           <path
@@ -91,9 +86,7 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
         if (exerciseRecords.length < 2) {
           // Punto único con efecto glow
           const record = exerciseRecords[0];
-          const estimated1RM = record.weight * (1 + Math.min(record.reps, 20) / 30);
-          const x = getChartX(record.date.getTime(), dateRange, dimensions);
-          const y = getChartY(estimated1RM, weightRange, dimensions);
+          const { x, y } = getChartCoordinates(record, dateRange, weightRange, dimensions);
 
           return (
             <g key={exerciseName}>
@@ -113,12 +106,7 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
         }
 
         // Crear la línea de progreso usando 1RM estimado
-        const pathData = exerciseRecords.map((record, index) => {
-          const estimated1RM = record.weight * (1 + Math.min(record.reps, 20) / 30);
-          const x = getChartX(record.date.getTime(), dateRange, dimensions);
-          const y = getChartY(estimated1RM, weightRange, dimensions);
-          return `${index === 0 ? 'M' : 'L'} ${x} ${y}`;
-        }).join(' ');
+        const pathData = generateProgressPath(exerciseRecords, dateRange, weightRange, dimensions);
 
         return (
           <g key={exerciseName}>
@@ -149,9 +137,7 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
 
             {/* Puntos */}
             {exerciseRecords.map((record, pointIndex) => {
-              const estimated1RM = record.weight * (1 + Math.min(record.reps, 20) / 30);
-              const x = getChartX(record.date.getTime(), dateRange, dimensions);
-              const y = getChartY(estimated1RM, weightRange, dimensions);
+              const { x, y, estimated1RM } = getChartCoordinates(record, dateRange, weightRange, dimensions);
 
               return (
                 <g key={pointIndex}>

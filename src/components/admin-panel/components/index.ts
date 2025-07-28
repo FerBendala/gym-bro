@@ -1,3 +1,10 @@
+export { AdminContent } from './admin-content';
+export { AdminHeader } from './admin-header';
+export { AdminTabs } from './admin-tabs';
+export { AssignmentForm } from './assignment-form';
+export { AssignmentItem } from './assignment-item';
 export { ExerciseAssignments } from './exercise-assignments';
+export { ExerciseCategoryTabs } from './exercise-category-tabs';
 export { ExerciseForm } from './exercise-form';
+export { ExerciseItem } from './exercise-item';
 export { ExerciseList } from './exercise-list';

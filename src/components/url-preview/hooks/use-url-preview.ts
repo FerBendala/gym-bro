@@ -1,5 +1,5 @@
+import { analyzeURL, type URLPreviewData } from '@/utils';
 import { useEffect, useState } from 'react';
-import { analyzeURL, type URLPreviewData } from '../../../utils/functions/url-preview-utils';
 
 /**
  * Hook para manejar la lógica de URL preview

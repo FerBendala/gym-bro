@@ -1,5 +1,5 @@
+import { THEME_CALENDAR } from '@/constants/theme/index.constants';
 import React from 'react';
-import { THEME_CALENDAR } from '../../../constants/theme';
 import type { CalendarStatsProps } from '../types';
 
 export const CalendarStats: React.FC<CalendarStatsProps> = ({ stats }) => {

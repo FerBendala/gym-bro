@@ -1,5 +1,5 @@
 import type { WorkoutRecord } from '../../interfaces';
-import type { ChartDimensions, DataRange } from '../../utils/functions';
+import type { ChartDimensions, DataRange } from '../../utils';
 
 /**
  * Props principales del ExerciseProgressChart

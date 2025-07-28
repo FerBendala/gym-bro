@@ -1,89 +1,88 @@
 /**
- * Utilidades genéricas para gráficos y visualizaciones
- * Reutilizable en ExerciseProgressChart, Dashboard charts, etc.
+ * Utilidades para gráficos y visualizaciones
  */
 
+/**
+ * Dimensiones del gráfico
+ */
 export interface ChartDimensions {
   width: number;
   height: number;
   padding: number;
 }
 
+/**
+ * Rango de datos para un eje
+ */
 export interface DataRange {
   min: number;
   max: number;
-  range: number;
 }
 
 /**
- * Calcula el rango de datos para un conjunto de valores
+ * Calcula la coordenada X en el gráfico
+ */
+export const getChartX = (value: number, range: DataRange, dimensions: ChartDimensions): number => {
+  const { min, max } = range;
+  const { width, padding } = dimensions;
+  const availableWidth = width - 2 * padding;
+
+  if (max === min) return padding;
+
+  const normalizedValue = (value - min) / (max - min);
+  return padding + (normalizedValue * availableWidth);
+};
+
+/**
+ * Calcula la coordenada Y en el gráfico
+ */
+export const getChartY = (value: number, range: DataRange, dimensions: ChartDimensions): number => {
+  const { min, max } = range;
+  const { height, padding } = dimensions;
+  const availableHeight = height - 2 * padding;
+
+  if (max === min) return height - padding;
+
+  const normalizedValue = (value - min) / (max - min);
+  return height - padding - (normalizedValue * availableHeight);
+};
+
+/**
+ * Calcula el rango de datos para un array de valores
  */
 export const calculateDataRange = (values: number[]): DataRange => {
   if (values.length === 0) {
-    return { min: 0, max: 1, range: 1 };
+    return { min: 0, max: 1 };
   }
 
   const min = Math.min(...values);
   const max = Math.max(...values);
-  const range = max - min || 1; // Evitar división por 0
 
-  return { min, max, range };
+  // Añadir un pequeño margen para evitar que los puntos toquen los bordes
+  const margin = (max - min) * 0.05;
+
+  return {
+    min: Math.max(0, min - margin),
+    max: max + margin
+  };
 };
 
 /**
- * Convierte un valor de datos a coordenada X del gráfico
+ * Genera puntos para el grid del gráfico
  */
-export const getChartX = (
-  value: number,
-  dataRange: DataRange,
-  dimensions: ChartDimensions
-): number => {
-  const { padding, width } = dimensions;
-  return padding + ((value - dataRange.min) / dataRange.range) * (width - 2 * padding);
-};
+export const generateGridPoints = (
+  range: DataRange,
+  dimensions: ChartDimensions,
+  divisions: number = 5
+): Array<{ x: number; y: number; value: number }> => {
+  const points = [];
+  const step = (range.max - range.min) / divisions;
 
-/**
- * Convierte un valor de datos a coordenada Y del gráfico (invertida para SVG)
- */
-export const getChartY = (
-  value: number,
-  dataRange: DataRange,
-  dimensions: ChartDimensions
-): number => {
-  const { padding, height } = dimensions;
-  return height - padding - ((value - dataRange.min) / dataRange.range) * (height - 2 * padding);
-};
+  for (let i = 0; i <= divisions; i++) {
+    const value = range.min + (step * i);
+    const y = getChartY(value, range, dimensions);
+    points.push({ x: dimensions.padding, y, value });
+  }
 
-/**
- * Genera puntos de cuadrícula para el eje Y
- */
-export const generateGridPoints = (dataRange: DataRange, count: number = 5): number[] => {
-  return Array.from({ length: count }, (_, index) => {
-    const ratio = index / (count - 1);
-    return dataRange.min + ratio * dataRange.range;
-  });
-};
-
-/**
- * Agrupa registros por una propiedad específica
- */
-export const groupRecordsByProperty = <T>(
-  records: T[],
-  getProperty: (record: T) => string
-): Record<string, T[]> => {
-  return records.reduce((acc, record) => {
-    const property = getProperty(record);
-    if (!acc[property]) {
-      acc[property] = [];
-    }
-    acc[property].push(record);
-    return acc;
-  }, {} as Record<string, T[]>);
-};
-
-/**
- * Ordena registros por fecha
- */
-export const sortRecordsByDate = <T extends { date: Date }>(records: T[]): T[] => {
-  return [...records].sort((a, b) => a.date.getTime() - b.date.getTime());
+  return points;
 }; 

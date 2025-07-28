@@ -1,6 +1,7 @@
+import { WorkoutItem } from '@/components/recent-workouts/components/workout-item';
+import type { WorkoutRecord } from '@/interfaces';
+
 import React from 'react';
-import type { WorkoutRecord } from '../../../interfaces';
-import { WorkoutItem } from '../../recent-workouts/components/workout-item';
 
 interface LastWorkoutSummaryProps {
   record?: WorkoutRecord | null;

@@ -1,7 +1,7 @@
+import type { WorkoutRecord } from '@/interfaces';
+import type { CategoryMetrics } from '@/utils';
+import { calculateAdvancedStrengthAnalysis, calculateIntensityScore } from '@/utils';
 import { useMemo } from 'react';
-import type { WorkoutRecord } from '../../../interfaces';
-import { calculateAdvancedStrengthAnalysis, calculateIntensityScore } from '../../../utils/functions';
-import type { CategoryMetrics } from '../../../utils/functions/category-analysis';
 
 export interface StrengthByCategory {
   categoryName: string;

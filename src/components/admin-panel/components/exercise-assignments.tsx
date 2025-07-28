@@ -1,62 +1,27 @@
-import { Plus, Trash2 } from 'lucide-react';
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import { DAYS } from '../../../constants/days';
-import type { DayOfWeek } from '../../../interfaces';
-import { groupExercisesByCategory } from '../../../utils/functions/select-utils';
+import { DAYS } from '@/constants/days.constants';
+import { useAdminStore } from '@/stores/admin';
+import { useOnlineStatus } from '@/stores/connection';
+import React from 'react';
 import { Button } from '../../button';
 import { Card, CardContent, CardHeader } from '../../card';
-import { Select } from '../../select';
-import { URLPreview } from '../../url-preview';
-import type { ExerciseAssignmentsProps } from '../types';
-
-interface AssignmentFormData {
-  exerciseId: string;
-  dayOfWeek: DayOfWeek;
-}
+import { formatDayName } from '../utils/admin-utils';
+import { AssignmentForm } from './assignment-form';
+import { AssignmentItem } from './assignment-item';
 
 /**
  * Componente para asignar ejercicios por día con select agrupado por categorías
+ * Usa Zustand para el estado global
  */
-export const ExerciseAssignments: React.FC<ExerciseAssignmentsProps> = ({
-  selectedDay,
-  onSelectDay,
-  exercises,
-  assignments,
-  isOnline,
-  loading,
-  onCreateAssignment,
-  onDeleteAssignment,
-  onPreviewUrl
-}) => {
-  const {
-    register,
-    handleSubmit,
-    reset,
-    setValue,
-    formState: { errors }
-  } = useForm<AssignmentFormData>({
-    mode: 'onChange',
-    defaultValues: {
-      exerciseId: '',
-      dayOfWeek: selectedDay
-    }
-  });
+export const ExerciseAssignments: React.FC = () => {
+  const isOnline = useOnlineStatus();
 
-  // Actualizar el formulario cuando cambie selectedDay
-  useEffect(() => {
-    setValue('dayOfWeek', selectedDay);
-  }, [selectedDay, setValue]);
+  // Usar selectores específicos para acceder al estado correctamente
+  const selectedDay = useAdminStore((state) => state.adminPanel.selectedDay);
+  const setSelectedDay = useAdminStore((state) => state.setSelectedDay);
+  const setPreviewUrl = useAdminStore((state) => state.setPreviewUrl);
+  const getAssignmentsByDay = useAdminStore((state) => state.getAssignmentsByDay);
 
-  const handleFormSubmit = async (data: AssignmentFormData) => {
-    const success = await onCreateAssignment(data.exerciseId, data.dayOfWeek);
-    if (success) {
-      reset({ exerciseId: '', dayOfWeek: selectedDay });
-    }
-  };
-
-  // Agrupar ejercicios por categoría para el select
-  const exerciseGroups = groupExercisesByCategory(exercises);
+  const assignments = getAssignmentsByDay(selectedDay);
 
   return (
     <Card>
@@ -75,50 +40,21 @@ export const ExerciseAssignments: React.FC<ExerciseAssignmentsProps> = ({
                 key={day}
                 variant={selectedDay === day ? 'primary' : 'ghost'}
                 size="sm"
-                onClick={() => onSelectDay(day)}
+                onClick={() => setSelectedDay(day)}
                 disabled={!isOnline}
               >
-                {day.charAt(0).toUpperCase() + day.slice(1)}
+                {formatDayName(day)}
               </Button>
             ))}
           </div>
 
-          {/* Formulario de asignación con select agrupado */}
-          <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-            <Select
-              label="Seleccionar ejercicio por categoría"
-              disabled={!isOnline}
-              placeholder={isOnline ? 'Selecciona un ejercicio...' : 'Sin conexión'}
-              groups={exerciseGroups}
-              {...register('exerciseId', { required: 'Selecciona un ejercicio' })}
-              error={errors.exerciseId?.message}
-            />
-
-            {/* Contador de ejercicios disponibles */}
-            {isOnline && exercises.length > 0 && (
-              <div className="text-xs text-gray-500">
-                {exercises.length} ejercicio{exercises.length !== 1 ? 's' : ''} disponible{exercises.length !== 1 ? 's' : ''}
-                en {exerciseGroups.length} categoría{exerciseGroups.length !== 1 ? 's' : ''}
-              </div>
-            )}
-
-            <Button
-              type="submit"
-              loading={loading}
-              disabled={!isOnline || exercises.length === 0}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              {isOnline
-                ? `Asignar al ${selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}`
-                : 'Sin conexión'
-              }
-            </Button>
-          </form>
+          {/* Formulario de asignación */}
+          <AssignmentForm selectedDay={selectedDay} />
 
           {/* Lista de ejercicios asignados */}
           <div className="mt-6">
             <h4 className="text-md font-medium text-white mb-3">
-              Ejercicios de {selectedDay.charAt(0).toUpperCase() + selectedDay.slice(1)}
+              Ejercicios de {formatDayName(selectedDay)}
             </h4>
             {assignments.length === 0 ? (
               <p className="text-gray-400 text-sm">
@@ -130,44 +66,11 @@ export const ExerciseAssignments: React.FC<ExerciseAssignmentsProps> = ({
             ) : (
               <div className="space-y-2">
                 {assignments.map((assignment) => (
-                  <div key={assignment.id} className="bg-gray-800 p-3 rounded-lg space-y-2">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="text-white font-medium">
-                          {assignment.exercise?.name || 'Ejercicio no encontrado'}
-                        </p>
-                        {assignment.exercise?.categories && assignment.exercise.categories.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-1">
-                            {assignment.exercise.categories.map((category) => (
-                              <span
-                                key={category}
-                                className="text-xs text-blue-300 bg-blue-500/15 px-1.5 py-0.5 rounded-full font-medium border border-blue-500/20"
-                              >
-                                {category}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        onClick={() => onDeleteAssignment(assignment.id)}
-                        disabled={!isOnline}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-
-                    {/* Vista previa de URL en asignaciones */}
-                    {assignment.exercise?.url && (
-                      <URLPreview
-                        url={assignment.exercise.url}
-                        onClick={() => onPreviewUrl(assignment.exercise!.url!)}
-                        className="mt-2"
-                      />
-                    )}
-                  </div>
+                  <AssignmentItem
+                    key={assignment.id}
+                    assignment={assignment}
+                    onPreviewUrl={setPreviewUrl}
+                  />
                 ))}
               </div>
             )}

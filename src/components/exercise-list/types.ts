@@ -1,4 +1,4 @@
-import type { DayOfWeek, ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '../../interfaces';
+import type { DayOfWeek, ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
 
 /**
  * Props principales del ExerciseList

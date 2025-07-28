@@ -1,6 +1,6 @@
+import { getDaysAgo } from '@/utils';
 import { Calendar, Target } from 'lucide-react';
 import React from 'react';
-import { getDaysAgo } from '../../../utils/functions';
 import { StatCard } from '../../stat-card';
 import type { AdditionalStatsProps } from '../types';
 
@@ -16,7 +16,7 @@ export const AdditionalStats: React.FC<AdditionalStatsProps> = ({ stats }) => {
         title="Días Entrenados"
         value={stats.workoutDays.toString()}
         icon={Calendar}
-        variant="purple"
+        variant="primary"
         tooltip="Número total de días únicos en los que has entrenado este ejercicio"
         tooltipPosition="top"
       />
@@ -25,7 +25,7 @@ export const AdditionalStats: React.FC<AdditionalStatsProps> = ({ stats }) => {
         title="Último Entrenamiento"
         value={getDaysAgo(stats.lastWorkout) || 'N/A'}
         icon={Calendar}
-        variant="indigo"
+        variant="secondary"
         tooltip="Tiempo transcurrido desde la última vez que entrenaste este ejercicio"
         tooltipPosition="top"
       />
@@ -34,7 +34,7 @@ export const AdditionalStats: React.FC<AdditionalStatsProps> = ({ stats }) => {
         title="Ejercicio Favorito"
         value={stats.mostFrequentExercise || 'N/A'}
         icon={Target}
-        variant="pink"
+        variant="warning"
         tooltip="Ejercicio que has realizado con mayor frecuencia en tus entrenamientos"
         tooltipPosition="top"
       />

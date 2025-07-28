@@ -1,0 +1,87 @@
+import React, { useState } from 'react';
+import { Page } from '../../components/layout';
+import { LoadingSpinner } from '../../components/loading-spinner';
+import { OfflineWarning } from '../../components/offline-warning';
+import {
+  BalanceTab,
+  DashboardEmptyState,
+  DashboardTabNavigation
+} from './components';
+import { DEFAULT_DASHBOARD_TAB } from './constants';
+import {
+  AdvancedTab,
+  ExercisesTab,
+  HistoryTab,
+  PredictionsTab
+} from './content';
+import { useDashboardData } from './hooks';
+import type { DashboardTab } from './types';
+
+/**
+ * Dashboard como página completa sin modal
+ * Optimizado para mobile-first con navegación de tabs moderna
+ */
+export const DashboardPage: React.FC = () => {
+  const { workoutRecords, loading, isOnline } = useDashboardData();
+  const [activeTab, setActiveTab] = useState<DashboardTab>(DEFAULT_DASHBOARD_TAB);
+
+  if (loading) {
+    return (
+      <Page
+        title="Mi Progreso"
+        subtitle="Análisis de rendimiento y mejoras"
+      >
+        <div className="flex flex-col items-center justify-center py-12">
+          <LoadingSpinner size="lg" className="mb-4" />
+          <p className="text-gray-400 text-sm">Cargando dashboard...</p>
+        </div>
+      </Page>
+    );
+  }
+
+  // Renderizar contenido según el tab activo
+  const renderTabContent = () => {
+    if (workoutRecords.length === 0) {
+      return <DashboardEmptyState isOnline={isOnline} />;
+    }
+
+    switch (activeTab) {
+      case 'balance':
+        return <BalanceTab records={workoutRecords} />;
+      case 'history':
+        return <HistoryTab records={workoutRecords} />;
+      case 'exercises':
+        return <ExercisesTab records={workoutRecords} />;
+      case 'advanced':
+        return <AdvancedTab records={workoutRecords} />;
+      case 'predictions':
+        return <PredictionsTab records={workoutRecords} />;
+      default:
+        return <BalanceTab records={workoutRecords} />;
+    }
+  };
+
+  return (
+    <Page
+      title="Mi Progreso"
+      subtitle="Análisis de rendimiento y mejoras"
+    >
+      <div className="space-y-6">
+        {/* Warning de conexión */}
+        {!isOnline && (
+          <OfflineWarning message="Sin conexión. Los datos mostrados pueden estar desactualizados." />
+        )}
+
+        {/* Navegación de tabs moderna */}
+        <DashboardTabNavigation
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          timeFilterLabel="Últimos 30 días"
+        />
+
+        {/* Contenido principal */}
+        {renderTabContent()}
+      </div>
+    </Page>
+  );
+}; 

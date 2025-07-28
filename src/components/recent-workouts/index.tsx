@@ -1,5 +1,5 @@
+import { THEME_WORKOUTS } from '@/constants/theme/index.constants';
 import React from 'react';
-import { THEME_WORKOUTS } from '../../constants/theme';
 import { WorkoutEmptyState, WorkoutFooter, WorkoutItem } from './components';
 import { useRecentWorkouts } from './hooks';
 import type { RecentWorkoutsProps } from './types';

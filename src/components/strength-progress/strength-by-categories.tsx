@@ -1,7 +1,7 @@
 import { Award, BarChart3, Target, TrendingUp, Users, Zap } from 'lucide-react';
 import React from 'react';
 import type { WorkoutRecord } from '../../interfaces';
-import { formatNumber } from '../../utils/functions';
+import { formatNumberToString } from '../../utils';
 import { Card, CardContent, CardHeader } from '../card';
 import { InfoTooltip } from '../tooltip';
 import { useStrengthByCategory } from './hooks/use-strength-by-category';
@@ -151,7 +151,7 @@ export const StrengthByCategories: React.FC<StrengthByCategoriesProps> = ({ reco
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {analysis.categories.map((category, index) => (
+            {analysis.categories.map((category) => (
               <div
                 key={category.categoryName}
                 className="p-4 bg-gray-800 rounded-lg border border-gray-700 hover:border-gray-600 transition-colors"
@@ -192,7 +192,7 @@ export const StrengthByCategories: React.FC<StrengthByCategoriesProps> = ({ reco
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                   <div className="text-center">
                     <p className="text-lg font-bold text-blue-400">
-                      {formatNumber(category.strengthAnalysis.currentMax1RM)}kg
+                      {formatNumberToString(category.strengthAnalysis.currentMax1RM)}kg
                     </p>
                     <p className="text-xs text-gray-400">1RM Máximo</p>
                   </div>
@@ -206,7 +206,7 @@ export const StrengthByCategories: React.FC<StrengthByCategoriesProps> = ({ reco
 
                   <div className="text-center">
                     <p className="text-lg font-bold text-purple-400">
-                      {formatNumber(category.categoryMetrics.totalVolume)}
+                      {formatNumberToString(category.categoryMetrics.totalVolume)}
                     </p>
                     <p className="text-xs text-gray-400">Volumen Total</p>
                   </div>
@@ -243,7 +243,7 @@ export const StrengthByCategories: React.FC<StrengthByCategoriesProps> = ({ reco
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-gray-400">Próximo PR</span>
                       <span className="font-bold text-blue-400">
-                        {formatNumber(category.strengthAnalysis.predictions.next4WeeksPR)}kg
+                        {formatNumberToString(category.strengthAnalysis.predictions.next4WeeksPR)}kg
                       </span>
                     </div>
                   </div>
@@ -320,7 +320,7 @@ export const StrengthByCategories: React.FC<StrengthByCategoriesProps> = ({ reco
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">1RM Máximo</span>
                   <span className="font-bold text-white">
-                    {formatNumber(analysis.bestCategory.strengthAnalysis.currentMax1RM)}kg
+                    {formatNumberToString(analysis.bestCategory.strengthAnalysis.currentMax1RM)}kg
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
@@ -332,7 +332,7 @@ export const StrengthByCategories: React.FC<StrengthByCategoriesProps> = ({ reco
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">Próximo PR Estimado</span>
                   <span className="font-bold text-purple-400">
-                    {formatNumber(analysis.bestCategory.strengthAnalysis.predictions.next4WeeksPR)}kg
+                    {formatNumberToString(analysis.bestCategory.strengthAnalysis.predictions.next4WeeksPR)}kg
                   </span>
                 </div>
               </div>
@@ -358,7 +358,7 @@ export const StrengthByCategories: React.FC<StrengthByCategoriesProps> = ({ reco
                 <div className="flex justify-between items-center">
                   <span className="text-gray-400">1RM Máximo</span>
                   <span className="font-bold text-white">
-                    {formatNumber(analysis.worstCategory.strengthAnalysis.currentMax1RM)}kg
+                    {formatNumberToString(analysis.worstCategory.strengthAnalysis.currentMax1RM)}kg
                   </span>
                 </div>
                 <div className="flex justify-between items-center">

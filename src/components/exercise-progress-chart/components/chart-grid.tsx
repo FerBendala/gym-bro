@@ -1,6 +1,6 @@
+import { THEME_CHART } from '@/constants/theme/index.constants';
+import { generateGridPoints, getChartY } from '@/utils';
 import React from 'react';
-import { THEME_CHART } from '../../../constants/theme';
-import { generateGridPoints, getChartY } from '../../../utils/functions';
 import type { ChartGridProps } from '../types';
 
 /**
@@ -9,8 +9,7 @@ import type { ChartGridProps } from '../types';
  */
 export const ChartGrid: React.FC<ChartGridProps> = ({
   dimensions,
-  weightRange,
-  dateRange
+  weightRange
 }) => {
   const { width, height, padding } = dimensions;
   const gridPoints = generateGridPoints(weightRange);

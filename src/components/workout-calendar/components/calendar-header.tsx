@@ -1,6 +1,6 @@
+import { THEME_CALENDAR } from '@/constants/theme/index.constants';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React from 'react';
-import { THEME_CALENDAR } from '../../../constants/theme';
 import { Button } from '../../button';
 import type { CalendarHeaderProps } from '../types';
 
