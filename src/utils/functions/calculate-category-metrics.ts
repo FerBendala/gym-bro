@@ -1,6 +1,4 @@
 import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
-import { calculateVolumeProgression } from './calculate-volume-progression';
-import { calculateWeightProgression } from './calculate-weight-progression';
 import type { CategoryMetrics } from './category-analysis-types';
 import { calculateCategoryEffortDistribution } from './exercise-patterns';
 import {
@@ -16,6 +14,7 @@ import {
   generateCategoryWarnings,
   getCurrentDateFromRecords
 } from './index';
+import { calculateVolumeProgression, calculateWeightProgression } from './progression-utils';
 
 /**
  * Calcula métricas detalladas para cada categoría muscular
@@ -168,7 +167,7 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[], allAssignment
     const estimatedOneRM = categoryRecords.length > 0 ?
       Math.max(...categoryRecords.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30))) : 0;
 
-    const weightProgression = calculateWeightProgression(categoryRecords, category, allAssignments);
+    const weightProgression = calculateWeightProgression(categoryRecords, category);
     const volumeProgression = calculateVolumeProgression(categoryRecords, category);
     const intensityScore = calculateIntensityScore(categoryRecords);
     const efficiencyScore = calculateEfficiencyScore(categoryRecords);

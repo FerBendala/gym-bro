@@ -1,5 +1,4 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { calculateEstimated1RMStats } from './strength-stats-utils';
 
 /**
  * Calcula el crecimiento total basado en datos de timeline
@@ -24,6 +23,7 @@ export const calculateTotalGrowth = (timelineData: Array<{ value: number; totalW
   };
 };
 
+import { calculateEstimated1RMStats } from './calculate-1rm.utils';
 import { calculateRealVolume } from './volume-calculations';
 
 /**

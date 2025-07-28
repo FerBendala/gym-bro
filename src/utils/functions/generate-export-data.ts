@@ -1,11 +1,11 @@
 import type { Exercise, WorkoutRecord } from '@/interfaces';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { calculateEstimated1RM } from './calculate-1rm.utils';
 import { calculateCategoryMetrics } from './calculate-category-metrics';
-import { calculateEstimated1RM } from './export-calculations';
 import type { ExercisesByDayData, ExportData } from './export-interfaces';
 import { calculateTemporalTrends } from './temporal-trends';
-import { calculateWorkoutVolume } from './volume-stats-utils';
+import { calculateVolume } from './volume-calculations';
 
 /**
  * Genera todos los datos de exportación
@@ -21,7 +21,7 @@ export const generateExportData = async (
 
   // Metadata
   const totalVolume = sortedRecords.reduce((sum, record) =>
-    sum + calculateWorkoutVolume(record), 0
+    sum + calculateVolume(record), 0
   );
 
   const metadata = {
@@ -72,7 +72,7 @@ export const generateExportData = async (
     const stats = exerciseStats.get(exerciseId);
     if (stats) {
       stats.workouts++;
-      stats.totalVolume += calculateWorkoutVolume(record);
+      stats.totalVolume += calculateVolume(record);
       stats.weights.push(record.weight);
 
       if (new Date(record.date) > stats.lastDate) {
@@ -118,7 +118,7 @@ export const generateExportData = async (
   // Workout Records con datos enriquecidos
   const workoutRecordsData = sortedRecords.map(record => {
     const exercise = exercises.find(ex => ex.id === record.exerciseId);
-    const volume = calculateWorkoutVolume(record);
+    const volume = calculateVolume(record);
 
     return {
       id: record.id,
@@ -164,7 +164,7 @@ export const generateExportData = async (
       const exerciseData = exerciseMap.get(exerciseName);
       if (exerciseData) {
         exerciseData.frequency++;
-        const volume = calculateWorkoutVolume(record);
+        const volume = calculateVolume(record);
         exerciseData.totalVolume += volume;
         exerciseData.volumes.push(volume);
       }
@@ -180,7 +180,7 @@ export const generateExportData = async (
     }));
 
     const totalDayVolume = dayRecords.reduce((sum, record) =>
-      sum + calculateWorkoutVolume(record), 0
+      sum + calculateVolume(record), 0
     );
 
     exercisesByDay.push({
@@ -199,7 +199,7 @@ export const generateExportData = async (
 
   sortedRecords.forEach(record => {
     const exercise = exercises.find(ex => ex.id === record.exerciseId);
-    const volume = calculateWorkoutVolume(record);
+    const volume = calculateVolume(record);
     const exerciseName = exercise?.name || 'Ejercicio desconocido';
 
     // Por categoría
@@ -260,7 +260,7 @@ export const generateExportData = async (
           const exercise = exercises.find(ex => ex.id === record.exerciseId);
           return exercise?.categories?.includes(category);
         })
-        .reduce((sum, record) => sum + calculateWorkoutVolume(record), 0);
+        .reduce((sum, record) => sum + calculateVolume(record), 0);
 
       return {
         category,
@@ -322,7 +322,7 @@ export const generateExportData = async (
     }
 
     const monthData = monthlyStatsMap.get(monthKey)!;
-    monthData.volume += calculateWorkoutVolume(record);
+    monthData.volume += calculateVolume(record);
     monthData.workouts++;
 
     const exercise = exercises.find(ex => ex.id === record.exerciseId);
@@ -330,7 +330,7 @@ export const generateExportData = async (
       monthData.exercises.add(exercise.name);
       exercise.categories?.forEach(category => {
         monthData.categories.set(category,
-          (monthData.categories.get(category) || 0) + calculateWorkoutVolume(record)
+          (monthData.categories.get(category) || 0) + calculateVolume(record)
         );
       });
     }

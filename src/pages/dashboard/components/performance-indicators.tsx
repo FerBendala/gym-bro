@@ -13,6 +13,7 @@ import {
   Clock,
   Heart,
   Layers,
+  LucideProps,
   Shield,
   Target,
   Target as TargetIcon,
@@ -32,7 +33,7 @@ export const PerformanceIndicators: React.FC<PerformanceIndicatorsProps> = ({ in
   };
 
   const getIconComponent = (iconName: string) => {
-    const iconMap: Record<string, React.ComponentType<any>> = {
+    const iconMap: Record<string, React.ComponentType<LucideProps>> = {
       'calendar-check': CalendarCheck,
       'calendar': Calendar,
       'calendar-x': CalendarX,

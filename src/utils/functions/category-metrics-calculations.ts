@@ -24,21 +24,7 @@ export const calculatePersonalRecords = (categoryRecords: WorkoutRecord[]): numb
 
 // Función calculateVolumeProgression movida a calculate-volume-progression.ts para evitar duplicación
 
-/**
- * Calcula el score de intensidad para una categoría
- */
-export const calculateIntensityScore = (categoryRecords: WorkoutRecord[]): number => {
-  if (categoryRecords.length === 0) return 0;
-
-  const maxWeight = Math.max(...categoryRecords.map(r => r.weight));
-  if (maxWeight === 0) return 0;
-
-  const avgWeight = categoryRecords.reduce((sum, r) => sum + r.weight, 0) / categoryRecords.length;
-  const intensityRatio = avgWeight / maxWeight;
-
-  // Convertir a score de 0-100
-  return Math.round(intensityRatio * 100);
-};
+// Función calculateIntensityScore movida a calculate-intensity-score.ts para evitar duplicación
 
 /**
  * Calcula el score de eficiencia para una categoría

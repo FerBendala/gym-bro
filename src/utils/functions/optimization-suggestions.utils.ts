@@ -1,6 +1,5 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { analyzeDailyTrainingPatterns, analyzeEnergyDemands, analyzeGoalSpecificity, analyzeMuscleGroupBalance, analyzeOptimalVolume, analyzeProgressiveOverload, analyzeRecoveryPatterns, analyzeRepRanges, analyzeSafetyPatterns, analyzeTemporalConsistency, calculateProgressionRate } from './analysis-helpers.utils';
-import { determineExperienceLevel } from './determine-experience-level.utils';
+import { analyzeDailyTrainingPatterns, analyzeEnergyDemands, analyzeGoalSpecificity, analyzeMuscleGroupBalance, analyzeOptimalVolume, analyzeProgressiveOverload, analyzeRecoveryPatterns, analyzeRepRanges, analyzeSafetyPatterns, analyzeTemporalConsistency, calculateProgressionRate, determineExperienceLevel } from './';
 
 /**
  * Genera sugerencias de optimización avanzadas basadas en análisis de datos

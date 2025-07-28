@@ -1,6 +1,5 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { analyzeFatigue, analyzeIntensityMetrics, predictProgress } from '../index';
-import { analyzeOptimalVolume, analyzeSafetyPatterns, analyzeTemporalConsistency, calculateProgressionRate } from './analysis-helpers.utils';
+import { analyzeFatigue, analyzeIntensityMetrics, analyzeOptimalVolume, analyzeSafetyPatterns, analyzeTemporalConsistency, calculateProgressionRate, predictProgress } from './';
 
 /**
  * Genera indicadores de rendimiento pico mejorados
