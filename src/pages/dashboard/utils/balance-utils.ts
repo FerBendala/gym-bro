@@ -49,7 +49,7 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]) => {
   // Usar las funciones correctas de category-analysis
   const categoryAnalysis = calculateCategoryAnalysis(records);
   const muscleBalance = analyzeMuscleBalance(records);
-  const balanceScore = calculateBalanceScore(muscleBalance, records);
+  const balanceScore = calculateBalanceScore(muscleBalance);
 
   // Calcular balance superior/inferior CORREGIDO: usando la misma lógica que main
   const upperLowerBalance = calculateUpperLowerBalance(categoryAnalysis.categoryMetrics);

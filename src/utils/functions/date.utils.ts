@@ -3,9 +3,9 @@
  * Funciones puras para operaciones con fechas
  */
 
+import type { WorkoutRecord } from '@/interfaces';
 import { endOfWeek, format, isThisWeek, isToday, isYesterday, startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
-import type { WorkoutRecord } from '../interfaces';
 
 export type TimeFilter = 'week' | 'month' | 'all';
 
