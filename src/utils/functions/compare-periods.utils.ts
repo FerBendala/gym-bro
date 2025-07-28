@@ -1,7 +1,7 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { calculateOptimal1RM } from './calculate-1rm-optimal.utils';
+import { calculateOptimal1RM } from './calculate-1rm.utils';
 import { getLastWeekRecords, getThisWeekRecords } from './week-records.utils';
 
 /**

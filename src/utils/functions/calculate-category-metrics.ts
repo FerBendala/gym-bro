@@ -1,4 +1,6 @@
 import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
+import { calculateVolumeProgression } from './calculate-volume-progression';
+import { calculateWeightProgression } from './calculate-weight-progression';
 import type { CategoryMetrics } from './category-analysis-types';
 import { calculateCategoryEffortDistribution } from './exercise-patterns';
 import {
@@ -9,8 +11,6 @@ import {
   calculateIntensityScore,
   calculatePersonalRecords,
   calculateVolumeDistribution,
-  calculateVolumeProgression,
-  calculateWeightProgression,
   determineStrengthLevel,
   generateCategoryRecommendations,
   generateCategoryWarnings,

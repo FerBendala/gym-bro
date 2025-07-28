@@ -1,5 +1,5 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { calculateOptimal1RM } from './calculate-1rm-optimal.utils';
+import { calculateOptimal1RM } from './calculate-1rm.utils';
 import { getLastCompleteWeekRecords } from './week-records.utils';
 
 /**

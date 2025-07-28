@@ -3,7 +3,7 @@
  * Funciones y lógica de negocio relacionada con ejercicios
  */
 
-import { calculateCategoryEffortDistribution } from '.';
+import { calculateCategoryEffortDistribution } from './exercise-patterns';
 
 // Re-exportar la función principal para mantener compatibilidad
 export { calculateCategoryEffortDistribution };

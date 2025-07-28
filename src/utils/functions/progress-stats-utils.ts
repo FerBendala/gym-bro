@@ -24,15 +24,7 @@ export const calculateTotalGrowth = (timelineData: Array<{ value: number; totalW
   };
 };
 
-/**
- * Calcula el volumen real de un registro
- */
-const calculateRealVolume = (record: WorkoutRecord): number => {
-  if (record.individualSets && record.individualSets.length > 0) {
-    return record.individualSets.reduce((total, set) => total + (set.weight * set.reps), 0);
-  }
-  return record.weight * record.reps * record.sets;
-};
+import { calculateRealVolume } from './volume-calculations';
 
 /**
  * Calcula el progreso de un ejercicio específico

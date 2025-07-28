@@ -85,4 +85,53 @@ export const normalizeByWeekday = (
     normalizedComparison,
     weekdayFactor
   };
+};
+
+/**
+ * Normaliza tendencias de volumen considerando el día de la semana
+ * ESENCIAL: Corrige el problema de "tendencia negativa falsa" los lunes
+ */
+export const normalizeVolumeTrend = (
+  thisWeekVolume: number,
+  lastWeekVolume: number,
+  currentDate: Date = new Date(),
+  allAssignments?: ExerciseAssignment[]
+): number => {
+  const { normalizedCurrent, normalizedComparison } = normalizeByWeekday(
+    thisWeekVolume,
+    lastWeekVolume,
+    currentDate,
+    allAssignments
+  );
+
+  if (normalizedComparison === 0) return 0;
+
+  return ((normalizedCurrent - normalizedComparison) / normalizedComparison) * 100;
+};
+
+/**
+ * Calcula porcentajes de volumen normalizados por día de la semana
+ */
+export const calculateNormalizedWeeklyPercentage = (
+  categoryVolume: number,
+  totalVolume: number,
+  currentDate: Date = new Date(),
+  allAssignments?: ExerciseAssignment[]
+): number => {
+  const { normalizedCurrent: normalizedCategoryVolume } = normalizeByWeekday(
+    categoryVolume,
+    categoryVolume, // Solo normalizamos, no comparamos
+    currentDate,
+    allAssignments
+  );
+
+  const { normalizedCurrent: normalizedTotalVolume } = normalizeByWeekday(
+    totalVolume,
+    totalVolume,
+    currentDate,
+    allAssignments
+  );
+
+  if (normalizedTotalVolume === 0) return 0;
+  return (normalizedCategoryVolume / normalizedTotalVolume) * 100;
 }; 

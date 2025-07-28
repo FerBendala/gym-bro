@@ -1,7 +1,25 @@
 import { Card, CardContent, CardHeader } from '@/components/card';
 import { DASHBOARD_COLORS } from '@/constants';
 import type { PerformanceIndicator } from '@/interfaces';
-import { Target } from 'lucide-react';
+import { formatNumberToString } from '@/utils';
+import {
+  Activity,
+  AlertTriangle,
+  BarChart3,
+  Calendar,
+  CalendarCheck,
+  CalendarX,
+  CheckCircle,
+  Clock,
+  Heart,
+  Layers,
+  Shield,
+  Target,
+  Target as TargetIcon,
+  TrendingDown,
+  TrendingUp,
+  Zap
+} from 'lucide-react';
 import React from 'react';
 
 interface PerformanceIndicatorsProps {
@@ -11,6 +29,30 @@ interface PerformanceIndicatorsProps {
 export const PerformanceIndicators: React.FC<PerformanceIndicatorsProps> = ({ indicators }) => {
   const getIndicatorStyles = (type: string) => {
     return DASHBOARD_COLORS.INDICATOR_COLORS[type as keyof typeof DASHBOARD_COLORS.INDICATOR_COLORS] || DASHBOARD_COLORS.INDICATOR_COLORS.critical;
+  };
+
+  const getIconComponent = (iconName: string) => {
+    const iconMap: Record<string, React.ComponentType<any>> = {
+      'calendar-check': CalendarCheck,
+      'calendar': Calendar,
+      'calendar-x': CalendarX,
+      'trending-up': TrendingUp,
+      'trending-down': TrendingDown,
+      'zap': Zap,
+      'heart': Heart,
+      'layers': Layers,
+      'target': TargetIcon,
+      'activity': Activity,
+      'shield': Shield,
+      'alert-triangle': AlertTriangle,
+      'check-circle': CheckCircle,
+      'clock': Clock,
+      'bar-chart-3': BarChart3,
+      'data': BarChart3 // fallback para datos
+    };
+
+    const IconComponent = iconMap[iconName] || BarChart3;
+    return <IconComponent className="w-5 h-5" />;
   };
 
   return (
@@ -30,12 +72,21 @@ export const PerformanceIndicators: React.FC<PerformanceIndicatorsProps> = ({ in
                 className={`p-3 sm:p-4 border rounded-lg ${getIndicatorStyles(indicator.type)}`}
               >
                 <div className="flex items-start space-x-3">
-                  <span className="text-lg">{indicator.icon}</span>
+                  <div className="flex-shrink-0">
+                    {getIconComponent(indicator.icon)}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between mb-1">
                       <h4 className="font-medium text-sm">{indicator.title}</h4>
                       {indicator.value && (
-                        <span className="text-sm font-bold">{indicator.value}</span>
+                        <span className="text-sm font-bold">
+                          {indicator.value.includes('%')
+                            ? formatNumberToString(parseFloat(indicator.value), 1) + '%'
+                            : indicator.value.includes('kg')
+                              ? formatNumberToString(parseFloat(indicator.value), 1) + 'kg'
+                              : formatNumberToString(parseFloat(indicator.value), 1)
+                          }
+                        </span>
                       )}
                     </div>
                     <p className="text-xs opacity-90 mb-2">{indicator.description}</p>

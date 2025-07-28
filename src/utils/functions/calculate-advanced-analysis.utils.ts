@@ -2,12 +2,17 @@ import type { WorkoutRecord } from '@/interfaces';
 import { generateAdvancedOptimizationSuggestions } from './advanced-analysis/optimization-suggestions.utils';
 import { generateEnhancedPerformanceIndicators } from './advanced-analysis/performance-indicators.utils';
 import type { FatigueAnalysis } from './analyze-fatigue.utils';
+import { analyzeFatigue } from './analyze-fatigue.utils';
 import type { IntensityMetrics } from './analyze-intensity-metrics.utils';
+import { analyzeIntensityMetrics } from './analyze-intensity-metrics.utils';
 import type { TrainingEfficiency } from './analyze-training-efficiency.utils';
+import { analyzeTrainingEfficiency } from './analyze-training-efficiency.utils';
 import type { TrainingDensity } from './calculate-training-density.utils';
+import { calculateTrainingDensity } from './calculate-training-density.utils';
 import type { PeriodComparison } from './compare-periods.utils';
-import { analyzeFatigue, analyzeIntensityMetrics, analyzeTrainingEfficiency, calculateTrainingDensity, comparePeriods, predictProgress } from './index';
+import { comparePeriods } from './compare-periods.utils';
 import type { ProgressPrediction } from './predict-progress.utils';
+import { predictProgress } from './predict-progress.utils';
 
 /**
  * Interfaz para análisis avanzado

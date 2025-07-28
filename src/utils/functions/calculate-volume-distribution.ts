@@ -2,8 +2,7 @@ import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
 import { endOfMonth, endOfWeek, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getCurrentDateFromRecords } from './get-current-date-from-records';
-import { normalizeByWeekday } from './normalize-by-weekday';
-import { normalizeVolumeTrend } from './normalize-volume-trend';
+import { normalizeByWeekday, normalizeVolumeTrend } from './normalize-by-weekday';
 
 /**
  * Calcula la distribución de volumen temporal para una categoría
