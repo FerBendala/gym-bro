@@ -61,3 +61,6 @@ export * from './week-records.utils';
 export * from './workout-habits';
 export * from './workout-streaks';
 
+export * from './analysis-helpers.utils';
+export * from './optimization-suggestions.utils';
+export * from './performance-indicators.utils';

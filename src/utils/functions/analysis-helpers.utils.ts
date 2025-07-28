@@ -1,4 +1,5 @@
 import type { WorkoutRecord } from '@/interfaces';
+import { determineExperienceLevel } from './determine-experience-level.utils';
 
 /**
  * Analiza el balance de grupos musculares
@@ -28,17 +29,7 @@ export const analyzeDailyTrainingPatterns = (records: WorkoutRecord[]) => {
   return dailyPatterns;
 };
 
-/**
- * Determina el nivel de experiencia del usuario
- */
-export const determineExperienceLevel = (records: WorkoutRecord[]) => {
-  const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-  const avgVolume = totalVolume / records.length;
 
-  if (avgVolume < 1000) return 'beginner';
-  if (avgVolume < 3000) return 'intermediate';
-  return 'advanced';
-};
 
 /**
  * Calcula la tasa de progresión
