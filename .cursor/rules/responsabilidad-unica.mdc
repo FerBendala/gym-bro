@@ -1,0 +1,8 @@
+---
+description: >
+  Los componentes deben ser pequeños, fácilmente testeables y con una única responsabilidad.
+  Extrae partes complejas o repetidas en subcomponentes o hooks reutilizables.
+globs:
+  - 'src/components/**/*.{tsx,jsx}'
+alwaysApply: false
+---

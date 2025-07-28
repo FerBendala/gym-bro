@@ -1,6 +1,6 @@
-import { THEME_CALENDAR } from '@/constants/theme/index.constants';
+import { THEME_CALENDAR } from '@/constants/theme';
+import type { CalendarDayData } from '@/utils';
 import React from 'react';
-import type { CalendarDayData } from '../../utils';
 import {
   CalendarGrid,
   CalendarHeader,

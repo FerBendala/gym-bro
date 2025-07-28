@@ -1,6 +1,6 @@
+import { Card, CardContent } from '@/components/card';
 import { formatNumberToString } from '@/utils';
 import { Award, BarChart3, Target, TrendingUp } from 'lucide-react';
-import { Card, CardContent } from '../../card';
 import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
 import type { StrengthProgressAnalysis } from '../types';
 import { getRateColor } from '../utils';

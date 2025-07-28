@@ -1,4 +1,4 @@
-import { IDEAL_VOLUME_DISTRIBUTION } from '../../constants/exercise.constants';
+import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
 import { analyzeAntagonistImbalance, getAntagonistGroup } from './antagonist-analysis';
 import type { CategoryMetrics, MuscleBalance } from './category-analysis-types';
 

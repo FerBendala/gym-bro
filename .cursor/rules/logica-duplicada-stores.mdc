@@ -1,0 +1,8 @@
+---
+description: >
+  No dupliques lógica de negocio en múltiples stores o archivos zustand.
+  Reutiliza funciones desde `utils` o abstrae lógica común en servicios.
+globs:
+  - 'src/stores/**/*.{ts,tsx}'
+alwaysApply: true
+---

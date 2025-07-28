@@ -1,0 +1,8 @@
+---
+description: >
+  No se deben usar valores mágicos directamente en el código.
+  Centraliza constantes, enums y configuraciones en archivos `constants` o `config`.
+globs:
+  - 'src/**/*.{ts,tsx,js,jsx}'
+alwaysApply: true
+---

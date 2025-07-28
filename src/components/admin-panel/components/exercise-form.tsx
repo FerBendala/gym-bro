@@ -2,6 +2,11 @@ import {
   createExercise,
   updateExercise
 } from '@/api/services';
+import { Button } from '@/components/button';
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { Input } from '@/components/input';
+import { MultiSelect } from '@/components/multi-select';
+import { URLPreview } from '@/components/url-preview';
 import { EXERCISE_CATEGORIES } from '@/constants';
 import { useExerciseForm } from '@/hooks';
 import type { Exercise } from '@/interfaces';
@@ -10,11 +15,6 @@ import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
 import { Plus, Save, XCircle } from 'lucide-react';
 import React from 'react';
-import { Button } from '../../button';
-import { Card, CardContent, CardHeader } from '../../card';
-import { Input } from '../../input';
-import { MultiSelect } from '../../multi-select';
-import { URLPreview } from '../../url-preview';
 import type { ExerciseFormData } from '../types';
 
 interface ExerciseFormProps {

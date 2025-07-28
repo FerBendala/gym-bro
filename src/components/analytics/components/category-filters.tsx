@@ -1,8 +1,8 @@
+import { Button } from '@/components/button';
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
 import { Zap } from 'lucide-react';
 import React from 'react';
-import { Button } from '../../button';
-import { Card, CardContent, CardHeader } from '../../card';
-import { InfoTooltip } from '../../tooltip';
 
 interface CategoryFiltersProps {
   categories: Array<{ id: string; name: string; count: number }>;

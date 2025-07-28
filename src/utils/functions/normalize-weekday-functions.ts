@@ -1,5 +1,5 @@
+import type { ExerciseAssignment } from '@/interfaces';
 import { getDay } from 'date-fns';
-import type { ExerciseAssignment } from '../../interfaces';
 
 /**
  * Normaliza valores por día de la semana considerando patrones de entrenamiento

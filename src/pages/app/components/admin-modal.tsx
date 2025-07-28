@@ -1,4 +1,4 @@
-import { AdminPanel } from '../../admin-panel';
+import { AdminPanel } from '@/pages/admin-panel';
 
 interface AdminModalProps {
   show: boolean;

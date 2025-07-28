@@ -1,6 +1,6 @@
+import { Button } from '@/components/button';
 import { Plus } from 'lucide-react';
 import React from 'react';
-import { Button } from '../../button';
 import type { ExerciseListEmptyStateProps } from '../types';
 
 /**

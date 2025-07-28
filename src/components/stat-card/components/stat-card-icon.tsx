@@ -1,4 +1,4 @@
-import { THEME_STAT_CARD } from '@/constants/theme/index.constants';
+import { THEME_STAT_CARD } from '@/constants/theme';
 import { cn } from '@/utils';
 import React from 'react';
 import type { StatCardIconProps } from '../types';

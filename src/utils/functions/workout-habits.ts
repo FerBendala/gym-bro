@@ -1,5 +1,5 @@
+import type { WorkoutRecord } from '@/interfaces';
 import { getHours } from 'date-fns';
-import type { WorkoutRecord } from '../../interfaces';
 import { calculateDayMetrics } from './day-metrics';
 import type { WorkoutHabits } from './trends-interfaces';
 import { calculateWorkoutStreaks } from './workout-streaks';

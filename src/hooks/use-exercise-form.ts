@@ -1,8 +1,8 @@
+import type { ExerciseFormData } from '@/components/admin-panel/types';
+import type { Exercise } from '@/interfaces';
+import { validateURL } from '@/utils';
 import { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
-import type { ExerciseFormData } from '../components/admin-panel/types';
-import type { Exercise } from '../interfaces';
-import { validateURL } from '../utils';
 
 interface UseExerciseFormProps {
   exercise?: Exercise;

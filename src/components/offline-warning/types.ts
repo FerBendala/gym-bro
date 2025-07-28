@@ -1,4 +1,4 @@
-import type { ThemeAlertVariant } from '@/constants/theme/index.constants';
+import type { ThemeAlertVariant } from '@/constants/theme';
 import type { LucideIcon } from 'lucide-react';
 
 export interface OfflineWarningProps {

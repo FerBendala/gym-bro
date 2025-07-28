@@ -1,4 +1,4 @@
-import type { UISize, UIVariant } from '../../interfaces';
+import type { UISize, UIVariant } from '@/interfaces';
 
 export interface CardProps {
   children: React.ReactNode;

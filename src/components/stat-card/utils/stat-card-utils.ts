@@ -1,5 +1,5 @@
-import type { ThemeStatCardSize, ThemeStatCardVariant } from '@/constants/theme/index.constants';
-import { THEME_STAT_CARD } from '@/constants/theme/index.constants';
+import type { ThemeStatCardSize, ThemeStatCardVariant } from '@/constants/theme';
+import { THEME_STAT_CARD } from '@/constants/theme';
 
 export const getStatCardStyles = (variant: ThemeStatCardVariant, size: ThemeStatCardSize) => {
   const variantStyles = THEME_STAT_CARD.variants[variant];

@@ -1,7 +1,7 @@
+import { StatCard } from '@/components/stat-card';
 import { formatNumberToString } from '@/utils';
 import { Target, TrendingUp, Zap } from 'lucide-react';
 import React from 'react';
-import { StatCard } from '../../stat-card';
 import type { MainStatsProps, StatConfig } from '../types';
 
 /**

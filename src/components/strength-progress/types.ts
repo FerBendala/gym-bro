@@ -1,4 +1,4 @@
-import type { WorkoutRecord } from '../../interfaces';
+import type { WorkoutRecord } from '@/interfaces';
 
 export interface StrengthProgressProps {
   records: WorkoutRecord[];

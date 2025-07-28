@@ -1,5 +1,5 @@
+import { Input } from '@/components/input';
 import React from 'react';
-import { Input } from '../../input';
 import { DATE_PICKER_DEFAULTS } from '../constants';
 import { getTodayFormatted } from '../utils';
 

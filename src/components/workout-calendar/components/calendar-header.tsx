@@ -1,7 +1,7 @@
-import { THEME_CALENDAR } from '@/constants/theme/index.constants';
+import { Button } from '@/components/button';
+import { THEME_CALENDAR } from '@/constants/theme';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React from 'react';
-import { Button } from '../../button';
 import type { CalendarHeaderProps } from '../types';
 
 export const CalendarHeader: React.FC<CalendarHeaderProps> = ({

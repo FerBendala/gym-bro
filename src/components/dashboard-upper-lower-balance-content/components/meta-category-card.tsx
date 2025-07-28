@@ -1,6 +1,6 @@
+import { Card } from '@/components/card';
 import { formatNumberToString } from '@/utils';
 import React from 'react';
-import { Card } from '../../card';
 import type { MetaCategoryCardProps } from '../types';
 import { CategoryDashboardChart } from './category-dashboard-chart';
 

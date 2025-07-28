@@ -1,7 +1,7 @@
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
 import { Zap } from 'lucide-react';
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader } from '../card';
-import { InfoTooltip } from '../tooltip';
 import { CategoryFilters, ExerciseItem, UnknownRecordsWarning } from './components';
 import { useExerciseAnalysis } from './hooks';
 import type { ExerciseAnalyticsProps } from './types';

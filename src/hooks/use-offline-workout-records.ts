@@ -1,20 +1,18 @@
+import type { WorkoutRecord } from '@/interfaces';
 import { useOnlineStatus } from '@/stores/connection';
-import { useCallback } from 'react';
-import type { WorkoutRecord } from '../interfaces';
-import { STORES } from '../utils/data/indexeddb-config';
-import type {
-  DatabaseResult,
-  IndexedDBWorkoutRecord,
-  QueryOptions
-} from '../utils/data/indexeddb-types';
 import {
+  STORES,
   addItem,
   deleteItem,
   getAllItems,
   getItemsByIndex,
-  updateItem
-} from '../utils/data/indexeddb-utils';
-import { queueSyncOperation } from '../utils/data/sync-manager';
+  queueSyncOperation,
+  updateItem,
+  type DatabaseResult,
+  type IndexedDBWorkoutRecord,
+  type QueryOptions
+} from '@/utils';
+import { useCallback } from 'react';
 
 // Función helper para generar IDs únicos
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
@@ -45,7 +43,7 @@ export const useOfflineWorkoutRecords = (isInitialized: boolean) => {
       const result = await addItem(STORES.WORKOUT_RECORDS, newRecord);
 
       if (result.success) {
-        await queueSyncOperation('workoutRecord', newRecord.id, 'CREATE', newRecord, 'HIGH');
+        await queueSyncOperation('workoutRecord', newRecord.id, 'CREATE', newRecord as unknown as Record<string, unknown>, 'HIGH');
       }
 
       return result;
@@ -73,7 +71,7 @@ export const useOfflineWorkoutRecords = (isInitialized: boolean) => {
       const result = await updateItem(STORES.WORKOUT_RECORDS, updatedRecord);
 
       if (result.success) {
-        await queueSyncOperation('workoutRecord', record.id, 'UPDATE', updatedRecord, 'MEDIUM');
+        await queueSyncOperation('workoutRecord', record.id, 'UPDATE', updatedRecord as unknown as Record<string, unknown>, 'MEDIUM');
       }
 
       return result;

@@ -1,5 +1,5 @@
+import { Button } from '@/components/button';
 import React from 'react';
-import { Button } from '../../button';
 import type { ExerciseCategory } from '../types';
 
 interface ExerciseCategoryTabsProps {

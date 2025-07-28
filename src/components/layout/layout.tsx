@@ -1,5 +1,5 @@
-import { MODERN_THEME } from '@/constants/theme/index.constants';
-import { useNavigationType, useSubtitle, useTitle } from '@/stores/modern-layout';
+import { MODERN_THEME } from '@/constants/theme';
+import { useSubtitle, useTitle } from '@/stores/modern-layout';
 import { cn } from '@/utils';
 import React from 'react';
 import { BottomNavigation } from './components/bottom-navigation';
@@ -20,12 +20,10 @@ export const Layout: React.FC<LayoutProps> = ({
   headerActions,
   showBackButton = false,
   onBackClick,
-  navigationType,
   isNavigationVisible = true
 }) => {
   const storeTitle = useTitle();
   const storeSubtitle = useSubtitle();
-  const storeNavigationType = useNavigationType();
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-950 via-gray-900 to-gray-800 relative flex flex-col">
@@ -56,7 +54,6 @@ export const Layout: React.FC<LayoutProps> = ({
       <BottomNavigation
         activeTab={activeTab}
         onTabChange={onTabChange}
-        navigationType={navigationType ?? storeNavigationType}
         isNavigationVisible={isNavigationVisible}
       />
 

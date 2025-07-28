@@ -1,6 +1,6 @@
+import type { WorkoutStats } from '@/utils';
 import { formatNumberToString } from '@/utils';
 import React from 'react';
-import type { WorkoutStats } from '../../utils';
 
 interface WorkoutMetricsProps {
   stats: WorkoutStats;

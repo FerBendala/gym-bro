@@ -1,4 +1,4 @@
-import type { ExerciseAssignment, WorkoutRecord } from '../../interfaces';
+import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
 import type { CategoryMetrics } from './category-analysis-types';
 import { calculateCategoryEffortDistribution } from './exercise-patterns';
 import {

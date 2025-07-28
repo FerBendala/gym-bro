@@ -1,8 +1,8 @@
-import { THEME_RESPONSIVE } from '@/constants/theme/index.constants';
+import { THEME_RESPONSIVE } from '@/constants/theme';
+import type { DayOfWeek } from '@/interfaces';
 import { useOnlineStatus } from '@/stores/connection';
+import { cn } from '@/utils';
 import React, { useState } from 'react';
-import type { DayOfWeek } from '../../interfaces';
-import { cn } from '../../utils';
 import {
   ExerciseListContent,
   ExerciseListEmptyState,
@@ -57,10 +57,7 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ dayOfWeek, onOpenAdm
         />
       ) : (
         <div className={cn(
-          THEME_RESPONSIVE.grid.cols1,
-          'sm:grid-cols-1',
-          'lg:grid-cols-2',
-          'xl:grid-cols-2',
+          THEME_RESPONSIVE.grid.responsive[1],
           THEME_RESPONSIVE.grid.gap
         )}>
           <ExerciseListContent

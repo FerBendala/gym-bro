@@ -1,0 +1,78 @@
+---
+description: >
+  ESTRUCTURA DEL CÓDIGO - GUÍA COMPLETA PARA AGENTES
+
+  ANTES DE CREAR NUEVO CÓDIGO, REVISA SIEMPRE LA ESTRUCTURA EXISTENTE:
+
+  📁 ESTRUCTURA PRINCIPAL:
+  - src/components/: Componentes reutilizables organizados por funcionalidad
+  - src/pages/: Páginas principales de la aplicación
+  - src/stores/: Estado global con Zustand (admin, connection, data, notification, modern-layout)
+  - src/hooks/: Hooks personalizados reutilizables
+  - src/utils/: Utilidades y funciones auxiliares
+  - src/interfaces/: Tipos TypeScript y interfaces
+  - src/constants/: Constantes de la aplicación
+  - src/api/: Servicios de API y Firebase
+
+  🔍 UBICACIONES ESPECÍFICAS:
+
+  UTILIDADES EXISTENTES:
+  - src/utils/functions/: +74 archivos con funciones auxiliares
+  - src/utils/data/: Utilidades para manejo de datos
+  - src/utils/index.ts: Exportaciones centralizadas
+
+  COMPONENTES ORGANIZADOS:
+  - Cada componente tiene: components/, hooks/, utils/, constants.ts, index.ts
+  - Ejemplos: exercise-card/, stat-card/, input/, select/, button/, card/
+
+  HOOKS REUTILIZABLES:
+  - src/hooks/index.ts: Exportaciones centralizadas
+  - Hooks específicos: use-app-initialization, use-drag-and-drop, etc.
+
+  SERVICIOS Y API:
+  - src/api/firebase.ts: Configuración Firebase
+  - src/api/services/: Servicios específicos (exercise, error-handler, etc.)
+
+  ESTADO GLOBAL:
+  - src/stores/: Zustand stores organizados por dominio
+  - src/stores/index.ts: Exportaciones centralizadas
+
+  TIPOS Y INTERFACES:
+  - src/interfaces/: domain.interfaces.ts, state.interfaces.ts
+  - src/interfaces/index.ts: Exportaciones centralizadas
+
+  CONSTANTES:
+  - src/constants/: Organizadas por dominio (api, days, exercise, theme)
+
+  ⚠️ REGLAS IMPORTANTES:
+  1. SIEMPRE revisa utils/functions/ antes de crear nuevas funciones
+  2. SIEMPRE revisa hooks/ antes de crear nuevos hooks
+  3. SIEMPRE revisa components/ antes de crear nuevos componentes
+  4. SIEMPRE revisa stores/ antes de crear nuevo estado
+  5. SIEMPRE revisa interfaces/ antes de crear nuevos tipos
+  6. SIEMPRE revisa constants/ antes de crear nuevas constantes
+
+  🎯 PATRONES ESTABLECIDOS:
+  - Componentes: Estructura modular con subcarpetas
+  - Hooks: Exportación centralizada en index.ts
+  - Utilidades: Funciones puras en utils/functions/
+  - Estado: Zustand stores organizados por dominio
+  - Tipos: Interfaces en src/interfaces/
+
+  📋 ANTES DE CODIFICAR:
+  1. Busca en utils/functions/ si existe la función que necesitas
+  2. Busca en hooks/ si existe el hook que necesitas
+  3. Busca en components/ si existe el componente que necesitas
+  4. Busca en stores/ si existe el estado que necesitas
+  5. Busca en interfaces/ si existen los tipos que necesitas
+  6. Busca en constants/ si existen las constantes que necesitas
+
+  🔄 REUTILIZACIÓN:
+  - NUNCA dupliques lógica existente
+  - SIEMPRE reutiliza componentes, hooks y utilidades existentes
+  - SIEMPRE refactoriza código duplicado existente
+  - SIEMPRE actualiza las exportaciones centralizadas
+globs:
+  - 'src/**/*.{ts,tsx,js,jsx}'
+alwaysApply: true
+---

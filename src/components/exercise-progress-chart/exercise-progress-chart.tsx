@@ -1,9 +1,9 @@
-import { THEME_CHART } from '@/constants/theme/index.constants';
+import { ChartLegend } from '@/components/chart-legend';
+import { InfoTooltip } from '@/components/tooltip';
+import { THEME_CHART } from '@/constants/theme';
+import type { ChartDimensions } from '@/utils';
 import { BarChart3, TrendingUp } from 'lucide-react';
 import React, { useState } from 'react';
-import type { ChartDimensions } from '../../utils';
-import { ChartLegend } from '../chart-legend';
-import { InfoTooltip } from '../tooltip';
 import { ChartEmptyState, ChartGrid, ChartStatistics, EnhancedChartLines } from './components';
 import { CHART_DIMENSIONS, CHART_EMPTY_STATE, CHART_INFO_ITEMS } from './constants';
 import { useChartData, useChartStatistics } from './hooks';

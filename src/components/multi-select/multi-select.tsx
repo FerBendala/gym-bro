@@ -1,4 +1,4 @@
-import { THEME_SELECT } from '@/constants/theme/index.constants';
+import { THEME_SELECT } from '@/constants/theme';
 import React from 'react';
 import {
   MultiSelectButton,

@@ -1,6 +1,6 @@
+import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
 import { endOfMonth, endOfWeek, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
-import type { ExerciseAssignment, WorkoutRecord } from '../../interfaces';
 import { getCurrentDateFromRecords } from './get-current-date-from-records';
 import { normalizeByWeekday } from './normalize-by-weekday';
 import { normalizeVolumeTrend } from './normalize-volume-trend';

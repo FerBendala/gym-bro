@@ -1,4 +1,4 @@
-import type { DayOfWeek } from '../interfaces';
+import type { DayOfWeek } from '@/interfaces';
 
 /**
  * Días de la semana en español

@@ -1,9 +1,9 @@
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
+import type { WorkoutRecord } from '@/interfaces';
+import { formatNumberToString } from '@/utils';
 import { Award, BarChart3, Target, TrendingUp, Users, Zap } from 'lucide-react';
 import React from 'react';
-import type { WorkoutRecord } from '../../interfaces';
-import { formatNumberToString } from '../../utils';
-import { Card, CardContent, CardHeader } from '../card';
-import { InfoTooltip } from '../tooltip';
 import { useStrengthByCategory } from './hooks/use-strength-by-category';
 
 interface StrengthByCategoriesProps {

@@ -1,4 +1,4 @@
-import { THEME_WORKOUTS } from '@/constants/theme/index.constants';
+import { THEME_WORKOUTS } from '@/constants/theme';
 import React from 'react';
 
 interface WorkoutFooterProps {

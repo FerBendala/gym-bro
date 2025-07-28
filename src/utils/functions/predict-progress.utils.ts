@@ -1,7 +1,7 @@
+import { PROGRESS_CONSTANTS, TIME_CONSTANTS } from '@/constants/';
 import type { WorkoutRecord } from '@/interfaces';
 import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { PROGRESS_CONSTANTS, TIME_CONSTANTS } from '../../constants/prediction-utils.constants';
 import { calculateOptimal1RM } from './calculate-1rm-optimal.utils';
 import { determineExperienceLevel } from './determine-experience-level.utils';
 import { getValidSortedRecords } from './get-valid-sorted-records.utils';

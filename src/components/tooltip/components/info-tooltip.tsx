@@ -1,6 +1,6 @@
+import { Tooltip } from '@/components/tooltip';
 import { Info } from 'lucide-react';
 import React from 'react';
-import { Tooltip } from '../tooltip';
 import { InfoTooltipProps } from '../types';
 
 export const InfoTooltip: React.FC<InfoTooltipProps> = ({

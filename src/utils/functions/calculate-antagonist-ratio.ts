@@ -1,4 +1,4 @@
-import { IDEAL_VOLUME_DISTRIBUTION } from '../../constants/exercise.constants';
+import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
 import { ANTAGONIST_PAIRS } from './category-analysis-types';
 
 /**

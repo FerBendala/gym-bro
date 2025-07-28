@@ -1,4 +1,4 @@
-import { MODERN_THEME } from '@/constants/theme/index.constants';
+import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils';
 import { Download, Loader2 } from 'lucide-react';
 import type { ExportFormat, ExportOption } from '../types';

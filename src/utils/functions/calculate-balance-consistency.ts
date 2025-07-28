@@ -1,4 +1,4 @@
-import type { WorkoutRecord } from '../../interfaces';
+import type { WorkoutRecord } from '@/interfaces';
 import { groupRecordsByWeek, isSameWeek } from './group-records-by-week';
 
 /**

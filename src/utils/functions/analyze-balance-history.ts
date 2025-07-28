@@ -1,5 +1,5 @@
-import { IDEAL_VOLUME_DISTRIBUTION } from '../../constants/exercise.constants';
-import type { ExerciseAssignment, WorkoutRecord } from '../../interfaces';
+import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
+import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
 import { calculateBalanceConsistency } from './calculate-balance-consistency';
 import { calculateVolumeProgression } from './calculate-volume-progression';
 import { analyzeTrendTowardsIdeal, calculateWeeklyBalancePercentages } from './calculate-weekly-balance-percentages';

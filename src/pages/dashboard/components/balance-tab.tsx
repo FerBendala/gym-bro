@@ -103,23 +103,22 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
           avgIntensity={avgIntensity}
           avgFrequency={avgFrequency}
           muscleBalance={muscleBalance}
-          onItemClick={handleBalanceItemClick}
         />
       )}
 
-      {activeSubTab === 'balanceByGroup' && (
+      {activeSubTab === 'balanceByGroup' && muscleBalance.length > 0 && (
         <BalanceByGroupContent
-          muscleBalance={muscleBalance}
-          categoryAnalysis={categoryAnalysis}
+          muscleBalance={muscleBalance as any}
+          categoryAnalysis={categoryAnalysis as any}
           onItemClick={handleBalanceItemClick}
         />
       )}
 
-      {activeSubTab === 'upperLower' && (
+      {activeSubTab === 'upperLower' && Object.keys(upperLowerBalance).length > 0 && (
         <UpperLowerBalanceContent
-          upperLowerBalance={upperLowerBalance}
-          categoryAnalysis={categoryAnalysis}
-          muscleBalance={muscleBalance}
+          upperLowerBalance={upperLowerBalance as any}
+          categoryAnalysis={categoryAnalysis as any}
+          muscleBalance={muscleBalance as any}
           onItemClick={handleUpperLowerItemClick}
         />
       )}

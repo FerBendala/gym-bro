@@ -12,3 +12,6 @@ export * from './ui.interfaces';
 // Interfaces de estado de la aplicación
 export * from './state.interfaces';
 
+// Interfaces del Dashboard
+export * from './dashboard.interfaces';
+

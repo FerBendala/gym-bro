@@ -1,7 +1,7 @@
+import { StatCard } from '@/components/stat-card';
 import { getDaysAgo } from '@/utils';
 import { Calendar, Target } from 'lucide-react';
 import React from 'react';
-import { StatCard } from '../../stat-card';
 import type { AdditionalStatsProps } from '../types';
 
 /**

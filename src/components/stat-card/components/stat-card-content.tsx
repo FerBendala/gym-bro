@@ -1,6 +1,6 @@
 import { Card, CardContent } from '@/components/card';
-import type { ThemeStatCardSize, ThemeStatCardVariant } from '@/constants/theme/index.constants';
-import { THEME_STAT_CARD } from '@/constants/theme/index.constants';
+import type { ThemeStatCardSize, ThemeStatCardVariant } from '@/constants/theme';
+import { THEME_STAT_CARD } from '@/constants/theme';
 import { cn } from '@/utils';
 import React from 'react';
 import type { StatCardContentProps } from '../types';
