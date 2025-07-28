@@ -21,9 +21,6 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[], allAssignments?: 
   const categoryMetrics = calculateCategoryMetrics(records, allAssignments);
   const balance: MuscleBalance[] = [];
 
-  // Calcular total de volumen para porcentajes
-  const totalVolume = categoryMetrics.reduce((sum, metric) => sum + metric.totalVolume, 0);
-
   // Analizar cada categoría
   categoryMetrics.forEach(metric => {
     const category = metric.category;

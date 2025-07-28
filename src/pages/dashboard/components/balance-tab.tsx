@@ -5,6 +5,7 @@ import React from 'react';
 import { BalanceByGroupContent, GeneralContent, TrendsContent } from '.';
 import { useBalanceTab } from '../hooks/use-balance-tab';
 
+
 interface BalanceTabProps {
   records: WorkoutRecord[];
 }
@@ -108,7 +109,9 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
 
       {activeSubTab === 'balanceByGroup' && muscleBalance.length > 0 && (
         <BalanceByGroupContent
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           muscleBalance={muscleBalance as any}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           categoryAnalysis={categoryAnalysis as any}
           onItemClick={handleBalanceItemClick}
         />
@@ -116,8 +119,11 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
 
       {activeSubTab === 'upperLower' && Object.keys(upperLowerBalance).length > 0 && (
         <UpperLowerBalanceContent
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           upperLowerBalance={upperLowerBalance as any}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           categoryAnalysis={categoryAnalysis as any}
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           muscleBalance={muscleBalance as any}
           onItemClick={handleUpperLowerItemClick}
         />

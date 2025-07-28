@@ -311,7 +311,7 @@ const validateAndCorrectPredictions = (
   prediction: ProgressPrediction,
   basicMetrics: ReturnType<typeof calculateBasicMetrics>,
 ): ProgressPrediction => {
-  let corrected = { ...prediction };
+  const corrected = { ...prediction };
 
   // Validar rangos razonables
   if (corrected.nextWeekWeight < 0) corrected.nextWeekWeight = basicMetrics.avgWeight;
