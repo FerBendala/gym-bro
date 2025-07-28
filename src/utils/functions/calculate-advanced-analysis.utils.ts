@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import type { WorkoutRecord } from '@/interfaces';
 import { analyzeFatigue, analyzeIntensityMetrics, analyzeTrainingEfficiency, calculateTrainingDensity, comparePeriods, predictProgress } from './index';
 
@@ -5,17 +6,11 @@ import { analyzeFatigue, analyzeIntensityMetrics, analyzeTrainingEfficiency, cal
  * Interfaz para análisis avanzado
  */
 export interface AdvancedAnalysis {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trainingDensity: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   trainingEfficiency: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   fatigueAnalysis: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   periodComparisons: any[];
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   progressPrediction: any;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   intensityMetrics: any;
   peakPerformanceIndicators: Array<{
     type: 'excellent' | 'good' | 'warning' | 'critical';
