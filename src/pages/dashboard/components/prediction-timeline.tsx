@@ -1,4 +1,5 @@
 import { formatNumberToString } from '@/utils';
+import { clamp } from '@/utils/functions/math-utils';
 import { ApexOptions } from 'apexcharts';
 import React from 'react';
 import Chart from 'react-apexcharts';
@@ -21,8 +22,8 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
     const weeks = [];
     const currentDate = new Date();
 
-    // Validar strengthTrend para evitar valores irreales
-    const validStrengthTrend = Math.max(-2, Math.min(2, strengthTrend));
+    // Validar tendencia de fuerza
+    const validStrengthTrend = clamp(strengthTrend, -2, 2);
 
     // Datos históricos (últimas 4 semanas) - con progresión realista
     for (let i = 4; i >= 1; i--) {
@@ -34,9 +35,12 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
       const minHistoricalWeight = currentWeight * 0.85; // Máximo 15% menos
       const maxHistoricalWeight = currentWeight * 1.05; // Máximo 5% más
 
+      // Calcular posición Y normalizada
+      const y = clamp(historicalWeight, minHistoricalWeight, maxHistoricalWeight);
+
       weeks.push({
         x: date.getTime(),
-        y: Math.max(minHistoricalWeight, Math.min(maxHistoricalWeight, historicalWeight))
+        y: y
       });
     }
 

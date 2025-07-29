@@ -1,4 +1,5 @@
 import { formatNumberToString } from '@/utils';
+import { clamp } from '@/utils/functions/math-utils';
 import { Timer, TrendingDown, TrendingUp, Trophy } from 'lucide-react';
 import React from 'react';
 import { TREND_THRESHOLDS } from '../constants';
@@ -11,7 +12,7 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
   const idealFrequencyPercentage = (TREND_THRESHOLDS.IDEAL_FREQUENCY / maxFrequency) * 100;
 
   // Normalizar fuerza: convertir progresión (-100 a +100) a escala 0-100
-  const normalizedStrength = Math.max(0, Math.min(100, ((data.strength + 100) / 2)));
+  const normalizedStrength = clamp(((data.strength + 100) / 2), 0, 100);
   const strengthIdeal = 50; // 0% de progresión como punto neutral
 
   // Calcular ideal de intensidad basado en datos disponibles

@@ -11,7 +11,7 @@ import { generateCategoryRecommendations, generateCategoryWarnings } from './gen
 import { getCurrentDateFromRecords } from './get-current-date-from-records';
 import { roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
-import { getLatestDate, getMaxEstimated1RM } from './workout-utils';
+import { getLatestDate, getMaxEstimated1RM, getMaxWeight, getMinWeight } from './workout-utils';
 
 /**
  * Calcula métricas detalladas para cada categoría de ejercicios
@@ -59,8 +59,8 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[], allAssignment
     // Calcular pesos promedio, máximo y mínimo usando funciones centralizadas
     const weights = categoryRecords.map(record => record.weight);
     const avgWeight = weights.reduce((sum, weight) => sum + weight, 0) / weights.length;
-    const maxWeight = Math.max(...weights);
-    const minWeight = Math.min(...weights);
+    const maxWeight = getMaxWeight(categoryRecords);
+    const minWeight = getMinWeight(categoryRecords);
 
     // Calcular sets y reps promedio y totales
     const sets = categoryRecords.map(record => record.sets);

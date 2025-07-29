@@ -249,8 +249,8 @@ const calculateNextWeekPredictions = (
   avgVolume: number,
 ): { nextWeekWeight: number; nextWeekVolume: number } => {
   // Predicción conservadora basada en tendencias
-  const nextWeekWeight = Math.max(0, avgVolume * (1 + strengthTrend * 0.01));
-  const nextWeekVolume = Math.max(0, avgVolume * (1 + volumeTrend * 0.01));
+  const nextWeekWeight = roundToDecimals(avgVolume * (1 + strengthTrend / 100));
+  const nextWeekVolume = roundToDecimals(avgVolume * (1 + volumeTrend / 100));
 
   return {
     nextWeekWeight,
@@ -267,14 +267,14 @@ const calculatePRPrediction = (
   confidenceLevel: number
 ): { weight: number; confidence: number; timeToNextPR: number } => {
   // Predicción conservadora de PR
-  const predictedWeight = current1RMMax * (1 + strengthTrend * 0.02);
+  const predictedWeight = roundToDecimals(current1RMMax * (1 + strengthTrend / 100));
   const confidence = clamp(confidenceLevel * 0.8, 0.3, 0.9);
   const timeToNextPR = strengthTrend > 0 ? Math.max(2, Math.min(12, 8 - strengthTrend * 2)) : 12;
 
   return {
     weight: predictedWeight,
-    confidence,
-    timeToNextPR
+    confidence: roundToDecimals(confidence),
+    timeToNextPR: roundToDecimals(timeToNextPR)
   };
 };
 

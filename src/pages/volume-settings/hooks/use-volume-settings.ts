@@ -2,6 +2,7 @@ import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants/exercise.constants';
 import { useNotification } from '@/stores/notification';
 import type { UserSettings } from '@/utils/data/indexeddb-types';
 import { getItem, updateItem } from '@/utils/data/indexeddb-utils';
+import { clamp } from '@/utils/functions/math-utils';
 import { useEffect, useState } from 'react';
 import { VOLUME_SETTINGS_CONSTANTS, VOLUME_SETTINGS_MESSAGES } from '../constants';
 import type { VolumeDistribution, VolumeSettingsState } from '../types';
@@ -37,7 +38,7 @@ export const useVolumeSettings = () => {
 
   // Actualizar porcentaje de un grupo muscular
   const handleVolumeChange = (category: string, value: number) => {
-    const clampedValue = Math.max(0, Math.min(100, value));
+    const clampedValue = clamp(value, 0, 100);
     setState(prev => ({
       ...prev,
       volumeDistribution: {

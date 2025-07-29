@@ -82,13 +82,13 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
     // Tiempo más frecuente (simplificado)
     const mostFrequentTime = null; // Calculado separadamente si es necesario
 
-    // Consistencia basada en variabilidad de volumen
-    const meanVolume = avgVolume;
+    // Calcular consistencia (menor desviación = mayor consistencia)
+    const meanVolume = volumes.reduce((sum, v) => sum + v, 0) / volumes.length;
     const variance = volumes.reduce((sum, v) => sum + Math.pow(v - meanVolume, 2), 0) / volumes.length;
     const stdDev = Math.sqrt(variance);
     const consistency = meanVolume > 0 ? clamp(100 - ((stdDev / meanVolume) * 100), 0, 100) : 0;
 
-    // Calcular tendencia temporal
+    // Calcular tendencia vs semanas anteriores
     let trend = 0;
     const sortedDayWorkouts = [...dayWorkouts].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
@@ -106,14 +106,7 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
 
       if (olderAvgVolume > 0) {
         const rawTrend = ((recentAvgVolume - olderAvgVolume) / olderAvgVolume) * 100;
-        // Usar función centralizada para validar rango
-        if (Math.abs(rawTrend) >= 8) {
-          trend = clamp(Math.round(rawTrend * 0.6), -30, 30); // Factor conservador
-        } else {
-          trend = 5; // Tendencia positiva leve por defecto
-        }
-      } else if (recentAvgVolume > 0) {
-        trend = 25; // Comenzó a entrenar en este día
+        trend = clamp(Math.round(rawTrend * 0.6), -30, 30); // Factor conservador
       }
     } else if (workoutCount === 3) {
       // Para exactamente 3 entrenamientos: verificar distribución temporal
@@ -129,48 +122,24 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
 
         if (firstVolume > 0) {
           const rawTrend = ((lastVolume - firstVolume) / firstVolume) * 100;
-          // Threshold más bajo para pocos datos
-          if (Math.abs(rawTrend) >= 12) {
-            trend = clamp(Math.round(rawTrend * 0.5), -20, 20); // Factor muy conservador
-          } else {
-            trend = 5; // Leve positivo por defecto con pocos datos
-          }
-        } else {
-          trend = 5;
+          trend = clamp(Math.round(rawTrend * 0.5), -20, 20); // Factor muy conservador
         }
       }
-    } else if (workoutCount === 2) {
-      // Para 2 entrenamientos: verificar si están en días diferentes
-      const uniqueDates = new Set(sortedDayWorkouts.map(r => r.date.toDateString()));
-
-      if (uniqueDates.size <= 1) {
-        // Si ambos entrenamientos están en el mismo día
-        trend = 6; // Tendencia positiva leve por actividad
+    } else if (sortedDayWorkouts.length >= 2) {
+      const firstVolume = calculateVolume(sortedDayWorkouts[0]);
+      const lastVolume = calculateVolume(sortedDayWorkouts[1]);
+      if (firstVolume > 0) {
+        const rawTrend = ((lastVolume - firstVolume) / firstVolume) * 100;
+        trend = clamp(Math.round(rawTrend * 0.3), 0, 15); // Factor muy conservador
       } else {
-        // Si están en días diferentes, comparar con mucha cautela
-        const firstVolume = calculateVolume(sortedDayWorkouts[0]);
-        const lastVolume = calculateVolume(sortedDayWorkouts[1]);
-
-        if (firstVolume > 0) {
-          const rawTrend = ((lastVolume - firstVolume) / firstVolume) * 100;
-          // Solo marcar tendencia si hay cambio muy significativo
-          if (rawTrend > 25) {
-            trend = clamp(Math.round(rawTrend * 0.3), 0, 15); // Factor muy conservador
-          } else if (rawTrend < -30) {
-            trend = clamp(Math.round(rawTrend * 0.3), -10, 0);
-          } else {
-            trend = 3; // Muy leve positivo por defecto
-          }
-        } else {
-          trend = 3;
-        }
+        trend = 3; // Valor por defecto si no hay datos
       }
     } else if (workoutCount === 1) {
       // Primera vez entrenando en este día = tendencia positiva leve
       trend = 20; // Positivo moderado para nuevo día
     }
 
-    // Performance score (0-100) basado en volumen, consistencia y variedad
+    // Calcular scores de rendimiento
     const volumeScore = totalVolume > 0 ? clamp((totalVolume / totalVolume) * 700, 0, 100) : 0;
     const consistencyScore = clamp(consistency * 2, 0, 100);
     const varietyScore = clamp(uniqueExercises * 20, 0, 100);

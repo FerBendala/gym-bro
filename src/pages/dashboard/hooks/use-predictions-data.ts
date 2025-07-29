@@ -1,5 +1,7 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { calculateAdvancedAnalysis, calculateNormalizedVolumeTrend, formatNumberToString } from '@/utils';
+import { roundToDecimals } from '@/utils/functions/math-utils';
+import { getMaxWeight } from '@/utils/functions/workout-utils';
 import { useMemo } from 'react';
 import { usePredictionMetrics } from './use-prediction-metrics';
 
@@ -21,7 +23,7 @@ const validateNextWeekWeight = (records: WorkoutRecord[], rawPrediction: number)
   const recentRecords = getRecentRecords(records);
   if (recentRecords.length === 0) return 0;
 
-  const maxRecentWeight = Math.max(...recentRecords.map(r => r.weight));
+  const maxRecentWeight = getMaxWeight(recentRecords);
 
   // CORRECCIÓN CRÍTICA: usar el peso máximo como base, NO el promedio
   // La próxima semana debe estar cerca del peso máximo actual
@@ -31,11 +33,11 @@ const validateNextWeekWeight = (records: WorkoutRecord[], rawPrediction: number)
   let result: number;
 
   if (rawPrediction < minReasonable) {
-    result = Math.round(maxRecentWeight * 1.01 * 100) / 100; // 1% mejora conservadora del peso máximo
+    result = roundToDecimals(maxRecentWeight * 1.01); // 1% mejora conservadora del peso máximo
   } else if (rawPrediction > maxReasonable) {
-    result = Math.round(maxReasonable * 100) / 100;
+    result = roundToDecimals(maxReasonable);
   } else {
-    result = Math.round(rawPrediction * 100) / 100;
+    result = roundToDecimals(rawPrediction);
   }
 
   return result;
@@ -45,7 +47,7 @@ const validatePRWeight = (records: WorkoutRecord[], rawPrediction: number, nextW
   const recentRecords = getRecentRecords(records);
   if (recentRecords.length === 0) return 0;
 
-  const recentMaxWeight = Math.max(...recentRecords.map(r => r.weight));
+  const recentMaxWeight = getMaxWeight(recentRecords);
 
   if (recentMaxWeight > 0) {
     // CORRECCIÓN: PR futuro debe ser progresivo (6 semanas = +5-15kg adicionales)
@@ -57,23 +59,23 @@ const validatePRWeight = (records: WorkoutRecord[], rawPrediction: number, nextW
     const maxReasonablePR = recentMaxWeight * 1.20; // Máximo 20% mejora
 
     if (rawPrediction < minReasonablePR) {
-      return Math.round(minReasonablePR * 100) / 100;
+      return roundToDecimals(minReasonablePR);
     } else if (rawPrediction > maxReasonablePR) {
-      return Math.round(maxReasonablePR * 100) / 100;
+      return roundToDecimals(maxReasonablePR);
     }
   }
 
-  return Math.round(rawPrediction * 100) / 100;
+  return roundToDecimals(rawPrediction);
 };
 
 const validateStrengthTrend = (rawTrend: number): number => {
   const validTrend = Math.max(-2, Math.min(2, rawTrend)); // Limitar a ±2kg/sem
-  return Math.round(validTrend * 100) / 100; // Redondear a 2 decimales
+  return roundToDecimals(validTrend); // Redondear a 2 decimales
 };
 
 const validateMonthlyGrowth = (rawGrowth: number): number => {
   const validGrowth = Math.max(-5, Math.min(10, rawGrowth)); // Rango realista: -5kg a +10kg/mes
-  return Math.round(validGrowth * 100) / 100; // Redondear a 2 decimales
+  return roundToDecimals(validGrowth); // Redondear a 2 decimales
 };
 
 const validateTimeToNextPR = (rawTime: number, nextWeekWeight?: number, prWeight?: number, strengthTrend?: number): number => {
@@ -95,8 +97,8 @@ const calculateValidatedCurrentWeight = (records: WorkoutRecord[]): number => {
   const recentRecords = getRecentRecords(records);
   if (recentRecords.length === 0) return 0;
 
-  const currentWeight = Math.max(...recentRecords.map(r => r.weight));
-  return Math.round(currentWeight * 100) / 100; // Redondear a 2 decimales
+  const currentWeight = getMaxWeight(recentRecords);
+  return roundToDecimals(currentWeight); // Redondear a 2 decimales
 };
 
 export const usePredictionsData = (records: WorkoutRecord[]) => {

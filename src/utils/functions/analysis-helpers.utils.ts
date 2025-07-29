@@ -1,5 +1,6 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { determineExperienceLevel } from './determine-experience-level.utils';
+import { clamp } from './math-utils';
 
 /**
  * Analiza el balance de grupos musculares
@@ -54,7 +55,7 @@ export const analyzeTemporalConsistency = (records: WorkoutRecord[]) => {
   const daysBetween = sortedRecords.length > 1 ?
     (new Date(sortedRecords[sortedRecords.length - 1].date).getTime() - new Date(sortedRecords[0].date).getTime()) / (1000 * 60 * 60 * 24) : 0;
 
-  const consistencyScore = Math.min(100, (records.length / Math.max(1, daysBetween / 7)) * 100);
+  const consistencyScore = clamp((records.length / Math.max(1, daysBetween / 7)) * 100, 0, 100);
 
   return { consistencyScore };
 };
@@ -162,6 +163,6 @@ export const analyzeEnergyDemands = (records: WorkoutRecord[]) => {
   const avgVolume = totalVolume / records.length;
 
   // Demandas energéticas basadas en volumen e intensidad
-  const energyScore = Math.min(100, Math.max(0, 100 - (avgVolume / 100)));
+  const energyScore = clamp(100 - (avgVolume / 100), 0, 100);
   return { energyScore };
 }; 

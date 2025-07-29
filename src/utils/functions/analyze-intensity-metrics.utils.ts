@@ -1,5 +1,6 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { calculateIntensityScore } from './calculate-intensity-score';
+import { clamp } from './math-utils';
 import { getThisWeekRecords } from './week-records.utils';
 
 /**
@@ -33,10 +34,7 @@ export const analyzeIntensityMetrics = (records: WorkoutRecord[]): IntensityMetr
   // Calcular intensidad de volumen basada en métricas más realistas
   const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
   const avgVolumePerWorkout = totalVolume / records.length;
-
-  // Clasificar volumen por sesión de forma más realista
-  // Basado en estándares típicos de entrenamiento
-  const volumeIntensity = Math.min(100, Math.max(0, (avgVolumePerWorkout / 800) * 100));
+  const volumeIntensity = clamp((avgVolumePerWorkout / 800) * 100, 0, 100);
 
   // Calcular intensidad de frecuencia de forma más equilibrada
   const thisWeekRecords = getThisWeekRecords(records);

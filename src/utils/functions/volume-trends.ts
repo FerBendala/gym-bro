@@ -1,5 +1,6 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { getDay } from 'date-fns';
+import { clamp } from './math-utils';
 import { calculateVolume } from './volume-calculations';
 
 /**
@@ -46,12 +47,8 @@ export const calculateVolumeTrendByDay = (records: WorkoutRecord[]): { day: stri
 
           if (olderAvgVolume > 0) {
             const rawTrend = ((recentAvgVolume - olderAvgVolume) / olderAvgVolume) * 100;
-            // Aplicar threshold realista para detectar cambios significativos
-            if (Math.abs(rawTrend) >= 8) {
-              trend = Math.max(-30, Math.min(30, Math.round(rawTrend * 0.6))); // Factor conservador
-            } else {
-              trend = 5; // Tendencia positiva leve por defecto
-            }
+            // Calcular tendencia conservadora
+            trend = clamp(Math.round(rawTrend * 0.6), -30, 30); // Factor conservador
           } else if (recentAvgVolume > 0) {
             trend = 25; // Comenzó a entrenar en este día
           }
@@ -70,12 +67,8 @@ export const calculateVolumeTrendByDay = (records: WorkoutRecord[]): { day: stri
 
           if (firstVolume > 0) {
             const rawTrend = ((lastVolume - firstVolume) / firstVolume) * 100;
-            // Threshold más bajo para pocos datos
-            if (Math.abs(rawTrend) >= 12) {
-              trend = Math.max(-20, Math.min(20, Math.round(rawTrend * 0.5))); // Factor muy conservador
-            } else {
-              trend = 5; // Leve positivo por defecto con pocos datos
-            }
+            // Comparar primer y último volumen
+            trend = clamp(Math.round(rawTrend * 0.3), 0, 15); // Factor muy conservador
           } else {
             trend = 5;
           }
@@ -96,14 +89,8 @@ export const calculateVolumeTrendByDay = (records: WorkoutRecord[]): { day: stri
 
         if (firstVolume > 0) {
           const rawTrend = ((lastVolume - firstVolume) / firstVolume) * 100;
-          // Solo marcar tendencia si hay cambio muy significativo
-          if (rawTrend > 25) {
-            trend = Math.min(15, Math.round(rawTrend * 0.3)); // Factor muy conservador
-          } else if (rawTrend < -30) {
-            trend = Math.max(-10, Math.round(rawTrend * 0.3));
-          } else {
-            trend = 3; // Muy leve positivo por defecto
-          }
+          // Comparar dos volúmenes
+          trend = clamp(Math.round(rawTrend * 0.3), -10, 0);
         } else {
           trend = 3;
         }

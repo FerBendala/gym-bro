@@ -1,6 +1,8 @@
 import type { WorkoutRecord } from '@/interfaces';
 import type { CategoryMetrics } from '@/utils';
 import { calculateAdvancedStrengthAnalysis, calculateIntensityScore } from '@/utils';
+import { roundToDecimals } from '@/utils/functions/math-utils';
+import { getMaxEstimated1RM, getMaxWeight, getMinWeight } from '@/utils/functions/workout-utils';
 import { useMemo } from 'react';
 
 export interface StrengthByCategory {
@@ -78,8 +80,8 @@ const calculateSingleCategoryMetrics = (categoryName: string, categoryRecords: W
   // Calcular métricas de peso
   const weights = categoryRecords.map(record => record.weight);
   const avgWeight = weights.reduce((sum, weight) => sum + weight, 0) / weights.length;
-  const maxWeight = Math.max(...weights);
-  const minWeight = Math.min(...weights);
+  const maxWeight = getMaxWeight(categoryRecords);
+  const minWeight = getMinWeight(categoryRecords);
 
   // Calcular métricas de sets y reps
   const sets = categoryRecords.map(record => record.sets);
@@ -117,8 +119,8 @@ const calculateSingleCategoryMetrics = (categoryName: string, categoryRecords: W
   const lastWorkout = latestDate;
   const daysSinceLastWorkout = Math.floor((new Date().getTime() - lastWorkout.getTime()) / (1000 * 60 * 60 * 24));
 
-  // Calcular 1RM estimado
-  const estimatedOneRM = Math.max(...categoryRecords.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30)));
+  // Calcular 1RM estimado máximo
+  const estimatedOneRM = getMaxEstimated1RM(categoryRecords);
 
   // Calcular métricas básicas adicionales
   const personalRecords = 1; // Simplificado
@@ -141,14 +143,14 @@ const calculateSingleCategoryMetrics = (categoryName: string, categoryRecords: W
     category: categoryName,
     workouts,
     totalVolume: Math.round(totalVolume),
-    avgWeight: Math.round(avgWeight * 100) / 100,
+    avgWeight: roundToDecimals(avgWeight),
     maxWeight,
     minWeight,
-    avgSets: Math.round(avgSets * 100) / 100,
-    avgReps: Math.round(avgReps * 100) / 100,
+    avgSets: roundToDecimals(avgSets),
+    avgReps: roundToDecimals(avgReps),
     totalSets,
     totalReps,
-    avgWorkoutsPerWeek: Math.round(avgWorkoutsPerWeek * 100) / 100,
+    avgWorkoutsPerWeek: roundToDecimals(avgWorkoutsPerWeek),
     lastWorkout,
     percentage: 0, // Se calculará después
     personalRecords,

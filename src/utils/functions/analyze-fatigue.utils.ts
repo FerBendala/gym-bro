@@ -1,7 +1,7 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { differenceInDays, endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { clamp } from './math-utils';
+import { clamp, roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
 import { getLatestDate } from './workout-utils';
 
@@ -256,7 +256,7 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
 
   const fatigueHistory: FatigueAnalysis['fatigueHistory'] = {
     trend,
-    consistency: Math.round(Math.min(100, Math.max(0, 100 - Math.abs(volumeChange))) * 10) / 10
+    consistency: roundToDecimals(Math.min(100, Math.max(0, 100 - Math.abs(volumeChange))))
   };
 
   return {

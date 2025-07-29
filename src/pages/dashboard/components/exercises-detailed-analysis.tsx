@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader } from '@/components/card';
 import { PROGRESS_THRESHOLDS } from '@/constants';
 import type { ExerciseAnalysis } from '@/interfaces';
 import { formatNumberToString, getCategoryColor, getCategoryIcon } from '@/utils';
+import { clamp } from '@/utils/functions/math-utils';
 import { Calendar, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
 
@@ -156,7 +157,7 @@ export const ExercisesDetailedAnalysis: React.FC<ExercisesDetailedAnalysisProps>
                     <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">
                       <div
                         className={`relative h-full bg-gradient-to-r ${exercise.progressPercent > 0 ? 'from-green-500/80 to-green-600/80' : exercise.progressPercent < 0 ? 'from-red-500/80 to-red-600/80' : 'from-gray-500/80 to-gray-600/80'} transition-all duration-300`}
-                        style={{ width: `${Math.min(100, Math.max(5, Math.abs(exercise.progressPercent) * 2))}%` }}
+                        style={{ width: `${clamp(Math.abs(exercise.progressPercent) * 2, 5, 100)}%` }}
                       >
                         <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
                       </div>

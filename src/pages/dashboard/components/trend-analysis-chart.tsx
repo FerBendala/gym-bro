@@ -1,4 +1,5 @@
 import { formatNumberToString } from '@/utils';
+import { clamp } from '@/utils/functions/math-utils';
 import { ApexOptions } from 'apexcharts';
 import React from 'react';
 import Chart from 'react-apexcharts';
@@ -20,9 +21,9 @@ export const TrendAnalysisChart: React.FC<TrendAnalysisChartProps> = ({
   confidenceLevel,
   trendAnalysis
 }) => {
-  // Normalizar valores para el radar chart (0-100)
-  const normalizeStrengthTrend = Math.min(100, Math.max(0, (strengthTrend + 2) * 25)); // -2 a +2 -> 0-100
-  const normalizeVolumeTrend = Math.min(100, Math.max(0, (volumeTrend + 50) * 1)); // -50 a +50 -> 0-100
+  // Normalizar tendencias para el gráfico (0-100)
+  const normalizeStrengthTrend = clamp((strengthTrend + 2) * 25, 0, 100); // -2 a +2 -> 0-100
+  const normalizeVolumeTrend = clamp((volumeTrend + 50) * 1, 0, 100); // -50 a +50 -> 0-100
   const normalizeGrowthRate = Math.min(100, monthlyGrowthRate * 10); // 0-10kg -> 0-100
   const normalizeConfidence = confidenceLevel; // ya está 0-100
   const normalizePlateauRisk = 100 - plateauRisk; // invertir para que mayor = mejor

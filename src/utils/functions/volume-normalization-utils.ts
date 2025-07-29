@@ -1,20 +1,12 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { roundToDecimals } from './math-utils';
+import { clamp, roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
-
-/**
- * @deprecated Usar calculateVolume de volume-calculations.ts
- */
-const calculateRecordVolume = (record: WorkoutRecord): number => {
-  return calculateVolume(record);
-};
 
 /**
  * Obtiene el nombre del día de la semana en español
  */
 export const getDayName = (date: Date): string => {
-  const days = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
-  return days[date.getDay()];
+  return date.toLocaleDateString('es-ES', { weekday: 'long' });
 };
 
 /**
@@ -27,7 +19,7 @@ export const getVolumeByDayOfWeek = (records: WorkoutRecord[]): Record<string, n
 
   records.forEach(record => {
     const dateKey = record.date.toISOString().split('T')[0]; // YYYY-MM-DD
-    const volume = calculateRecordVolume(record);
+    const volume = calculateVolume(record);
 
     if (!volumeByDate[dateKey]) {
       volumeByDate[dateKey] = 0;
@@ -95,7 +87,7 @@ export const calculateNormalizedVolumeTrend = (records: WorkoutRecord[]): number
 
   records.forEach(record => {
     const dateKey = record.date.toISOString().split('T')[0];
-    const volume = calculateRecordVolume(record);
+    const volume = calculateVolume(record);
 
     if (!volumeByDate[dateKey]) {
       volumeByDate[dateKey] = { volume: 0, date: new Date(record.date) };
@@ -152,7 +144,8 @@ export const calculateNormalizedVolumeTrend = (records: WorkoutRecord[]): number
   const absoluteMaxTrend = 300;
   const finalMaxTrend = Math.min(maxReasonableTrend, absoluteMaxTrend);
 
-  const limitedTrend = Math.max(-finalMaxTrend, Math.min(finalMaxTrend, weeklyTrend));
+  // Limitar la tendencia a un rango realista
+  const limitedTrend = clamp(weeklyTrend, -finalMaxTrend, finalMaxTrend);
 
   return roundToDecimals(limitedTrend);
 };

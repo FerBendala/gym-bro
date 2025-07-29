@@ -1,4 +1,5 @@
 import { formatNumberToString } from '@/utils';
+import { clamp } from '@/utils/functions/math-utils';
 import { ApexOptions } from 'apexcharts';
 import React from 'react';
 import Chart from 'react-apexcharts';
@@ -24,10 +25,10 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
   const validPredictedPR = Math.max(validCurrentWeight, predictedPR || validCurrentWeight * 1.05);
   const validBaseline1RM = Math.max(validCurrentWeight, baseline1RM || validCurrentWeight);
 
-  // Calcular progreso como porcentaje hacia el PR
-  // Usar baseline1RM como punto de partida y predictedPR como objetivo
-  const progressPercentage = validBaseline1RM > 0 ?
-    Math.min(100, Math.max(0, ((validCurrentWeight - validBaseline1RM) / (validPredictedPR - validBaseline1RM)) * 100)) : 0;
+  // Calcular progreso hacia el PR
+  const progressPercentage = validBaseline1RM > 0 && validPredictedPR > validBaseline1RM
+    ? clamp(((validCurrentWeight - validBaseline1RM) / (validPredictedPR - validBaseline1RM)) * 100, 0, 100)
+    : 0;
 
   const getProgressColor = (progress: number): string => {
     if (progress >= 90) return '#10b981'; // green
@@ -119,7 +120,7 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
         </div>
         <div className="text-center">
           <div className="text-xs text-gray-400">Tiempo</div>
-          <div className="text-sm font-medium text-white">{Math.max(1, Math.min(52, timeToNextPR || 8))}sem</div>
+          <div className="text-sm font-medium text-white">{clamp(timeToNextPR || 8, 1, 52)}sem</div>
         </div>
       </div>
 
@@ -127,13 +128,13 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
       <div>
         <div className="flex justify-between text-xs text-gray-400 mb-2">
           <span>Confianza de Predicción</span>
-          <span>{Math.max(5, Math.min(95, confidence || 50))}%</span>
+          <span>{clamp(confidence || 50, 5, 95)}%</span>
         </div>
         <div className="relative h-2 bg-gray-800 rounded-full overflow-hidden">
           <div
             className={`h-full transition-all duration-300 ${(confidence || 50) >= 70 ? 'bg-green-500' :
               (confidence || 50) >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
-            style={{ width: `${Math.max(5, Math.min(95, confidence || 50))}%` }}
+            style={{ width: `${clamp(confidence || 50, 5, 95)}%` }}
           />
         </div>
       </div>

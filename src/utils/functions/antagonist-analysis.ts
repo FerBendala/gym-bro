@@ -2,6 +2,7 @@ import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
 import type { WorkoutRecord } from '@/interfaces';
 import type { CategoryMetrics } from './category-analysis-types';
 import { ANTAGONIST_PAIRS } from './category-analysis-types';
+import { roundToDecimals } from './math-utils';
 import { STRENGTH_STANDARDS } from './strength-standards';
 
 /**
@@ -33,17 +34,15 @@ export const calculateSymmetryScore = (_: string, categoryRecords: WorkoutRecord
  * Calcula el ratio antagonista para un grupo muscular
  */
 export const calculateAntagonistRatio = (category: string, categoryMetrics: CategoryMetrics[]): number => {
-  const antagonist = ANTAGONIST_PAIRS[category];
-  if (!antagonist) return 1; // No hay antagonista directo
-
   const currentMetric = categoryMetrics.find(m => m.category === category);
-  const antagonistMetric = categoryMetrics.find(m => m.category === antagonist);
+  const antagonistGroup = getAntagonistGroup(category);
+  const antagonistMetric = antagonistGroup ? categoryMetrics.find(m => m.category === antagonistGroup) : null;
 
   if (!currentMetric || !antagonistMetric || antagonistMetric.totalVolume === 0) {
-    return 0;
+    return 1; // Ratio neutro si no hay datos del antagonista
   }
 
-  return Math.round((currentMetric.totalVolume / antagonistMetric.totalVolume) * 100) / 100;
+  return roundToDecimals((currentMetric.totalVolume / antagonistMetric.totalVolume));
 };
 
 /**
