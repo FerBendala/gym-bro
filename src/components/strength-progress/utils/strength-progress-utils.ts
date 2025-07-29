@@ -23,10 +23,4 @@ export const getPlateauRiskBgColor = (risk: number): string => {
   if (risk > 70) return 'bg-red-500';
   if (risk > 40) return 'bg-yellow-500';
   return 'bg-green-500';
-};
-
-export const getVolumeAdjustmentColor = (adjustment: number): string => {
-  if (adjustment > 0) return 'text-green-400';
-  if (adjustment < 0) return 'text-red-400';
-  return 'text-gray-400';
 }; 

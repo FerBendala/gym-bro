@@ -1,81 +1,62 @@
 import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
+import { calculateCategoryPerformanceMetrics } from './calculate-category-performance-metrics';
+import { calculateConsistencyScore } from './calculate-consistency-score';
+import { calculateIntensityScore } from './calculate-intensity-score';
+import { calculateVolumeDistribution } from './calculate-volume-distribution';
 import { calculateVolumeProgression } from './calculate-volume-progression';
 import { calculateWeightProgression } from './calculate-weight-progression';
 import type { CategoryMetrics } from './category-analysis-types';
-import { calculateCategoryEffortDistribution } from './exercise-patterns';
-import {
-  analyzeBalanceHistory,
-  calculateCategoryPerformanceMetrics,
-  calculateConsistencyScore,
-  calculateEfficiencyScore,
-  calculateIntensityScore,
-  calculatePersonalRecords,
-  calculateVolumeDistribution,
-  determineStrengthLevel,
-  generateCategoryRecommendations,
-  generateCategoryWarnings,
-  getCurrentDateFromRecords
-} from './index';
+import { calculateEfficiencyScore, calculatePersonalRecords } from './category-metrics-calculations';
+import { generateCategoryRecommendations, generateCategoryWarnings } from './generate-category-recommendations';
+import { getCurrentDateFromRecords } from './get-current-date-from-records';
+import { roundToDecimals } from './math-utils';
+import { calculateVolume } from './volume-calculations';
+import { getLatestDate, getMaxEstimated1RM } from './workout-utils';
 
 /**
- * Calcula métricas detalladas para cada categoría muscular
+ * Calcula métricas detalladas para cada categoría de ejercicios
+ * Refactorizado para usar funciones centralizadas y eliminar redundancias
  */
 export const calculateCategoryMetrics = (records: WorkoutRecord[], allAssignments?: ExerciseAssignment[]): CategoryMetrics[] => {
   if (records.length === 0) return [];
 
-  // Agrupar records por categoría (un record puede contar para múltiples categorías)
-  const recordsByCategory: Record<string, WorkoutRecord[]> = {};
-  const workoutsByCategory: Record<string, number> = {};
-  const volumeByCategory: Record<string, number> = {};
+  // Agrupar registros por categoría
+  const recordsByCategory: { [key: string]: WorkoutRecord[] } = {};
+  const workoutsByCategory: { [key: string]: number } = {};
+  const volumeByCategory: { [key: string]: number } = {};
 
   records.forEach(record => {
     const categories = record.exercise?.categories || [];
 
-    if (categories.length === 0) {
-      // Sin categorías
-      const category = 'Sin categoría';
+    categories.forEach(category => {
       if (!recordsByCategory[category]) {
         recordsByCategory[category] = [];
         workoutsByCategory[category] = 0;
         volumeByCategory[category] = 0;
       }
+
       recordsByCategory[category].push(record);
       workoutsByCategory[category]++;
-      volumeByCategory[category] += record.weight * record.reps * record.sets;
-    } else {
-      // OPCIÓN 2: Volumen Relativo al Esfuerzo
-      // Calcular la distribución de esfuerzo entre categorías
-      const totalVolume = record.weight * record.reps * record.sets;
-      const effortDistribution = calculateCategoryEffortDistribution(categories);
-      const workoutContribution = 1 / categories.length; // Solo dividir workouts, no volumen
-
-      categories.forEach(category => {
-        if (!recordsByCategory[category]) {
-          recordsByCategory[category] = [];
-          workoutsByCategory[category] = 0;
-          volumeByCategory[category] = 0;
-        }
-        recordsByCategory[category].push(record);
-        workoutsByCategory[category] += workoutContribution;
-        // Asignar volumen basado en el esfuerzo relativo de cada categoría
-        volumeByCategory[category] += totalVolume * (effortDistribution[category] || 0);
-      });
-    }
+      // Usar función centralizada para calcular volumen
+      volumeByCategory[category] += calculateVolume(record);
+    });
   });
 
-  // Calcular totalVolume para porcentajes consistentes
+  // Calcular volumen total usando función centralizada
   const totalVolume = Object.values(volumeByCategory).reduce((sum, volume) => sum + volume, 0);
-  const metrics: CategoryMetrics[] = [];
 
-  // Obtener fecha actual basada en los datos reales
+  // Obtener fecha actual basada en los datos
   const currentDate = getCurrentDateFromRecords(records);
+
+  // Array para almacenar las métricas de categorías
+  const categoryMetricsArray: CategoryMetrics[] = [];
 
   // Calcular métricas para cada categoría
   Object.entries(recordsByCategory).forEach(([category, categoryRecords]) => {
     const workouts = workoutsByCategory[category];
     const categoryVolume = volumeByCategory[category];
 
-    // Calcular pesos promedio, máximo y mínimo considerando todos los ejercicios de la categoría
+    // Calcular pesos promedio, máximo y mínimo usando funciones centralizadas
     const weights = categoryRecords.map(record => record.weight);
     const avgWeight = weights.reduce((sum, weight) => sum + weight, 0) / weights.length;
     const maxWeight = Math.max(...weights);
@@ -88,9 +69,6 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[], allAssignment
     const avgReps = reps.reduce((sum, r) => sum + r, 0) / reps.length;
     const totalSets = sets.reduce((sum, s) => sum + s, 0);
     const totalReps = reps.reduce((sum, r) => sum + r, 0);
-
-    // Calcular entrenamientos por semana aproximado - CORREGIDO
-    const dates = categoryRecords.map(record => new Date(record.date));
 
     // Agrupar por semanas para calcular frecuencia semanal real
     const weeklyData = new Map<string, Set<string>>();
@@ -158,15 +136,14 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[], allAssignment
       }
     }
 
-    const lastWorkout = new Date(Math.max(...dates.map(d => d.getTime())));
+    const lastWorkout = getLatestDate(categoryRecords);
 
     // Usar porcentaje de volumen relativo al esfuerzo
     const percentage = totalVolume > 0 ? (categoryVolume / totalVolume) * 100 : 0;
 
-    // Calcular métricas avanzadas
+    // Calcular métricas avanzadas usando funciones centralizadas
     const personalRecords = calculatePersonalRecords(categoryRecords);
-    const estimatedOneRM = categoryRecords.length > 0 ?
-      Math.max(...categoryRecords.map(r => r.weight * (1 + Math.min(r.reps, 20) / 30))) : 0;
+    const estimatedOneRM = getMaxEstimated1RM(categoryRecords);
 
     const weightProgression = calculateWeightProgression(categoryRecords, category);
     const volumeProgression = calculateVolumeProgression(categoryRecords, category);
@@ -179,60 +156,86 @@ export const calculateCategoryMetrics = (records: WorkoutRecord[], allAssignment
 
     let trend: 'improving' | 'stable' | 'declining' = 'stable';
 
-    // **CENTRALIZACIÓN**: Usar directamente la lógica de balanceHistory.trend
-    // Esto elimina la duplicación y usa el sistema más inteligente
-    const balanceHistory = analyzeBalanceHistory(categoryRecords, records, allAssignments);
-    trend = balanceHistory.trend; // Usar directamente el resultado del análisis de balance
+    // Determinar tendencia basada en progresión de peso y volumen
+    if (weightProgression > 5 || volumeProgression > 10) {
+      trend = 'improving';
+    } else if (weightProgression < -5 || volumeProgression < -10) {
+      trend = 'declining';
+    }
 
-    const strengthLevel = determineStrengthLevel(estimatedOneRM, category);
+    // Determinar nivel de fuerza basado en 1RM estimado
+    let strengthLevel: 'beginner' | 'intermediate' | 'advanced' = 'beginner';
+    if (estimatedOneRM > 100) strengthLevel = 'advanced';
+    else if (estimatedOneRM > 50) strengthLevel = 'intermediate';
 
-    // Pasar todos los records como segundo parámetro para cálculo correcto de fechas
+    // Calcular distribución de volumen usando función centralizada
     const volumeDistribution = calculateVolumeDistribution(categoryRecords, records, allAssignments);
 
+    // Calcular métricas de rendimiento usando función centralizada
     const performanceMetrics = calculateCategoryPerformanceMetrics(categoryRecords);
 
-    // Crear objeto base
-    const baseMetrics: Partial<CategoryMetrics> = {
+    // Generar recomendaciones y advertencias
+    const recommendations = generateCategoryRecommendations(category, {
+      workouts,
+      totalVolume: categoryVolume,
+      avgWeight,
+      maxWeight,
+      avgWorkoutsPerWeek,
+      trend,
+      strengthLevel,
+      daysSinceLastWorkout
+    });
+
+    const warnings = generateCategoryWarnings(category, {
+      workouts,
+      totalVolume: categoryVolume,
+      avgWeight,
+      maxWeight,
+      avgWorkoutsPerWeek,
+      trend,
+      strengthLevel,
+      daysSinceLastWorkout
+    });
+
+    // Crear objeto de métricas con valores redondeados usando función centralizada
+    const categoryMetrics: CategoryMetrics = {
       category,
-      workouts: Math.round(workouts * 100) / 100,
-      totalVolume: Math.round(categoryVolume),
-      avgWeight: Math.round(avgWeight * 100) / 100,
+      workouts,
+      totalVolume: roundToDecimals(categoryVolume),
+      avgWeight: roundToDecimals(avgWeight, 2),
       maxWeight,
       minWeight,
-      avgSets: Math.round(avgSets * 100) / 100,
-      avgReps: Math.round(avgReps * 100) / 100,
+      avgWorkoutsPerWeek: roundToDecimals(avgWorkoutsPerWeek, 2),
+      lastWorkout,
+      percentage: roundToDecimals(percentage, 1),
+      avgSets: roundToDecimals(avgSets, 2),
+      avgReps: roundToDecimals(avgReps, 2),
       totalSets,
       totalReps,
-      avgWorkoutsPerWeek: Math.round(avgWorkoutsPerWeek * 100) / 100,
-      lastWorkout,
-      percentage: Math.round(percentage * 100) / 100,
       personalRecords,
-      estimatedOneRM: Math.round(estimatedOneRM),
-      weightProgression,
-      volumeProgression,
-      intensityScore,
-      efficiencyScore,
-      consistencyScore,
+      estimatedOneRM: roundToDecimals(estimatedOneRM),
+      weightProgression: roundToDecimals(weightProgression, 1),
+      volumeProgression: roundToDecimals(volumeProgression, 1),
+      intensityScore: roundToDecimals(intensityScore),
+      efficiencyScore: roundToDecimals(efficiencyScore),
+      consistencyScore: roundToDecimals(consistencyScore),
       daysSinceLastWorkout,
       trend,
       strengthLevel,
-      volumeDistribution,
+      recentImprovement,
+      volumeDistribution: {
+        thisWeek: volumeDistribution.thisWeek,
+        lastWeek: volumeDistribution.lastWeek,
+        thisMonth: volumeDistribution.thisMonth,
+        lastMonth: volumeDistribution.lastMonth,
+      },
       performanceMetrics,
-      recentImprovement
-    };
-
-    // Generar recomendaciones y advertencias
-    const recommendations = generateCategoryRecommendations(category, baseMetrics);
-    const warnings = generateCategoryWarnings(category, baseMetrics);
-
-    // Crear objeto completo
-    metrics.push({
-      ...baseMetrics,
       recommendations,
       warnings
-    } as CategoryMetrics);
+    };
+
+    categoryMetricsArray.push(categoryMetrics);
   });
 
-  // Ordenar por volumen total descendente
-  return metrics.sort((a, b) => b.totalVolume - a.totalVolume);
+  return categoryMetricsArray.sort((a: CategoryMetrics, b: CategoryMetrics) => b.totalVolume - a.totalVolume);
 }; 

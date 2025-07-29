@@ -1,6 +1,9 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { differenceInDays, endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { clamp } from './math-utils';
+import { calculateVolume } from './volume-calculations';
+import { getLatestDate } from './workout-utils';
 
 /**
  * Interfaz para análisis de fatiga y recuperación
@@ -32,6 +35,7 @@ export interface FatigueAnalysis {
 
 /**
  * Analiza fatiga y recuperación
+ * Refactorizado para usar funciones centralizadas
  */
 export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   if (records.length < 7) {
@@ -80,8 +84,9 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   });
 
   // **CORRECCIÓN CLAVE**: Calcular tanto volumen total (para stress) como promedio por sesión (para comparación justa)
-  let recentVolume = recentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-  let olderVolume = olderRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  // Usar función centralizada para calcular volumen
+  let recentVolume = recentRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
+  let olderVolume = olderRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
 
   // OPCIÓN A: Fallback si no hay datos en semanas anteriores completas
   if (recentRecords.length === 0 || olderRecords.length === 0) {
@@ -96,14 +101,14 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
     });
 
     if (recentRecords.length === 0 && recent7Days.length > 0) {
-      recentVolume = recent7Days.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+      recentVolume = recent7Days.reduce((sum, r) => sum + calculateVolume(r), 0);
       // Actualizar recentRecords para cálculos posteriores
       recentRecords.length = 0;
       recentRecords.push(...recent7Days);
     }
 
     if (olderRecords.length === 0 && older7Days.length > 0) {
-      olderVolume = older7Days.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+      olderVolume = older7Days.reduce((sum, r) => sum + calculateVolume(r), 0);
     }
   }
 
@@ -113,8 +118,8 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   const volumeChange = olderAvgVolume > 0 ? ((recentAvgVolume - olderAvgVolume) / olderAvgVolume) * 100 : 0;
   const volumeDropIndicators = volumeChange < -15; // Caída > 15%
 
-  // Calcular días desde último entrenamiento
-  const lastWorkout = new Date(Math.max(...records.map(r => new Date(r.date).getTime())));
+  // Calcular días desde último entrenamiento usando función centralizada
+  const lastWorkout = getLatestDate(records);
   const recoveryDays = differenceInDays(new Date(), lastWorkout);
 
   // OPCIÓN A: Índice de fatiga basado en semana anterior completa (no semana actual)
@@ -124,7 +129,8 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   const volumeFactor = volumeDropIndicators ? 25 : 0;
   const recoveryFactor = recoveryDays === 0 ? 20 : recoveryDays > 3 ? -10 : 0;
 
-  const fatigueIndex = Math.min(100, Math.max(0, frequencyFactor + volumeFactor + recoveryFactor));
+  // Usar función centralizada para validar rango
+  const fatigueIndex = clamp(frequencyFactor + volumeFactor + recoveryFactor, 0, 100);
 
   // Riesgo de sobreentrenamiento
   let overreachingRisk: FatigueAnalysis['overreachingRisk'];
@@ -147,7 +153,8 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   else if (fatigueIndex < 80) fatigueLevel = 'Alta';
   else fatigueLevel = 'Muy Alta';
 
-  const recoveryRate = Math.min(100, Math.max(0, 100 - (fatigueIndex * 0.8)));
+  // Usar función centralizada para validar rango
+  const recoveryRate = clamp(100 - (fatigueIndex * 0.8), 0, 100);
 
   // Calcular workload trend
   let workloadTrend: FatigueAnalysis['workloadTrend'];
@@ -156,40 +163,44 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   else workloadTrend = 'Estable';
 
   // Calcular recovery score basado en múltiples factores
-  const recoveryScore = Math.min(100, Math.max(0,
-    100 - (fatigueIndex * 0.6) - (recoveryDays > 2 ? (recoveryDays - 2) * 5 : 0)
-  ));
+  const recoveryScore = clamp(
+    100 - (fatigueIndex * 0.6) - (recoveryDays > 2 ? (recoveryDays - 2) * 5 : 0),
+    0, 100
+  );
 
   // Calcular stress factors más realistas basados en niveles actuales
   const stressFactors: FatigueAnalysis['stressFactors'] = {
     // Volume stress: basado en el volumen actual relativo + cambios
-    volumeStress: Math.min(100, Math.max(0,
+    volumeStress: clamp(
       // Base stress por volumen semanal (normalizado)
       Math.min(60, (recentVolume / 1000) * 10) +
       // Stress adicional por aumentos súbitos
-      (volumeChange > 15 ? (volumeChange - 15) * 2 : 0)
-    )),
+      (volumeChange > 15 ? (volumeChange - 15) * 2 : 0),
+      0, 100
+    ),
 
     // Frequency stress: basado en frecuencia actual
-    frequencyStress: Math.min(100, Math.max(0,
+    frequencyStress: clamp(
       weeklyFrequency <= 2 ? 10 :  // Muy poca frecuencia = bajo stress
         weeklyFrequency <= 3 ? 30 :  // Frecuencia normal = stress moderado
           weeklyFrequency <= 4 ? 50 :  // Frecuencia buena = stress medio-alto
             weeklyFrequency <= 5 ? 70 :  // Frecuencia alta = stress alto
               weeklyFrequency <= 6 ? 85 :  // Frecuencia muy alta = stress muy alto
-                100  // Entrenamiento diario = stress máximo
-    )),
+                100,  // Entrenamiento diario = stress máximo
+      0, 100
+    ),
 
     // Intensity stress: basado en el índice de fatiga
-    intensityStress: Math.min(100, Math.max(0, fatigueIndex)),
+    intensityStress: clamp(fatigueIndex, 0, 100),
 
     // Recovery stress: basado en tiempo desde último entrenamiento
-    recoveryStress: Math.min(100, Math.max(0,
+    recoveryStress: clamp(
       recoveryDays === 0 ? 80 :      // Sin descanso = alto stress
         recoveryDays === 1 ? 40 :      // 1 día descanso = stress medio
           recoveryDays === 2 ? 20 :      // 2 días descanso = stress bajo
-            recoveryDays >= 3 ? 10 : 0     // 3+ días descanso = stress muy bajo
-    ))
+            recoveryDays >= 3 ? 10 : 0,     // 3+ días descanso = stress muy bajo
+      0, 100
+    )
   };
 
   // Recomendaciones de recuperación mejoradas

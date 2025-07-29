@@ -60,9 +60,9 @@ export * from './trends-analysis';
 export * from './trends-interfaces';
 export * from './volume-calculations';
 export * from './volume-normalization-utils';
-export * from './volume-stats-utils';
 export * from './volume-trends';
 export * from './week-records.utils';
 export * from './workout-habits';
 export * from './workout-streaks';
+export * from './workout-utils';
 

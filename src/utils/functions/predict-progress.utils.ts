@@ -1,10 +1,9 @@
-import { PROGRESS_CONSTANTS, TIME_CONSTANTS } from '@/constants/';
 import type { WorkoutRecord } from '@/interfaces';
 import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { calculateOptimal1RM } from './calculate-1rm.utils';
-import { determineExperienceLevel } from './determine-experience-level.utils';
-import { getValidSortedRecords } from './get-valid-sorted-records.utils';
+import { clamp, roundToDecimals } from './math-utils';
+import { calculateVolume } from './volume-calculations';
+import { getBaseline1RM, getMaxWeight } from './workout-utils';
 
 /**
  * Interfaz para predicción de progreso
@@ -24,7 +23,14 @@ export interface ProgressPrediction {
 }
 
 /**
- * Valida que hay suficientes datos para hacer predicciones confiables
+ * Constantes de tiempo
+ */
+const TIME_CONSTANTS = {
+  MS_PER_DAY: 24 * 60 * 60 * 1000
+};
+
+/**
+ * Valida suficiencia de datos
  */
 const validateDataSufficiency = (records: WorkoutRecord[]): {
   isValid: boolean;
@@ -34,9 +40,7 @@ const validateDataSufficiency = (records: WorkoutRecord[]): {
   daysBetween: number;
   experienceLevel: 'beginner' | 'intermediate' | 'advanced';
 } => {
-  const validRecords = getValidSortedRecords(records);
-
-  if (validRecords.length === 0) {
+  if (records.length < 3) {
     return {
       isValid: false,
       validRecords: [],
@@ -47,13 +51,36 @@ const validateDataSufficiency = (records: WorkoutRecord[]): {
     };
   }
 
-  const firstDate = validRecords[0].date;
-  const lastDate = validRecords[validRecords.length - 1].date;
+  const validRecords = records.filter(r => r.weight > 0 && r.reps > 0 && r.sets > 0);
+
+  if (validRecords.length < 3) {
+    return {
+      isValid: false,
+      validRecords: [],
+      hasTimeData: false,
+      hasVolumeData: false,
+      daysBetween: 0,
+      experienceLevel: 'beginner'
+    };
+  }
+
+  const sortedRecords = [...validRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const firstDate = new Date(sortedRecords[0].date);
+  const lastDate = new Date(sortedRecords[sortedRecords.length - 1].date);
   const daysBetween = Math.max(1, (lastDate.getTime() - firstDate.getTime()) / TIME_CONSTANTS.MS_PER_DAY);
 
-  const hasTimeData = daysBetween >= TIME_CONSTANTS.MIN_DAYS_FOR_ANALYSIS;
-  const hasVolumeData = validRecords.length >= TIME_CONSTANTS.MIN_WORKOUTS_FOR_PREDICTIONS;
-  const experienceLevel = determineExperienceLevel(validRecords);
+  const hasTimeData = daysBetween >= 7;
+  const hasVolumeData = validRecords.length >= 5;
+
+  // Determinar nivel de experiencia basado en volumen y frecuencia
+  const totalVolume = validRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
+  const avgVolume = totalVolume / validRecords.length;
+  const workoutFrequency = validRecords.length / Math.max(1, daysBetween / 7);
+
+  let experienceLevel: 'beginner' | 'intermediate' | 'advanced';
+  if (avgVolume > 2000 && workoutFrequency > 3) experienceLevel = 'advanced';
+  else if (avgVolume > 1000 && workoutFrequency > 2) experienceLevel = 'intermediate';
+  else experienceLevel = 'beginner';
 
   return {
     isValid: hasTimeData && hasVolumeData,
@@ -67,11 +94,13 @@ const validateDataSufficiency = (records: WorkoutRecord[]): {
 
 /**
  * Calcula métricas básicas de los registros
+ * Refactorizado para usar funciones centralizadas
  */
 const calculateBasicMetrics = (validRecords: WorkoutRecord[]) => {
-  const totalVolume = validRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  // Usar función centralizada para calcular volumen
+  const totalVolume = validRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
   const avgWeight = validRecords.reduce((sum, r) => sum + r.weight, 0) / validRecords.length;
-  const maxWeight = Math.max(...validRecords.map(r => r.weight));
+  const maxWeight = getMaxWeight(validRecords);
   const avgVolume = totalVolume / validRecords.length;
 
   // OPCIÓN A: Usar última semana completa (excluyendo semana actual)
@@ -85,9 +114,9 @@ const calculateBasicMetrics = (validRecords: WorkoutRecord[]) => {
 
   let current1RMMax = 0;
   if (lastCompleteWeekRecords.length > 0) {
-    current1RMMax = Math.max(...lastCompleteWeekRecords.map(r => calculateOptimal1RM(r.weight, r.reps)));
+    current1RMMax = getBaseline1RM(lastCompleteWeekRecords);
   } else {
-    current1RMMax = Math.max(...validRecords.map(r => calculateOptimal1RM(r.weight, r.reps)));
+    current1RMMax = getBaseline1RM(validRecords);
   }
 
   return {
@@ -175,47 +204,57 @@ const calculateConfidenceLevel = (
   validRecords: WorkoutRecord[],
   weeklyDataLength: number
 ): number => {
-  let baseConfidence = 50;
+  let baseConfidence = 0.5;
 
-  // Factor por experiencia
+  // Factor por nivel de experiencia
   switch (experienceLevel) {
     case 'beginner':
-      baseConfidence += 10;
+      baseConfidence = 0.6;
       break;
     case 'intermediate':
-      baseConfidence += 20;
+      baseConfidence = 0.7;
       break;
     case 'advanced':
-      baseConfidence += 30;
+      baseConfidence = 0.8;
       break;
   }
 
   // Factor por cantidad de datos
-  if (weeklyDataLength >= 8) baseConfidence += 20;
-  else if (weeklyDataLength >= 4) baseConfidence += 15;
-  else if (weeklyDataLength >= 2) baseConfidence += 10;
+  const dataFactor = Math.min(0.2, (validRecords.length / 50) * 0.2);
+  baseConfidence += dataFactor;
 
-  // Factor por consistencia
-  const consistency = Math.min(100, (validRecords.length / 20) * 100);
-  baseConfidence += consistency * 0.2;
+  // Factor por consistencia temporal
+  const consistencyFactor = Math.min(0.1, (weeklyDataLength / 12) * 0.1);
+  baseConfidence += consistencyFactor;
 
-  return Math.min(100, Math.max(0, baseConfidence));
+  // Factor por calidad de datos (menos variabilidad = más confianza)
+  const weights = validRecords.map(r => r.weight);
+  const meanWeight = weights.reduce((sum, w) => sum + w, 0) / weights.length;
+  const variance = weights.reduce((sum, w) => sum + Math.pow(w - meanWeight, 2), 0) / weights.length;
+  const stdDev = Math.sqrt(variance);
+  const cv = meanWeight > 0 ? stdDev / meanWeight : 0;
+  const qualityFactor = Math.min(0.1, Math.max(0, 0.1 - cv * 0.1));
+  baseConfidence += qualityFactor;
+
+  // Usar función centralizada para validar rango
+  return clamp(baseConfidence, 0.3, 0.9);
 };
 
 /**
- * Calcula predicciones para próxima semana
+ * Calcula predicciones para la próxima semana
  */
 const calculateNextWeekPredictions = (
   strengthTrend: number,
   volumeTrend: number,
   avgVolume: number,
 ): { nextWeekWeight: number; nextWeekVolume: number } => {
-  const nextWeekWeight = avgVolume + strengthTrend;
-  const nextWeekVolume = avgVolume + volumeTrend;
+  // Predicción conservadora basada en tendencias
+  const nextWeekWeight = Math.max(0, avgVolume * (1 + strengthTrend * 0.01));
+  const nextWeekVolume = Math.max(0, avgVolume * (1 + volumeTrend * 0.01));
 
   return {
-    nextWeekWeight: Math.max(0, nextWeekWeight),
-    nextWeekVolume: Math.max(0, nextWeekVolume)
+    nextWeekWeight,
+    nextWeekVolume
   };
 };
 
@@ -227,14 +266,15 @@ const calculatePRPrediction = (
   strengthTrend: number,
   confidenceLevel: number
 ): { weight: number; confidence: number; timeToNextPR: number } => {
-  const predictedWeight = current1RMMax + (strengthTrend * 4); // 4 semanas
-  const confidence = Math.min(100, confidenceLevel * 0.8);
+  // Predicción conservadora de PR
+  const predictedWeight = current1RMMax * (1 + strengthTrend * 0.02);
+  const confidence = clamp(confidenceLevel * 0.8, 0.3, 0.9);
   const timeToNextPR = strengthTrend > 0 ? Math.max(2, Math.min(12, 8 - strengthTrend * 2)) : 12;
 
   return {
-    weight: Math.round(predictedWeight * 100) / 100,
-    confidence: Math.round(confidence),
-    timeToNextPR: Math.round(timeToNextPR)
+    weight: predictedWeight,
+    confidence,
+    timeToNextPR
   };
 };
 
@@ -247,30 +287,38 @@ const calculatePlateauRisk = (
   overallProgress: number,
   strengthTrend: number
 ): number => {
-  let risk = 20;
+  let risk = 0;
 
-  // Factor por experiencia
+  // Factor por nivel de experiencia
   switch (experienceLevel) {
     case 'beginner':
-      risk -= 10;
+      risk += 10; // Principiantes tienen menor riesgo
       break;
     case 'intermediate':
-      risk += 10;
+      risk += 30;
       break;
     case 'advanced':
-      risk += 20;
+      risk += 50; // Avanzados tienen mayor riesgo
       break;
   }
 
-  // Factor por progreso
+  // Factor por progreso general
   if (overallProgress < 5) risk += 20;
+  else if (overallProgress < 10) risk += 10;
+
+  // Factor por tendencia de fuerza
   if (strengthTrend < 0) risk += 15;
+  else if (strengthTrend < 0.5) risk += 5;
 
-  // Factor por tiempo de entrenamiento
-  const weeksOfData = validRecords.length / 3;
-  if (weeksOfData > 12) risk += 10;
+  // Factor por consistencia
+  const recentRecords = validRecords.slice(-10);
+  const recentProgress = recentRecords.length > 0 ?
+    (recentRecords[recentRecords.length - 1].weight - recentRecords[0].weight) / recentRecords[0].weight * 100 : 0;
 
-  return Math.min(100, Math.max(0, risk));
+  if (recentProgress < 0) risk += 25;
+
+  // Usar función centralizada para validar rango
+  return clamp(risk, 0, 100);
 };
 
 /**
@@ -283,22 +331,33 @@ const generateRecommendations = (
 ): string[] => {
   const recommendations: string[] = [];
 
-  if (trendAnalysis === 'mejorando') {
-    recommendations.push('¡Excelente progreso! Mantén la consistencia');
-  } else if (trendAnalysis === 'estable') {
-    recommendations.push('Progreso estable - considera aumentar intensidad gradualmente');
-  } else if (trendAnalysis === 'empeorando') {
-    recommendations.push('Revisa tu rutina - considera descanso o cambio de enfoque');
-  } else {
-    recommendations.push('Necesitas más datos para análisis preciso');
-  }
-
-  if (plateauRisk > 60) {
-    recommendations.push('Riesgo de meseta alto - implementa periodización');
+  switch (trendAnalysis) {
+    case 'mejorando':
+      recommendations.push('¡Excelente progreso! Mantén la consistencia');
+      recommendations.push('Considera aumentar gradualmente la intensidad');
+      break;
+    case 'estable':
+      recommendations.push('Progreso estable, evalúa si necesitas más desafío');
+      if (plateauRisk > 50) {
+        recommendations.push('Riesgo de meseta detectado - varía tu rutina');
+      }
+      break;
+    case 'empeorando':
+      recommendations.push('Revisa tu rutina y descanso');
+      recommendations.push('Considera reducir volumen temporalmente');
+      break;
+    case 'insuficiente':
+      recommendations.push('Necesitas más datos para análisis preciso');
+      recommendations.push('Mantén consistencia en tus entrenamientos');
+      break;
   }
 
   if (weeklyDataLength < 4) {
-    recommendations.push('Más semanas de datos mejorarán la precisión');
+    recommendations.push('Más semanas de datos mejorarán las predicciones');
+  }
+
+  if (plateauRisk > 70) {
+    recommendations.push('Alto riesgo de meseta - cambia tu rutina');
   }
 
   return recommendations;
@@ -311,50 +370,47 @@ const validateAndCorrectPredictions = (
   prediction: ProgressPrediction,
   basicMetrics: ReturnType<typeof calculateBasicMetrics>,
 ): ProgressPrediction => {
-  const corrected = { ...prediction };
+  // Validar que las predicciones sean realistas
+  const maxReasonableVolume = basicMetrics.avgVolume * 1.5;
+  const maxReasonableWeight = basicMetrics.maxWeight * 1.1;
 
-  // Validar rangos razonables
-  if (corrected.nextWeekWeight < 0) corrected.nextWeekWeight = basicMetrics.avgWeight;
-  if (corrected.nextWeekVolume < 0) corrected.nextWeekVolume = basicMetrics.avgVolume;
-  if (corrected.confidenceLevel > 100) corrected.confidenceLevel = 100;
-  if (corrected.plateauRisk > 100) corrected.plateauRisk = 100;
-
-  return corrected;
+  return {
+    ...prediction,
+    nextWeekVolume: clamp(prediction.nextWeekVolume, 0, maxReasonableVolume),
+    nextWeekWeight: clamp(prediction.nextWeekWeight, 0, maxReasonableWeight),
+    predictedPR: {
+      weight: clamp(prediction.predictedPR.weight, basicMetrics.current1RMMax, basicMetrics.current1RMMax * 1.3),
+      confidence: clamp(prediction.predictedPR.confidence, 0.3, 0.9)
+    }
+  };
 };
 
 /**
  * Agrupa registros por semana
  */
 const groupRecordsByWeek = (records: WorkoutRecord[]): { volume: number; weight: number; date: Date }[] => {
-  const weekGroups = new Map<string, WorkoutRecord[]>();
+  const weeklyData: { [key: string]: { volume: number; weight: number; count: number; date: Date } } = {};
 
   records.forEach(record => {
     const date = new Date(record.date);
     const weekStart = startOfWeek(date, { locale: es });
     const weekKey = weekStart.toISOString().split('T')[0];
 
-    if (!weekGroups.has(weekKey)) {
-      weekGroups.set(weekKey, []);
+    if (!weeklyData[weekKey]) {
+      weeklyData[weekKey] = { volume: 0, weight: 0, count: 0, date: weekStart };
     }
-    weekGroups.get(weekKey)!.push(record);
+
+    // Usar función centralizada para calcular volumen
+    weeklyData[weekKey].volume += calculateVolume(record);
+    weeklyData[weekKey].weight += record.weight;
+    weeklyData[weekKey].count++;
   });
 
-  return Array.from(weekGroups.entries())
-    .sort(([keyA], [keyB]) => keyA.localeCompare(keyB))
-    .slice(-12)
-    .map(([weekKey, weekRecords]) => {
-      const volume = weekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-      const avg1RM = weekRecords.reduce((sum, r) => {
-        const oneRM = calculateOptimal1RM(r.weight, r.reps);
-        return sum + oneRM;
-      }, 0) / weekRecords.length;
-
-      return {
-        volume,
-        weight: avg1RM,
-        date: new Date(weekKey)
-      };
-    });
+  return Object.values(weeklyData).map(week => ({
+    volume: week.volume,
+    weight: week.weight / week.count,
+    date: week.date
+  }));
 };
 
 /**
@@ -369,25 +425,18 @@ const calculateLinearTrend = (values: number[]): number => {
   const xxSum = values.reduce((sum, _, i) => sum + i * i, 0);
   const xySum = values.reduce((sum, val, i) => sum + i * val, 0);
 
-  const denominator = (n * xxSum - xSum * xSum);
-  if (denominator === 0) return 0;
-
-  const slope = (n * xySum - xSum * ySum) / denominator;
-
-  // Detectar si es tendencia de peso o volumen y aplicar límites
-  const avgValue = ySum / n;
-  const isWeightTrend = avgValue < 500;
-  const maxTrend = isWeightTrend ? 2 : 100;
-
-  return Math.max(-maxTrend, Math.min(maxTrend, slope));
+  const slope = (n * xySum - xSum * ySum) / (n * xxSum - xSum * xSum);
+  return isNaN(slope) ? 0 : slope;
 };
 
 /**
  * Predice progreso basado en registros de entrenamiento
+ * Refactorizado para usar funciones centralizadas
  */
 export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction => {
-  // Validación inicial
-  if (records.length === 0) {
+  const { isValid, validRecords, experienceLevel } = validateDataSufficiency(records);
+
+  if (!isValid) {
     return {
       nextWeekVolume: 0,
       nextWeekWeight: 0,
@@ -399,121 +448,36 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
       confidenceLevel: 0,
       volumeTrend: 0,
       strengthTrend: 0,
-      recommendations: ['Comienza registrando tus entrenamientos para obtener predicciones']
+      recommendations: ['Datos insuficientes para predicción']
     };
   }
 
-  // Validar datos y obtener información básica
-  const validation = validateDataSufficiency(records);
+  const basicMetrics = calculateBasicMetrics(validRecords);
+  const { overallProgress } = calculateOverallProgress(validRecords);
+  const { volumeTrend, strengthTrend, weeklyDataLength } = calculateTrends(validRecords);
+  const trendAnalysis = determineTrendAnalysis(validRecords, strengthTrend, volumeTrend);
+  const confidenceLevel = calculateConfidenceLevel(experienceLevel, validRecords, weeklyDataLength);
+  const { nextWeekWeight, nextWeekVolume } = calculateNextWeekPredictions(strengthTrend, volumeTrend, basicMetrics.avgVolume);
+  const predictedPR = calculatePRPrediction(basicMetrics.current1RMMax, strengthTrend, confidenceLevel);
+  const plateauRisk = calculatePlateauRisk(experienceLevel, validRecords, overallProgress, strengthTrend);
+  const recommendations = generateRecommendations(trendAnalysis, weeklyDataLength, plateauRisk);
 
-  if (validation.validRecords.length === 0) {
-    return {
-      nextWeekVolume: 0,
-      nextWeekWeight: 0,
-      monthlyGrowthRate: 0,
-      predictedPR: { weight: 0, confidence: 0 },
-      plateauRisk: 0,
-      trendAnalysis: 'insuficiente',
-      timeToNextPR: 0,
-      confidenceLevel: 0,
-      volumeTrend: 0,
-      strengthTrend: 0,
-      recommendations: ['Revisa la calidad de los datos registrados']
-    };
-  }
-
-  // Si no hay datos suficientes, usar valores conservadores
-  if (!validation.isValid) {
-    const basicMetrics = calculateBasicMetrics(validation.validRecords);
-
-    return {
-      nextWeekVolume: Math.round(basicMetrics.avgVolume * 1.02), // 2% conservador
-      nextWeekWeight: Math.round((basicMetrics.avgWeight * 1.01) * 100) / 100, // 1% conservador
-      monthlyGrowthRate: 2,
-      predictedPR: { weight: Math.round((basicMetrics.maxWeight * 1.05) * 100) / 100, confidence: 30 },
-      plateauRisk: 20,
-      trendAnalysis: 'insuficiente',
-      timeToNextPR: 8,
-      confidenceLevel: 25,
-      volumeTrend: Math.round(basicMetrics.avgVolume * 0.02),
-      strengthTrend: Math.round((basicMetrics.avgWeight * 0.01) * 100) / 100,
-      recommendations: [
-        'Continúa registrando entrenamientos para obtener predicciones más precisas',
-        'Mantén la consistencia en tu rutina durante al menos 2 semanas',
-        'Enfócate en progresión gradual: 2.5-5% de aumento semanal'
-      ]
-    };
-  }
-
-  // Calcular métricas básicas usando funciones auxiliares
-  const basicMetrics = calculateBasicMetrics(validation.validRecords);
-  const overallProgressData = calculateOverallProgress(validation.validRecords);
-
-  // Calcular tendencias usando la función auxiliar
-  const trendsData = calculateTrends(validation.validRecords);
-
-  // Determinar análisis de tendencia
-  const trendAnalysis = determineTrendAnalysis(
-    validation.validRecords,
-    trendsData.strengthTrend,
-    trendsData.volumeTrend
-  );
-
-  // Calcular nivel de confianza
-  const confidenceLevel = calculateConfidenceLevel(
-    validation.experienceLevel,
-    validation.validRecords,
-    trendsData.weeklyDataLength,
-  );
-
-  // Calcular predicciones para próxima semana
-  const nextWeekPredictions = calculateNextWeekPredictions(
-    trendsData.strengthTrend,
-    trendsData.volumeTrend,
-    basicMetrics.avgVolume,
-  );
-
-  // Calcular predicción de PR
-  const prPrediction = calculatePRPrediction(
-    basicMetrics.current1RMMax,
-    trendsData.strengthTrend,
-    confidenceLevel
-  );
-
-  // Calcular riesgo de meseta
-  const plateauRisk = calculatePlateauRisk(
-    validation.experienceLevel,
-    validation.validRecords,
-    overallProgressData.overallProgress,
-    trendsData.strengthTrend
-  );
-
-  // Generar recomendaciones
-  const recommendations = generateRecommendations(
+  const prediction: ProgressPrediction = {
+    nextWeekVolume: roundToDecimals(nextWeekVolume),
+    nextWeekWeight: roundToDecimals(nextWeekWeight),
+    monthlyGrowthRate: roundToDecimals(strengthTrend * 4), // Estimación mensual
+    predictedPR: {
+      weight: roundToDecimals(predictedPR.weight),
+      confidence: roundToDecimals(predictedPR.confidence)
+    },
+    plateauRisk: roundToDecimals(plateauRisk),
     trendAnalysis,
-    trendsData.weeklyDataLength,
-    plateauRisk
-  );
-
-  // Ensamblar resultado final con validación de rangos
-  const result: ProgressPrediction = {
-    nextWeekVolume: Math.round(nextWeekPredictions.nextWeekVolume),
-    nextWeekWeight: Math.round(nextWeekPredictions.nextWeekWeight * 100) / 100,
-    monthlyGrowthRate: Math.max(-PROGRESS_CONSTANTS.MAX_MONTHLY_GROWTH,
-      Math.min(PROGRESS_CONSTANTS.MAX_MONTHLY_GROWTH,
-        Math.round((trendsData.strengthTrend * TIME_CONSTANTS.WEEKS_PER_MONTH) * 100) / 100)),
-    predictedPR: prPrediction,
-    plateauRisk: Math.round(plateauRisk),
-    trendAnalysis,
-    timeToNextPR: prPrediction.timeToNextPR,
-    confidenceLevel: Math.round(confidenceLevel),
-    volumeTrend: Math.round(trendsData.volumeTrend),
-    strengthTrend: Math.round(trendsData.strengthTrend * 100) / 100,
+    timeToNextPR: roundToDecimals(predictedPR.timeToNextPR),
+    confidenceLevel: roundToDecimals(confidenceLevel),
+    volumeTrend: roundToDecimals(volumeTrend),
+    strengthTrend: roundToDecimals(strengthTrend),
     recommendations
   };
 
-  // Validación final de coherencia
-  const validatedResult = validateAndCorrectPredictions(result, basicMetrics);
-
-  return validatedResult;
+  return validateAndCorrectPredictions(prediction, basicMetrics);
 }; 

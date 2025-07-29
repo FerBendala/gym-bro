@@ -326,4 +326,14 @@ export const isValidSelectValue = (
   value: string
 ): boolean => {
   return options.some(option => option.value === value);
+};
+
+/**
+ * Obtiene el color de ajuste de volumen basado en el valor
+ * Función genérica para colores de volumen en toda la aplicación
+ */
+export const getVolumeAdjustmentColor = (adjustment: number): string => {
+  if (adjustment > 0) return 'text-green-400';
+  if (adjustment < 0) return 'text-red-400';
+  return 'text-gray-400';
 }; 

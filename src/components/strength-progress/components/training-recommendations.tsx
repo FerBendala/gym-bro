@@ -1,9 +1,10 @@
 import { Card, CardContent, CardHeader } from '@/components/card';
 import { InfoTooltip } from '@/components/tooltip';
+import { getVolumeAdjustmentColor } from '@/utils';
 import { Zap } from 'lucide-react';
 import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
 import type { StrengthProgressAnalysis } from '../types';
-import { getVolumeAdjustmentColor, getZoneColor } from '../utils';
+import { getZoneColor } from '../utils';
 
 interface TrainingRecommendationsProps {
   analysis: StrengthProgressAnalysis;
