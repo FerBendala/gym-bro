@@ -5,6 +5,8 @@ import { isValidRecord } from './is-valid-record.utils';
 import { clamp, roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
 import { getBaseline1RM, getMaxWeight } from './workout-utils';
+import { calculateBasicMetrics } from './calculate-basic-metrics';
+import { groupRecordsByWeek } from './group-records-by-week';
 
 /**
  * Interfaz para predicción de progreso
@@ -94,42 +96,6 @@ const validateDataSufficiency = (records: WorkoutRecord[]): {
 };
 
 /**
- * Calcula métricas básicas de los registros
- * Refactorizado para usar funciones centralizadas
- */
-const calculateBasicMetrics = (validRecords: WorkoutRecord[]) => {
-  // Usar función centralizada para calcular volumen
-  const totalVolume = validRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
-  const avgWeight = validRecords.reduce((sum, r) => sum + r.weight, 0) / validRecords.length;
-  const maxWeight = getMaxWeight(validRecords);
-  const avgVolume = totalVolume / validRecords.length;
-
-  // OPCIÓN A: Usar última semana completa (excluyendo semana actual)
-  const lastCompleteWeekRecords = validRecords.filter(r => {
-    const recordDate = new Date(r.date);
-    const weekStart = startOfWeek(new Date(), { locale: es });
-    const lastWeekStart = new Date(weekStart.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const lastWeekEnd = new Date(weekStart.getTime() - 24 * 60 * 60 * 1000);
-    return recordDate >= lastWeekStart && recordDate <= lastWeekEnd;
-  });
-
-  let current1RMMax = 0;
-  if (lastCompleteWeekRecords.length > 0) {
-    current1RMMax = getBaseline1RM(lastCompleteWeekRecords);
-  } else {
-    current1RMMax = getBaseline1RM(validRecords);
-  }
-
-  return {
-    totalVolume,
-    avgWeight,
-    maxWeight,
-    avgVolume,
-    current1RMMax
-  };
-};
-
-/**
  * Calcula progreso general
  */
 const calculateOverallProgress = (validRecords: WorkoutRecord[]) => {
@@ -149,7 +115,7 @@ const calculateOverallProgress = (validRecords: WorkoutRecord[]) => {
  * Calcula tendencias de volumen y fuerza
  */
 const calculateTrends = (validRecords: WorkoutRecord[]): { volumeTrend: number; strengthTrend: number; weeklyDataLength: number } => {
-  const weeklyData = groupRecordsByWeek(validRecords);
+  const weeklyData = groupRecordsByWeekForAnalysis(validRecords);
   const weeklyDataLength = weeklyData.length;
 
   if (weeklyDataLength < 2) {
@@ -387,9 +353,10 @@ const validateAndCorrectPredictions = (
 };
 
 /**
- * Agrupa registros por semana
+ * Agrupa registros por semana para análisis de tendencias
+ * Refactorizado para usar función centralizada
  */
-const groupRecordsByWeek = (records: WorkoutRecord[]): { volume: number; weight: number; date: Date }[] => {
+const groupRecordsByWeekForAnalysis = (records: WorkoutRecord[]): { volume: number; weight: number; date: Date }[] => {
   const weeklyData: { [key: string]: { volume: number; weight: number; count: number; date: Date } } = {};
 
   records.forEach(record => {
