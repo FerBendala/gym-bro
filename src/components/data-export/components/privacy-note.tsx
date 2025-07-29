@@ -6,4 +6,4 @@ export const PrivacyNote: React.FC = () => {
       {EXPORT_INFO.privacyNote}
     </div>
   );
-}; 
+};

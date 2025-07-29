@@ -1,6 +1,7 @@
-import { formatNumberToString } from '@/utils';
 import { TrendingUp } from 'lucide-react';
 import React from 'react';
+
+import { formatNumberToString } from '@/utils';
 
 interface ExerciseData {
   name: string;
@@ -39,7 +40,7 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({ exercise, index, sel
                     className={`text-xs px-2 py-1 rounded-full font-medium border ${selectedCategory === category
                       ? 'text-blue-200 bg-blue-500/25 border-blue-400/50'
                       : 'text-gray-300 bg-gray-600/30 border-gray-500/30'
-                      }`}
+                    }`}
                   >
                     {category}
                   </span>
@@ -76,12 +77,12 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({ exercise, index, sel
           <div className="flex items-center justify-center space-x-1">
             <p className={`text-sm font-bold ${exercise.progress > 0 ? 'text-green-400' :
               exercise.progress < 0 ? 'text-red-400' : 'text-gray-400'
-              }`}>
+            }`}>
               {exercise.progress > 0 ? '+' : ''}{formatNumberToString(exercise.progress)} kg
             </p>
             {exercise.progress !== 0 && (
               <TrendingUp className={`w-3 h-3 ${exercise.progress > 0 ? 'text-green-400' : 'text-red-400 rotate-180'
-                }`} />
+              }`} />
             )}
           </div>
           <p className="text-xs text-gray-400">Progreso</p>
@@ -110,13 +111,13 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({ exercise, index, sel
           <div
             className={`h-2 rounded-full transition-all duration-300 ${exercise.progressPercent > 0 ? 'bg-green-600' :
               exercise.progressPercent < 0 ? 'bg-red-600' : 'bg-gray-600'
-              }`}
+            }`}
             style={{
-              width: `${Math.min(100, Math.abs(exercise.progressPercent) * 2)}%`
+              width: `${Math.min(100, Math.abs(exercise.progressPercent) * 2)}%`,
             }}
           />
         </div>
       </div>
     </div>
   );
-}; 
+};

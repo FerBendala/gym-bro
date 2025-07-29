@@ -10,7 +10,7 @@ export { INITIAL_STATE, PERSISTENCE_CONFIG } from './constants';
 // Exportar acciones
 export {
   createModernLayoutConfigActions, createModernLayoutNavigationActions,
-  createModernLayoutUIActions, createModernLayoutUtilityActions
+  createModernLayoutUIActions, createModernLayoutUtilityActions,
 } from './actions';
 
 // Exportar selectores individuales
@@ -21,6 +21,5 @@ export {
   // Selectores compuestos
   useNavigationState, useNavigationType,
   // Acciones individuales
-  useSetActiveTab, useSetNavigationType, useSetNavigationVisible, useSetShowBackButton, useSetSubtitle, useSetTitle, useShowBackButton, useShowMoreMenu, useSubtitle, useTitle, useToggleMoreMenu, useUIActions, useUIState
+  useSetActiveTab, useSetNavigationType, useSetNavigationVisible, useSetShowBackButton, useSetSubtitle, useSetTitle, useShowBackButton, useShowMoreMenu, useSubtitle, useTitle, useToggleMoreMenu, useUIActions, useUIState,
 } from './selectors';
-

@@ -22,17 +22,17 @@ export const ConfidenceGauge: React.FC<ConfidenceGaugeProps> = ({ confidence, le
       type: 'radialBar',
       height: 250,
       background: 'transparent',
-      toolbar: { show: false }
+      toolbar: { show: false },
     },
     plotOptions: {
       radialBar: {
         hollow: {
           size: '60%',
-          background: 'transparent'
+          background: 'transparent',
         },
         track: {
           background: '#374151',
-          strokeWidth: '100%'
+          strokeWidth: '100%',
         },
         dataLabels: {
           show: true,
@@ -41,7 +41,7 @@ export const ConfidenceGauge: React.FC<ConfidenceGaugeProps> = ({ confidence, le
             fontSize: '14px',
             fontWeight: 600,
             color: '#ffffff',
-            offsetY: -10
+            offsetY: -10,
           },
           value: {
             show: true,
@@ -49,10 +49,10 @@ export const ConfidenceGauge: React.FC<ConfidenceGaugeProps> = ({ confidence, le
             fontWeight: 700,
             color: getGaugeColor(confidence),
             offsetY: 8,
-            formatter: (val: number) => `${val}%`
-          }
-        }
-      }
+            formatter: (val: number) => `${val}%`,
+          },
+        },
+      },
     },
     fill: {
       colors: [getGaugeColor(confidence)],
@@ -65,16 +65,16 @@ export const ConfidenceGauge: React.FC<ConfidenceGaugeProps> = ({ confidence, le
         inverseColors: true,
         opacityFrom: 1,
         opacityTo: 0.8,
-        stops: [0, 100]
-      }
+        stops: [0, 100],
+      },
     },
     stroke: {
-      lineCap: 'round'
+      lineCap: 'round',
     },
     labels: [level],
     theme: {
-      mode: 'dark'
-    }
+      mode: 'dark',
+    },
   };
 
   const series = [confidence];
@@ -84,4 +84,4 @@ export const ConfidenceGauge: React.FC<ConfidenceGaugeProps> = ({ confidence, le
       <Chart options={options} series={series} type="radialBar" height="100%" />
     </div>
   );
-}; 
+};

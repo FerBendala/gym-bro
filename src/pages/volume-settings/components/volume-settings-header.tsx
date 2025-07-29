@@ -1,7 +1,9 @@
+import React from 'react';
+
+import type { VolumeSettingsProps } from '../types';
+
 import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils';
-import React from 'react';
-import type { VolumeSettingsProps } from '../types';
 
 type VolumeSettingsHeaderProps = VolumeSettingsProps;
 
@@ -14,7 +16,7 @@ export const VolumeSettingsHeader: React.FC<VolumeSettingsHeaderProps> = ({ onBa
           'p-2 rounded-lg',
           MODERN_THEME.components.button.base,
           MODERN_THEME.touch.tap,
-          MODERN_THEME.accessibility.focusRing
+          MODERN_THEME.accessibility.focusRing,
         )}
       >
         <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -29,4 +31,4 @@ export const VolumeSettingsHeader: React.FC<VolumeSettingsHeaderProps> = ({ onBa
       </div>
     </div>
   );
-}; 
+};

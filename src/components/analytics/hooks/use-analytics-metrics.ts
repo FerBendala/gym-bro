@@ -1,7 +1,9 @@
+import { useMemo } from 'react';
+
+import type { AnalyticsMetric } from '../types';
+
 import type { WorkoutRecord } from '@/interfaces';
 import { calculateWeightProgress } from '@/utils';
-import { useMemo } from 'react';
-import type { AnalyticsMetric } from '../types';
 
 /**
  * Hook para calcular métricas de analytics
@@ -12,12 +14,12 @@ export const useAnalyticsMetrics = (records: WorkoutRecord[]) => {
 
     // Filtrar registros válidos con información de ejercicio
     const validRecords = records.filter(record =>
-      record.exercise && record.exercise.name && record.exercise.name !== 'Ejercicio desconocido'
+      record.exercise?.name && record.exercise.name !== 'Ejercicio desconocido',
     );
 
     // Calcular métricas principales
     const totalVolume = validRecords.reduce((sum, record) =>
-      sum + (record.weight * record.reps * record.sets), 0
+      sum + (record.weight * record.reps * record.sets), 0,
     );
 
     const totalWorkouts = validRecords.length;
@@ -26,7 +28,7 @@ export const useAnalyticsMetrics = (records: WorkoutRecord[]) => {
     const uniqueExercises = new Set(
       validRecords
         .filter(r => r.exercise?.name)
-        .map(r => r.exercise!.name)
+        .map(r => r.exercise!.name),
     ).size;
 
     // Calcular promedio de peso
@@ -70,7 +72,7 @@ export const useAnalyticsMetrics = (records: WorkoutRecord[]) => {
         trend: 'up',
         trendValue: 0,
         description: 'Suma total de peso levantado en todos los entrenamientos',
-        color: 'blue'
+        color: 'blue',
       },
       {
         id: 'total-workouts',
@@ -80,7 +82,7 @@ export const useAnalyticsMetrics = (records: WorkoutRecord[]) => {
         trend: 'up',
         trendValue: 0,
         description: 'Número total de entrenamientos registrados',
-        color: 'green'
+        color: 'green',
       },
       {
         id: 'unique-exercises',
@@ -90,7 +92,7 @@ export const useAnalyticsMetrics = (records: WorkoutRecord[]) => {
         trend: 'stable',
         trendValue: 0,
         description: 'Variedad de ejercicios diferentes realizados',
-        color: 'purple'
+        color: 'purple',
       },
       {
         id: 'average-weight',
@@ -100,7 +102,7 @@ export const useAnalyticsMetrics = (records: WorkoutRecord[]) => {
         trend: weightProgress > 0 ? 'up' : weightProgress < 0 ? 'down' : 'stable',
         trendValue: weightProgressPercent,
         description: 'Progreso de fuerza considerando peso y repeticiones',
-        color: 'yellow'
+        color: 'yellow',
       },
       {
         id: 'training-days',
@@ -110,7 +112,7 @@ export const useAnalyticsMetrics = (records: WorkoutRecord[]) => {
         trend: 'up',
         trendValue: 0,
         description: 'Número de días únicos con entrenamientos',
-        color: 'indigo'
+        color: 'indigo',
       },
       {
         id: 'weekly-frequency',
@@ -120,10 +122,10 @@ export const useAnalyticsMetrics = (records: WorkoutRecord[]) => {
         trend: weeklyFrequency >= 3 ? 'up' : weeklyFrequency >= 2 ? 'stable' : 'down',
         trendValue: 0,
         description: 'Promedio de días de entrenamiento por semana',
-        color: 'teal'
-      }
+        color: 'teal',
+      },
     ];
   }, [records]);
 
   return { metrics };
-}; 
+};

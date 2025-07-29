@@ -1,12 +1,13 @@
+import React from 'react';
+import type { UseFormReturn } from 'react-hook-form';
+
+import { EXERCISE_CARD_CONSTANTS } from '../constants';
+
 import { Button } from '@/components/button';
 import { DatePicker } from '@/components/date-picker';
 import { Input } from '@/components/input';
 import type { WorkoutFormData } from '@/interfaces';
 import { formatNumberToString } from '@/utils';
-import React from 'react';
-import type { UseFormReturn } from 'react-hook-form';
-
-import { EXERCISE_CARD_CONSTANTS } from '../constants';
 
 interface SimpleFormProps {
   loading: boolean;
@@ -28,7 +29,7 @@ export const SimpleForm: React.FC<SimpleFormProps> = ({
   onSubmit,
   onCancel,
   formMethods,
-  stats
+  stats,
 }) => {
   const { register, handleSubmit, formState: { errors }, watch, setValue } = formMethods;
 
@@ -46,7 +47,7 @@ export const SimpleForm: React.FC<SimpleFormProps> = ({
               {...register('weight', {
                 required: EXERCISE_CARD_CONSTANTS.ERROR_MESSAGES.weight.required,
                 min: { value: 0, message: EXERCISE_CARD_CONSTANTS.ERROR_MESSAGES.weight.min },
-                valueAsNumber: true
+                valueAsNumber: true,
               })}
               error={errors.weight?.message}
               className="bg-gray-700/50 border-gray-600/50"
@@ -60,7 +61,7 @@ export const SimpleForm: React.FC<SimpleFormProps> = ({
               {...register('reps', {
                 required: EXERCISE_CARD_CONSTANTS.ERROR_MESSAGES.reps.required,
                 min: { value: 1, message: EXERCISE_CARD_CONSTANTS.ERROR_MESSAGES.reps.min },
-                valueAsNumber: true
+                valueAsNumber: true,
               })}
               error={errors.reps?.message}
               className="bg-gray-700/50 border-gray-600/50"
@@ -74,7 +75,7 @@ export const SimpleForm: React.FC<SimpleFormProps> = ({
               {...register('sets', {
                 required: EXERCISE_CARD_CONSTANTS.ERROR_MESSAGES.sets.required,
                 min: { value: 1, message: EXERCISE_CARD_CONSTANTS.ERROR_MESSAGES.sets.min },
-                valueAsNumber: true
+                valueAsNumber: true,
               })}
               error={errors.sets?.message}
               className="bg-gray-700/50 border-gray-600/50"
@@ -127,4 +128,4 @@ export const SimpleForm: React.FC<SimpleFormProps> = ({
       </div>
     </form>
   );
-}; 
+};

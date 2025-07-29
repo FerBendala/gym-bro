@@ -1,11 +1,14 @@
-import { Button } from '@/components/button';
-import { useModalOverflow } from '@/hooks';
-import { openURLSafely } from '@/utils';
 import { ExternalLink, Globe, X } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+
 import type { PreviewFullProps } from '../types';
+
 import { PreviewContent } from './preview-content';
+
+import { Button } from '@/components/button';
+import { useModalOverflow } from '@/hooks';
+import { openURLSafely } from '@/utils';
 
 export const PreviewFull: React.FC<PreviewFullProps> = ({ url, previewData, onClose }) => {
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
@@ -110,4 +113,4 @@ export const PreviewFull: React.FC<PreviewFullProps> = ({ url, previewData, onCl
 
   // Usar createPortal para renderizar fuera del flujo normal del DOM
   return createPortal(modalContent, portalContainer);
-}; 
+};

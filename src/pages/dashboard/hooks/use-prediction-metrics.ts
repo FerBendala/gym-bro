@@ -1,10 +1,11 @@
+import { useMemo } from 'react';
+
 import type { WorkoutRecord } from '@/interfaces';
 import {
   calculatePredictionMetrics,
   normalizeByWeekday,
-  type PredictionMetrics
+  type PredictionMetrics,
 } from '@/utils';
-import { useMemo } from 'react';
 
 /**
  * Valida un registro de entrenamiento para predicciones
@@ -42,14 +43,14 @@ export interface EnhancedPredictionMetrics extends PredictionMetrics {
 /**
  * Hook para calcular métricas de predicciones de forma optimizada con validación
  * Filtra registros inválidos y proporciona información sobre calidad de datos
- * 
+ *
  * @param records - Array de registros de entrenamiento
  * @param predictedPRWeight - Peso del PR predicho
  * @returns Métricas calculadas, formateadas y con información de calidad
  */
 export const usePredictionMetrics = (
   records: WorkoutRecord[],
-  predictedPRWeight: number
+  predictedPRWeight: number,
 ): EnhancedPredictionMetrics => {
   return useMemo(() => {
     // Validar y filtrar registros
@@ -73,7 +74,7 @@ export const usePredictionMetrics = (
     let dataSpan = 0;
     if (validRecords.length > 1) {
       const sortedRecords = [...validRecords].sort((a, b) =>
-        new Date(a.date).getTime() - new Date(b.date).getTime()
+        new Date(a.date).getTime() - new Date(b.date).getTime(),
       );
       const firstDate = new Date(sortedRecords[0].date);
       const lastDate = new Date(sortedRecords[sortedRecords.length - 1].date);
@@ -109,13 +110,13 @@ export const usePredictionMetrics = (
         validationRate: Math.round(validationRate),
         hasRecentData,
         dataSpan,
-        qualityScore: Math.round(Math.min(100, qualityScore))
+        qualityScore: Math.round(Math.min(100, qualityScore)),
       },
       weekdayNormalization: {
         currentWeekdayFactor: weekdayFactor,
         isPartialWeek,
-        normalizedVolumeTrend: Math.round(normalizedVolumeTrend)
-      }
+        normalizedVolumeTrend: Math.round(normalizedVolumeTrend),
+      },
     };
   }, [records, predictedPRWeight]);
-}; 
+};

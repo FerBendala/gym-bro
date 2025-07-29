@@ -1,6 +1,7 @@
+import { useMemo, useState } from 'react';
+
 import type { WorkoutRecord } from '@/interfaces';
 import { calculateExerciseProgress } from '@/utils';
-import { useMemo, useState } from 'react';
 
 interface ExerciseAnalysis {
   name: string;
@@ -49,7 +50,7 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
     // Analizar cada ejercicio
     return Object.entries(exerciseGroups).map(([exerciseName, exerciseRecords]) => {
       const totalVolume = exerciseRecords.reduce((sum, record) =>
-        sum + (record.weight * record.reps * record.sets), 0
+        sum + (record.weight * record.reps * record.sets), 0,
       );
 
       const maxWeight = Math.max(...exerciseRecords.map(r => r.weight));
@@ -71,14 +72,14 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
         frequency,
         firstWeight: exerciseRecords[0].weight,
         lastWeight: exerciseRecords[exerciseRecords.length - 1].weight,
-        lastDate: new Date(Math.max(...exerciseRecords.map(r => r.date.getTime())))
+        lastDate: new Date(Math.max(...exerciseRecords.map(r => r.date.getTime()))),
       };
     }).sort((a, b) => b.totalVolume - a.totalVolume);
   }, [records]);
 
   const categoriesWithCount = useMemo((): CategoryWithCount[] => {
     const categories = [
-      { id: 'all', name: 'Todas', count: exerciseAnalysis.length }
+      { id: 'all', name: 'Todas', count: exerciseAnalysis.length },
     ];
 
     const uniqueCategories = Array.from(new Set(exerciseAnalysis.flatMap(ex => ex.categories)));
@@ -102,7 +103,7 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
   const allExercises = filteredExercises;
 
   const unknownRecords = records.filter(record =>
-    !record.exercise || !record.exercise.name || record.exercise.name === 'Ejercicio desconocido'
+    !record.exercise?.name || record.exercise.name === 'Ejercicio desconocido',
   );
 
   const globalMetrics = useMemo((): GlobalMetrics => {
@@ -117,7 +118,7 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
       avgProgress,
       exercisesImproving,
       maxWeightExercise,
-      totalSessions
+      totalSessions,
     };
   }, [allExercises]);
 
@@ -128,6 +129,6 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
     setSelectedCategory,
     allExercises,
     unknownRecords,
-    globalMetrics
+    globalMetrics,
   };
-}; 
+};

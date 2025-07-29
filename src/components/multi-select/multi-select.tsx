@@ -1,14 +1,16 @@
-import { THEME_SELECT } from '@/constants/theme';
 import React from 'react';
+
 import {
   MultiSelectButton,
   MultiSelectDropdown,
   MultiSelectError,
-  MultiSelectLabel
+  MultiSelectLabel,
 } from './components';
 import { MULTI_SELECT_CONSTANTS } from './constants';
 import { useClickOutside, useMultiSelect } from './hooks';
 import { MultiSelectProps } from './types';
+
+import { THEME_SELECT } from '@/constants/theme';
 
 export const MultiSelect: React.FC<MultiSelectProps> = ({
   label,
@@ -18,7 +20,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
   onChange,
   placeholder = MULTI_SELECT_CONSTANTS.DEFAULT_PLACEHOLDER,
   disabled = MULTI_SELECT_CONSTANTS.DEFAULT_DISABLED,
-  size = MULTI_SELECT_CONSTANTS.DEFAULT_SIZE
+  size = MULTI_SELECT_CONSTANTS.DEFAULT_SIZE,
 }) => {
   const {
     isOpen,
@@ -27,13 +29,13 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
     handleToggle,
     handleToggleOption,
     handleClose,
-    hasValue
+    hasValue,
   } = useMultiSelect({
     value,
     options,
     onChange,
     placeholder,
-    disabled
+    disabled,
   });
 
   useClickOutside(dropdownRef, handleClose);
@@ -76,4 +78,4 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
       )}
     </div>
   );
-}; 
+};

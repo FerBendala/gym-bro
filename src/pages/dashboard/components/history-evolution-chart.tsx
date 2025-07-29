@@ -1,10 +1,11 @@
+import { History } from 'lucide-react';
+import React from 'react';
+import Chart from 'react-apexcharts';
+
 import { Card, CardContent, CardHeader } from '@/components/card';
 import { InfoTooltip } from '@/components/tooltip';
 import type { HistoryPoint } from '@/interfaces';
 import { formatNumberToString } from '@/utils';
-import { History } from 'lucide-react';
-import React from 'react';
-import Chart from 'react-apexcharts';
 
 interface HistoryEvolutionChartProps {
   historyData: HistoryPoint[];
@@ -21,9 +22,9 @@ export const HistoryEvolutionChart: React.FC<HistoryEvolutionChartProps> = ({ hi
         date: point.date.toLocaleDateString('es-ES', {
           day: 'numeric',
           month: 'short',
-          year: 'numeric'
-        })
-      }))
+          year: 'numeric',
+        }),
+      })),
     }];
 
     const options = {
@@ -32,21 +33,21 @@ export const HistoryEvolutionChart: React.FC<HistoryEvolutionChartProps> = ({ hi
         height: 300,
         background: 'transparent',
         toolbar: {
-          show: false
+          show: false,
         },
         animations: {
           enabled: true,
           easing: 'easeinout',
-          speed: 800
-        }
+          speed: 800,
+        },
       },
       theme: {
-        mode: 'dark' as const
+        mode: 'dark' as const,
       },
       colors: ['#3b82f6'],
       stroke: {
         curve: 'smooth' as const,
-        width: 3
+        width: 3,
       },
       fill: {
         type: 'gradient',
@@ -57,51 +58,51 @@ export const HistoryEvolutionChart: React.FC<HistoryEvolutionChartProps> = ({ hi
           type: 'vertical',
           opacityFrom: 0.7,
           opacityTo: 0.1,
-          stops: [0, 100]
-        }
+          stops: [0, 100],
+        },
       },
       grid: {
         borderColor: '#374151',
         strokeDashArray: 4,
         xaxis: {
           lines: {
-            show: true
-          }
+            show: true,
+          },
         },
         yaxis: {
           lines: {
-            show: true
-          }
-        }
+            show: true,
+          },
+        },
       },
       xaxis: {
         categories: historyData.map(point => `Semana ${point.weekNumber}`),
         labels: {
           style: {
             colors: '#9ca3af',
-            fontSize: '12px'
-          }
+            fontSize: '12px',
+          },
         },
         axisBorder: {
-          color: '#374151'
+          color: '#374151',
         },
         axisTicks: {
-          color: '#374151'
-        }
+          color: '#374151',
+        },
       },
       yaxis: {
         labels: {
           style: {
             colors: '#9ca3af',
-            fontSize: '12px'
+            fontSize: '12px',
           },
-          formatter: (value: number) => `${formatNumberToString(value)} kg`
-        }
+          formatter: (value: number) => `${formatNumberToString(value)} kg`,
+        },
       },
       tooltip: {
         theme: 'dark',
         style: {
-          fontSize: '12px'
+          fontSize: '12px',
         },
         custom: ({ dataPointIndex }: { dataPointIndex: number }) => {
           const point = historyData[dataPointIndex];
@@ -111,10 +112,10 @@ export const HistoryEvolutionChart: React.FC<HistoryEvolutionChartProps> = ({ hi
             <div class="bg-gray-800 border border-gray-600 rounded-lg p-3 shadow-lg">
               <div class="font-semibold text-white mb-1">Semana ${point.weekNumber}</div>
               <div class="text-gray-300 text-sm mb-2">${point.date.toLocaleDateString('es-ES', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric'
-          })}</div>
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })}</div>
               <div class="space-y-1">
                 <div class="text-blue-400 font-medium">${formatNumberToString(point.value)} kg</div>
                 <div class="text-gray-400 text-xs">${point.totalWorkouts} entrenamientos</div>
@@ -123,7 +124,7 @@ export const HistoryEvolutionChart: React.FC<HistoryEvolutionChartProps> = ({ hi
               </div>
             </div>
           `;
-        }
+        },
       },
       markers: {
         size: 6,
@@ -131,12 +132,12 @@ export const HistoryEvolutionChart: React.FC<HistoryEvolutionChartProps> = ({ hi
         strokeColors: '#ffffff',
         strokeWidth: 2,
         hover: {
-          size: 8
-        }
+          size: 8,
+        },
       },
       dataLabels: {
-        enabled: false
-      }
+        enabled: false,
+      },
     };
 
     return { series, options };
@@ -167,4 +168,4 @@ export const HistoryEvolutionChart: React.FC<HistoryEvolutionChartProps> = ({ hi
       </CardContent>
     </Card>
   );
-}; 
+};

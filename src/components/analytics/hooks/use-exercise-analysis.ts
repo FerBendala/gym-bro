@@ -1,6 +1,7 @@
+import { useMemo } from 'react';
+
 import type { WorkoutRecord } from '@/interfaces';
 import { calculateExerciseProgress } from '@/utils';
-import { useMemo } from 'react';
 
 interface ExerciseAnalysis {
   name: string;
@@ -42,7 +43,7 @@ export const useExerciseAnalysis = (records: WorkoutRecord[], selectedCategory: 
     // Analizar cada ejercicio
     return Object.entries(exerciseGroups).map(([exerciseName, exerciseRecords]) => {
       const totalVolume = exerciseRecords.reduce((sum, record) =>
-        sum + (record.weight * record.reps * record.sets), 0
+        sum + (record.weight * record.reps * record.sets), 0,
       );
 
       const maxWeight = Math.max(...exerciseRecords.map(r => r.weight));
@@ -65,7 +66,7 @@ export const useExerciseAnalysis = (records: WorkoutRecord[], selectedCategory: 
         frequency,
         firstWeight: first1RM,
         lastWeight: last1RM,
-        lastDate: new Date(Math.max(...exerciseRecords.map(r => r.date.getTime())))
+        lastDate: new Date(Math.max(...exerciseRecords.map(r => r.date.getTime()))),
       };
     }).sort((a, b) => b.totalVolume - a.totalVolume);
   }, [records]);
@@ -73,7 +74,7 @@ export const useExerciseAnalysis = (records: WorkoutRecord[], selectedCategory: 
   // Crear lista de categorías con contador
   const categoriesWithCount = useMemo((): CategoryWithCount[] => {
     const categories = [
-      { id: 'all', name: 'Todas', count: exerciseAnalysis.length }
+      { id: 'all', name: 'Todas', count: exerciseAnalysis.length },
     ];
 
     // Contar ejercicios por categoría
@@ -105,14 +106,14 @@ export const useExerciseAnalysis = (records: WorkoutRecord[], selectedCategory: 
   // Contar registros sin información de ejercicio
   const unknownRecords = useMemo(() =>
     records.filter(record =>
-      !record.exercise || !record.exercise.name || record.exercise.name === 'Ejercicio desconocido'
-    ), [records]
+      !record.exercise?.name || record.exercise.name === 'Ejercicio desconocido',
+    ), [records],
   );
 
   return {
     exerciseAnalysis,
     categoriesWithCount,
     filteredExercises,
-    unknownRecords
+    unknownRecords,
   };
-}; 
+};

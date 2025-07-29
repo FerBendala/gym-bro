@@ -4,4 +4,4 @@ import type { ConnectionState } from './types';
 export const getInitialState = (): ConnectionState => ({
   isOnline: navigator.onLine,
   isInitialized: false,
-}); 
+});

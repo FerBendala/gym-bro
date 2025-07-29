@@ -1,21 +1,23 @@
-import { Card, CardContent, CardHeader } from '@/components/card';
-import { InfoTooltip } from '@/components/tooltip';
 import { Scale } from 'lucide-react';
 import React from 'react';
+
 import { HorizontalBarChart, MetaCategoryCard } from './components';
 import { useUpperLowerBalance } from './hooks';
 import type { UpperLowerBalanceContentProps } from './types';
+
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
 
 const UpperLowerBalanceContent: React.FC<UpperLowerBalanceContentProps> = ({
   upperLowerBalance,
   categoryAnalysis,
   muscleBalance,
-  onItemClick
+  onItemClick,
 }) => {
   const { metaCategoryData } = useUpperLowerBalance({
     upperLowerBalance,
     categoryAnalysis,
-    muscleBalance
+    muscleBalance,
   });
 
   return (
@@ -39,7 +41,7 @@ const UpperLowerBalanceContent: React.FC<UpperLowerBalanceContentProps> = ({
               name: meta.category,
               value: meta.percentage,
               ideal: meta.idealPercentage,
-              color: meta.color
+              color: meta.color,
             }))}
             onItemClick={onItemClick}
           />

@@ -1,3 +1,6 @@
+import { Trash2 } from 'lucide-react';
+import React from 'react';
+
 import { deleteExerciseAssignment } from '@/api/services';
 import { Button } from '@/components/button';
 import { URLPreview } from '@/components/url-preview';
@@ -5,8 +8,6 @@ import type { ExerciseAssignment } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
-import { Trash2 } from 'lucide-react';
-import React from 'react';
 
 interface AssignmentItemProps {
   assignment: ExerciseAssignment;
@@ -15,7 +16,7 @@ interface AssignmentItemProps {
 
 export const AssignmentItem: React.FC<AssignmentItemProps> = ({
   assignment,
-  onPreviewUrl
+  onPreviewUrl,
 }) => {
   const isOnline = useOnlineStatus();
   const { showNotification } = useNotification();
@@ -23,7 +24,7 @@ export const AssignmentItem: React.FC<AssignmentItemProps> = ({
   const {
     setLoading,
     setError,
-    removeAssignmentFromStore
+    removeAssignmentFromStore,
   } = useAdminStore();
 
   const handleDeleteAssignment = async () => {
@@ -88,4 +89,4 @@ export const AssignmentItem: React.FC<AssignmentItemProps> = ({
       )}
     </div>
   );
-}; 
+};

@@ -1,6 +1,7 @@
-import type { NotificationType } from '@/stores/types';
 import type { LucideIcon } from 'lucide-react';
 import { AlertTriangle, CheckCircle, Info, XCircle } from 'lucide-react';
+
+import type { NotificationType } from '@/stores/types';
 
 export const NOTIFICATION_ICONS: Record<NotificationType, LucideIcon> = {
   success: CheckCircle,
@@ -24,4 +25,4 @@ export const NOTIFICATION_BACKGROUNDS: Record<NotificationType, string> = {
 };
 
 export const ANIMATION_DURATION = 300;
-export const EXIT_ANIMATION_DELAY = 300; 
+export const EXIT_ANIMATION_DELAY = 300;

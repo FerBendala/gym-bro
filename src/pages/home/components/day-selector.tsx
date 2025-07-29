@@ -1,11 +1,13 @@
+import { ChevronDown } from 'lucide-react';
+import React from 'react';
+
+import type { DaySelectorProps } from '../types';
+import { formatDayName, isCurrentDay } from '../utils/date-utils';
+
 import { Button } from '@/components/button';
 import { DAYS } from '@/constants/days.constants';
 import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils';
-import { ChevronDown } from 'lucide-react';
-import React from 'react';
-import type { DaySelectorProps } from '../types';
-import { formatDayName, isCurrentDay } from '../utils/date-utils';
 
 interface DaySelectorComponentProps extends DaySelectorProps {
   showDaySelector: boolean;
@@ -21,7 +23,7 @@ export const DaySelector: React.FC<DaySelectorComponentProps> = ({
   onDayChange,
   showDaySelector,
   onToggle,
-  onClose
+  onClose,
 }) => {
   return (
     <div className="relative">
@@ -37,7 +39,7 @@ export const DaySelector: React.FC<DaySelectorComponentProps> = ({
       {showDaySelector && (
         <div className={cn(
           'absolute top-full right-0 mt-2 bg-gray-900/95 backdrop-blur-md border border-gray-700/50 rounded-xl shadow-2xl z-[55] min-w-[200px]',
-          MODERN_THEME.animations.slide.down
+          MODERN_THEME.animations.slide.down,
         )}>
           <div className="p-2">
             {DAYS.map((day) => {
@@ -55,7 +57,7 @@ export const DaySelector: React.FC<DaySelectorComponentProps> = ({
                     'w-full flex items-center justify-between px-3 py-2 rounded-lg text-sm transition-all duration-200',
                     isActive
                       ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                      : 'text-gray-300 hover:bg-gray-800/50 hover:text-white'
+                      : 'text-gray-300 hover:bg-gray-800/50 hover:text-white',
                   )}
                 >
                   <span className="font-medium">
@@ -79,4 +81,4 @@ export const DaySelector: React.FC<DaySelectorComponentProps> = ({
       )}
     </div>
   );
-}; 
+};

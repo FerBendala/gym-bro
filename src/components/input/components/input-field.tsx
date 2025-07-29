@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+
 import type { InputProps } from '../types';
 
 interface InputFieldProps extends Omit<InputProps, 'label' | 'error' | 'helperText'> {
@@ -21,4 +22,4 @@ export const InputField = forwardRef<HTMLInputElement, InputFieldProps>(({
   );
 });
 
-InputField.displayName = 'InputField'; 
+InputField.displayName = 'InputField';

@@ -6,4 +6,4 @@ export interface SettingsItem {
   icon: React.ComponentType<{ className?: string }>;
   description: string;
   disabled?: boolean;
-} 
+}

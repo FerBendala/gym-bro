@@ -1,9 +1,11 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { differenceInDays, endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 import { clamp, roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
 import { getLatestDate, getRecordsByDayRange } from './workout-utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Interfaz para análisis de fatiga y recuperación
@@ -53,14 +55,14 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
         volumeStress: 0,
         frequencyStress: 0,
         intensityStress: 0,
-        recoveryStress: 0
+        recoveryStress: 0,
       },
       recoveryRecommendations: [],
       predictedRecoveryTime: 0,
       fatigueHistory: {
         trend: 'Estable',
-        consistency: 0
-      }
+        consistency: 0,
+      },
     };
   }
 
@@ -159,7 +161,7 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   // Calcular recovery score basado en múltiples factores
   const recoveryScore = clamp(
     100 - (fatigueIndex * 0.6) - (recoveryDays > 2 ? (recoveryDays - 2) * 5 : 0),
-    0, 100
+    0, 100,
   );
 
   // Calcular stress factors más realistas basados en niveles actuales
@@ -170,7 +172,7 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
       Math.min(60, (recentVolume / 1000) * 10) +
       // Stress adicional por aumentos súbitos
       (volumeChange > 15 ? (volumeChange - 15) * 2 : 0),
-      0, 100
+      0, 100,
     ),
 
     // Frequency stress: basado en frecuencia actual
@@ -181,7 +183,7 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
             weeklyFrequency <= 5 ? 70 :  // Frecuencia alta = stress alto
               weeklyFrequency <= 6 ? 85 :  // Frecuencia muy alta = stress muy alto
                 100,  // Entrenamiento diario = stress máximo
-      0, 100
+      0, 100,
     ),
 
     // Intensity stress: basado en el índice de fatiga
@@ -193,8 +195,8 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
         recoveryDays === 1 ? 40 :      // 1 día descanso = stress medio
           recoveryDays === 2 ? 20 :      // 2 días descanso = stress bajo
             recoveryDays >= 3 ? 10 : 0,     // 3+ días descanso = stress muy bajo
-      0, 100
-    )
+      0, 100,
+    ),
   };
 
   // Recomendaciones de recuperación mejoradas
@@ -226,7 +228,7 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   // Tiempo estimado de recuperación más realista
   const predictedRecoveryTime = Math.round(clamp(
     (fatigueIndex / 100) * 48 + (recoveryDays === 0 ? 12 : 0),
-    8, 72
+    8, 72,
   ));
 
   // Análisis de historial de fatiga usando semanas completas CON CONTEXTO
@@ -251,7 +253,7 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
 
   const fatigueHistory: FatigueAnalysis['fatigueHistory'] = {
     trend,
-    consistency: roundToDecimals(Math.min(100, Math.max(0, 100 - Math.abs(volumeChange))))
+    consistency: roundToDecimals(Math.min(100, Math.max(0, 100 - Math.abs(volumeChange)))),
   };
 
   return {
@@ -267,6 +269,6 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
     stressFactors,
     recoveryRecommendations,
     predictedRecoveryTime,
-    fatigueHistory
+    fatigueHistory,
   };
-}; 
+};

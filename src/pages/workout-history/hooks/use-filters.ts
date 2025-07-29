@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+
 import { WORKOUT_HISTORY_CONSTANTS } from '../constants';
 import type { FilterState, WorkoutRecordWithExercise } from '../types';
 
@@ -10,7 +11,7 @@ export const useFilters = (records: WorkoutRecordWithExercise[], initialFilter?:
     dateFrom: undefined,
     dateTo: undefined,
     sortBy: 'date',
-    sortOrder: 'desc'
+    sortOrder: 'desc',
   });
 
   const filteredAndSortedRecords = useMemo(() => {
@@ -96,7 +97,7 @@ export const useFilters = (records: WorkoutRecordWithExercise[], initialFilter?:
       dateFrom: undefined,
       dateTo: undefined,
       sortBy: 'date',
-      sortOrder: 'desc'
+      sortOrder: 'desc',
     });
   }, []);
 
@@ -106,6 +107,6 @@ export const useFilters = (records: WorkoutRecordWithExercise[], initialFilter?:
     clearFilters,
     filteredAndSortedRecords,
     displayRecords,
-    hasActiveFilters
+    hasActiveFilters,
   };
-}; 
+};

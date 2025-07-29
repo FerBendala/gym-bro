@@ -7,11 +7,11 @@ interface MetricsGridProps {
 
 export const MetricsGrid: React.FC<MetricsGridProps> = ({
   children,
-  className = ''
+  className = '',
 }) => {
   return (
     <div className={`grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4 ${className}`}>
       {children}
     </div>
   );
-}; 
+};

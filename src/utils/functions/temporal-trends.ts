@@ -1,14 +1,16 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { endOfWeek, format, getDay, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 import { roundToDecimals } from './math-utils';
 import type { TemporalTrend } from './trends-interfaces';
 import { getMaxWeight } from './workout-utils';
 
+import type { WorkoutRecord } from '@/interfaces';
+
 /**
  * Calcula tendencias temporales mejoradas por semana
  */
-export const calculateTemporalTrends = (records: WorkoutRecord[], weeksCount: number = 12): TemporalTrend[] => {
+export const calculateTemporalTrends = (records: WorkoutRecord[], weeksCount = 12): TemporalTrend[] => {
   if (records.length === 0) return [];
 
   const now = new Date();
@@ -25,7 +27,7 @@ export const calculateTemporalTrends = (records: WorkoutRecord[], weeksCount: nu
 
     if (weekRecords.length > 0) {
       const totalVolume = weekRecords.reduce((sum, record) =>
-        sum + (record.weight * record.reps * record.sets), 0
+        sum + (record.weight * record.reps * record.sets), 0,
       );
 
       const weights = weekRecords.map(record => record.weight);
@@ -69,7 +71,7 @@ export const calculateTemporalTrends = (records: WorkoutRecord[], weeksCount: nu
         avgReps: roundToDecimals(avgReps),
         avgSets: roundToDecimals(avgSets),
         totalSets,
-        weeklyStrength: roundToDecimals(weeklyStrength)
+        weeklyStrength: roundToDecimals(weeklyStrength),
       };
 
       trends.push(trend);
@@ -123,4 +125,4 @@ export const calculateTemporalTrends = (records: WorkoutRecord[], weeksCount: nu
   }
 
   return trends.slice(-8); // Últimas 8 semanas con datos
-}; 
+};

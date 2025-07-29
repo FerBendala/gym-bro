@@ -1,4 +1,5 @@
 import { useRef, useState } from 'react';
+
 import { MultiSelectProps } from '../types';
 import { getDisplayText, toggleOption } from '../utils';
 
@@ -7,7 +8,7 @@ export const useMultiSelect = ({
   options,
   onChange,
   placeholder,
-  disabled = false
+  disabled = false,
 }: MultiSelectProps) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -36,6 +37,6 @@ export const useMultiSelect = ({
     handleToggle,
     handleToggleOption,
     handleClose,
-    hasValue: value.length > 0
+    hasValue: value.length > 0,
   };
-}; 
+};

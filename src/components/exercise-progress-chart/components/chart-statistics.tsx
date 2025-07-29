@@ -1,13 +1,15 @@
-import { InfoTooltip } from '@/components/tooltip';
 import { TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
+
 import type { ChartStatisticsProps } from '../types';
+
+import { InfoTooltip } from '@/components/tooltip';
 
 /**
  * Componente que muestra estadísticas adicionales del gráfico de progreso
  */
 export const ChartStatistics: React.FC<ChartStatisticsProps> = ({
-  statistics
+  statistics,
 }) => {
   const {
     totalExercises,
@@ -15,7 +17,7 @@ export const ChartStatistics: React.FC<ChartStatisticsProps> = ({
     averageWeightIncrease,
     bestProgress,
     consistencyScore,
-    timeRange
+    timeRange,
   } = statistics;
 
   return (
@@ -118,4 +120,4 @@ export const ChartStatistics: React.FC<ChartStatisticsProps> = ({
       </div>
     </div>
   );
-}; 
+};

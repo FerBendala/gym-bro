@@ -13,7 +13,7 @@ interface ModalHeaderProps {
  */
 export const ModalHeader: React.FC<ModalHeaderProps> = ({
   assignment,
-  onClose
+  onClose,
 }) => {
   return (
     <div className="relative bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20 border-b border-gray-700/50">
@@ -52,4 +52,4 @@ export const ModalHeader: React.FC<ModalHeaderProps> = ({
       </div>
     </div>
   );
-}; 
+};

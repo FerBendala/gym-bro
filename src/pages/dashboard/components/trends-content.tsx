@@ -1,11 +1,14 @@
+import { Activity, AlertTriangle, Calendar, CheckCircle, TrendingDown, TrendingUp, Zap } from 'lucide-react';
+import React, { useMemo } from 'react';
+
+import { useTrendsContent } from '../hooks/use-trends-content';
+import { EmptyState } from '../shared';
+
+import { dayColors, dayIcons, safeNumber } from './trends-utils';
+
 import { Card, CardContent, CardHeader } from '@/components/card';
 import type { WorkoutRecord } from '@/interfaces';
 import { formatNumberToString } from '@/utils';
-import { Activity, AlertTriangle, Calendar, CheckCircle, TrendingDown, TrendingUp, Zap } from 'lucide-react';
-import React, { useMemo } from 'react';
-import { useTrendsContent } from '../hooks/use-trends-content';
-import { EmptyState } from '../shared';
-import { dayColors, dayIcons, safeNumber } from './trends-utils';
 
 interface TrendsContentProps {
   records: WorkoutRecord[];
@@ -83,7 +86,7 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
               return (
                 <div
                   key={day.dayName}
-                  className={`relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/30 hover:border-gray-600/50 transition-all duration-200`}
+                  className={'relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/30 hover:border-gray-600/50 transition-all duration-200'}
                 >
                   {/* Header con ícono y estado */}
                   <div className="flex items-start justify-between mb-4">
@@ -228,4 +231,4 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
       </Card>
     </div>
   );
-}; 
+};

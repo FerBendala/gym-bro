@@ -48,4 +48,4 @@ export interface WorkoutFormData {
   reps: number;
   sets: number;
   date?: Date;
-} 
+}

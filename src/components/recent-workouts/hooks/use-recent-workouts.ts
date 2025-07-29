@@ -1,5 +1,6 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { useMemo } from 'react';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 interface UseRecentWorkoutsProps {
   records: WorkoutRecord[];
@@ -20,7 +21,7 @@ interface UseRecentWorkoutsReturn {
  */
 export const useRecentWorkouts = ({
   records,
-  maxRecords = 10
+  maxRecords = 10,
 }: UseRecentWorkoutsProps): UseRecentWorkoutsReturn => {
   const displayRecords = useMemo(() => {
     return records.slice(0, maxRecords);
@@ -35,6 +36,6 @@ export const useRecentWorkouts = ({
     hasRecords,
     isAtLimit,
     recordCount,
-    maxRecords
+    maxRecords,
   };
-}; 
+};

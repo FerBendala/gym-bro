@@ -1,13 +1,15 @@
-import { cn } from '@/utils';
 import React from 'react';
+
 import { ARROW_CLASSES, POSITION_CLASSES } from '../constants';
 import { TooltipContentProps } from '../types';
 import { getTooltipStyles } from '../utils';
 
+import { cn } from '@/utils';
+
 export const TooltipContent: React.FC<TooltipContentProps> = ({
   content,
   position,
-  isVisible
+  isVisible,
 }) => {
   if (!isVisible) return null;
 
@@ -18,7 +20,7 @@ export const TooltipContent: React.FC<TooltipContentProps> = ({
         'bg-gray-800 border border-gray-700',
         'backdrop-blur-sm',
         'animate-tooltip',
-        POSITION_CLASSES[position]
+        POSITION_CLASSES[position],
       )}
       style={getTooltipStyles()}
     >
@@ -28,9 +30,9 @@ export const TooltipContent: React.FC<TooltipContentProps> = ({
       <div
         className={cn(
           'absolute w-0 h-0 border-4',
-          ARROW_CLASSES[position]
+          ARROW_CLASSES[position],
         )}
       />
     </div>
   );
-}; 
+};

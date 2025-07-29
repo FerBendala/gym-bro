@@ -1,10 +1,11 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { calculateConsistencyScore } from './calculate-consistency-score';
 import { calculateIntensityScore } from './calculate-intensity-score';
 import { calculateVolumeProgression } from './calculate-volume-progression';
 import { calculateWeightProgression } from './calculate-weight-progression';
 import { roundToDecimalsBatch } from './math-utils';
 import { getLatestDate, getMaxEstimated1RM, getMaxWeight, getMinWeight, sortRecordsByDate } from './workout-utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula métricas detalladas por categoría de ejercicio
@@ -46,13 +47,13 @@ export const calculateCategoryMetrics = (
       volumeProgression: 0,
       intensityScore: 0,
       efficiencyScore: 0,
-      consistencyScore: 0
+      consistencyScore: 0,
     };
   }
 
   // Filtrar registros de la categoría objetivo
   const categoryRecords = records.filter(record =>
-    record.exercise?.categories?.includes(targetCategory)
+    record.exercise?.categories?.includes(targetCategory),
   );
 
   if (categoryRecords.length === 0) {
@@ -71,7 +72,7 @@ export const calculateCategoryMetrics = (
       volumeProgression: 0,
       intensityScore: 0,
       efficiencyScore: 0,
-      consistencyScore: 0
+      consistencyScore: 0,
     };
   }
 
@@ -80,7 +81,7 @@ export const calculateCategoryMetrics = (
 
   // Calcular métricas básicas
   const categoryVolume = categoryRecords.reduce((sum, record) =>
-    sum + (record.weight * record.reps * record.sets), 0
+    sum + (record.weight * record.reps * record.sets), 0,
   );
 
   const weights = categoryRecords.map(r => r.weight);
@@ -130,7 +131,7 @@ export const calculateCategoryMetrics = (
     volumeProgression,
     intensityScore,
     efficiencyScore,
-    consistencyScore
+    consistencyScore,
   }, {
     // Especificar decimales específicos para cada métrica
     totalVolume: 0,
@@ -146,7 +147,7 @@ export const calculateCategoryMetrics = (
     volumeProgression: 1,
     intensityScore: 0,
     efficiencyScore: 0,
-    consistencyScore: 0
+    consistencyScore: 0,
   });
 
   return {
@@ -164,6 +165,6 @@ export const calculateCategoryMetrics = (
     volumeProgression: roundedMetrics.volumeProgression,
     intensityScore: roundedMetrics.intensityScore,
     efficiencyScore: roundedMetrics.efficiencyScore,
-    consistencyScore: roundedMetrics.consistencyScore
+    consistencyScore: roundedMetrics.consistencyScore,
   };
-}; 
+};

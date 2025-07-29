@@ -6,7 +6,7 @@ interface FilterModalHeaderProps {
 }
 
 export const FilterModalHeader: React.FC<FilterModalHeaderProps> = ({
-  onClose
+  onClose,
 }) => {
   return (
     <div className="relative bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20 border-b border-gray-700/50 p-6">
@@ -29,4 +29,4 @@ export const FilterModalHeader: React.FC<FilterModalHeaderProps> = ({
       </div>
     </div>
   );
-}; 
+};

@@ -1,7 +1,9 @@
-import { getCategoryColor, getCategoryIcon } from '@/utils';
 import { ClipboardList, Plus, WifiOff } from 'lucide-react';
 import React from 'react';
+
 import type { ExerciseCardHeaderProps } from '../types';
+
+import { getCategoryColor, getCategoryIcon } from '@/utils';
 
 /**
  * Header del ExerciseCard con título, categorías y botones de acción
@@ -11,7 +13,7 @@ export const ExerciseCardHeader: React.FC<ExerciseCardHeaderProps> = ({
   assignment,
   disabled,
   onToggleModal,
-  onGoToHistory
+  onGoToHistory,
 }) => {
   // Obtener la primera categoría para determinar el color y el icono
   const primaryCategory = assignment.exercise?.categories?.[0] || 'Pecho';
@@ -88,4 +90,4 @@ export const ExerciseCardHeader: React.FC<ExerciseCardHeaderProps> = ({
       </div>
     </div>
   );
-}; 
+};

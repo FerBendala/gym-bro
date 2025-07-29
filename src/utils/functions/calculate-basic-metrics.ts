@@ -1,8 +1,9 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { calculateOptimal1RM } from './calculate-1rm.utils';
 import { calculateVolume } from './volume-calculations';
 import { getLastCompleteWeekRecords } from './week-records.utils';
 import { getMaxWeight } from './workout-utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula métricas básicas de los registros
@@ -35,6 +36,6 @@ export const calculateBasicMetrics = (validRecords: WorkoutRecord[]) => {
     avgWeight,
     maxWeight,
     avgVolume,
-    current1RMMax
+    current1RMMax,
   };
-}; 
+};

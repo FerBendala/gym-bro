@@ -17,4 +17,4 @@ export const calculateIntensityScore = (categoryRecords: WorkoutRecord[]): numbe
   // Intensidad basada en % de 1RM (más precisa)
   const intensityPercentage = (avgOneRM / maxOneRM) * 100;
   return Math.round(intensityPercentage);
-}; 
+};

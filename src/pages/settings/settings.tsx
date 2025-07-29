@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { MainSettings, SettingsContent } from './components';
 import { useSettingsNavigation } from './hooks';
 
@@ -22,4 +23,4 @@ export const ModernSettings: React.FC = () => {
       {renderContent()}
     </div>
   );
-}; 
+};

@@ -1,14 +1,16 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { Activity, AlertTriangle } from 'lucide-react';
 import React from 'react';
+
 import {
   ExercisesCategoryFilters,
   ExercisesDetailedAnalysis,
   ExercisesMetrics,
-  ExercisesUnknownWarning
+  ExercisesUnknownWarning,
 } from '../components';
 import { useExercisesData } from '../hooks/use-exercises-data';
 import { EmptyState } from '../shared/empty-state';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 interface ExercisesTabProps {
   records: WorkoutRecord[];
@@ -22,7 +24,7 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
     setSelectedCategory,
     allExercises,
     unknownRecords,
-    globalMetrics
+    globalMetrics,
   } = useExercisesData(records);
 
   if (records.length === 0) {
@@ -58,4 +60,4 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
       />
     </div>
   );
-}; 
+};

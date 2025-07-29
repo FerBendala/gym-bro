@@ -1,13 +1,14 @@
-import { Page } from '@/components/layout';
 import {
   CalendarMainSection,
   EmptyState,
   ErrorState,
   LoadingState,
-  MonthStatsSection
+  MonthStatsSection,
 } from './components';
 import { useCalendarData } from './hooks';
 import { getCurrentMonthStats } from './utils';
+
+import { Page } from '@/components/layout';
 
 /**
  * Página de calendario moderna con datos reales
@@ -35,4 +36,4 @@ export const ModernCalendar: React.FC = () => {
       {records.length === 0 && <EmptyState />}
     </Page>
   );
-}; 
+};

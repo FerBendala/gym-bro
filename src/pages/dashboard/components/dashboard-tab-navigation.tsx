@@ -1,8 +1,10 @@
-import { MODERN_THEME } from '@/constants/theme';
-import { cn } from '@/utils';
 import React from 'react';
+
 import { DASHBOARD_TABS } from '../constants';
 import type { DashboardTab } from '../types';
+
+import { MODERN_THEME } from '@/constants/theme';
+import { cn } from '@/utils';
 
 interface DashboardTabNavigationProps {
   activeTab: DashboardTab;
@@ -15,7 +17,7 @@ interface DashboardTabNavigationProps {
  */
 export const DashboardTabNavigation: React.FC<DashboardTabNavigationProps> = ({
   activeTab,
-  onTabChange
+  onTabChange,
 }) => {
   return (
     <div className="space-y-4">
@@ -36,7 +38,7 @@ export const DashboardTabNavigation: React.FC<DashboardTabNavigationProps> = ({
                   MODERN_THEME.accessibility.focusRing,
                   isActive
                     ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                    : 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50'
+                    : 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50',
                 )}
                 title={tab.description}
               >
@@ -49,4 +51,4 @@ export const DashboardTabNavigation: React.FC<DashboardTabNavigationProps> = ({
       </div>
     </div>
   );
-}; 
+};

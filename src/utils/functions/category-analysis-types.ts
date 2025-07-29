@@ -8,7 +8,7 @@ export const ANTAGONIST_PAIRS: Record<string, string> = {
   'Brazos': 'Piernas', // Simplificado
   'Piernas': 'Brazos',
   'Hombros': 'Core',
-  'Core': 'Hombros'
+  'Core': 'Hombros',
 };
 
 export interface CategoryMetrics {
@@ -90,4 +90,4 @@ export interface CategoryAnalysis {
   dominantCategory: string | null;
   leastTrainedCategory: string | null;
   balanceScore: number; // 0-100, donde 100 es perfectamente balanceado
-} 
+}

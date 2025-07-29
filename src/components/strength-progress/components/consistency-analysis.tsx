@@ -1,8 +1,10 @@
-import { Card, CardContent, CardHeader } from '@/components/card';
-import { InfoTooltip } from '@/components/tooltip';
 import { Target } from 'lucide-react';
+
 import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
 import type { StrengthProgressAnalysis } from '../types';
+
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
 
 interface ConsistencyAnalysisProps {
   analysis: StrengthProgressAnalysis;
@@ -55,4 +57,4 @@ export const ConsistencyAnalysis: React.FC<ConsistencyAnalysisProps> = ({ analys
       </CardContent>
     </Card>
   );
-}; 
+};

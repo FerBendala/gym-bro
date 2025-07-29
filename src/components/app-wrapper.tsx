@@ -5,4 +5,4 @@ import App from '@/pages/app';
 export const AppWrapper = () => {
   useAppInitialization();
   return <App />;
-}; 
+};

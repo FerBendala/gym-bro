@@ -1,9 +1,12 @@
-import { useAdminStore } from '@/stores/admin';
 import React from 'react';
+
 import type { AdminPanelTab } from '../types';
+
 import { ExerciseAssignments } from './exercise-assignments';
 import { ExerciseForm } from './exercise-form';
 import { ExerciseList } from './exercise-list';
+
+import { useAdminStore } from '@/stores/admin';
 
 interface AdminContentProps {
   activeTab: AdminPanelTab;
@@ -12,7 +15,7 @@ interface AdminContentProps {
 
 export const AdminContent: React.FC<AdminContentProps> = ({
   activeTab,
-  isModal = false
+  isModal = false,
 }) => {
   // Usar selectores específicos para acceder al estado correctamente
   const editingExercise = useAdminStore((state) => state.adminPanel.editingExercise);
@@ -61,4 +64,4 @@ export const AdminContent: React.FC<AdminContentProps> = ({
       {content}
     </div>
   );
-}; 
+};

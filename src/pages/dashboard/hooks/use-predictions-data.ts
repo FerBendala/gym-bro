@@ -1,3 +1,7 @@
+import { useMemo } from 'react';
+
+import { usePredictionMetrics } from './use-prediction-metrics';
+
 import { useAdvancedAnalysis } from '@/hooks/use-advanced-analysis';
 import type { WorkoutRecord } from '@/interfaces';
 import { calculateNormalizedVolumeTrend, formatNumberToString } from '@/utils';
@@ -8,10 +12,8 @@ import {
   getRecordsFromLastDays,
   validateMonthlyGrowth,
   validateStrengthTrend,
-  validateTimeToNextPR as validateTimeToNextPRUtil
+  validateTimeToNextPR as validateTimeToNextPRUtil,
 } from '@/utils/functions/workout-utils';
-import { useMemo } from 'react';
-import { usePredictionMetrics } from './use-prediction-metrics';
 
 const validateNextWeekWeight = (records: WorkoutRecord[], rawPrediction: number): number => {
   const recentRecords = getRecordsFromLastDays(records, 30);
@@ -47,7 +49,7 @@ const validatePRWeight = (records: WorkoutRecord[], rawPrediction: number, nextW
     const baseNextWeek = nextWeekWeight || (recentMaxWeight * 1.01);
     const minReasonablePR = Math.max(
       baseNextWeek + 2.5, // Al menos 2.5kg más que próxima semana
-      recentMaxWeight * 1.05  // O mínimo 5% mejora total
+      recentMaxWeight * 1.05,  // O mínimo 5% mejora total
     );
     const maxReasonablePR = recentMaxWeight * 1.20; // Máximo 20% mejora
 
@@ -100,7 +102,7 @@ export const usePredictionsData = (records: WorkoutRecord[]) => {
       analysis.progressPrediction.timeToNextPR,
       nextWeekWeight,
       prWeight,
-      strengthTrend
+      strengthTrend,
     );
 
     const normalizedVolumeTrend = calculateNormalizedVolumeTrend(records);
@@ -130,14 +132,14 @@ export const usePredictionsData = (records: WorkoutRecord[]) => {
       rawNextWeek: analysis.progressPrediction.nextWeekWeight,
       rawPR: analysis.progressPrediction.predictedPR.weight,
       rawStrengthTrend: analysis.progressPrediction.strengthTrend,
-      rawMonthlyGrowth: analysis.progressPrediction.monthlyGrowthRate
+      rawMonthlyGrowth: analysis.progressPrediction.monthlyGrowthRate,
     };
   }, [records, analysis]);
 
   // Usar el hook mejorado para calcular métricas de forma optimizada
   const predictionMetrics = usePredictionMetrics(
     records,
-    analysis.progressPrediction.predictedPR.weight
+    analysis.progressPrediction.predictedPR.weight,
   );
 
   // ✅ USAR UTILIDAD CENTRALIZADA: Función para obtener explicación de nivel de confianza
@@ -147,6 +149,6 @@ export const usePredictionsData = (records: WorkoutRecord[]) => {
     analysis,
     centralizedMetrics,
     predictionMetrics,
-    confidenceInfo
+    confidenceInfo,
   };
-}; 
+};

@@ -1,6 +1,8 @@
-import { Card } from '@/components/card';
 import React from 'react';
+
 import { VOLUME_SETTINGS_TIPS } from '../constants';
+
+import { Card } from '@/components/card';
 
 export const VolumeSettingsTips: React.FC = () => {
   return (
@@ -13,4 +15,4 @@ export const VolumeSettingsTips: React.FC = () => {
       </ul>
     </Card>
   );
-}; 
+};

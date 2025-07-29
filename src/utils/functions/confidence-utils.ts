@@ -23,8 +23,8 @@ export const getConfidenceExplanation = (confidence: number): ConfidenceExplanat
       factors: [
         'Datos abundantes y consistentes',
         'Progresión clara y estable',
-        'Entrenamientos regulares recientes'
-      ]
+        'Entrenamientos regulares recientes',
+      ],
     };
   } else if (confidence >= 60) {
     return {
@@ -34,8 +34,8 @@ export const getConfidenceExplanation = (confidence: number): ConfidenceExplanat
       factors: [
         'Suficientes datos históricos',
         'Patrones de progreso identificables',
-        'Regularidad en entrenamientos'
-      ]
+        'Regularidad en entrenamientos',
+      ],
     };
   } else if (confidence >= 40) {
     return {
@@ -45,8 +45,8 @@ export const getConfidenceExplanation = (confidence: number): ConfidenceExplanat
       factors: [
         'Datos limitados o irregulares',
         'Progresión variable o inconsistente',
-        'Períodos largos sin entrenar'
-      ]
+        'Períodos largos sin entrenar',
+      ],
     };
   } else if (confidence >= 20) {
     return {
@@ -56,8 +56,8 @@ export const getConfidenceExplanation = (confidence: number): ConfidenceExplanat
       factors: [
         'Pocos datos históricos',
         'Gran variabilidad en rendimiento',
-        'Entrenamientos muy esporádicos'
-      ]
+        'Entrenamientos muy esporádicos',
+      ],
     };
   } else {
     return {
@@ -67,8 +67,8 @@ export const getConfidenceExplanation = (confidence: number): ConfidenceExplanat
       factors: [
         'Datos insuficientes o de mala calidad',
         'Sin patrones identificables',
-        'Falta de consistencia temporal'
-      ]
+        'Falta de consistencia temporal',
+      ],
     };
   }
 };

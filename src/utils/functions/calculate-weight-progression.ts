@@ -1,6 +1,7 @@
-import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
 import { calculateCategoryEffortDistribution } from './exercise-patterns';
 import { normalizeByWeekday } from './normalize-by-weekday';
+
+import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula la progresión de peso para una categoría
@@ -74,7 +75,7 @@ export const calculateWeightProgression = (categoryRecords: WorkoutRecord[], tar
     secondHalfAvg1RM,
     firstHalfAvg1RM,
     currentDate,
-    allAssignments // Pasar asignaciones para detectar patrón
+    allAssignments, // Pasar asignaciones para detectar patrón
   );
 
   const densityProgression = normalizedFirstHalf > 0 ? ((normalizedSecondHalf - normalizedFirstHalf) / normalizedFirstHalf) * 100 : 0;
@@ -141,4 +142,4 @@ export const calculateWeightProgression = (categoryRecords: WorkoutRecord[], tar
   }
 
   return Math.round(progression);
-}; 
+};

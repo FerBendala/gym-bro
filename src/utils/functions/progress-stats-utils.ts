@@ -1,13 +1,14 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { calculateOptimal1RM } from './calculate-1rm.utils';
 import { clamp, roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula el crecimiento total basado en datos de timeline
  * Refactorizado para usar funciones centralizadas
  */
-export const calculateTotalGrowth = (timelineData: Array<{ value: number; totalWorkouts: number }>): {
+export const calculateTotalGrowth = (timelineData: { value: number; totalWorkouts: number }[]): {
   absoluteGrowth: number;
   percentGrowth: number;
 } => {
@@ -23,7 +24,7 @@ export const calculateTotalGrowth = (timelineData: Array<{ value: number; totalW
 
   return {
     absoluteGrowth: roundToDecimals(absoluteGrowth * 100) / 100,
-    percentGrowth: roundToDecimals(percentGrowth * 100) / 100
+    percentGrowth: roundToDecimals(percentGrowth * 100) / 100,
   };
 };
 
@@ -59,7 +60,7 @@ export const calculateExerciseProgress = (exerciseRecords: WorkoutRecord[]): {
       absoluteProgress: roundToDecimals(absoluteProgress),
       percentProgress: roundToDecimals(percentProgress),
       first1RM: roundToDecimals(first1RM),
-      last1RM: roundToDecimals(last1RM)
+      last1RM: roundToDecimals(last1RM),
     };
   }
 
@@ -128,7 +129,7 @@ export const calculateExerciseProgress = (exerciseRecords: WorkoutRecord[]): {
     absoluteProgress: roundToDecimals(absoluteProgress),
     percentProgress: roundToDecimals(percentProgress),
     first1RM: roundToDecimals(first1RM),
-    last1RM: roundToDecimals(last1RM)
+    last1RM: roundToDecimals(last1RM),
   };
 };
 
@@ -182,6 +183,6 @@ export const calculateWeightProgress = (records: WorkoutRecord[]): {
     absoluteProgress: roundToDecimals(absoluteProgress),
     percentProgress: roundToDecimals(percentProgress),
     firstAvg1RM: roundToDecimals(firstAvg1RM),
-    lastAvg1RM: roundToDecimals(lastAvg1RM)
+    lastAvg1RM: roundToDecimals(lastAvg1RM),
   };
 };

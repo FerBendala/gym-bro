@@ -1,6 +1,8 @@
+import { useEffect, useState } from 'react';
+
 import { getWorkoutRecords } from '@/api/services';
 import type { WorkoutRecord } from '@/interfaces';
-import { useEffect, useState } from 'react';
+import { logger } from '@/utils';
 
 export const useCalendarData = () => {
   const [records, setRecords] = useState<WorkoutRecord[]>([]);
@@ -14,7 +16,7 @@ export const useCalendarData = () => {
         const workoutRecords = await getWorkoutRecords();
         setRecords(workoutRecords);
       } catch (err) {
-        console.error('Error loading workout records:', err);
+        logger.error('Error loading workout records:', err as Error);
         setError('Error al cargar los datos de entrenamientos');
       } finally {
         setLoading(false);
@@ -27,6 +29,6 @@ export const useCalendarData = () => {
   return {
     records,
     loading,
-    error
+    error,
   };
-}; 
+};

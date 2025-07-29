@@ -1,14 +1,15 @@
-import { cn } from '@/utils';
 import {
   DataStatsCard,
   ExportInfoCard,
   ExportOptionButton,
   OfflineWarning,
-  PrivacyNote
+  PrivacyNote,
 } from './components';
 import { EXPORT_INFO, EXPORT_OPTIONS } from './constants';
 import { useDataExport } from './hooks';
 import type { DataExportProps } from './types';
+
+import { cn } from '@/utils';
 
 /**
  * Componente para exportar todos los datos de la aplicación
@@ -52,4 +53,4 @@ export const DataExport: React.FC<DataExportProps> = ({ className }) => {
       <PrivacyNote />
     </div>
   );
-}; 
+};

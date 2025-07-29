@@ -8,22 +8,22 @@ const META_CATEGORIES = {
     name: 'Tren Superior',
     categories: ['Pecho', 'Espalda', 'Hombros', 'Brazos'],
     idealPercentage: 60,
-    color: '#3B82F6'
+    color: '#3B82F6',
   },
   LOWER_BODY: {
     id: 'lower_body',
     name: 'Tren Inferior',
     categories: ['Piernas', 'Glúteos'],
     idealPercentage: 35,
-    color: '#10B981'
+    color: '#10B981',
   },
   CORE: {
     id: 'core',
     name: 'Core',
     categories: ['Core'],
     idealPercentage: 5,
-    color: '#8B5CF6'
-  }
+    color: '#8B5CF6',
+  },
 };
 
 export const calculateBalanceAnalysis = (records: WorkoutRecord[]): {
@@ -46,16 +46,16 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]): {
       categoryAnalysis: {
         categoryMetrics: [],
         overallBalance: 0,
-        recommendations: []
+        recommendations: [],
       },
       upperLowerBalance: {
         upperBody: { volume: 0, percentage: 0, categories: [] },
         lowerBody: { volume: 0, percentage: 0, categories: [] },
         core: { volume: 0, percentage: 0, categories: [] },
         isBalanced: true,
-        recommendation: 'Sin datos suficientes'
+        recommendation: 'Sin datos suficientes',
       },
-      selectedView: 'general' as const
+      selectedView: 'general' as const,
     };
   }
 
@@ -99,7 +99,7 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]): {
         weight: pr.weight,
         reps: pr.reps,
         date: pr.date,
-        exerciseId: pr.exerciseId || 'unknown'
+        exerciseId: pr.exerciseId || 'unknown',
       })),
       balanceHistory: {
         ...balance.balanceHistory,
@@ -107,8 +107,8 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]): {
         // Propiedades requeridas por BalanceHistory
         lastWeekVolume: balance.volume * 0.9, // TODO: Calcular volumen real de la semana anterior
         currentWeekVolume: balance.volume, // TODO: Calcular volumen real de la semana actual
-        changePercent: balance.volume > 0 ? 10 : 0 // TODO: Calcular cambio porcentual real
-      }
+        changePercent: balance.volume > 0 ? 10 : 0, // TODO: Calcular cambio porcentual real
+      },
     })),
     categoryAnalysis: {
       categoryMetrics: categoryAnalysis.categoryMetrics.map(metric => ({
@@ -140,35 +140,35 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]): {
           thisWeek: 0,
           lastWeek: 0,
           thisMonth: 0,
-          lastMonth: 0
+          lastMonth: 0,
         },
         performanceMetrics: {
           bestSession: {
             date: new Date(),
             volume: metric.totalVolume,
-            maxWeight: metric.maxWeight
+            maxWeight: metric.maxWeight,
           },
           averageSessionVolume: metric.totalVolume / Math.max(1, metric.workoutCount),
           volumePerWorkout: metric.totalVolume / Math.max(1, metric.workoutCount),
-          sessionsAboveAverage: 0
+          sessionsAboveAverage: 0,
         },
         recommendations: [],
         warnings: [],
         // Propiedades requeridas por CategoryMetric
         volumeTrend: metric.volumeProgression,
         frequency: metric.avgWorkoutsPerWeek,
-        intensity: metric.intensityScore
+        intensity: metric.intensityScore,
       })),
       overallBalance: balanceScore,
-      recommendations: []
+      recommendations: [],
     },
     upperLowerBalance,
-    selectedView: 'general' as const
+    selectedView: 'general' as const,
   };
 };
 
 // NUEVA FUNCIÓN: Calcular balance tren superior vs inferior como en main
-const calculateUpperLowerBalance = (categoryMetrics: Array<{ category: string; percentage: number; totalVolume: number }>) => {
+const calculateUpperLowerBalance = (categoryMetrics: { category: string; percentage: number; totalVolume: number }[]) => {
   const upperBodyCategories = ['Pecho', 'Espalda', 'Hombros', 'Brazos'];
   const lowerBodyCategories = ['Piernas'];
   const coreCategories = ['Core'];
@@ -180,7 +180,7 @@ const calculateUpperLowerBalance = (categoryMetrics: Array<{ category: string; p
     volume: categoryMetrics
       .filter(m => upperBodyCategories.includes(m.category))
       .reduce((sum, m) => sum + m.totalVolume, 0),
-    categories: upperBodyCategories
+    categories: upperBodyCategories,
   };
 
   const lowerBody = {
@@ -190,7 +190,7 @@ const calculateUpperLowerBalance = (categoryMetrics: Array<{ category: string; p
     volume: categoryMetrics
       .filter(m => lowerBodyCategories.includes(m.category))
       .reduce((sum, m) => sum + m.totalVolume, 0),
-    categories: lowerBodyCategories
+    categories: lowerBodyCategories,
   };
 
   const core = {
@@ -200,7 +200,7 @@ const calculateUpperLowerBalance = (categoryMetrics: Array<{ category: string; p
     volume: categoryMetrics
       .filter(m => coreCategories.includes(m.category))
       .reduce((sum, m) => sum + m.totalVolume, 0),
-    categories: coreCategories
+    categories: coreCategories,
   };
 
   // Calcular balance basado en desviación de porcentajes individuales vs ideales
@@ -221,7 +221,7 @@ const calculateUpperLowerBalance = (categoryMetrics: Array<{ category: string; p
     const deviations = [
       { category: 'Tren Superior', deviation: upperBodyDeviation, current: upperBody.percentage, ideal: META_CATEGORIES.UPPER_BODY.idealPercentage },
       { category: 'Tren Inferior', deviation: lowerBodyDeviation, current: lowerBody.percentage, ideal: META_CATEGORIES.LOWER_BODY.idealPercentage },
-      { category: 'Core', deviation: coreDeviation, current: core.percentage, ideal: META_CATEGORIES.CORE.idealPercentage }
+      { category: 'Core', deviation: coreDeviation, current: core.percentage, ideal: META_CATEGORIES.CORE.idealPercentage },
     ];
 
     // Ordenar por desviación descendente
@@ -239,20 +239,20 @@ const calculateUpperLowerBalance = (categoryMetrics: Array<{ category: string; p
     upperBody: {
       percentage: upperBody.percentage,
       volume: upperBody.volume,
-      categories: upperBody.categories
+      categories: upperBody.categories,
     },
     lowerBody: {
       percentage: lowerBody.percentage,
       volume: lowerBody.volume,
-      categories: lowerBody.categories
+      categories: lowerBody.categories,
     },
     core: {
       percentage: core.percentage,
       volume: core.volume,
-      categories: core.categories
+      categories: core.categories,
     },
     isBalanced,
-    recommendation
+    recommendation,
   };
 };
 
@@ -267,4 +267,4 @@ const calculateConsistency = (records: WorkoutRecord[]): number => {
   const workoutDays = new Set(records.map(r => r.date.toDateString())).size;
 
   return totalDays > 0 ? (workoutDays / totalDays) * 100 : 0;
-}; 
+};

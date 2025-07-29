@@ -10,7 +10,7 @@ interface AdminHeaderProps {
 export const AdminHeader: React.FC<AdminHeaderProps> = ({
   isOnline,
   onClose,
-  showCloseButton = false
+  showCloseButton = false,
 }) => {
   return (
     <>
@@ -75,4 +75,4 @@ export const AdminHeader: React.FC<AdminHeaderProps> = ({
       )}
     </>
   );
-}; 
+};

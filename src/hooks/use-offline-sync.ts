@@ -1,6 +1,7 @@
-import { useOnlineStatus } from '@/stores/connection';
-import { addSyncEventListener, initializeDB, removeSyncEventListener, startSync, type SyncEvent } from '@/utils';
 import { useEffect, useState } from 'react';
+
+import { useOnlineStatus } from '@/stores/connection';
+import { addSyncEventListener, initializeDB, logger, removeSyncEventListener, startSync, type SyncEvent } from '@/utils';
 
 /**
  * Hook especializado para manejar la sincronización offline
@@ -15,7 +16,7 @@ export const useOfflineSync = () => {
     error?: string;
   }>({
     isSyncing: false,
-    pendingOperations: 0
+    pendingOperations: 0,
   });
 
   const isOnline = useOnlineStatus();
@@ -32,7 +33,7 @@ export const useOfflineSync = () => {
           startSync(5); // Cada 5 minutos
         }
       } catch (error) {
-        console.error('Error inicializando IndexedDB:', error);
+        logger.error('Error inicializando IndexedDB:', error as Error);
       }
     };
 
@@ -51,14 +52,14 @@ export const useOfflineSync = () => {
             ...prev,
             isSyncing: false,
             lastSync: Date.now(),
-            pendingOperations: 0
+            pendingOperations: 0,
           }));
           break;
         case 'sync_failed':
           setSyncStatus(prev => ({
             ...prev,
             isSyncing: false,
-            error: event.error
+            error: event.error,
           }));
           break;
       }
@@ -71,6 +72,6 @@ export const useOfflineSync = () => {
   return {
     isInitialized,
     syncStatus,
-    isOnline
+    isOnline,
   };
-}; 
+};

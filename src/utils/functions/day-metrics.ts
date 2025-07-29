@@ -1,10 +1,12 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 import { clamp, roundToDecimals } from './math-utils';
 import type { DayMetrics } from './trends-interfaces';
 import { calculateVolume } from './volume-calculations';
 import { getMaxWeight } from './workout-utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula métricas detalladas por día de la semana
@@ -55,7 +57,7 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
         topExercise: 'N/A',
         efficiency: 0,
         intensity: 0,
-        recommendations: []
+        recommendations: [],
       };
     }
 
@@ -204,7 +206,7 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
       topExercise,
       efficiency: roundToDecimals(efficiency),
       intensity: roundToDecimals(intensity),
-      recommendations
+      recommendations,
     };
   });
-}; 
+};

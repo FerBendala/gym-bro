@@ -1,10 +1,12 @@
-import { Card, CardContent } from '@/components/card';
-import { InfoTooltip } from '@/components/tooltip';
 import { BarChart3 } from 'lucide-react';
 import React from 'react';
+
 import { useAnalyticsMetrics } from './hooks/use-analytics-metrics';
 import type { AnalyticsOverviewProps } from './types';
 import { getMetricColor, getMetricIcon, getTrendColor, getTrendIcon } from './utils/analytics-utils';
+
+import { Card, CardContent } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
 
 /**
  * Componente de overview principal de analytics
@@ -95,4 +97,4 @@ export const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ records })
       </div>
     </div>
   );
-}; 
+};

@@ -1,3 +1,10 @@
+import { useState } from 'react';
+
+import { useHistoryFilter, usePageInfo } from '../hooks';
+import { getCurrentDayInfo } from '../utils';
+
+import { AdminModal } from './admin-modal';
+
 import { Layout, useModernNavigation } from '@/components/layout';
 import { Notification } from '@/components/notification';
 import type { DayOfWeek } from '@/interfaces';
@@ -6,11 +13,6 @@ import { DashboardPage } from '@/pages/dashboard';
 import { ModernHome } from '@/pages/home';
 import { ModernSettings } from '@/pages/settings';
 import { WorkoutHistory } from '@/pages/workout-history';
-import { useState } from 'react';
-import { useHistoryFilter, usePageInfo } from '../hooks';
-import { getCurrentDayInfo } from '../utils';
-import { AdminModal } from './admin-modal';
-
 
 export const AppContent = () => {
   const { activeTab, navigateTo, goBack, canGoBack } = useModernNavigation();
@@ -67,4 +69,4 @@ export const AppContent = () => {
       <Notification />
     </Layout>
   );
-}; 
+};

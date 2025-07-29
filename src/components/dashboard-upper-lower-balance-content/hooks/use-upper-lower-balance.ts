@@ -1,11 +1,12 @@
 import { useMemo } from 'react';
+
 import type { MetaCategoryData, UpperLowerBalanceContentProps } from '../types';
 import { calculateChartData, createMetaCategoryData } from '../utils';
 
 export const useUpperLowerBalance = ({
   upperLowerBalance,
   categoryAnalysis,
-  muscleBalance
+  muscleBalance,
 }: Omit<UpperLowerBalanceContentProps, 'onItemClick'>) => {
   const metaCategoryData = useMemo(() => {
     return createMetaCategoryData(upperLowerBalance);
@@ -19,6 +20,6 @@ export const useUpperLowerBalance = ({
 
   return {
     metaCategoryData,
-    getChartDataForMeta
+    getChartDataForMeta,
   };
-}; 
+};

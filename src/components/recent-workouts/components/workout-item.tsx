@@ -1,3 +1,8 @@
+import { Clock, Dumbbell, Target, Trash2, TrendingUp, Zap } from 'lucide-react';
+import React, { useState } from 'react';
+
+import type { WorkoutItemProps } from '../types';
+
 import {
   calculateVolume,
   formatRelativeTime,
@@ -5,9 +10,6 @@ import {
   getVolumeAdjustmentColor,
   logger,
 } from '@/utils';
-import { Clock, Dumbbell, Target, Trash2, TrendingUp, Zap } from 'lucide-react';
-import React, { useState } from 'react';
-import type { WorkoutItemProps } from '../types';
 
 /**
  * Item individual de entrenamiento con diseño mejorado y atractivo
@@ -68,7 +70,7 @@ export const WorkoutItem: React.FC<WorkoutItemProps> = ({ record, onDelete }) =>
 
         baseSets.push({
           weight: Math.max(0, record.weight + weightVariation),
-          reps: Math.max(1, record.reps + repsVariation)
+          reps: Math.max(1, record.reps + repsVariation),
         });
       }
       return baseSets;
@@ -253,4 +255,4 @@ export const WorkoutItem: React.FC<WorkoutItemProps> = ({ record, onDelete }) =>
       </div>
     </div>
   );
-}; 
+};

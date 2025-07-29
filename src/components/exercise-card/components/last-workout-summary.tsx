@@ -1,7 +1,7 @@
+import React from 'react';
+
 import { WorkoutItem } from '@/components/recent-workouts/components/workout-item';
 import type { WorkoutRecord } from '@/interfaces';
-
-import React from 'react';
 
 interface LastWorkoutSummaryProps {
   record?: WorkoutRecord | null;
@@ -21,4 +21,4 @@ export const LastWorkoutSummary: React.FC<LastWorkoutSummaryProps> = ({ record }
       <WorkoutItem record={record} index={0} />
     </div>
   );
-}; 
+};

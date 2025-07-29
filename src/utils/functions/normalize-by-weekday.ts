@@ -1,5 +1,6 @@
-import type { ExerciseAssignment } from '@/interfaces';
 import { getDay } from 'date-fns';
+
+import type { ExerciseAssignment } from '@/interfaces';
 
 /**
  * Normaliza métricas semanales basándose en el día actual de la semana
@@ -9,7 +10,7 @@ export const normalizeByWeekday = (
   currentWeekValue: number,
   comparisonWeekValue: number,
   currentDate: Date = new Date(),
-  allAssignments?: ExerciseAssignment[] // Usar asignaciones en lugar de registros
+  allAssignments?: ExerciseAssignment[], // Usar asignaciones en lugar de registros
 ): {
   normalizedCurrent: number;
   normalizedComparison: number;
@@ -34,7 +35,7 @@ export const normalizeByWeekday = (
         'miércoles': 3,
         'jueves': 4,
         'viernes': 5,
-        'sábado': 6
+        'sábado': 6,
       };
       const weekday = dayMap[assignment.dayOfWeek];
       if (weekday !== undefined) {
@@ -47,7 +48,7 @@ export const normalizeByWeekday = (
 
     // Crear factores basados en distribución de asignaciones
     const cumulativePercentages = weekdayPercentages.map((_percentage, index) =>
-      weekdayPercentages.slice(0, index + 1).reduce((sum, p) => sum + p, 0)
+      weekdayPercentages.slice(0, index + 1).reduce((sum, p) => sum + p, 0),
     );
 
     weekdayFactors = {
@@ -57,18 +58,18 @@ export const normalizeByWeekday = (
       3: cumulativePercentages[3], // Miércoles
       4: cumulativePercentages[4], // Jueves
       5: cumulativePercentages[5], // Viernes
-      6: cumulativePercentages[6]  // Sábado
+      6: cumulativePercentages[6],  // Sábado
     };
   } else {
     // Fallback: distribución típica (lunes a viernes)
     weekdayFactors = {
       0: 0.0,   // Domingo - no entrena
       1: 0.20,  // Lunes - 20% de la semana
-      2: 0.40,  // Martes - 40% de la semana  
+      2: 0.40,  // Martes - 40% de la semana
       3: 0.60,  // Miércoles - 60% de la semana
       4: 0.80,  // Jueves - 80% de la semana
       5: 1.0,   // Viernes - 100% de la semana
-      6: 1.0    // Sábado - 100% de la semana (no entrena)
+      6: 1.0,    // Sábado - 100% de la semana (no entrena)
     };
   }
 
@@ -83,7 +84,7 @@ export const normalizeByWeekday = (
   return {
     normalizedCurrent,
     normalizedComparison,
-    weekdayFactor
+    weekdayFactor,
   };
 };
 
@@ -95,13 +96,13 @@ export const normalizeVolumeTrend = (
   thisWeekVolume: number,
   lastWeekVolume: number,
   currentDate: Date = new Date(),
-  allAssignments?: ExerciseAssignment[]
+  allAssignments?: ExerciseAssignment[],
 ): number => {
   const { normalizedCurrent, normalizedComparison } = normalizeByWeekday(
     thisWeekVolume,
     lastWeekVolume,
     currentDate,
-    allAssignments
+    allAssignments,
   );
 
   if (normalizedComparison === 0) return 0;
@@ -116,22 +117,22 @@ export const calculateNormalizedWeeklyPercentage = (
   categoryVolume: number,
   totalVolume: number,
   currentDate: Date = new Date(),
-  allAssignments?: ExerciseAssignment[]
+  allAssignments?: ExerciseAssignment[],
 ): number => {
   const { normalizedCurrent: normalizedCategoryVolume } = normalizeByWeekday(
     categoryVolume,
     categoryVolume, // Solo normalizamos, no comparamos
     currentDate,
-    allAssignments
+    allAssignments,
   );
 
   const { normalizedCurrent: normalizedTotalVolume } = normalizeByWeekday(
     totalVolume,
     totalVolume,
     currentDate,
-    allAssignments
+    allAssignments,
   );
 
   if (normalizedTotalVolume === 0) return 0;
   return (normalizedCategoryVolume / normalizedTotalVolume) * 100;
-}; 
+};

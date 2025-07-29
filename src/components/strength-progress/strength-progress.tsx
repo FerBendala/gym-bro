@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   ConsistencyAnalysis,
   EmptyState,
@@ -8,7 +9,7 @@ import {
   Predictions,
   QualityMetrics,
   RepRangeAnalysis,
-  TrainingRecommendations
+  TrainingRecommendations,
 } from './components';
 import { useStrengthProgress } from './hooks';
 import type { StrengthProgressProps } from './types';
@@ -39,4 +40,4 @@ export const StrengthProgress: React.FC<StrengthProgressProps> = ({ records }) =
       <QualityMetrics analysis={analysis} />
     </div>
   );
-}; 
+};

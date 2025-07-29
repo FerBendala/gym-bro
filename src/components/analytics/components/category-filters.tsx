@@ -1,11 +1,12 @@
-import { Button } from '@/components/button';
-import { Card, CardContent, CardHeader } from '@/components/card';
-import { InfoTooltip } from '@/components/tooltip';
 import { Zap } from 'lucide-react';
 import React from 'react';
 
+import { Button } from '@/components/button';
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
+
 interface CategoryFiltersProps {
-  categories: Array<{ id: string; name: string; count: number }>;
+  categories: { id: string; name: string; count: number }[];
   selectedCategory: string;
   onCategoryChange: (category: string) => void;
 }
@@ -13,7 +14,7 @@ interface CategoryFiltersProps {
 export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
   categories,
   selectedCategory,
-  onCategoryChange
+  onCategoryChange,
 }) => {
   return (
     <Card>
@@ -42,7 +43,7 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
               <span className={`text-xs px-1.5 py-0.5 rounded-full ${selectedCategory === category.id
                 ? 'bg-white/20 text-white'
                 : 'bg-gray-600/50 text-gray-300'
-                }`}>
+              }`}>
                 {category.count}
               </span>
             </Button>
@@ -51,4 +52,4 @@ export const CategoryFilters: React.FC<CategoryFiltersProps> = ({
       </CardContent>
     </Card>
   );
-}; 
+};

@@ -1,8 +1,10 @@
-import { useNotification } from '@/stores/notification';
 import { useEffect, useState } from 'react';
+
 import { EXIT_ANIMATION_DELAY } from '../constants';
 import type { NotificationAnimationState } from '../types';
 import { getNotificationDuration } from '../utils';
+
+import { useNotification } from '@/stores/notification';
 
 /**
  * Hook para manejar el estado de animación y auto-hide de las notificaciones
@@ -47,4 +49,4 @@ export const useNotificationAnimation = () => {
     animationState,
     handleClose,
   };
-}; 
+};

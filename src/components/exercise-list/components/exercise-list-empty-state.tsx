@@ -1,7 +1,9 @@
-import { Button } from '@/components/button';
 import { Plus } from 'lucide-react';
 import React from 'react';
+
 import type { ExerciseListEmptyStateProps } from '../types';
+
+import { Button } from '@/components/button';
 
 /**
  * Estado vacío del ExerciseList cuando no hay ejercicios programados
@@ -9,7 +11,7 @@ import type { ExerciseListEmptyStateProps } from '../types';
 export const ExerciseListEmptyState: React.FC<ExerciseListEmptyStateProps> = ({
   dayOfWeek,
   isOnline,
-  onOpenAdmin
+  onOpenAdmin,
 }) => {
   return (
     <div className="text-center py-12">
@@ -27,4 +29,4 @@ export const ExerciseListEmptyState: React.FC<ExerciseListEmptyStateProps> = ({
       </Button>
     </div>
   );
-}; 
+};

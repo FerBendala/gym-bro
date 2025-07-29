@@ -12,4 +12,3 @@ export * from './common-props';
 
 // Interfaces de balance
 export * from './balance-types';
-

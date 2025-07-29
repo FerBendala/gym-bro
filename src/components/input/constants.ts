@@ -12,4 +12,4 @@ export const INPUT_THEME = {
   FORM: THEME_FORM,
   INPUT: THEME_INPUT,
   RESPONSIVE: THEME_RESPONSIVE,
-} as const; 
+} as const;

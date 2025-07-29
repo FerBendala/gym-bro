@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { SELECT_CONSTANTS } from '../constants';
 import { SelectGroupsProps } from '../types';
 import { buildGroupOptionClasses } from '../utils';
@@ -26,4 +27,4 @@ export const SelectGroups: React.FC<SelectGroupsProps> = ({ groups }) => {
       ))}
     </>
   );
-}; 
+};

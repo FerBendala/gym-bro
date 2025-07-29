@@ -1,19 +1,20 @@
-import { StatCard } from '@/components/stat-card';
-import { formatNumberToString } from '@/utils';
 import { Calendar, Clock, TrendingDown, TrendingUp, Trophy, Zap } from 'lucide-react';
 import React from 'react';
 
+import { StatCard } from '@/components/stat-card';
+import { formatNumberToString } from '@/utils';
+
 interface HistoryMetricsProps {
-  historyData: Array<{
+  historyData: {
     value: number;
     totalWorkouts: number;
-  }>;
+  }[];
   totalGrowthPercent: number;
 }
 
 export const HistoryMetrics: React.FC<HistoryMetricsProps> = ({
   historyData,
-  totalGrowthPercent
+  totalGrowthPercent,
 }) => {
   const maxValue = historyData.length > 0 ? Math.max(...historyData.map(point => point.value)) : 0;
   const avgValue = historyData.length > 0 ? historyData.reduce((sum, p) => sum + p.value, 0) / historyData.length : 0;
@@ -67,4 +68,4 @@ export const HistoryMetrics: React.FC<HistoryMetricsProps> = ({
       />
     </div>
   );
-}; 
+};

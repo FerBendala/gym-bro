@@ -1,5 +1,6 @@
-import { CATEGORY_COLORS, CATEGORY_ICONS } from '@/constants';
 import React from 'react';
+
+import { CATEGORY_COLORS, CATEGORY_ICONS } from '@/constants';
 
 /**
  * Utilidad para obtener el icono de una categoría

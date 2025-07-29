@@ -1,6 +1,7 @@
+import type { DataStats } from '../types';
+
 import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils';
-import type { DataStats } from '../types';
 
 interface DataStatsCardProps {
   dataStats: DataStats;
@@ -10,7 +11,7 @@ export const DataStatsCard: React.FC<DataStatsCardProps> = ({ dataStats }) => {
   return (
     <div className={cn(
       'mt-4 p-4 rounded-xl',
-      MODERN_THEME.components.card.base
+      MODERN_THEME.components.card.base,
     )}>
       <h4 className="text-sm font-semibold text-gray-300 mb-2">Datos disponibles:</h4>
       <div className="grid grid-cols-3 gap-4 text-center">
@@ -31,4 +32,4 @@ export const DataStatsCard: React.FC<DataStatsCardProps> = ({ dataStats }) => {
       </div>
     </div>
   );
-}; 
+};

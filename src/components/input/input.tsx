@@ -1,4 +1,5 @@
 import { forwardRef } from 'react';
+
 import { InputField, InputLabel, InputMessage } from './components';
 import { useInput } from './hooks';
 import type { InputProps } from './types';
@@ -52,4 +53,4 @@ export const Input = forwardRef<HTMLInputElement, InputProps>((props, ref) => {
   );
 });
 
-Input.displayName = 'Input'; 
+Input.displayName = 'Input';

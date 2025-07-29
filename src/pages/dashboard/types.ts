@@ -1,4 +1,4 @@
-import { DASHBOARD_TABS } from "./constants";
+import { DASHBOARD_TABS } from './constants';
 
 // Tipos para el balance por grupo
 export interface PersonalRecord {
@@ -47,9 +47,7 @@ export interface CategoryAnalysis {
 }
 
 // Tipos para el análisis de tendencias
-export interface DayIcon {
-  [key: string]: React.ComponentType<{ className?: string }>;
-}
+export type DayIcon = Record<string, React.ComponentType<{ className?: string }>>;
 
 // Tipos para el hook de dashboard
 export interface DashboardError {

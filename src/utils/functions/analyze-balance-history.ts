@@ -1,9 +1,10 @@
-import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
-import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
 import { calculateBalanceConsistency } from './calculate-balance-consistency';
 import { calculateVolumeProgression } from './calculate-volume-progression';
 import { analyzeTrendTowardsIdeal, calculateWeeklyBalancePercentages } from './calculate-weekly-balance-percentages';
 import { calculateWeightProgression } from './calculate-weight-progression';
+
+import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
+import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
 
 /**
  * Analiza el historial de balance para un grupo muscular
@@ -60,7 +61,7 @@ export const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecor
       return {
         trend,
         consistency: Math.round(balanceConsistency),
-        volatility: Math.round(Math.min(100, volatility))
+        volatility: Math.round(Math.min(100, volatility)),
       };
     }
   }
@@ -68,7 +69,7 @@ export const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecor
   // **FALLBACK**: Si no hay suficientes datos para análisis de balance real,
   // usar análisis de progreso de fuerza como proxy
   const sortedRecords = [...categoryRecords].sort((a, b) =>
-    new Date(a.date).getTime() - new Date(b.date).getTime()
+    new Date(a.date).getTime() - new Date(b.date).getTime(),
   );
 
   // Dividir en dos períodos para análisis de tendencia
@@ -129,6 +130,6 @@ export const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecor
   return {
     trend,
     consistency: Math.round(consistency),
-    volatility: Math.round(Math.min(100, adjustedVolatility))
+    volatility: Math.round(Math.min(100, adjustedVolatility)),
   };
-}; 
+};

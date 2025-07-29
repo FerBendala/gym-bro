@@ -13,5 +13,5 @@ export { createConnectionActions } from './actions';
 // Exportar selectores optimizados
 export {
   useConnectionInitialized,
-  useInitializeConnection, useOnlineStatus
+  useInitializeConnection, useOnlineStatus,
 } from './selectors';

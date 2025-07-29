@@ -1,5 +1,6 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { sortRecordsByDateAscending } from './workout-utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Utilidades de análisis centralizadas
@@ -9,7 +10,7 @@ import { sortRecordsByDateAscending } from './workout-utils';
 /**
  * Calcula la tendencia de peso en un período específico
  */
-export const calculateWeightTrend = (records: WorkoutRecord[], days: number = 30): number => {
+export const calculateWeightTrend = (records: WorkoutRecord[], days = 30): number => {
   if (records.length < 2) return 0;
 
   // ✅ OPTIMIZACIÓN: Usar función centralizada de ordenamiento
@@ -29,7 +30,7 @@ export const calculateWeightTrend = (records: WorkoutRecord[], days: number = 30
 /**
  * Calcula la tendencia de volumen en un período específico
  */
-export const calculateVolumeTrend = (records: WorkoutRecord[], days: number = 30): number => {
+export const calculateVolumeTrend = (records: WorkoutRecord[], days = 30): number => {
   if (records.length < 2) return 0;
 
   // ✅ OPTIMIZACIÓN: Usar función centralizada de ordenamiento
@@ -49,7 +50,7 @@ export const calculateVolumeTrend = (records: WorkoutRecord[], days: number = 30
 /**
  * Calcula la frecuencia de entrenamiento en un período específico
  */
-export const calculateTrainingFrequency = (records: WorkoutRecord[], days: number = 30): number => {
+export const calculateTrainingFrequency = (records: WorkoutRecord[], days = 30): number => {
   if (records.length === 0) return 0;
 
   // ✅ OPTIMIZACIÓN: Usar función centralizada de ordenamiento
@@ -64,7 +65,7 @@ export const calculateTrainingFrequency = (records: WorkoutRecord[], days: numbe
 /**
  * Calcula la consistencia de entrenamiento
  */
-export const calculateTrainingConsistency = (records: WorkoutRecord[], days: number = 30): number => {
+export const calculateTrainingConsistency = (records: WorkoutRecord[], days = 30): number => {
   if (records.length === 0) return 0;
 
   // ✅ OPTIMIZACIÓN: Usar función centralizada de ordenamiento
@@ -110,7 +111,7 @@ const calculateTrainingGaps = (records: WorkoutRecord[]): number => {
 /**
  * Calcula la progresión de intensidad
  */
-export const calculateIntensityProgression = (records: WorkoutRecord[], days: number = 30): number => {
+export const calculateIntensityProgression = (records: WorkoutRecord[], days = 30): number => {
   if (records.length < 2) return 0;
 
   // ✅ OPTIMIZACIÓN: Usar función centralizada de ordenamiento
@@ -125,4 +126,4 @@ export const calculateIntensityProgression = (records: WorkoutRecord[], days: nu
   const olderAvgIntensity = olderRecords.reduce((sum, r) => sum + (r.weight / r.reps), 0) / olderRecords.length;
 
   return recentAvgIntensity - olderAvgIntensity;
-}; 
+};

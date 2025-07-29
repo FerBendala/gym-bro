@@ -1,9 +1,12 @@
-import type { WorkoutRecord } from '@/interfaces';
 import React from 'react';
+
 import { AdvancedTab, ExercisesTab, HistoryTab, PredictionsTab } from '../content';
 import type { DashboardTab } from '../types';
+
 import { BalanceTab } from './balance-tab';
 import { DashboardEmptyState } from './dashboard-empty-state';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 interface DashboardContentProps {
   records: WorkoutRecord[];
@@ -14,7 +17,7 @@ interface DashboardContentProps {
 export const DashboardContent: React.FC<DashboardContentProps> = ({
   records,
   activeTab,
-  isOnline
+  isOnline,
 }) => {
   if (records.length === 0) {
     return <DashboardEmptyState isOnline={isOnline} />;
@@ -34,4 +37,4 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
     default:
       return <BalanceTab records={records} />;
   }
-}; 
+};

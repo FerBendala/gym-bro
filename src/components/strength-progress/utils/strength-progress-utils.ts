@@ -23,4 +23,4 @@ export const getPlateauRiskBgColor = (risk: number): string => {
   if (risk > 70) return 'bg-red-500';
   if (risk > 40) return 'bg-yellow-500';
   return 'bg-green-500';
-}; 
+};

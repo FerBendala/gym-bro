@@ -44,4 +44,4 @@ export interface ModernLayoutActions {
 }
 
 // Store completo
-export interface ModernLayoutStore extends ModernLayoutState, ModernLayoutActions { } 
+export interface ModernLayoutStore extends ModernLayoutState, ModernLayoutActions { }

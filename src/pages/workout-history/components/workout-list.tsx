@@ -1,9 +1,12 @@
-import { Card, CardContent } from '@/components/card';
 import { Calendar } from 'lucide-react';
 import React from 'react';
+
 import { WORKOUT_HISTORY_CONSTANTS } from '../constants';
 import type { EditMode, WorkoutRecordWithExercise } from '../types';
+
 import { EditWorkoutForm, WorkoutRecordCard } from './';
+
+import { Card, CardContent } from '@/components/card';
 
 interface WorkoutListProps {
   records: WorkoutRecordWithExercise[];
@@ -36,7 +39,7 @@ export const WorkoutList: React.FC<WorkoutListProps> = ({
   onIndividualSetRemove,
   onIndividualSetUpdate,
   hasActiveFilters,
-  totalRecords
+  totalRecords,
 }) => {
   if (records.length === 0) {
     return (
@@ -101,4 +104,4 @@ export const WorkoutList: React.FC<WorkoutListProps> = ({
       </CardContent>
     </Card>
   );
-}; 
+};

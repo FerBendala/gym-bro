@@ -1,8 +1,9 @@
-import type { WorkoutRecord } from '@/interfaces';
-import { calculateTotalGrowth, formatNumberToString } from '@/utils';
 import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useMemo } from 'react';
+
+import type { WorkoutRecord } from '@/interfaces';
+import { calculateTotalGrowth, formatNumberToString } from '@/utils';
 
 /**
  * Interfaz para los datos de timeline del historial
@@ -62,7 +63,7 @@ export const useHistoryData = (records: WorkoutRecord[]) => {
           totalSets: 0,
           totalReps: 0,
           exercises: new Set(),
-          weekStart
+          weekStart,
         });
       }
 
@@ -96,7 +97,7 @@ export const useHistoryData = (records: WorkoutRecord[]) => {
         uniqueExercises: data.exercises.size,
         change: 0,
         changePercent: 0,
-        trend: 'stable' as const
+        trend: 'stable' as const,
       }))
       .sort((a, b) => a.date.getTime() - b.date.getTime());
 
@@ -179,7 +180,7 @@ export const useHistoryData = (records: WorkoutRecord[]) => {
         change,
         changePercent,
         totalVolumeChangePercent: index > 0 ? totalVolumeChangePercent : 0,
-        trend
+        trend,
       };
     });
   }, [records]);
@@ -189,6 +190,6 @@ export const useHistoryData = (records: WorkoutRecord[]) => {
 
   return {
     historyData,
-    totalGrowthPercent
+    totalGrowthPercent,
   };
-}; 
+};

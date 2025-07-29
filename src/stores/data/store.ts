@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+
 import { createAssignmentActions, createExerciseActions } from './actions';
 import type { DataStore } from './types';
 import { getInitialState, persistenceConfig } from './utils';
@@ -15,10 +16,10 @@ export const useDataStore = create<DataStore>()(
         ...createExerciseActions(set),
         ...createAssignmentActions(set),
       }),
-      persistenceConfig
+      persistenceConfig,
     ),
     {
       name: 'data-store',
-    }
-  )
-); 
+    },
+  ),
+);

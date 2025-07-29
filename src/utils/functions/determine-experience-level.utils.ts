@@ -1,7 +1,8 @@
-import { EXPERIENCE_CONSTANTS } from '@/constants';
-import type { WorkoutRecord } from '@/interfaces';
 import { getValidSortedRecords } from './get-valid-sorted-records.utils';
 import { getMaxWeight } from './workout-utils';
+
+import { EXPERIENCE_CONSTANTS } from '@/constants';
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Determina el nivel de experiencia basado en múltiples factores
@@ -32,4 +33,4 @@ export const determineExperienceLevel = (records: WorkoutRecord[]): 'beginner' |
   if (isIntermediate) return 'intermediate';
 
   return 'advanced';
-}; 
+};

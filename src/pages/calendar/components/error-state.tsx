@@ -21,4 +21,4 @@ export const ErrorState: React.FC<ErrorStateProps> = ({ error }) => {
       </Card>
     </Page>
   );
-}; 
+};

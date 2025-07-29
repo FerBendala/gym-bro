@@ -1,14 +1,16 @@
+import { WifiOff } from 'lucide-react';
+import React from 'react';
+
+import { ExerciseCardHeader, ExerciseModal } from './components';
+import { LastWorkoutSummary } from './components/last-workout-summary';
+import { useExerciseCard } from './hooks';
+import type { ExerciseCardProps } from './types';
+
 import { Card, CardContent } from '@/components/card';
 import { OfflineWarning } from '@/components/offline-warning';
 import { URLPreview } from '@/components/url-preview';
 import type { WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
 import { getCategoryColor } from '@/utils';
-import { WifiOff } from 'lucide-react';
-import React from 'react';
-import { ExerciseCardHeader, ExerciseModal } from './components';
-import { LastWorkoutSummary } from './components/last-workout-summary';
-import { useExerciseCard } from './hooks';
-import type { ExerciseCardProps } from './types';
 
 /**
  * Componente principal del ExerciseCard
@@ -24,7 +26,7 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({
   disabled = false,
   isTrainedToday = false,
   workoutRecords,
-  onGoToHistory
+  onGoToHistory,
 }) => {
   const {
     showModal,
@@ -52,7 +54,7 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({
       <Card className={`mb-3 relative overflow-hidden transition-all duration-300 hover:shadow-xl ${isTrainedToday
         ? 'border-green-500/50 shadow-lg shadow-green-500/20 bg-gradient-to-br from-gray-800/90 to-gray-900/90'
         : 'bg-gradient-to-br from-gray-800/50 to-gray-900/70 border-gray-700/50 hover:border-gray-600/50'
-        }`}>
+      }`}>
         {/* Indicador visual de categoría */}
         <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${colorGradient}`} />
 

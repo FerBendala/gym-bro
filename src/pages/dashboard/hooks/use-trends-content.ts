@@ -1,6 +1,7 @@
+import { useMemo } from 'react';
+
 import { useTrendsAnalysis } from '@/hooks/use-advanced-analysis';
 import type { WorkoutRecord } from '@/interfaces';
-import { useMemo } from 'react';
 
 export const useTrendsContent = (records: WorkoutRecord[]) => {
   // ✅ USAR HOOK CENTRALIZADO: Evita duplicación de análisis de tendencias
@@ -16,8 +17,8 @@ export const useTrendsContent = (records: WorkoutRecord[]) => {
           totalWorkouts: 0,
           totalVolume: 0,
           avgWeight: 0,
-          maxWeight: 0
-        }
+          maxWeight: 0,
+        },
       };
     }
 
@@ -29,13 +30,13 @@ export const useTrendsContent = (records: WorkoutRecord[]) => {
         totalWorkouts: records.length,
         totalVolume: records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0),
         avgWeight: records.reduce((sum, r) => sum + r.weight, 0) / records.length,
-        maxWeight: Math.max(...records.map(r => r.weight))
-      }
+        maxWeight: Math.max(...records.map(r => r.weight)),
+      },
     };
   }, [records, analysis]);
 
   return {
     analysis,
-    trendsData
+    trendsData,
   };
 };

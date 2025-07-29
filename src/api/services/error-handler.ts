@@ -8,4 +8,4 @@ import { logger } from '@/utils';
  */
 export const handleFirebaseError = (error: unknown, operation: string): void => {
   logger.error(`Error in ${operation}:`, error as Error, { operation }, 'API');
-}; 
+};

@@ -1,5 +1,6 @@
-import { ThemeSelectSize, ThemeSelectValidation, ThemeSelectVariant } from '@/constants/theme';
 import React from 'react';
+
+import { ThemeSelectSize, ThemeSelectValidation, ThemeSelectVariant } from '@/constants/theme';
 
 export interface SelectProps extends Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'size'> {
   label?: string;

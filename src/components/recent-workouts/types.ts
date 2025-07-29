@@ -28,4 +28,4 @@ export interface WorkoutDisplayConfig {
   maxRecords: number;
   showFooter: boolean;
   showEmptyState: boolean;
-} 
+}

@@ -1,6 +1,8 @@
-import { formatNumberToString } from '@/utils';
 import React from 'react';
+
 import type { HorizontalBarChartProps } from '../types';
+
+import { formatNumberToString } from '@/utils';
 
 export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({ data, onItemClick }) => {
   const maxValue = Math.max(...data.map(item => Math.max(item.value, item.ideal))) * 1.1;
@@ -35,7 +37,7 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({ data, on
                 className="absolute h-full bg-white/10 border-x border-white/20"
                 style={{
                   left: `${Math.max(0, (item.ideal - 2) / maxValue * 100)}%`,
-                  width: `${4 / maxValue * 100}%`
+                  width: `${4 / maxValue * 100}%`,
                 }}
               />
 
@@ -44,7 +46,7 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({ data, on
                 className="h-full transition-all duration-1000 ease-out"
                 style={{
                   width: `${Math.min(100, (item.value / maxValue) * 100)}%`,
-                  backgroundColor: item.color
+                  backgroundColor: item.color,
                 }}
               />
 
@@ -59,4 +61,4 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({ data, on
       ))}
     </div>
   );
-}; 
+};

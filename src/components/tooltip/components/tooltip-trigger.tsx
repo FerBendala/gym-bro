@@ -1,12 +1,14 @@
-import { cn } from '@/utils';
 import { Info } from 'lucide-react';
 import React from 'react';
+
 import { TooltipTriggerProps } from '../types';
+
+import { cn } from '@/utils';
 
 export const TooltipTrigger: React.FC<TooltipTriggerProps> = ({
   children,
   showIcon = false,
-  className
+  className,
 }) => {
   return (
     <div className={cn('flex items-center space-x-1', className)}>
@@ -16,4 +18,4 @@ export const TooltipTrigger: React.FC<TooltipTriggerProps> = ({
       )}
     </div>
   );
-}; 
+};

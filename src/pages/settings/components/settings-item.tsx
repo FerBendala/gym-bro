@@ -1,7 +1,9 @@
+import React from 'react';
+
+import { SettingsItem } from '../types';
+
 import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils';
-import React from 'react';
-import { SettingsItem } from '../types';
 
 interface SettingsItemProps {
   item: SettingsItem;
@@ -19,7 +21,7 @@ export const SettingsItemComponent: React.FC<SettingsItemProps> = ({ item, onCli
       MODERN_THEME.accessibility.focusRing,
       item.disabled
         ? 'opacity-50 cursor-not-allowed'
-        : 'hover:bg-gray-800/50 active:scale-[0.98]'
+        : 'hover:bg-gray-800/50 active:scale-[0.98]',
     )}
   >
     <div className="flex items-center space-x-4">
@@ -27,20 +29,20 @@ export const SettingsItemComponent: React.FC<SettingsItemProps> = ({ item, onCli
         'p-3 rounded-lg',
         item.disabled
           ? 'bg-gray-800/50'
-          : 'bg-blue-600/20 text-blue-400'
+          : 'bg-blue-600/20 text-blue-400',
       )}>
         <item.icon className="w-5 h-5" />
       </div>
       <div className="flex-1">
         <h3 className={cn(
           'font-semibold',
-          item.disabled ? 'text-gray-500' : 'text-white'
+          item.disabled ? 'text-gray-500' : 'text-white',
         )}>
           {item.label}
         </h3>
         <p className={cn(
           'text-sm',
-          item.disabled ? 'text-gray-600' : 'text-gray-400'
+          item.disabled ? 'text-gray-600' : 'text-gray-400',
         )}>
           {item.description}
         </p>
@@ -54,4 +56,4 @@ export const SettingsItemComponent: React.FC<SettingsItemProps> = ({ item, onCli
       )}
     </div>
   </button>
-); 
+);

@@ -1,13 +1,14 @@
-import { formatNumberToString } from '@/utils';
 import { Clock } from 'lucide-react';
 import React from 'react';
+
+import { formatNumberToString } from '@/utils';
 
 interface IndividualSetsProps {
   individualSets: { weight: number; reps: number }[];
 }
 
 export const IndividualSets: React.FC<IndividualSetsProps> = ({
-  individualSets
+  individualSets,
 }) => {
   return (
     <div className="mb-4">
@@ -35,4 +36,4 @@ export const IndividualSets: React.FC<IndividualSetsProps> = ({
       </div>
     </div>
   );
-}; 
+};

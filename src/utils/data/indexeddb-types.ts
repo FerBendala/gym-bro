@@ -1,5 +1,6 @@
-import type { Exercise, WorkoutRecord } from '@/interfaces';
 import type { SyncOperation, SyncPriority, SyncStatus } from './indexeddb-config';
+
+import type { Exercise, WorkoutRecord } from '@/interfaces';
 
 /**
  * Tipos de datos para IndexedDB con metadatos de sincronización
@@ -138,7 +139,7 @@ export interface DatabaseResult<T = Record<string, unknown>> {
 export interface QueryFilter {
   field: string;
   operator: 'equals' | 'gt' | 'gte' | 'lt' | 'lte' | 'between' | 'in';
-  value: string | number | boolean | Array<string | number>;
+  value: string | number | boolean | (string | number)[];
 }
 
 /**
@@ -191,4 +192,4 @@ export interface DatabaseConfig {
   syncEnabled: boolean;
   offlineMode: boolean;
   conflictResolution: 'local' | 'remote' | 'timestamp' | 'manual';
-} 
+}

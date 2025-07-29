@@ -25,12 +25,12 @@ export interface CalendarWeekdaysProps {
 }
 
 export interface CalendarLegendProps {
-  legendData: Array<{
+  legendData: {
     intensity: string;
     className: string;
-  }>;
+  }[];
 }
 
 export interface CalendarStatsProps {
   stats: CalendarStats;
-} 
+}

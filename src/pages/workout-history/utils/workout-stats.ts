@@ -26,7 +26,7 @@ export const calculateWorkoutStats = (record: WorkoutRecordWithExercise): Workou
       totalVolume,
       avgWeight,
       maxWeight,
-      minWeight
+      minWeight,
     };
   } else {
     const volume = record.weight * record.reps * record.sets;
@@ -37,11 +37,11 @@ export const calculateWorkoutStats = (record: WorkoutRecordWithExercise): Workou
       totalVolume: volume,
       avgWeight: record.weight,
       maxWeight: record.weight,
-      minWeight: record.weight
+      minWeight: record.weight,
     };
   }
 };
 
 export const hasIndividualSets = (record: WorkoutRecordWithExercise): boolean => {
   return !!(record.individualSets && record.individualSets.length > 0);
-}; 
+};

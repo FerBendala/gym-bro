@@ -2,8 +2,8 @@ import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula el volumen real de un registro usando series individuales si están disponibles
- * 
- * NOTA: Esta es la función principal. Los alias calculateRealVolume, calculateWorkoutVolume, 
+ *
+ * NOTA: Esta es la función principal. Los alias calculateRealVolume, calculateWorkoutVolume,
  * y calculateRecordVolume han sido eliminados para evitar redundancia.
  */
 export const calculateVolume = (record: WorkoutRecord): number => {
@@ -16,4 +16,4 @@ export const calculateVolume = (record: WorkoutRecord): number => {
 
   // Fallback: usar valores agregados
   return record.weight * record.reps * record.sets;
-}; 
+};

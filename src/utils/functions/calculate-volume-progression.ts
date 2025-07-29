@@ -1,7 +1,8 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { calculateCategoryEffortDistribution } from './exercise-patterns';
 import { normalizeByWeekday } from './normalize-by-weekday';
 import { calculateVolume } from './volume-calculations';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula la progresión de volumen para una categoría
@@ -75,12 +76,12 @@ export const calculateVolumeProgression = (categoryRecords: WorkoutRecord[], tar
     secondHalfAvgVolume,
     firstHalfAvgVolume,
     currentDate,
-    categoryRecords // Pasar registros para detectar patrón
+    categoryRecords, // Pasar registros para detectar patrón
   );
 
   const densityProgression = normalizedFirstHalf > 0 ? ((normalizedSecondHalf - normalizedFirstHalf) / normalizedFirstHalf) * 100 : 0;
 
-  // **MEJORA HÍBRIDA**: Combinar densidad de entrenamiento + progresión individual de ejercicios  
+  // **MEJORA HÍBRIDA**: Combinar densidad de entrenamiento + progresión individual de ejercicios
   const individualExerciseProgressions: number[] = [];
 
   // Calcular progresión de volumen de cada ejercicio individual
@@ -142,4 +143,4 @@ export const calculateVolumeProgression = (categoryRecords: WorkoutRecord[], tar
   }
 
   return Math.round(progression);
-}; 
+};

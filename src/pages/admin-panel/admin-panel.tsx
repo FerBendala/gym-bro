@@ -1,17 +1,18 @@
-import { Page } from '@/components/layout';
-import { MODERN_THEME } from '@/constants/theme';
 import React from 'react';
 
 import { AdminPanelContent } from './components';
 import { useAdminPanel } from './hooks';
 import type { AdminPanelProps } from './types';
 
+import { Page } from '@/components/layout';
+import { MODERN_THEME } from '@/constants/theme';
+
 /**
  * Panel de administración moderno que puede funcionar como modal o página completa
  */
 export const AdminPanel: React.FC<AdminPanelProps> = ({
   isModal = false,
-  onClose
+  onClose,
 }) => {
   const { isOnline, activeTab, previewUrl, setTab, setPreviewUrl } = useAdminPanel();
 
@@ -49,4 +50,4 @@ export const AdminPanel: React.FC<AdminPanelProps> = ({
       </div>
     </Page>
   );
-}; 
+};

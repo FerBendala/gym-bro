@@ -1,6 +1,8 @@
 import React from 'react';
+
 import { MULTI_SELECT_CLASSES } from '../constants';
 import { MultiSelectDropdownProps } from '../types';
+
 import { MultiSelectOption } from './multi-select-option';
 
 export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
@@ -8,7 +10,7 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
   disabled,
   options,
   selectedValues,
-  onToggleOption
+  onToggleOption,
 }) => {
   if (!isOpen || disabled) return null;
 
@@ -27,4 +29,4 @@ export const MultiSelectDropdown: React.FC<MultiSelectDropdownProps> = ({
       })}
     </div>
   );
-}; 
+};

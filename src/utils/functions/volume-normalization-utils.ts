@@ -1,6 +1,7 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { clamp, roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Obtiene el nombre del día de la semana en español
@@ -56,7 +57,7 @@ export const getVolumeByDayOfWeek = (records: WorkoutRecord[]): Record<string, n
 export const normalizeVolumeByDay = (
   date: Date,
   dayTotalVolume: number,
-  avgVolumeByDay: Record<string, number>
+  avgVolumeByDay: Record<string, number>,
 ): number => {
   const dayName = getDayName(date);
   const expectedVolumeForDay = avgVolumeByDay[dayName] || dayTotalVolume;
@@ -97,7 +98,7 @@ export const calculateNormalizedVolumeTrend = (records: WorkoutRecord[]): number
 
   // Convertir a array y ordenar cronológicamente
   const dailyVolumes = Object.values(volumeByDate).sort((a, b) =>
-    a.date.getTime() - b.date.getTime()
+    a.date.getTime() - b.date.getTime(),
   );
 
   if (dailyVolumes.length < 4) return 0; // Necesitamos al menos 4 días
@@ -109,11 +110,11 @@ export const calculateNormalizedVolumeTrend = (records: WorkoutRecord[]): number
   const normalizedDays = dailyVolumes.map(({ volume, date }) => ({
     date,
     originalVolume: volume,
-    normalizedVolume: normalizeVolumeByDay(date, volume, avgVolumeByDay)
+    normalizedVolume: normalizeVolumeByDay(date, volume, avgVolumeByDay),
   }));
 
   // Usar períodos de tiempo reales para calcular tendencia
-  const length = normalizedDays.length;
+  const { length } = normalizedDays;
   const halfPoint = Math.floor(length / 2);
 
   const olderPeriod = normalizedDays.slice(0, halfPoint);
@@ -157,7 +158,7 @@ export const calculateNormalizedVolumeTrend = (records: WorkoutRecord[]): number
 export const predictVolumeForDay = (
   records: WorkoutRecord[],
   targetDate: Date,
-  volumeTrend: number
+  volumeTrend: number,
 ): number => {
   const avgVolumeByDay = getVolumeByDayOfWeek(records);
   const targetDayName = getDayName(targetDate);
@@ -182,7 +183,7 @@ export const predictVolumeForDay = (
   const maxChange = baseDayVolume * 0.2;
   const limitedVolume = Math.max(
     baseDayVolume - maxChange,
-    Math.min(baseDayVolume + maxChange, predictedVolume)
+    Math.min(baseDayVolume + maxChange, predictedVolume),
   );
 
   return roundToDecimals(Math.max(0, limitedVolume));
@@ -208,7 +209,7 @@ export const getWeeklyVolumeInsights = (records: WorkoutRecord[]): {
       avgVolumeByDay,
       peakDay: 'Sin datos',
       restDay: 'Sin datos',
-      weeklyPattern: 'Sin datos'
+      weeklyPattern: 'Sin datos',
     };
   }
 
@@ -245,6 +246,6 @@ export const getWeeklyVolumeInsights = (records: WorkoutRecord[]): {
     avgVolumeByDay,
     peakDay,
     restDay,
-    weeklyPattern: pattern
+    weeklyPattern: pattern,
   };
-}; 
+};

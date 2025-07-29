@@ -1,4 +1,5 @@
 import React from 'react';
+
 import type { AdminPanelTab } from '../types';
 
 interface AdminTabsProps {
@@ -10,11 +11,11 @@ interface AdminTabsProps {
 export const AdminTabs: React.FC<AdminTabsProps> = ({
   activeTab,
   onTabChange,
-  isModal = false
+  isModal = false,
 }) => {
   const tabs: { id: AdminPanelTab; label: string; }[] = [
     { id: 'exercises', label: 'Ejercicios' },
-    { id: 'assignments', label: 'Asignaciones' }
+    { id: 'assignments', label: 'Asignaciones' },
   ];
 
   if (isModal) {
@@ -28,7 +29,7 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
               className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === tab.id
                 ? 'bg-blue-600 text-white shadow-lg'
                 : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-                }`}
+              }`}
             >
               {tab.label}
             </button>
@@ -48,7 +49,7 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
             className={`flex-1 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${activeTab === tab.id
               ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
               : 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50'
-              }`}
+            }`}
           >
             {tab.label}
           </button>
@@ -56,4 +57,4 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
       </div>
     </div>
   );
-}; 
+};

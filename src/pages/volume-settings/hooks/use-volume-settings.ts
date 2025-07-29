@@ -1,11 +1,14 @@
+import { useEffect, useState } from 'react';
+
+import { VOLUME_SETTINGS_CONSTANTS, VOLUME_SETTINGS_MESSAGES } from '../constants';
+import type { VolumeDistribution, VolumeSettingsState } from '../types';
+
 import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants/exercise.constants';
 import { useNotification } from '@/stores/notification';
+import { logger } from '@/utils';
 import type { UserSettings } from '@/utils/data/indexeddb-types';
 import { getItem, updateItem } from '@/utils/data/indexeddb-utils';
 import { clamp } from '@/utils/functions/math-utils';
-import { useEffect, useState } from 'react';
-import { VOLUME_SETTINGS_CONSTANTS, VOLUME_SETTINGS_MESSAGES } from '../constants';
-import type { VolumeDistribution, VolumeSettingsState } from '../types';
 
 export const useVolumeSettings = () => {
   const [state, setState] = useState<VolumeSettingsState>({
@@ -27,7 +30,7 @@ export const useVolumeSettings = () => {
           }));
         }
       } catch (error) {
-        console.error('Error cargando configuración de volumen:', error);
+        logger.error('Error cargando configuración de volumen:', error as Error);
       } finally {
         setState(prev => ({ ...prev, loading: false }));
       }
@@ -51,7 +54,7 @@ export const useVolumeSettings = () => {
   // Calcular total de porcentajes
   const totalPercentage = Object.values(state.volumeDistribution).reduce(
     (sum, value) => sum + value,
-    0
+    0,
   );
 
   // Guardar configuración
@@ -83,7 +86,7 @@ export const useVolumeSettings = () => {
         throw new Error(result.error || 'Error guardando configuración');
       }
     } catch (error) {
-      console.error('Error guardando configuración:', error);
+      logger.error('Error guardando configuración:', error as Error);
       showNotification(VOLUME_SETTINGS_MESSAGES.SAVE_ERROR, 'error');
       return false;
     } finally {
@@ -125,4 +128,4 @@ export const useVolumeSettings = () => {
     handleReset,
     handleNormalize,
   };
-}; 
+};

@@ -20,4 +20,4 @@ export const getDefaultTimeFilter = (): string => {
 export const isValidTab = (tab: string): boolean => {
   const validTabs = ['balance', 'advanced', 'predictions', 'history', 'exercises'];
   return validTabs.includes(tab);
-}; 
+};

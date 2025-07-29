@@ -1,6 +1,7 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Obtiene registros de esta semana (lunes a domingo)
@@ -61,4 +62,4 @@ export const getLastCompleteWeekRecords = (records: WorkoutRecord[]): WorkoutRec
 
   // Devolver registros de la última semana completa
   return sortedWeeks.length > 0 ? sortedWeeks[sortedWeeks.length - 1][1] : [];
-}; 
+};

@@ -1,10 +1,12 @@
-import { Card, CardContent, CardHeader } from '@/components/card';
-import { InfoTooltip } from '@/components/tooltip';
 import { Zap } from 'lucide-react';
 import React, { useState } from 'react';
+
 import { CategoryFilters, ExerciseItem, UnknownRecordsWarning } from './components';
 import { useExerciseAnalysis } from './hooks';
 import type { ExerciseAnalyticsProps } from './types';
+
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
 
 /**
  * Componente de analytics por ejercicio
@@ -16,7 +18,7 @@ export const ExerciseAnalytics: React.FC<ExerciseAnalyticsProps> = ({ records })
     exerciseAnalysis,
     categoriesWithCount,
     filteredExercises,
-    unknownRecords
+    unknownRecords,
   } = useExerciseAnalysis(records, selectedCategory);
 
   if (records.length === 0) {
@@ -115,4 +117,4 @@ export const ExerciseAnalytics: React.FC<ExerciseAnalyticsProps> = ({ records })
       </Card>
     </div>
   );
-}; 
+};

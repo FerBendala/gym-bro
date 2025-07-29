@@ -3,118 +3,118 @@ import { KNOWN_EXERCISE_DISTRIBUTIONS } from '@/constants';
 /**
  * Patrones de ejercicios para detectar distribuciones inteligentes por palabras clave
  */
-const EXERCISE_PATTERNS: Array<{
+const EXERCISE_PATTERNS: {
   patterns: string[];
   distribution: Record<string, number>;
   description: string;
-}> = [
-    // PIERNAS
-    {
-      patterns: ['press.*pierna', 'leg.*press', 'sentadilla', 'squat'],
-      distribution: { 'Piernas': 0.9, 'Core': 0.1 },
-      description: 'Ejercicio principal de piernas'
-    },
-    {
-      patterns: ['extensión.*cuádriceps', 'extensiones.*cuádriceps', 'quad.*extension'],
-      distribution: { 'Piernas': 1.0 },
-      description: 'Aislamiento de cuádriceps'
-    },
-    {
-      patterns: ['curl.*femoral', 'hamstring.*curl'],
-      distribution: { 'Piernas': 1.0 },
-      description: 'Aislamiento de isquiotibiales'
-    },
-    {
-      patterns: ['talones', 'pantorrill', 'calf.*raise'],
-      distribution: { 'Piernas': 1.0 },
-      description: 'Entrenamiento de pantorrillas'
-    },
+}[] = [
+  // PIERNAS
+  {
+    patterns: ['press.*pierna', 'leg.*press', 'sentadilla', 'squat'],
+    distribution: { 'Piernas': 0.9, 'Core': 0.1 },
+    description: 'Ejercicio principal de piernas',
+  },
+  {
+    patterns: ['extensión.*cuádriceps', 'extensiones.*cuádriceps', 'quad.*extension'],
+    distribution: { 'Piernas': 1.0 },
+    description: 'Aislamiento de cuádriceps',
+  },
+  {
+    patterns: ['curl.*femoral', 'hamstring.*curl'],
+    distribution: { 'Piernas': 1.0 },
+    description: 'Aislamiento de isquiotibiales',
+  },
+  {
+    patterns: ['talones', 'pantorrill', 'calf.*raise'],
+    distribution: { 'Piernas': 1.0 },
+    description: 'Entrenamiento de pantorrillas',
+  },
 
-    // PECHO
-    {
-      patterns: ['press.*banca', 'bench.*press', 'press.*banco'],
-      distribution: { 'Pecho': 0.7, 'Hombros': 0.2, 'Brazos': 0.1 },
-      description: 'Press de pecho básico'
-    },
-    {
-      patterns: ['fondos', 'dips'],
-      distribution: { 'Pecho': 0.6, 'Brazos': 0.3, 'Hombros': 0.1 },
-      description: 'Fondos en paralelas'
-    },
-    {
-      patterns: ['cruces', 'flies', 'aperturas.*pecho'],
-      distribution: { 'Pecho': 0.9, 'Hombros': 0.1 },
-      description: 'Ejercicio de aislamiento de pecho'
-    },
+  // PECHO
+  {
+    patterns: ['press.*banca', 'bench.*press', 'press.*banco'],
+    distribution: { 'Pecho': 0.7, 'Hombros': 0.2, 'Brazos': 0.1 },
+    description: 'Press de pecho básico',
+  },
+  {
+    patterns: ['fondos', 'dips'],
+    distribution: { 'Pecho': 0.6, 'Brazos': 0.3, 'Hombros': 0.1 },
+    description: 'Fondos en paralelas',
+  },
+  {
+    patterns: ['cruces', 'flies', 'aperturas.*pecho'],
+    distribution: { 'Pecho': 0.9, 'Hombros': 0.1 },
+    description: 'Ejercicio de aislamiento de pecho',
+  },
 
-    // ESPALDA
-    {
-      patterns: ['dominadas', 'pull.*up', 'chin.*up'],
-      distribution: { 'Espalda': 0.7, 'Brazos': 0.3 },
-      description: 'Dominadas y variaciones'
-    },
-    {
-      patterns: ['remo', 'row'],
-      distribution: { 'Espalda': 0.8, 'Brazos': 0.2 },
-      description: 'Ejercicios de remo'
-    },
-    {
-      patterns: ['pullover'],
-      distribution: { 'Pecho': 0.6, 'Espalda': 0.4 },
-      description: 'Pullover (híbrido pecho-espalda)'
-    },
+  // ESPALDA
+  {
+    patterns: ['dominadas', 'pull.*up', 'chin.*up'],
+    distribution: { 'Espalda': 0.7, 'Brazos': 0.3 },
+    description: 'Dominadas y variaciones',
+  },
+  {
+    patterns: ['remo', 'row'],
+    distribution: { 'Espalda': 0.8, 'Brazos': 0.2 },
+    description: 'Ejercicios de remo',
+  },
+  {
+    patterns: ['pullover'],
+    distribution: { 'Pecho': 0.6, 'Espalda': 0.4 },
+    description: 'Pullover (híbrido pecho-espalda)',
+  },
 
-    // HOMBROS
-    {
-      patterns: ['press.*militar', 'overhead.*press', 'press.*hombro'],
-      distribution: { 'Hombros': 0.7, 'Brazos': 0.2, 'Core': 0.1 },
-      description: 'Press militar y variaciones'
-    },
-    {
-      patterns: ['elevaciones.*laterales', 'lateral.*raise'],
-      distribution: { 'Hombros': 1.0 },
-      description: 'Elevaciones laterales'
-    },
-    {
-      patterns: ['elevaciones.*frontales', 'front.*raise'],
-      distribution: { 'Hombros': 1.0 },
-      description: 'Elevaciones frontales'
-    },
-    {
-      patterns: ['pájaros', 'rear.*delt', 'aperturas.*invert'],
-      distribution: { 'Hombros': 0.8, 'Espalda': 0.2 },
-      description: 'Deltoides posterior'
-    },
+  // HOMBROS
+  {
+    patterns: ['press.*militar', 'overhead.*press', 'press.*hombro'],
+    distribution: { 'Hombros': 0.7, 'Brazos': 0.2, 'Core': 0.1 },
+    description: 'Press militar y variaciones',
+  },
+  {
+    patterns: ['elevaciones.*laterales', 'lateral.*raise'],
+    distribution: { 'Hombros': 1.0 },
+    description: 'Elevaciones laterales',
+  },
+  {
+    patterns: ['elevaciones.*frontales', 'front.*raise'],
+    distribution: { 'Hombros': 1.0 },
+    description: 'Elevaciones frontales',
+  },
+  {
+    patterns: ['pájaros', 'rear.*delt', 'aperturas.*invert'],
+    distribution: { 'Hombros': 0.8, 'Espalda': 0.2 },
+    description: 'Deltoides posterior',
+  },
 
-    // BRAZOS
-    {
-      patterns: ['curl.*bíceps', 'bicep.*curl'],
-      distribution: { 'Brazos': 1.0 },
-      description: 'Ejercicios de bíceps'
-    },
-    {
-      patterns: ['extensión.*tríceps', 'tricep.*extension'],
-      distribution: { 'Brazos': 1.0 },
-      description: 'Ejercicios de tríceps'
-    },
+  // BRAZOS
+  {
+    patterns: ['curl.*bíceps', 'bicep.*curl'],
+    distribution: { 'Brazos': 1.0 },
+    description: 'Ejercicios de bíceps',
+  },
+  {
+    patterns: ['extensión.*tríceps', 'tricep.*extension'],
+    distribution: { 'Brazos': 1.0 },
+    description: 'Ejercicios de tríceps',
+  },
 
-    // CORE
-    {
-      patterns: ['plancha', 'plank'],
-      distribution: { 'Core': 1.0 },
-      description: 'Plancha abdominal'
-    },
-    {
-      patterns: ['abdominal', 'crunch', 'sit.*up'],
-      distribution: { 'Core': 1.0 },
-      description: 'Ejercicios abdominales'
-    },
-    {
-      patterns: ['rueda.*abdominal', 'ab.*wheel'],
-      distribution: { 'Core': 0.9, 'Brazos': 0.1 },
-      description: 'Rueda abdominal'
-    }
-  ];
+  // CORE
+  {
+    patterns: ['plancha', 'plank'],
+    distribution: { 'Core': 1.0 },
+    description: 'Plancha abdominal',
+  },
+  {
+    patterns: ['abdominal', 'crunch', 'sit.*up'],
+    distribution: { 'Core': 1.0 },
+    description: 'Ejercicios abdominales',
+  },
+  {
+    patterns: ['rueda.*abdominal', 'ab.*wheel'],
+    distribution: { 'Core': 0.9, 'Brazos': 0.1 },
+    description: 'Rueda abdominal',
+  },
+];
 
 /**
  * Detecta patrones en el nombre de un ejercicio usando expresiones regulares
@@ -161,15 +161,15 @@ const getConservativeDistribution = (categories: string[]): Record<string, numbe
 /**
  * Calcula la distribución de esfuerzo entre categorías musculares para un ejercicio
  * MEJORADO: Ahora usa distribuciones realistas basadas en biomecánica
- * 
+ *
  * Prioridad:
  * 1. Ejercicio conocido en base de datos → Distribución exacta
- * 2. Patrón detectado por nombre → Distribución inteligente  
+ * 2. Patrón detectado por nombre → Distribución inteligente
  * 3. Fallback → Distribución conservadora (categoría principal 70%, resto dividido)
  */
 export const calculateCategoryEffortDistribution = (
   categories: string[],
-  exerciseName?: string
+  exerciseName?: string,
 ): Record<string, number> => {
   // Casos básicos
   if (categories.length === 0) return {};
@@ -228,7 +228,7 @@ export const calculateCategoryEffortDistribution = (
         }
       });
 
-      // Distribuir el resto equitativamente entre categorías no cubiertas  
+      // Distribuir el resto equitativamente entre categorías no cubiertas
       const uncoveredCategories = categories.filter(cat => !patternDistribution[cat]);
       if (uncoveredCategories.length > 0) {
         const remainingEffort = 1.0 - totalPatternEffort;
@@ -244,4 +244,4 @@ export const calculateCategoryEffortDistribution = (
 
   // 3. FALLBACK: Distribución conservadora
   return getConservativeDistribution(categories);
-}; 
+};

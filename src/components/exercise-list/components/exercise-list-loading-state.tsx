@@ -1,5 +1,6 @@
-import { LoadingSpinner } from '@/components/loading-spinner';
 import React from 'react';
+
+import { LoadingSpinner } from '@/components/loading-spinner';
 
 /**
  * Estado de carga del ExerciseList usando el LoadingSpinner genérico
@@ -11,4 +12,4 @@ export const ExerciseListLoadingState: React.FC = () => {
       <p className="text-gray-400 text-sm">Cargando ejercicios...</p>
     </div>
   );
-}; 
+};

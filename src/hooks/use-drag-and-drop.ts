@@ -47,7 +47,7 @@ export const useDragAndDrop = <T>({ onReorder, items, getItemId, enabled = true 
       },
       // Deshabilitar si no está habilitado
       disabled: !enabled,
-    })
+    }),
   );
 
   const handleDragStart = () => {
@@ -88,4 +88,4 @@ export const useDragAndDrop = <T>({ onReorder, items, getItemId, enabled = true 
     handleDragEnd,
     collisionDetection: closestCenter,
   };
-}; 
+};

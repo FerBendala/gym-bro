@@ -1,3 +1,10 @@
+import { Plus } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+
+import type { AssignmentFormData } from '../types';
+import { formatDayName } from '../utils';
+
 import { createExerciseAssignment } from '@/api/services';
 import { Button } from '@/components/button';
 import { Select } from '@/components/select';
@@ -6,11 +13,6 @@ import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
 import { groupExercisesByCategory } from '@/utils';
-import { Plus } from 'lucide-react';
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import type { AssignmentFormData } from '../types';
-import { formatDayName } from '../utils';
 
 interface AssignmentFormProps {
   selectedDay: DayOfWeek;
@@ -24,7 +26,7 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) =
     exercises,
     setLoading,
     setError,
-    addAssignment
+    addAssignment,
   } = useAdminStore();
 
   const {
@@ -32,13 +34,13 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) =
     handleSubmit,
     reset,
     setValue,
-    formState: { errors }
+    formState: { errors },
   } = useForm<AssignmentFormData>({
     mode: 'onChange',
     defaultValues: {
       exerciseId: '',
-      dayOfWeek: selectedDay
-    }
+      dayOfWeek: selectedDay,
+    },
   });
 
   // Actualizar el formulario cuando cambie selectedDay
@@ -59,7 +61,7 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) =
       const exercise = exercises.find(ex => ex.id === data.exerciseId);
       const assignmentId = await createExerciseAssignment({
         exerciseId: data.exerciseId,
-        dayOfWeek: data.dayOfWeek
+        dayOfWeek: data.dayOfWeek,
       });
 
       // Crear objeto de asignación con datos del ejercicio
@@ -67,7 +69,7 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) =
         id: assignmentId,
         exerciseId: data.exerciseId,
         dayOfWeek: data.dayOfWeek,
-        exercise
+        exercise,
       };
 
       addAssignment(assignmentWithExercise);
@@ -120,4 +122,4 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) =
       </Button>
     </form>
   );
-}; 
+};

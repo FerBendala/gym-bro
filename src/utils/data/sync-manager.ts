@@ -1,16 +1,17 @@
-import { logger } from '@/utils';
 import { STORES, SYNC_OPERATIONS, SYNC_PRIORITY, SYNC_STATUS } from './indexeddb-config';
 import type {
   DatabaseResult,
   SyncEvent,
-  SyncQueueItem
+  SyncQueueItem,
 } from './indexeddb-types';
 import {
   addItem,
   deleteItem,
   getItemsByIndex,
-  updateItem
+  updateItem,
 } from './indexeddb-utils';
+
+import { logger } from '@/utils';
 
 /**
  * Sistema de sincronización entre IndexedDB y Firebase
@@ -23,7 +24,7 @@ class SyncManager {
   private eventListeners: SyncEventListener[] = [];
   private syncInterval: ReturnType<typeof setInterval> | null = null;
   private isSyncing = false;
-  private retryTimeouts: Map<number, ReturnType<typeof setTimeout>> = new Map();
+  private retryTimeouts = new Map<number, ReturnType<typeof setTimeout>>();
 
   constructor() {
     this.setupOnlineListener();
@@ -47,7 +48,7 @@ class SyncManager {
   /**
    * Inicia la sincronización automática
    */
-  startAutoSync(intervalMinutes: number = 5): void {
+  startAutoSync(intervalMinutes = 5): void {
     this.stopAutoSync();
 
     this.syncInterval = setInterval(() => {
@@ -105,7 +106,7 @@ class SyncManager {
     entityId: string,
     operation: keyof typeof SYNC_OPERATIONS,
     data: Record<string, unknown>,
-    priority: keyof typeof SYNC_PRIORITY = 'MEDIUM'
+    priority: keyof typeof SYNC_PRIORITY = 'MEDIUM',
   ): Promise<DatabaseResult<SyncQueueItem>> {
     const queueItem: SyncQueueItem = {
       entityType,
@@ -117,7 +118,7 @@ class SyncManager {
       retryCount: 0,
       maxRetries: 3,
       createdAt: Date.now(),
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
     };
 
     const result = await addItem(STORES.SYNC_QUEUE, queueItem);
@@ -149,8 +150,8 @@ class SyncManager {
         SYNC_STATUS.PENDING,
         {
           orderBy: { field: 'priority', direction: 'asc' },
-          limit: 50 // Procesar en lotes
-        }
+          limit: 50, // Procesar en lotes
+        },
       );
 
       if (!pendingResult.success || !pendingResult.data) {
@@ -168,7 +169,7 @@ class SyncManager {
           this.emit({
             type: 'sync_progress',
             completed: processed,
-            total: pendingItems.length
+            total: pendingItems.length,
           });
         } catch (error) {
           logger.error('Error procesando item de sync:', error as Error, { itemId: item.id }, 'SYNC');
@@ -179,14 +180,14 @@ class SyncManager {
       this.emit({
         type: 'sync_completed',
         duration: Date.now(),
-        itemsProcessed: processed
+        itemsProcessed: processed,
       });
 
     } catch (error) {
       logger.error('Error en processSyncQueue:', error as Error, undefined, 'SYNC');
       this.emit({
         type: 'sync_failed',
-        error: error instanceof Error ? error.message : 'Error desconocido'
+        error: error instanceof Error ? error.message : 'Error desconocido',
       });
     } finally {
       this.isSyncing = false;
@@ -201,18 +202,18 @@ class SyncManager {
     const updatedItem = {
       ...item,
       status: SYNC_STATUS.IN_PROGRESS,
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
     };
     await updateItem(STORES.SYNC_QUEUE, updatedItem);
 
     // Simular llamada a Firebase - aquí iría la lógica real
-    await this.syncWithFirebase(item);
+    await this.syncWithFirebase();
 
     // Marcar como completado
     await updateItem(STORES.SYNC_QUEUE, {
       ...updatedItem,
       status: SYNC_STATUS.COMPLETED,
-      updatedAt: Date.now()
+      updatedAt: Date.now(),
     });
 
     // Opcional: limpiar elementos completados después de un tiempo
@@ -257,7 +258,7 @@ class SyncManager {
         retryCount,
         scheduledFor,
         error: error.message,
-        updatedAt: Date.now()
+        updatedAt: Date.now(),
       };
 
       await updateItem(STORES.SYNC_QUEUE, updatedItem);
@@ -273,7 +274,7 @@ class SyncManager {
       this.emit({
         type: 'sync_failed',
         error: error.message,
-        retryIn: delayMs
+        retryIn: delayMs,
       });
     } else {
       // Máximo de reintentos alcanzado
@@ -281,12 +282,12 @@ class SyncManager {
         ...item,
         status: SYNC_STATUS.FAILED,
         error: error.message,
-        updatedAt: Date.now()
+        updatedAt: Date.now(),
       });
 
       this.emit({
         type: 'sync_failed',
-        error: `Máximo de reintentos alcanzado: ${error.message}`
+        error: `Máximo de reintentos alcanzado: ${error.message}`,
       });
     }
   }
@@ -301,12 +302,12 @@ class SyncManager {
       const completedResult = await getItemsByIndex<SyncQueueItem>(
         STORES.SYNC_QUEUE,
         'by_status',
-        SYNC_STATUS.COMPLETED
+        SYNC_STATUS.COMPLETED,
       );
 
       if (completedResult.success && completedResult.data) {
         const oldItems = completedResult.data.filter(
-          item => item.updatedAt < cutoffTime
+          item => item.updatedAt < cutoffTime,
         );
 
         for (const oldItem of oldItems) {
@@ -346,14 +347,14 @@ class SyncManager {
       getItemsByIndex(STORES.SYNC_QUEUE, 'by_status', SYNC_STATUS.PENDING),
       getItemsByIndex(STORES.SYNC_QUEUE, 'by_status', SYNC_STATUS.IN_PROGRESS),
       getItemsByIndex(STORES.SYNC_QUEUE, 'by_status', SYNC_STATUS.COMPLETED),
-      getItemsByIndex(STORES.SYNC_QUEUE, 'by_status', SYNC_STATUS.FAILED)
+      getItemsByIndex(STORES.SYNC_QUEUE, 'by_status', SYNC_STATUS.FAILED),
     ]);
 
     return {
       pending: pending.data?.length || 0,
       inProgress: inProgress.data?.length || 0,
       completed: completed.data?.length || 0,
-      failed: failed.data?.length || 0
+      failed: failed.data?.length || 0,
     };
   }
 
@@ -387,11 +388,11 @@ export const queueSyncOperation = (
   entityId: string,
   operation: keyof typeof SYNC_OPERATIONS,
   data: Record<string, unknown>,
-  priority?: keyof typeof SYNC_PRIORITY
+  priority?: keyof typeof SYNC_PRIORITY,
 ) => syncManager.queueOperation(entityType, entityId, operation, data, priority);
 
 export const addSyncEventListener = (listener: SyncEventListener) =>
   syncManager.addEventListener(listener);
 
 export const removeSyncEventListener = (listener: SyncEventListener) =>
-  syncManager.removeEventListener(listener); 
+  syncManager.removeEventListener(listener);

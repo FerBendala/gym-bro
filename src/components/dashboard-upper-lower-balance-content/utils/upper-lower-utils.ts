@@ -1,4 +1,5 @@
 import { Activity, Dumbbell, Footprints } from 'lucide-react';
+
 import { META_CATEGORIES, TREND_THRESHOLDS } from '../constants';
 import type { CategoryAnalysis, MetaCategoryData, MuscleBalanceItem, TrendType, UpperLowerBalanceData } from '../types';
 
@@ -13,7 +14,7 @@ export const createMetaCategoryData = (upperLowerBalance: UpperLowerBalanceData)
       volume: upperLowerBalance.upperBody.volume,
       idealPercentage: META_CATEGORIES.UPPER_BODY.idealPercentage,
       categories: upperLowerBalance.upperBody.categories,
-      isBalanced: Math.abs(upperLowerBalance.upperBody.percentage - META_CATEGORIES.UPPER_BODY.idealPercentage) <= TREND_THRESHOLDS.BALANCE_TOLERANCE
+      isBalanced: Math.abs(upperLowerBalance.upperBody.percentage - META_CATEGORIES.UPPER_BODY.idealPercentage) <= TREND_THRESHOLDS.BALANCE_TOLERANCE,
     },
     {
       category: 'Tren Inferior',
@@ -24,8 +25,8 @@ export const createMetaCategoryData = (upperLowerBalance: UpperLowerBalanceData)
       volume: upperLowerBalance.lowerBody.volume,
       idealPercentage: META_CATEGORIES.LOWER_BODY.idealPercentage,
       categories: upperLowerBalance.lowerBody.categories,
-      isBalanced: Math.abs(upperLowerBalance.lowerBody.percentage - META_CATEGORIES.LOWER_BODY.idealPercentage) <= TREND_THRESHOLDS.BALANCE_TOLERANCE
-    }
+      isBalanced: Math.abs(upperLowerBalance.lowerBody.percentage - META_CATEGORIES.LOWER_BODY.idealPercentage) <= TREND_THRESHOLDS.BALANCE_TOLERANCE,
+    },
   ];
 
   // Agregar Core si tiene volumen
@@ -39,7 +40,7 @@ export const createMetaCategoryData = (upperLowerBalance: UpperLowerBalanceData)
       volume: upperLowerBalance.core.volume,
       idealPercentage: META_CATEGORIES.CORE.idealPercentage,
       categories: upperLowerBalance.core.categories,
-      isBalanced: Math.abs(upperLowerBalance.core.percentage - META_CATEGORIES.CORE.idealPercentage) <= TREND_THRESHOLDS.BALANCE_TOLERANCE
+      isBalanced: Math.abs(upperLowerBalance.core.percentage - META_CATEGORIES.CORE.idealPercentage) <= TREND_THRESHOLDS.BALANCE_TOLERANCE,
     });
   }
 
@@ -60,7 +61,7 @@ export const calculateAggregatedMetrics = (meta: MetaCategoryData, categoryAnaly
     totalFrequency,
     avgIntensity,
     totalRecords,
-    avgStrength
+    avgStrength,
   };
 };
 
@@ -88,7 +89,7 @@ export const determineTrend = (muscleBalanceData: MuscleBalanceItem[]): TrendTyp
 export const calculateChartData = (
   meta: MetaCategoryData,
   categoryAnalysis: CategoryAnalysis,
-  muscleBalance: MuscleBalanceItem[]
+  muscleBalance: MuscleBalanceItem[],
 ) => {
   const { totalFrequency, avgIntensity, totalRecords, avgStrength } = calculateAggregatedMetrics(meta, categoryAnalysis);
 
@@ -105,6 +106,6 @@ export const calculateChartData = (
     frequency: totalFrequency,
     strength: avgStrength,
     records: totalRecords,
-    trend: trend === 'improving' ? '+' : trend === 'declining' ? '-' : '='
+    trend: trend === 'improving' ? '+' : trend === 'declining' ? '-' : '=',
   };
-}; 
+};

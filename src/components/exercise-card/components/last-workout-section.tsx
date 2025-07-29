@@ -1,17 +1,18 @@
 import { Calendar, Dumbbell, TrendingUp } from 'lucide-react';
 import React from 'react';
 
-import { formatNumberToString } from '@/utils';
 import { EXERCISE_CARD_CONSTANTS } from '../constants';
 
+import { formatNumberToString } from '@/utils';
+
 interface LastWorkoutSectionProps {
-  expandedSeries: Array<{
+  expandedSeries: {
     weight: number;
     reps: number;
     volume: number;
     recordIndex: number;
     setIndex: number;
-  }>;
+  }[];
   lastWorkoutStats: {
     totalVolume: number;
     totalSets: number;
@@ -26,7 +27,7 @@ interface LastWorkoutSectionProps {
  */
 export const LastWorkoutSection: React.FC<LastWorkoutSectionProps> = ({
   expandedSeries,
-  lastWorkoutStats
+  lastWorkoutStats,
 }) => {
   return (
     <div className="bg-gradient-to-r from-green-900/20 via-green-800/20 to-green-900/20 rounded-xl border border-green-700/30 p-5 hover:border-green-600/50 transition-all duration-200 hover:shadow-lg">
@@ -41,7 +42,7 @@ export const LastWorkoutSection: React.FC<LastWorkoutSectionProps> = ({
             {lastWorkoutStats.date.toLocaleDateString('es-ES', {
               day: 'numeric',
               month: 'long',
-              year: 'numeric'
+              year: 'numeric',
             })}
           </p>
         </div>
@@ -92,4 +93,4 @@ export const LastWorkoutSection: React.FC<LastWorkoutSectionProps> = ({
       </div>
     </div>
   );
-}; 
+};

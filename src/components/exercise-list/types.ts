@@ -61,4 +61,4 @@ export interface UseExerciseListReturn extends ExerciseListState {
   handleReorderAssignments: (assignments: ExerciseAssignment[]) => Promise<void>;
   exercisesTrainedToday: string[];
   workoutRecords: WorkoutRecord[];
-} 
+}

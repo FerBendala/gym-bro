@@ -12,7 +12,7 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
   icon,
   title,
   description,
-  className = ''
+  className = '',
 }) => {
   const IconComponent = typeof icon === 'function' ? icon : icon;
 
@@ -29,4 +29,4 @@ export const EmptyState: React.FC<EmptyStateProps> = ({
       </p>
     </div>
   );
-}; 
+};

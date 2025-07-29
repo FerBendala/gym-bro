@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { SpinnerSVG } from './components';
 import { useSpinner } from './hooks';
 import type { LoadingSpinnerProps } from './types';
@@ -12,4 +13,4 @@ export const LoadingSpinner: React.FC<LoadingSpinnerProps> = (props) => {
   const { spinnerClasses } = useSpinner(props);
 
   return <SpinnerSVG className={spinnerClasses} />;
-}; 
+};

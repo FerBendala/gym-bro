@@ -27,4 +27,4 @@ export interface TooltipTriggerProps {
   children: React.ReactNode;
   showIcon?: boolean;
   className?: string;
-} 
+}

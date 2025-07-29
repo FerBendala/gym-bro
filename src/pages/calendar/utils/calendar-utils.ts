@@ -1,6 +1,7 @@
+import type { MonthStats } from '../types';
+
 import type { WorkoutRecord } from '@/interfaces';
 import { formatNumberToString } from '@/utils';
-import type { MonthStats } from '../types';
 
 export const getCurrentMonthStats = (records: WorkoutRecord[]): MonthStats => {
   const now = new Date();
@@ -15,17 +16,17 @@ export const getCurrentMonthStats = (records: WorkoutRecord[]): MonthStats => {
 
   const totalWorkouts = currentMonthRecords.length;
   const totalVolume = currentMonthRecords.reduce((sum, record) =>
-    sum + (record.weight * record.reps * record.sets), 0
+    sum + (record.weight * record.reps * record.sets), 0,
   );
   const uniqueDays = new Set(currentMonthRecords.map(record =>
-    new Date(record.date).toDateString()
+    new Date(record.date).toDateString(),
   )).size;
 
   return {
     totalWorkouts,
     totalVolume,
     uniqueDays,
-    averageVolumePerDay: uniqueDays > 0 ? totalVolume / uniqueDays : 0
+    averageVolumePerDay: uniqueDays > 0 ? totalVolume / uniqueDays : 0,
   };
 };
 
@@ -34,4 +35,4 @@ export const formatStatsValue = (key: string, value: number): string => {
     return `${formatNumberToString(value)} kg`;
   }
   return value.toString();
-}; 
+};

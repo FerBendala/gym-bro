@@ -1,8 +1,11 @@
+import { useCallback, useEffect, useState } from 'react';
+
+import type { WorkoutRecordWithExercise } from '../types';
+
 import { deleteWorkoutRecord, getExercises, getWorkoutRecords, updateWorkoutRecord } from '@/api/services';
 import type { Exercise, WorkoutRecord } from '@/interfaces';
 import { useNotification } from '@/stores/notification';
-import { useCallback, useEffect, useState } from 'react';
-import type { WorkoutRecordWithExercise } from '../types';
+import { logger } from '@/utils';
 
 export const useWorkoutHistory = () => {
   const [records, setRecords] = useState<WorkoutRecordWithExercise[]>([]);
@@ -15,19 +18,19 @@ export const useWorkoutHistory = () => {
       setLoading(true);
       const [workoutRecords, exerciseList] = await Promise.all([
         getWorkoutRecords(),
-        getExercises()
+        getExercises(),
       ]);
 
       // Enriquecer registros con información de ejercicios
       const enrichedRecords = workoutRecords.map(record => ({
         ...record,
-        exercise: exerciseList.find(ex => ex.id === record.exerciseId)
+        exercise: exerciseList.find(ex => ex.id === record.exerciseId),
       }));
 
       setRecords(enrichedRecords);
       setExercises(exerciseList);
     } catch (error) {
-      console.error('Error loading data:', error);
+      logger.error('Error loading data:', error as Error);
       showNotification('Error al cargar los datos', 'error');
     } finally {
       setLoading(false);
@@ -38,12 +41,12 @@ export const useWorkoutHistory = () => {
     try {
       await updateWorkoutRecord(recordId, updatedRecord);
       setRecords(prev => prev.map(r =>
-        r.id === recordId ? { ...r, ...updatedRecord } : r
+        r.id === recordId ? { ...r, ...updatedRecord } : r,
       ));
       showNotification('Entrenamiento actualizado correctamente', 'success');
       return true;
     } catch (error) {
-      console.error('Error updating record:', error);
+      logger.error('Error updating record:', error as Error);
       showNotification('Error al actualizar el entrenamiento', 'error');
       return false;
     }
@@ -56,7 +59,7 @@ export const useWorkoutHistory = () => {
       showNotification('Entrenamiento eliminado correctamente', 'success');
       return true;
     } catch (error) {
-      console.error('Error deleting record:', error);
+      logger.error('Error deleting record:', error as Error);
       showNotification('Error al eliminar el entrenamiento', 'error');
       return false;
     }
@@ -72,6 +75,6 @@ export const useWorkoutHistory = () => {
     loading,
     updateRecord,
     deleteRecord,
-    reloadData: loadData
+    reloadData: loadData,
   };
-}; 
+};

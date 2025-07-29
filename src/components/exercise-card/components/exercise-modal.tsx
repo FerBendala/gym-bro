@@ -1,5 +1,3 @@
-import { useModalOverflow } from '@/hooks';
-import type { WorkoutFormData, WorkoutFormDataAdvanced } from '@/interfaces';
 
 import { Dumbbell } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
@@ -8,9 +6,13 @@ import { createPortal } from 'react-dom';
 import { EXERCISE_CARD_CONSTANTS } from '../constants';
 import type { ExerciseModalProps } from '../types';
 import { exerciseCardUtils } from '../utils';
+
 import { ExerciseCardForm } from './exercise-card-form';
 import { LastWorkoutSection } from './last-workout-section';
 import { ModalHeader } from './modal-header';
+
+import { useModalOverflow } from '@/hooks';
+import type { WorkoutFormData, WorkoutFormDataAdvanced } from '@/interfaces';
 
 /**
  * Modal para registro de ejercicios con diseño moderno y atractivo
@@ -24,7 +26,7 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
   onSubmit,
   formMethods,
   advancedFormMethods,
-  lastWorkoutSeries = []
+  lastWorkoutSeries = [],
 }) => {
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
 
@@ -100,4 +102,4 @@ export const ExerciseModal: React.FC<ExerciseModalProps> = ({
   );
 
   return createPortal(modalContent, portalContainer);
-}; 
+};

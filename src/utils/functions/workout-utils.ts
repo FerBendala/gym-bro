@@ -1,7 +1,9 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { differenceInDays } from 'date-fns';
+
 import { calculateOptimal1RM } from './calculate-1rm.utils';
 import { clamp, roundToDecimals } from './math-utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Obtiene el peso máximo de los registros
@@ -67,7 +69,7 @@ export const getRecordsByDayRange = (records: WorkoutRecord[], minDays: number, 
  * Ordena registros por fecha (más reciente primero)
  * Patrón usado +8 veces: records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
  */
-export const sortRecordsByDate = (records: WorkoutRecord[], ascending: boolean = false): WorkoutRecord[] => {
+export const sortRecordsByDate = (records: WorkoutRecord[], ascending = false): WorkoutRecord[] => {
   return [...records].sort((a, b) => {
     const timeA = new Date(a.date).getTime();
     const timeB = new Date(b.date).getTime();
@@ -87,7 +89,7 @@ export const sortRecordsByDateAscending = (records: WorkoutRecord[]): WorkoutRec
  * Valida y corrige tendencia de fuerza
  * Patrón usado +4 veces: Math.max(-max, Math.min(max, value))
  */
-export const validateStrengthTrend = (trend: number, maxTrend: number = 2): number => {
+export const validateStrengthTrend = (trend: number, maxTrend = 2): number => {
   return clamp(trend, -maxTrend, maxTrend);
 };
 
@@ -95,7 +97,7 @@ export const validateStrengthTrend = (trend: number, maxTrend: number = 2): numb
  * Valida y corrige crecimiento mensual
  * Patrón usado +4 veces: Math.max(-5, Math.min(10, growth))
  */
-export const validateMonthlyGrowth = (growth: number, min: number = -5, max: number = 10): number => {
+export const validateMonthlyGrowth = (growth: number, min = -5, max = 10): number => {
   return clamp(growth, min, max);
 };
 
@@ -103,7 +105,7 @@ export const validateMonthlyGrowth = (growth: number, min: number = -5, max: num
  * Valida y corrige tiempo hasta próximo PR
  * Patrón usado +3 veces: Math.max(1, Math.min(52, weeks))
  */
-export const validateTimeToNextPR = (weeks: number, min: number = 1, max: number = 52): number => {
+export const validateTimeToNextPR = (weeks: number, min = 1, max = 52): number => {
   return clamp(weeks, min, max);
 };
 
@@ -111,7 +113,7 @@ export const validateTimeToNextPR = (weeks: number, min: number = 1, max: number
  * Valida y corrige nivel de confianza
  * Patrón usado +4 veces: Math.max(0.3, Math.min(0.9, confidence))
  */
-export const validateConfidence = (confidence: number, min: number = 0.3, max: number = 0.9): number => {
+export const validateConfidence = (confidence: number, min = 0.3, max = 0.9): number => {
   return clamp(confidence, min, max);
 };
 
@@ -119,7 +121,7 @@ export const validateConfidence = (confidence: number, min: number = 0.3, max: n
  * Valida y corrige mejora
  * Patrón usado +4 veces: Math.max(-80, Math.min(300, improvement))
  */
-export const validateImprovement = (improvement: number, min: number = -80, max: number = 300): number => {
+export const validateImprovement = (improvement: number, min = -80, max = 300): number => {
   return clamp(improvement, min, max);
 };
 
@@ -127,7 +129,7 @@ export const validateImprovement = (improvement: number, min: number = -80, max:
  * Obtiene el peso actual (promedio de últimos N días)
  * Patrón usado +3 veces: Math.max(...recentRecords.map(r => r.weight))
  */
-export const getCurrentWeight = (records: WorkoutRecord[], days: number = 30): number => {
+export const getCurrentWeight = (records: WorkoutRecord[], days = 30): number => {
   const recentRecords = getRecordsFromLastDays(records, days);
   if (recentRecords.length === 0) return 0;
   return Math.max(...recentRecords.map(r => r.weight));
@@ -149,4 +151,4 @@ export const getBaseline1RM = (records: WorkoutRecord[]): number => {
 export const calculateImprovement = (current: number, baseline: number): number => {
   if (baseline === 0) return 0;
   return roundToDecimals(((current - baseline) / baseline) * 100);
-}; 
+};

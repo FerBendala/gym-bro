@@ -6,7 +6,7 @@ import { getNotificationIcon } from '../utils';
  */
 export const NotificationIcon: React.FC<NotificationIconProps> = ({
   type,
-  className = "w-5 h-5 mt-0.5"
+  className = 'w-5 h-5 mt-0.5',
 }) => {
   const Icon = getNotificationIcon(type);
 
@@ -15,4 +15,4 @@ export const NotificationIcon: React.FC<NotificationIconProps> = ({
       <Icon className={className} />
     </div>
   );
-}; 
+};

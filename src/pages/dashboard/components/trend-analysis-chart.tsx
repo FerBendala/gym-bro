@@ -1,8 +1,9 @@
-import { formatNumberToString } from '@/utils';
-import { clamp } from '@/utils/functions/math-utils';
 import { ApexOptions } from 'apexcharts';
 import React from 'react';
 import Chart from 'react-apexcharts';
+
+import { formatNumberToString } from '@/utils';
+import { clamp } from '@/utils/functions/math-utils';
 
 export interface TrendAnalysisChartProps {
   strengthTrend: number;
@@ -19,7 +20,7 @@ export const TrendAnalysisChart: React.FC<TrendAnalysisChartProps> = ({
   monthlyGrowthRate,
   plateauRisk,
   confidenceLevel,
-  trendAnalysis
+  trendAnalysis,
 }) => {
   // Normalizar tendencias para el gráfico (0-100)
   const normalizeStrengthTrend = clamp((strengthTrend + 2) * 25, 0, 100); // -2 a +2 -> 0-100
@@ -40,7 +41,7 @@ export const TrendAnalysisChart: React.FC<TrendAnalysisChartProps> = ({
       type: 'radar',
       height: 350,
       background: 'transparent',
-      toolbar: { show: false }
+      toolbar: { show: false },
     },
     plotOptions: {
       radar: {
@@ -48,25 +49,25 @@ export const TrendAnalysisChart: React.FC<TrendAnalysisChartProps> = ({
         polygons: {
           strokeColors: '#374151',
           fill: {
-            colors: ['transparent']
-          }
-        }
-      }
+            colors: ['transparent'],
+          },
+        },
+      },
     },
     colors: [getRadarColor()],
     fill: {
       opacity: 0.3,
-      colors: [getRadarColor()]
+      colors: [getRadarColor()],
     },
     stroke: {
       width: 3,
-      colors: [getRadarColor()]
+      colors: [getRadarColor()],
     },
     markers: {
       size: 6,
       colors: ['#ffffff'],
       strokeColors: getRadarColor(),
-      strokeWidth: 2
+      strokeWidth: 2,
     },
     xaxis: {
       categories: [
@@ -74,22 +75,22 @@ export const TrendAnalysisChart: React.FC<TrendAnalysisChartProps> = ({
         'Tendencia Volumen',
         'Crecimiento Mensual',
         'Confianza IA',
-        'Estabilidad'
+        'Estabilidad',
       ],
       labels: {
         style: {
           colors: '#9ca3af',
-          fontSize: '12px'
-        }
-      }
+          fontSize: '12px',
+        },
+      },
     },
     yaxis: {
       show: false,
       min: 0,
-      max: 100
+      max: 100,
     },
     theme: {
-      mode: 'dark'
+      mode: 'dark',
     },
     tooltip: {
       theme: 'dark',
@@ -112,12 +113,12 @@ export const TrendAnalysisChart: React.FC<TrendAnalysisChartProps> = ({
             default:
               return `${val}%`;
           }
-        }
-      }
+        },
+      },
     },
     legend: {
-      show: false
-    }
+      show: false,
+    },
   };
 
   const series = [{
@@ -127,8 +128,8 @@ export const TrendAnalysisChart: React.FC<TrendAnalysisChartProps> = ({
       normalizeVolumeTrend,
       normalizeGrowthRate,
       normalizeConfidence,
-      normalizePlateauRisk
-    ]
+      normalizePlateauRisk,
+    ],
   }];
 
   return (
@@ -136,4 +137,4 @@ export const TrendAnalysisChart: React.FC<TrendAnalysisChartProps> = ({
       <Chart options={options} series={series} type="radar" height="100%" />
     </div>
   );
-}; 
+};

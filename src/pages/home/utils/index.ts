@@ -1,3 +1,3 @@
 export {
-  formatDayName, getCurrentDayInfo, getDayAbbreviation, isCurrentDay
+  formatDayName, getCurrentDayInfo, getDayAbbreviation, isCurrentDay,
 } from './date-utils';

@@ -1,4 +1,5 @@
-import { WorkoutRecord } from "@/interfaces";
+import type { WorkoutRecord } from '@/interfaces';
+import { logger } from '../logger';
 
 /**
  * Valida que un registro de entrenamiento sea válido para cálculos
@@ -22,7 +23,7 @@ export const isValidRecord = (record: WorkoutRecord): boolean => {
 
   if (record.date.getTime() > now.getTime() + tolerance) {
     if (process.env.NODE_ENV === 'development') {
-      console.warn(`⚠️ Registro con fecha futura ignorado: ${record.date.toISOString().split('T')[0]} (peso: ${record.weight}kg)`);
+      logger.warn(`⚠️ Registro con fecha futura ignorado: ${record.date.toISOString().split('T')[0]} (peso: ${record.weight}kg)`);
     }
     return false;
   }

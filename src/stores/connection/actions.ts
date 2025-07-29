@@ -45,4 +45,4 @@ export const createConnectionActions = (set: (fn: (state: ConnectionStore) => Pa
     // Solo marcar como no inicializado, los event listeners se limpian automáticamente
     set((state) => ({ ...state, isInitialized: false }));
   },
-}); 
+});

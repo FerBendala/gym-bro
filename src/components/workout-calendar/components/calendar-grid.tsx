@@ -1,11 +1,13 @@
+import React from 'react';
+
+import type { CalendarGridProps } from '../types';
+
 import { THEME_CALENDAR } from '@/constants/theme';
 import { cn } from '@/utils';
-import React from 'react';
-import type { CalendarGridProps } from '../types';
 
 export const CalendarGrid: React.FC<CalendarGridProps> = ({
   calendarDays,
-  onDayClick
+  onDayClick,
 }) => {
   return (
     <div className={THEME_CALENDAR.grid.container}>
@@ -19,7 +21,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
               : THEME_CALENDAR.grid.day.otherMonth,
             dayData.isToday && THEME_CALENDAR.grid.day.today,
             dayData.hasData && THEME_CALENDAR.grid.day.hasData,
-            dayData.hasData && dayData.intensity // Solo aplicar intensidad si tiene datos
+            dayData.hasData && dayData.intensity, // Solo aplicar intensidad si tiene datos
           )}
           onClick={() => onDayClick?.(dayData)}
           title={dayData.hasData ? `${dayData.workouts.length} entrenamientos` : ''}
@@ -29,11 +31,11 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           </span>
           {dayData.hasData && (
             <div className={THEME_CALENDAR.grid.day.indicator}>
-              <div className={THEME_CALENDAR.grid.day.dot}></div>
+              <div className={THEME_CALENDAR.grid.day.dot} />
             </div>
           )}
         </div>
       ))}
     </div>
   );
-}; 
+};

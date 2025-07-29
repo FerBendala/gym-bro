@@ -1,6 +1,7 @@
+import type { DayInfo } from '../types';
+
 import { DAYS } from '@/constants/days.constants';
 import type { DayOfWeek } from '@/interfaces';
-import type { DayInfo } from '../types';
 
 /**
  * Obtiene información del día actual
@@ -16,8 +17,8 @@ export const getCurrentDayInfo = (activeDay: DayOfWeek): DayInfo => {
     formattedDate: new Date().toLocaleDateString('es-ES', {
       day: 'numeric',
       month: 'long',
-      year: 'numeric'
-    })
+      year: 'numeric',
+    }),
   };
 };
 
@@ -40,4 +41,4 @@ export const formatDayName = (day: DayOfWeek): string => {
  */
 export const getDayAbbreviation = (day: DayOfWeek): string => {
   return day.slice(0, 3).toUpperCase();
-}; 
+};

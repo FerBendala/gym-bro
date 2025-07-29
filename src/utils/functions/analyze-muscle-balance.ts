@@ -1,9 +1,11 @@
+import type { MuscleBalance } from './category-analysis-types';
+
+import {
+  calculateCategoryMetrics,
+} from './index';
+
 import { EXERCISE_CATEGORIES, IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
 import type { WorkoutRecord } from '@/interfaces';
-import type { MuscleBalance } from './category-analysis-types';
-import {
-  calculateCategoryMetrics
-} from './index';
 
 /**
  * Analiza el balance muscular entre todas las categorías
@@ -44,7 +46,7 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
     const balanceHistory = {
       trend: 'stable',
       consistency: categoryMetrics.consistencyScore,
-      volatility: 0
+      volatility: 0,
     };
 
     // Generar recomendaciones específicas (simplificado)
@@ -90,9 +92,9 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
       intensityScore: categoryMetrics.intensityScore,
       balanceHistory,
       specificRecommendations,
-      warnings
+      warnings,
     });
   });
 
   return balance.sort((a, b) => Math.abs(b.deviation) - Math.abs(a.deviation));
-}; 
+};

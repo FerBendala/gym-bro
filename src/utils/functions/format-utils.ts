@@ -11,7 +11,7 @@ import { formatNumberToString } from '@/utils';
  */
 export const formatMetricsBatch = (
   metrics: Record<string, number>,
-  decimals: Record<string, number> = {}
+  decimals: Record<string, number> = {},
 ): Record<string, string> => {
   const result: Record<string, string> = {};
 
@@ -39,7 +39,7 @@ export const formatMetricsWithUnits = (
     percentages?: string;
     volumes?: string;
     scores?: string;
-  } = {}
+  } = {},
 ): {
   weights: string[];
   percentages: string[];
@@ -50,7 +50,7 @@ export const formatMetricsWithUnits = (
     weights: 'kg',
     percentages: '%',
     volumes: 'kg',
-    scores: '%'
+    scores: '%',
   };
 
   const finalUnits = { ...defaultUnits, ...units };
@@ -59,7 +59,7 @@ export const formatMetricsWithUnits = (
     weights: (metrics.weights || []).map(w => `${formatNumberToString(w, 1)}${finalUnits.weights}`),
     percentages: (metrics.percentages || []).map(p => `${formatNumberToString(p, 1)}${finalUnits.percentages}`),
     volumes: (metrics.volumes || []).map(v => `${formatNumberToString(v, 0)}${finalUnits.volumes}`),
-    scores: (metrics.scores || []).map(s => `${formatNumberToString(s, 0)}${finalUnits.scores}`)
+    scores: (metrics.scores || []).map(s => `${formatNumberToString(s, 0)}${finalUnits.scores}`),
   };
 };
 
@@ -69,7 +69,7 @@ export const formatMetricsWithUnits = (
  */
 export const formatProgressMetrics = (
   metrics: Record<string, number>,
-  decimals: Record<string, number> = {}
+  decimals: Record<string, number> = {},
 ): Record<string, string> => {
   const result: Record<string, string> = {};
 
@@ -89,7 +89,7 @@ export const formatProgressMetrics = (
 export const formatComparisonMetrics = (
   before: Record<string, number>,
   after: Record<string, number>,
-  decimals: Record<string, number> = {}
+  decimals: Record<string, number> = {},
 ): Record<string, string> => {
   const result: Record<string, string> = {};
 
@@ -111,7 +111,7 @@ export const formatComparisonMetrics = (
  */
 export const formatRangeMetrics = (
   ranges: Record<string, { min: number; max: number }>,
-  decimals: Record<string, number> = {}
+  decimals: Record<string, number> = {},
 ): Record<string, string> => {
   const result: Record<string, string> = {};
 
@@ -129,7 +129,7 @@ export const formatRangeMetrics = (
  */
 export const formatMetricsWithTooltips = (
   metrics: Record<string, { value: number; tooltip: string }>,
-  decimals: Record<string, number> = {}
+  decimals: Record<string, number> = {},
 ): Record<string, { display: string; tooltip: string }> => {
   const result: Record<string, { display: string; tooltip: string }> = {};
 
@@ -137,7 +137,7 @@ export const formatMetricsWithTooltips = (
     const decimal = decimals[key] || 2;
     result[key] = {
       display: formatNumberToString(value, decimal),
-      tooltip
+      tooltip,
     };
   }
 

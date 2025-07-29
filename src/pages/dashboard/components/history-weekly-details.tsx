@@ -1,11 +1,13 @@
+import { ArrowDown, ArrowUp, Calendar, Minus, TrendingDown, TrendingUp } from 'lucide-react';
+import React from 'react';
+
+import { MetricsGrid } from '../shared';
+
 import { Card, CardContent, CardHeader } from '@/components/card';
 import { InfoTooltip } from '@/components/tooltip';
 import { TREND_COLORS, TREND_LABELS } from '@/constants';
 import type { HistoryPoint } from '@/interfaces';
 import { formatNumberToString } from '@/utils';
-import { ArrowDown, ArrowUp, Calendar, Minus, TrendingDown, TrendingUp } from 'lucide-react';
-import React from 'react';
-import { MetricsGrid } from '../shared';
 
 interface HistoryWeeklyDetailsProps {
   historyData: HistoryPoint[];
@@ -72,7 +74,7 @@ export const HistoryWeeklyDetails: React.FC<HistoryWeeklyDetailsProps> = ({ hist
                           {point.date.toLocaleDateString('es-ES', {
                             day: 'numeric',
                             month: 'short',
-                            year: 'numeric'
+                            year: 'numeric',
                           })}
                         </span>
                         {point.weekNumber > 1 && (
@@ -163,4 +165,4 @@ export const HistoryWeeklyDetails: React.FC<HistoryWeeklyDetailsProps> = ({ hist
       </CardContent>
     </Card>
   );
-}; 
+};

@@ -2,9 +2,7 @@ export interface VolumeSettingsProps {
   onBack: () => void;
 }
 
-export interface VolumeDistribution {
-  [category: string]: number;
-}
+export type VolumeDistribution = Record<string, number>;
 
 export interface VolumeSettingsState {
   volumeDistribution: VolumeDistribution;
@@ -17,4 +15,4 @@ export interface VolumeCategoryProps {
   percentage: number;
   defaultValue: number;
   onVolumeChange: (category: string, value: number) => void;
-} 
+}

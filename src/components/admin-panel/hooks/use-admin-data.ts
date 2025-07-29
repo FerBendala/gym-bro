@@ -1,7 +1,9 @@
-import type { DayOfWeek } from '@/interfaces';
 import { useCallback, useEffect } from 'react';
+
 import { useAssignments } from './use-assignments';
 import { useExercises } from './use-exercises';
+
+import type { DayOfWeek } from '@/interfaces';
 
 /**
  * Hook para cargar datos del administrador
@@ -16,7 +18,7 @@ export const useAdminData = (selectedDay: DayOfWeek, isOnline: boolean) => {
     loadExercises,
     handleCreateExercise,
     handleUpdateExercise,
-    handleDeleteExercise
+    handleDeleteExercise,
   } = useExercises(isOnline);
 
   const {
@@ -24,7 +26,7 @@ export const useAdminData = (selectedDay: DayOfWeek, isOnline: boolean) => {
     loading: assignmentsLoading,
     loadAssignments,
     handleCreateAssignment,
-    handleDeleteAssignment
+    handleDeleteAssignment,
   } = useAssignments(selectedDay, exercises, isOnline);
 
   const loadData = useCallback(async () => {
@@ -49,6 +51,6 @@ export const useAdminData = (selectedDay: DayOfWeek, isOnline: boolean) => {
     handleDeleteExercise,
     handleCreateAssignment,
     handleDeleteAssignment,
-    loadData
+    loadData,
   };
-}; 
+};

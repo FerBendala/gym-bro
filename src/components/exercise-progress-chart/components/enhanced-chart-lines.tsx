@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+
 import type { ChartProgressLinesProps } from '../types';
 import { generateAreaPath, generateProgressPath, getChartCoordinates } from '../utils';
 
@@ -19,7 +20,7 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
   dimensions,
   weightRange,
   dateRange,
-  colors
+  colors,
 }) => {
   const [hoveredExercise, setHoveredExercise] = useState<string | null>(null);
   const [hoveredPoint, setHoveredPoint] = useState<{ x: number; y: number; data: TooltipData } | null>(null);
@@ -95,7 +96,7 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
                 cy={y}
                 r="6"
                 fill={color}
-                filter={isHovered ? "url(#glow)" : undefined}
+                filter={isHovered ? 'url(#glow)' : undefined}
                 opacity={isOtherHovered ? 0.3 : 1}
                 className="transition-all duration-300 cursor-pointer"
                 onMouseEnter={() => setHoveredExercise(exerciseName)}
@@ -125,10 +126,10 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
               d={pathData}
               fill="none"
               stroke={color}
-              strokeWidth={isHovered ? "3" : "2"}
+              strokeWidth={isHovered ? '3' : '2'}
               strokeLinecap="round"
               strokeLinejoin="round"
-              filter={isHovered ? "url(#glow)" : undefined}
+              filter={isHovered ? 'url(#glow)' : undefined}
               opacity={isOtherHovered ? 0.3 : 1}
               className="transition-all duration-300 cursor-pointer"
               onMouseEnter={() => setHoveredExercise(exerciseName)}
@@ -153,11 +154,11 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
                   <circle
                     cx={x}
                     cy={y}
-                    r={isHovered ? "5" : "4"}
+                    r={isHovered ? '5' : '4'}
                     fill={color}
                     stroke="white"
                     strokeWidth="2"
-                    filter={isHovered ? "url(#glow)" : undefined}
+                    filter={isHovered ? 'url(#glow)' : undefined}
                     opacity={isOtherHovered ? 0.3 : 1}
                     className="transition-all duration-300 cursor-pointer"
                     onMouseEnter={(e) => {
@@ -168,11 +169,11 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
                         data: {
                           exercise: exerciseName,
                           weight: record.weight,
-                          estimated1RM: estimated1RM,
+                          estimated1RM,
                           date: record.date,
                           reps: record.reps,
-                          sets: record.sets
-                        }
+                          sets: record.sets,
+                        },
                       });
                     }}
                     onMouseLeave={() => {
@@ -213,4 +214,4 @@ export const EnhancedChartLines: React.FC<ChartProgressLinesProps> = ({
       )}
     </>
   );
-}; 
+};

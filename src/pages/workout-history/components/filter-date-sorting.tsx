@@ -1,10 +1,12 @@
+import { Calendar, TrendingDown, TrendingUp } from 'lucide-react';
+import React from 'react';
+
+import { WORKOUT_HISTORY_CONSTANTS } from '../constants';
+import { getQuickDateRange } from '../utils';
+
 import { Card, CardContent } from '@/components/card';
 import { DatePicker } from '@/components/date-picker';
 import { Select } from '@/components/select';
-import { Calendar, TrendingDown, TrendingUp } from 'lucide-react';
-import React from 'react';
-import { WORKOUT_HISTORY_CONSTANTS } from '../constants';
-import { getQuickDateRange } from '../utils';
 
 interface DateSortingProps {
   dateFrom: Date | undefined;
@@ -25,7 +27,7 @@ export const DateSorting: React.FC<DateSortingProps> = ({
   onDateFromChange,
   onDateToChange,
   onSortByChange,
-  onSortOrderChange
+  onSortOrderChange,
 }) => {
   const handleQuickDateFilter = (type: 'week' | 'month') => {
     const { from, to } = getQuickDateRange(type);
@@ -121,4 +123,4 @@ export const DateSorting: React.FC<DateSortingProps> = ({
       </CardContent>
     </Card>
   );
-}; 
+};

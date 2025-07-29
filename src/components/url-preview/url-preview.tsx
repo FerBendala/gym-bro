@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { PreviewCompact, PreviewFull, PreviewLoading } from './components';
 import { useURLPreview } from './hooks';
 import type { URLPreviewProps } from './types';
@@ -15,7 +16,7 @@ export const URLPreview: React.FC<URLPreviewProps> = ({
   className = '',
   showFullPreview = false,
   onClose,
-  onClick
+  onClick,
 }) => {
   const { previewData, isLoading, hasData } = useURLPreview(url);
 

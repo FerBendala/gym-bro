@@ -1,6 +1,7 @@
-import { Button } from '@/components/button';
 import { Filter } from 'lucide-react';
 import React from 'react';
+
+import { Button } from '@/components/button';
 
 interface FilterModalFooterProps {
   onClearFilters: () => void;
@@ -9,7 +10,7 @@ interface FilterModalFooterProps {
 
 export const FilterModalFooter: React.FC<FilterModalFooterProps> = ({
   onClearFilters,
-  onClose
+  onClose,
 }) => {
   return (
     <div className="border-t border-gray-700/50 p-6 bg-gray-800/30">
@@ -39,4 +40,4 @@ export const FilterModalFooter: React.FC<FilterModalFooterProps> = ({
       </div>
     </div>
   );
-}; 
+};

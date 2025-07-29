@@ -1,11 +1,13 @@
-import type { Exercise, WorkoutRecord } from '@/interfaces';
 import { format, startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 import { calculateOptimal1RM } from './calculate-1rm.utils';
 import type { ExportData } from './export-interfaces';
 import { roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
 import { getMaxWeight } from './workout-utils';
+
+import type { Exercise, WorkoutRecord } from '@/interfaces';
 
 /**
  * Genera datos de exportación completos
@@ -13,18 +15,18 @@ import { getMaxWeight } from './workout-utils';
  */
 export const generateExportData = async (
   exercises: Exercise[],
-  workoutRecords: WorkoutRecord[]
+  workoutRecords: WorkoutRecord[],
 ): Promise<ExportData> => {
   const now = new Date();
 
   // Ordenar registros por fecha
   const sortedRecords = [...workoutRecords].sort((a, b) =>
-    new Date(a.date).getTime() - new Date(b.date).getTime()
+    new Date(a.date).getTime() - new Date(b.date).getTime(),
   );
 
   // Metadata usando función centralizada para calcular volumen total
   const totalVolume = sortedRecords.reduce((sum, record) =>
-    sum + calculateVolume(record), 0
+    sum + calculateVolume(record), 0,
   );
 
   const metadata = {
@@ -34,9 +36,9 @@ export const generateExportData = async (
     totalVolume,
     dateRange: {
       from: sortedRecords.length > 0 ? format(new Date(sortedRecords[0].date), 'dd/MM/yyyy', { locale: es }) : '',
-      to: sortedRecords.length > 0 ? format(new Date(sortedRecords[sortedRecords.length - 1].date), 'dd/MM/yyyy', { locale: es }) : ''
+      to: sortedRecords.length > 0 ? format(new Date(sortedRecords[sortedRecords.length - 1].date), 'dd/MM/yyyy', { locale: es }) : '',
     },
-    appVersion: '1.0.0'
+    appVersion: '1.0.0',
   };
 
   // Interfaces para estadísticas de ejercicios
@@ -60,7 +62,7 @@ export const generateExportData = async (
   // Exercises con estadísticas
   const exerciseStats = new Map<string, ExerciseStats>();
   sortedRecords.forEach(record => {
-    const exerciseId = record.exerciseId;
+    const { exerciseId } = record;
     if (!exerciseStats.has(exerciseId)) {
       exerciseStats.set(exerciseId, {
         workouts: 0,
@@ -68,7 +70,7 @@ export const generateExportData = async (
         weights: [],
         lastDate: new Date(0),
         firstWeight: 0,
-        lastWeight: 0
+        lastWeight: 0,
       });
     }
 
@@ -93,7 +95,7 @@ export const generateExportData = async (
   const exercisesData = exercises.map(exercise => {
     const stats = exerciseStats.get(exercise.id) || {
       workouts: 0, totalVolume: 0, weights: [], lastDate: new Date(0),
-      firstWeight: 0, lastWeight: 0
+      firstWeight: 0, lastWeight: 0,
     };
 
     const averageWeight = stats.weights.length > 0 ?
@@ -116,7 +118,7 @@ export const generateExportData = async (
       maxWeight,
       lastWorkout: stats.lastDate.getTime() > 0 ?
         format(stats.lastDate, 'dd/MM/yyyy', { locale: es }) : 'Nunca',
-      progressPercentage: roundToDecimals(progressPercentage)
+      progressPercentage: roundToDecimals(progressPercentage),
     };
   });
 
@@ -139,8 +141,8 @@ export const generateExportData = async (
       individualSets: record.individualSets?.map(set => ({
         weight: set.weight,
         reps: set.reps,
-        volume: roundToDecimals(set.weight * set.reps)
-      }))
+        volume: roundToDecimals(set.weight * set.reps),
+      })),
     };
   });
 
@@ -157,7 +159,7 @@ export const generateExportData = async (
         categories,
         frequency: 0,
         totalVolume: 0,
-        volumes: []
+        volumes: [],
       });
     }
 
@@ -178,11 +180,11 @@ export const generateExportData = async (
       categories: stats.categories,
       frequency: stats.frequency,
       averageVolume: stats.volumes.length > 0 ? roundToDecimals(stats.volumes.reduce((sum, v) => sum + v, 0) / stats.volumes.length) : 0,
-      totalVolume: roundToDecimals(stats.totalVolume)
+      totalVolume: roundToDecimals(stats.totalVolume),
     }],
     totalVolume: roundToDecimals(stats.totalVolume),
     averageVolume: stats.volumes.length > 0 ? roundToDecimals(stats.volumes.reduce((sum, v) => sum + v, 0) / stats.volumes.length) : 0,
-    workoutCount: stats.frequency
+    workoutCount: stats.frequency,
   }));
 
   // Volume Analysis
@@ -216,15 +218,15 @@ export const generateExportData = async (
       category,
       volume: roundToDecimals(stats.volume),
       percentage: roundToDecimals((stats.volume / totalVolume) * 100),
-      averagePerWorkout: roundToDecimals(stats.volume / stats.count)
+      averagePerWorkout: roundToDecimals(stats.volume / stats.count),
     })),
     volumeByExercise: Array.from(volumeByExercise.entries()).map(([exerciseName, stats]) => ({
       exerciseName,
       volume: roundToDecimals(stats.volume),
       percentage: roundToDecimals((stats.volume / totalVolume) * 100),
       averagePerWorkout: roundToDecimals(stats.volume / stats.count),
-      categories: stats.categories
-    }))
+      categories: stats.categories,
+    })),
   };
 
   // Weekly Data
@@ -249,7 +251,7 @@ export const generateExportData = async (
     workoutCount: stats.workouts,
     averageVolumePerWorkout: roundToDecimals(stats.volume / stats.workouts),
     uniqueExercises: stats.exercises.size,
-    categoryBreakdown: [] // Simplificado para este ejemplo
+    categoryBreakdown: [], // Simplificado para este ejemplo
   }));
 
   // Category Metrics
@@ -263,7 +265,7 @@ export const generateExportData = async (
     weeklyFrequency: 0, // Calculado separadamente si es necesario
     trend: 'stable' as const,
     progressPercentage: 0, // Calculado separadamente si es necesario
-    recommendations: []
+    recommendations: [],
   }));
 
   // Monthly Stats
@@ -281,14 +283,14 @@ export const generateExportData = async (
   });
 
   const monthlyStatsArray = Array.from(monthlyStats.entries()).map(([monthKey, stats]) => ({
-    month: format(new Date(monthKey + '-01'), 'MMMM yyyy', { locale: es }),
-    year: new Date(monthKey + '-01').getFullYear(),
+    month: format(new Date(`${monthKey}-01`), 'MMMM yyyy', { locale: es }),
+    year: new Date(`${monthKey}-01`).getFullYear(),
     totalVolume: roundToDecimals(stats.volume),
     workoutCount: stats.workouts,
     uniqueExercises: stats.exercises.size,
     averageVolumePerWorkout: roundToDecimals(stats.volume / stats.workouts),
     strongestCategory: 'N/A', // Calculado separadamente si es necesario
-    improvementAreas: [] // Calculado separadamente si es necesario
+    improvementAreas: [], // Calculado separadamente si es necesario
   }));
 
   // Progress Summary
@@ -299,7 +301,7 @@ export const generateExportData = async (
     consistencyScore: 0, // Calculado separadamente
     topPerformingCategories: [], // Calculado separadamente
     areasForImprovement: [], // Calculado separadamente
-    personalRecords: [] // Calculado separadamente
+    personalRecords: [], // Calculado separadamente
   };
 
   return {
@@ -311,6 +313,6 @@ export const generateExportData = async (
     weeklyData: weeklyDataArray,
     categoryMetrics,
     monthlyStats: monthlyStatsArray,
-    progressSummary
+    progressSummary,
   };
-}; 
+};

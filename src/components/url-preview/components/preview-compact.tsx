@@ -1,14 +1,16 @@
-import { THEME_URL_PREVIEW } from '@/constants/theme';
-import { cn } from '@/utils';
 import { ExternalLink, FileText, Globe, Image, Play } from 'lucide-react';
 import React from 'react';
+
 import type { PreviewCompactProps } from '../types';
+
+import { THEME_URL_PREVIEW } from '@/constants/theme';
+import { cn } from '@/utils';
 
 export const PreviewCompact: React.FC<PreviewCompactProps> = ({
   url,
   previewData,
   className = '',
-  onClick
+  onClick,
 }) => {
   const getIcon = () => {
     switch (previewData.type) {
@@ -32,7 +34,7 @@ export const PreviewCompact: React.FC<PreviewCompactProps> = ({
         THEME_URL_PREVIEW.compact.container,
         onClick && THEME_URL_PREVIEW.compact.clickable,
         typeStyles.colors,
-        className
+        className,
       )}
       onClick={onClick}
     >
@@ -68,4 +70,4 @@ export const PreviewCompact: React.FC<PreviewCompactProps> = ({
       </div>
     </div>
   );
-}; 
+};

@@ -1,8 +1,9 @@
-import { EXERCISE_CATEGORIES } from '@/constants';
-import type { WorkoutRecord } from '@/interfaces';
 import { analyzeMuscleBalance } from './analyze-muscle-balance';
 import { calculateCategoryMetrics } from './calculate-category-metrics';
 import type { CategoryAnalysis, CategoryMetrics, MuscleBalance } from './category-analysis-types';
+
+import { EXERCISE_CATEGORIES } from '@/constants';
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula el score de balance general entre todas las categorías
@@ -100,20 +101,20 @@ export const calculateCategoryAnalysis = (records: WorkoutRecord[]): CategoryAna
         thisWeek: 0,
         lastWeek: 0,
         thisMonth: 0,
-        lastMonth: 0
+        lastMonth: 0,
       },
       performanceMetrics: {
         bestSession: {
           date: new Date(),
           volume: metrics.totalVolume,
-          maxWeight: metrics.maxWeight
+          maxWeight: metrics.maxWeight,
         },
         averageSessionVolume: metrics.totalVolume / Math.max(1, metrics.workoutCount),
         volumePerWorkout: metrics.totalVolume / Math.max(1, metrics.workoutCount),
-        sessionsAboveAverage: 0
+        sessionsAboveAverage: 0,
       },
       recommendations: [],
-      warnings: []
+      warnings: [],
     };
   });
 
@@ -122,6 +123,6 @@ export const calculateCategoryAnalysis = (records: WorkoutRecord[]): CategoryAna
     muscleBalance,
     dominantCategory,
     leastTrainedCategory,
-    balanceScore
+    balanceScore,
   };
 };

@@ -2,7 +2,7 @@ import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula la tasa de progresión general
- * NOTA: Las funciones calculateWeightProgression y calculateVolumeProgression 
+ * NOTA: Las funciones calculateWeightProgression y calculateVolumeProgression
  * se han movido a sus propios archivos para evitar duplicación
  */
 export const calculateProgressionRate = (records: WorkoutRecord[]): number => {
@@ -16,4 +16,4 @@ export const calculateProgressionRate = (records: WorkoutRecord[]): number => {
   const secondAvg = secondHalf.reduce((sum, r) => sum + r.weight, 0) / secondHalf.length;
 
   return firstAvg > 0 ? ((secondAvg - firstAvg) / firstAvg) * 100 : 0;
-}; 
+};

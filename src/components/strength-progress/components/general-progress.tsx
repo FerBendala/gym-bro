@@ -1,10 +1,12 @@
-import { Card, CardContent, CardHeader } from '@/components/card';
-import { InfoTooltip } from '@/components/tooltip';
-import { formatNumberToString } from '@/utils';
 import { TrendingUp } from 'lucide-react';
+
 import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
 import type { StrengthProgressAnalysis } from '../types';
 import { getPhaseColor } from '../utils';
+
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
+import { formatNumberToString } from '@/utils';
 
 interface GeneralProgressProps {
   analysis: StrengthProgressAnalysis;
@@ -75,4 +77,4 @@ export const GeneralProgress: React.FC<GeneralProgressProps> = ({ analysis }) =>
       </CardContent>
     </Card>
   );
-}; 
+};

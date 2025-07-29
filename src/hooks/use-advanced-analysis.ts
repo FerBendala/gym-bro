@@ -1,6 +1,7 @@
+import { useMemo } from 'react';
+
 import type { WorkoutRecord } from '@/interfaces';
 import { calculateAdvancedAnalysis, calculateTrendsAnalysis } from '@/utils';
-import { useMemo } from 'react';
 
 /**
  * Hook centralizado para análisis avanzado
@@ -29,7 +30,7 @@ export const useExerciseAnalysis = (records: WorkoutRecord[]) => {
 
     // Filtrar registros válidos con información de ejercicio
     const validRecords = records.filter(record =>
-      record.exercise && record.exercise.name && record.exercise.name !== 'Ejercicio desconocido'
+      record.exercise?.name && record.exercise.name !== 'Ejercicio desconocido',
     );
 
     // Agrupar por ejercicio
@@ -45,7 +46,7 @@ export const useExerciseAnalysis = (records: WorkoutRecord[]) => {
     // Calcular métricas por ejercicio
     return Array.from(exerciseMap.entries()).map(([exerciseName, exerciseRecords]) => {
       const totalVolume = exerciseRecords.reduce((sum, record) =>
-        sum + (record.weight * record.reps * record.sets), 0
+        sum + (record.weight * record.reps * record.sets), 0,
       );
 
       const weights = exerciseRecords.map(r => r.weight);
@@ -66,7 +67,7 @@ export const useExerciseAnalysis = (records: WorkoutRecord[]) => {
         firstWeight: firstRecord.weight,
         lastWeight: lastRecord.weight,
         progress,
-        progressPercent
+        progressPercent,
       };
     }).sort((a, b) => b.totalVolume - a.totalVolume);
   }, [records]);

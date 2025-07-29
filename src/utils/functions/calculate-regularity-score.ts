@@ -1,6 +1,8 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { getDay } from 'date-fns';
+
 import { getCurrentDateFromRecords } from './get-current-date-from-records';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula score de regularidad mejorado que no penaliza patrones sistemáticos
@@ -11,7 +13,7 @@ export const calculateRegularityScore = (categoryRecords: WorkoutRecord[]): numb
 
   const currentDate = getCurrentDateFromRecords(categoryRecords);
   const sortedRecords = [...categoryRecords].sort((a, b) =>
-    new Date(a.date).getTime() - new Date(b.date).getTime()
+    new Date(a.date).getTime() - new Date(b.date).getTime(),
   );
 
   // **MEJORA**: Considerar si la evaluación es en día temprano de la semana
@@ -22,7 +24,7 @@ export const calculateRegularityScore = (categoryRecords: WorkoutRecord[]): numb
   for (let i = 1; i < sortedRecords.length; i++) {
     const days = Math.floor(
       (new Date(sortedRecords[i].date).getTime() -
-        new Date(sortedRecords[i - 1].date).getTime()) / (1000 * 60 * 60 * 24)
+        new Date(sortedRecords[i - 1].date).getTime()) / (1000 * 60 * 60 * 24),
     );
     daysBetweenWorkouts.push(days);
   }
@@ -30,7 +32,7 @@ export const calculateRegularityScore = (categoryRecords: WorkoutRecord[]): numb
   // Detectar si hay un patrón sistemático
   const avgInterval = daysBetweenWorkouts.reduce((sum, days) => sum + days, 0) / daysBetweenWorkouts.length;
   const variance = daysBetweenWorkouts.reduce((sum, days) =>
-    sum + Math.pow(days - avgInterval, 2), 0
+    sum + Math.pow(days - avgInterval, 2), 0,
   ) / daysBetweenWorkouts.length;
   const stdDev = Math.sqrt(variance);
   const coefficientOfVariation = avgInterval > 0 ? stdDev / avgInterval : 1;
@@ -45,7 +47,7 @@ export const calculateRegularityScore = (categoryRecords: WorkoutRecord[]): numb
   // **MEJORA**: Considerar el último entrenamiento en el contexto del día actual
   const lastRecordDate = new Date(sortedRecords[sortedRecords.length - 1].date);
   const daysSinceLastWorkout = Math.floor(
-    (currentDate.getTime() - lastRecordDate.getTime()) / (1000 * 60 * 60 * 24)
+    (currentDate.getTime() - lastRecordDate.getTime()) / (1000 * 60 * 60 * 24),
   );
 
   // Si el último entrenamiento fue muy reciente y estamos al inicio de la semana,
@@ -69,4 +71,4 @@ export const calculateRegularityScore = (categoryRecords: WorkoutRecord[]): numb
   }
 
   return Math.round(regularityScore);
-}; 
+};

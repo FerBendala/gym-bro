@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+
 import { OFFLINE_WARNING_DEFAULTS } from '../constants';
 import type { OfflineWarningProps } from '../types';
 import { getAlertStyles, getIconClassName } from '../utils';
@@ -9,7 +10,7 @@ export const useOfflineWarning = (props: OfflineWarningProps) => {
     className = '',
     variant = OFFLINE_WARNING_DEFAULTS.variant,
     icon = OFFLINE_WARNING_DEFAULTS.icon,
-    iconClassName = ''
+    iconClassName = '',
   } = props;
 
   const alertStyles = useMemo(() => {
@@ -25,6 +26,6 @@ export const useOfflineWarning = (props: OfflineWarningProps) => {
     message,
     icon,
     alertStyles,
-    finalIconClassName
+    finalIconClassName,
   };
-}; 
+};

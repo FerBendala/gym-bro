@@ -1,6 +1,8 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { useMemo, useState } from 'react';
+
 import { calculateBalanceAnalysis } from '../utils/balance-utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 export type BalanceSubTab = 'general' | 'balanceByGroup' | 'upperLower' | 'trends';
 
@@ -17,7 +19,7 @@ export const useBalanceTab = (records: WorkoutRecord[]) => {
         muscleBalance: [],
         categoryAnalysis: {},
         upperLowerBalance: {},
-        selectedView: 'general' as const
+        selectedView: 'general' as const,
       };
     }
 
@@ -35,7 +37,7 @@ export const useBalanceTab = (records: WorkoutRecord[]) => {
       element.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
-        inline: 'nearest'
+        inline: 'nearest',
       });
     }
   };
@@ -59,6 +61,6 @@ export const useBalanceTab = (records: WorkoutRecord[]) => {
     handleViewChange,
     handleBalanceItemClick,
     handleUpperLowerItemClick,
-    scrollToCard
+    scrollToCard,
   };
-}; 
+};

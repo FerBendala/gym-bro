@@ -21,4 +21,4 @@ export interface DaySelectorProps {
 export interface QuickDayNavigationProps {
   activeDay: DayOfWeek;
   onDayChange: (day: DayOfWeek) => void;
-} 
+}

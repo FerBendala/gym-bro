@@ -1,6 +1,6 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { Brain } from 'lucide-react';
 import React from 'react';
+
 import {
   ConfidenceGauge,
   DataQualityRadial,
@@ -8,10 +8,12 @@ import {
   PRProgressChart,
   PerformanceIndicators,
   PredictionTimeline,
-  TrendAnalysisSection
+  TrendAnalysisSection,
 } from '../components';
 import { PredictionsHeader } from '../components/predictions-header';
 import { usePredictionsData } from '../hooks/use-predictions-data';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 interface PredictionsTabProps {
   records: WorkoutRecord[];
@@ -105,23 +107,23 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
             {
               name: 'Tendencia Fuerza',
               value: centralizedMetrics.strengthTrend > 0 ? centralizedMetrics.strengthTrend : 0,
-              status: centralizedMetrics.strengthTrend > 0.5 ? 'good' : centralizedMetrics.strengthTrend > 0 ? 'warning' : 'bad'
+              status: centralizedMetrics.strengthTrend > 0.5 ? 'good' : centralizedMetrics.strengthTrend > 0 ? 'warning' : 'bad',
             },
             {
               name: 'Tendencia Volumen',
               value: centralizedMetrics.volumeTrend > 0 ? centralizedMetrics.volumeTrend : 0,
-              status: centralizedMetrics.volumeTrend > 5 ? 'good' : centralizedMetrics.volumeTrend > 0 ? 'warning' : 'bad'
+              status: centralizedMetrics.volumeTrend > 5 ? 'good' : centralizedMetrics.volumeTrend > 0 ? 'warning' : 'bad',
             },
             {
               name: 'Riesgo Meseta',
               value: 100 - centralizedMetrics.plateauRisk,
-              status: centralizedMetrics.plateauRisk < 30 ? 'good' : centralizedMetrics.plateauRisk < 60 ? 'warning' : 'bad'
+              status: centralizedMetrics.plateauRisk < 30 ? 'good' : centralizedMetrics.plateauRisk < 60 ? 'warning' : 'bad',
             },
             {
               name: 'Confianza IA',
               value: centralizedMetrics.confidenceLevel,
-              status: centralizedMetrics.confidenceLevel >= 70 ? 'good' : centralizedMetrics.confidenceLevel >= 40 ? 'warning' : 'bad'
-            }
+              status: centralizedMetrics.confidenceLevel >= 70 ? 'good' : centralizedMetrics.confidenceLevel >= 40 ? 'warning' : 'bad',
+            },
           ]}
         />
       </div>
@@ -158,4 +160,4 @@ export const PredictionsTab: React.FC<PredictionsTabProps> = ({ records }) => {
       />
     </div>
   );
-}; 
+};

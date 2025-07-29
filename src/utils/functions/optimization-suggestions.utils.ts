@@ -18,7 +18,7 @@ export const generateAdvancedOptimizationSuggestions = (records: WorkoutRecord[]
     return [
       'Sigue entrenando de forma consistente durante al menos 2 semanas para recibir análisis detallados',
       'Registra todos tus entrenamientos para obtener métricas más precisas',
-      'Mantén un patrón de entrenamiento regular para mejorar el análisis temporal'
+      'Mantén un patrón de entrenamiento regular para mejorar el análisis temporal',
     ];
   }
 
@@ -86,4 +86,4 @@ export const generateAdvancedOptimizationSuggestions = (records: WorkoutRecord[]
   }
 
   return suggestions.slice(0, 6); // Limitar a 6 sugerencias más relevantes
-}; 
+};

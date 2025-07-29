@@ -1,10 +1,12 @@
+import { useCallback, useEffect, useState } from 'react';
+
+import type { UseExerciseListReturn } from '../types';
+
 import { createWorkoutRecord, getAssignmentsByDay, getExercises, getWorkoutRecords, updateAssignmentsOrder } from '@/api/services';
 import type { DayOfWeek, ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
 import { getExercisesTrainedTodayForCurrentDay, logger } from '@/utils';
-import { useCallback, useEffect, useState } from 'react';
-import type { UseExerciseListReturn } from '../types';
 
 // Evento personalizado para escuchar cambios de datos
 const DATA_CHANGE_EVENT = 'followgym-data-change';
@@ -40,12 +42,12 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
       const [assignmentsData, exercisesData, workoutRecords] = await Promise.all([
         getAssignmentsByDay(dayOfWeek),
         getExercises(),
-        getWorkoutRecords()
+        getWorkoutRecords(),
       ]);
 
       const assignmentsWithExercises = assignmentsData.map(assignment => ({
         ...assignment,
-        exercise: exercisesData.find(ex => ex.id === assignment.exerciseId)
+        exercise: exercisesData.find(ex => ex.id === assignment.exerciseId),
       }));
 
       setAssignments(assignmentsWithExercises);
@@ -78,7 +80,7 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
       // Verificar si es modo avanzado (series individuales)
       if ('sets' in data && Array.isArray(data.sets)) {
         // Modo avanzado: calcular valores agregados
-        const sets = data.sets;
+        const { sets } = data;
         const totalSets = sets.length;
         const totalReps = sets.reduce((sum, set) => sum + set.reps, 0);
         const averageReps = Math.round(totalReps / totalSets);
@@ -90,7 +92,7 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
           reps: averageReps,
           sets: totalSets,
           dayOfWeek,
-          individualSets: sets
+          individualSets: sets,
         };
 
         await createWorkoutRecord(workoutData, data.date);
@@ -99,7 +101,7 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
         const seriesText = sets.map((set, i) => `Serie ${i + 1}: ${set.weight}kg x ${set.reps}`).join(', ');
         showNotification(
           `Entrenamiento registrado: ${totalSets} series - ${seriesText}`,
-          'success'
+          'success',
         );
       } else {
         // Modo simple: usar datos directamente (type guard)
@@ -109,14 +111,14 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
           weight: simpleData.weight,
           reps: simpleData.reps,
           sets: simpleData.sets,
-          dayOfWeek
+          dayOfWeek,
         };
 
         await createWorkoutRecord(workoutData, simpleData.date);
 
         showNotification(
           `Entrenamiento registrado: ${simpleData.sets} series de ${simpleData.reps} reps con ${simpleData.weight}kg`,
-          'success'
+          'success',
         );
       }
 
@@ -196,6 +198,6 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
     loadAssignments,
     handleReorderAssignments,
     exercisesTrainedToday,
-    workoutRecords
+    workoutRecords,
   };
-}; 
+};

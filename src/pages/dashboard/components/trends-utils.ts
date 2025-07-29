@@ -2,7 +2,7 @@ import { Activity, Calendar, CheckCircle, TrendingUp, Zap } from 'lucide-react';
 import React from 'react';
 
 // Función de utilidad para manejar valores seguros
-export const safeNumber = (value: number | undefined, fallback: number = 0): number => {
+export const safeNumber = (value: number | undefined, fallback = 0): number => {
   return typeof value === 'number' && !isNaN(value) ? value : fallback;
 };
 
@@ -14,7 +14,7 @@ export const dayIcons: Record<string, React.ComponentType<{ className?: string }
   'Jueves': TrendingUp,
   'Viernes': CheckCircle,
   'Sábado': Calendar,
-  'Domingo': Calendar
+  'Domingo': Calendar,
 };
 
 export const dayColors: Record<string, string> = {
@@ -24,5 +24,5 @@ export const dayColors: Record<string, string> = {
   'Jueves': 'from-orange-500/80 to-amber-500/80',
   'Viernes': 'from-red-500/80 to-pink-500/80',
   'Sábado': 'from-indigo-500/80 to-blue-500/80',
-  'Domingo': 'from-teal-500/80 to-green-500/80'
+  'Domingo': 'from-teal-500/80 to-green-500/80',
 };

@@ -1,9 +1,11 @@
-import { THEME_TABS } from '@/constants/theme';
 import React from 'react';
+
 import { TabButton, TabContainer } from './components';
 import { TAB_NAVIGATION_CONSTANTS } from './constants';
 import { useTabNavigation } from './hooks';
 import type { TabNavigationProps } from './types';
+
+import { THEME_TABS } from '@/constants/theme';
 
 /**
  * Componente de navegación por tabs responsive
@@ -14,7 +16,7 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
   activeDay,
   onDayChange,
   size = TAB_NAVIGATION_CONSTANTS.DEFAULT_SIZE,
-  variant = TAB_NAVIGATION_CONSTANTS.DEFAULT_VARIANT
+  variant = TAB_NAVIGATION_CONSTANTS.DEFAULT_VARIANT,
 }) => {
   const { variantStyles, sizeStyles } = useTabNavigation(size, variant);
 
@@ -49,4 +51,4 @@ export const TabNavigation: React.FC<TabNavigationProps> = ({
       </TabContainer>
     </div>
   );
-}; 
+};

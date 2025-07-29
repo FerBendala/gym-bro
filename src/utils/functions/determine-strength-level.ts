@@ -17,4 +17,4 @@ export const determineStrengthLevel = (estimatedOneRM: number, category: string)
   if (estimatedOneRM >= standards.advanced) return 'advanced';
   if (estimatedOneRM >= standards.intermediate) return 'intermediate';
   return 'beginner';
-}; 
+};

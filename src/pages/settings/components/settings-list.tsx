@@ -1,6 +1,8 @@
 import React from 'react';
+
 import { SETTINGS_ITEMS } from '../constants';
 import { SettingsSection } from '../types';
+
 import { SettingsItemComponent } from './settings-item';
 
 interface SettingsListProps {
@@ -17,4 +19,4 @@ export const SettingsList: React.FC<SettingsListProps> = ({ onItemClick }) => (
       />
     ))}
   </div>
-); 
+);

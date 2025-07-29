@@ -1,20 +1,22 @@
-import { Card, CardContent, CardHeader } from '@/components/card';
-import { formatNumberToString } from '@/utils';
 import { BarChart } from 'lucide-react';
 import React from 'react';
+
 import { BalanceRadarChart } from './balance-radar-chart';
+
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { formatNumberToString } from '@/utils';
 
 interface GeneralContentProps {
   balanceScore: number;
   finalConsistency: number;
   avgIntensity: number;
   avgFrequency: number;
-  muscleBalance: Array<{
+  muscleBalance: {
     category: string;
     percentage: number;
     totalVolume: number;
     idealPercentage: number;
-  }>;
+  }[];
 
 }
 
@@ -23,7 +25,7 @@ export const GeneralContent: React.FC<GeneralContentProps> = ({
   finalConsistency,
   avgIntensity,
   avgFrequency,
-  muscleBalance
+  muscleBalance,
 }) => {
   const balanceLevel = balanceScore >= 70 ? 'excellent' :
     balanceScore >= 50 ? 'good' :
@@ -56,7 +58,7 @@ export const GeneralContent: React.FC<GeneralContentProps> = ({
                   <div
                     className="absolute inset-0 rounded-full"
                     style={{
-                      background: `conic-gradient(${balanceScore >= 70 ? '#10b981' : balanceScore >= 50 ? '#3b82f6' : balanceScore >= 30 ? '#f59e0b' : '#ef4444'} 0deg, ${balanceScore * 3.6}deg, #374151 ${balanceScore * 3.6}deg, 360deg)`
+                      background: `conic-gradient(${balanceScore >= 70 ? '#10b981' : balanceScore >= 50 ? '#3b82f6' : balanceScore >= 30 ? '#f59e0b' : '#ef4444'} 0deg, ${balanceScore * 3.6}deg, #374151 ${balanceScore * 3.6}deg, 360deg)`,
                     }}
                   />
                   {/* Contenido del círculo */}
@@ -125,7 +127,7 @@ export const GeneralContent: React.FC<GeneralContentProps> = ({
 
           {/* Gráfico Radar Mejorado */}
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-xl"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/5 to-purple-500/5 rounded-xl" />
             <div className="relative z-10">
               <BalanceRadarChart
                 balanceScore={balanceScore}
@@ -141,4 +143,4 @@ export const GeneralContent: React.FC<GeneralContentProps> = ({
       </Card>
     </div>
   );
-}; 
+};

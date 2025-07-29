@@ -42,4 +42,4 @@ export const normalizeVolumeDistribution = (volumeDistribution: VolumeDistributi
     acc[key] = Math.round(value * factor * 10) / 10;
     return acc;
   }, {} as VolumeDistribution);
-}; 
+};

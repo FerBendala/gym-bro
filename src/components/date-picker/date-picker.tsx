@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { DateActions, DateDisplay, DateInput } from './components';
 import { DATE_PICKER_DEFAULTS } from './constants';
 import { useDatePicker } from './hooks';
@@ -10,12 +11,12 @@ export const DatePicker: React.FC<DatePickerProps> = ({
   label = DATE_PICKER_DEFAULTS.LABEL,
   placeholder = DATE_PICKER_DEFAULTS.PLACEHOLDER,
   className = DATE_PICKER_DEFAULTS.CLASS_NAME,
-  disabled = DATE_PICKER_DEFAULTS.DISABLED
+  disabled = DATE_PICKER_DEFAULTS.DISABLED,
 }) => {
   const { state, handlers, disabled: isDisabled } = useDatePicker({
     value,
     onChange,
-    disabled
+    disabled,
   });
 
   return (
@@ -39,4 +40,4 @@ export const DatePicker: React.FC<DatePickerProps> = ({
       {value && <DateDisplay value={value} />}
     </div>
   );
-}; 
+};

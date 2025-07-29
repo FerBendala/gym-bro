@@ -25,7 +25,7 @@ export const getMetricColor = (color: string) => {
     purple: 'text-purple-400 bg-purple-600/20',
     yellow: 'text-yellow-400 bg-yellow-600/20',
     indigo: 'text-indigo-400 bg-indigo-600/20',
-    teal: 'text-teal-400 bg-teal-600/20'
+    teal: 'text-teal-400 bg-teal-600/20',
   };
   return colors[color as keyof typeof colors] || colors.blue;
 };
@@ -50,4 +50,4 @@ export const getTrendColor = (trend: string) => {
     case 'down': return 'text-red-400';
     default: return 'text-gray-400';
   }
-}; 
+};

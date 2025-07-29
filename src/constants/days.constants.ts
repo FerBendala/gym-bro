@@ -11,5 +11,5 @@ export const DAYS: DayOfWeek[] = [
   'jueves',
   'viernes',
   'sábado',
-  'domingo'
-]; 
+  'domingo',
+];

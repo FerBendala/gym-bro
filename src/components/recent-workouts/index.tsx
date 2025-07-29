@@ -1,8 +1,10 @@
-import { THEME_WORKOUTS } from '@/constants/theme';
 import React from 'react';
+
 import { WorkoutEmptyState, WorkoutFooter, WorkoutItem } from './components';
 import { useRecentWorkouts } from './hooks';
 import type { RecentWorkoutsProps } from './types';
+
+import { THEME_WORKOUTS } from '@/constants/theme';
 
 /**
  * Componente para mostrar entrenamientos recientes
@@ -12,12 +14,12 @@ import type { RecentWorkoutsProps } from './types';
 export const RecentWorkouts: React.FC<RecentWorkoutsProps> = ({
   records,
   maxRecords = 10,
-  onDeleteRecord
+  onDeleteRecord,
 }) => {
   const {
     displayRecords,
     hasRecords,
-    recordCount
+    recordCount,
   } = useRecentWorkouts({ records, maxRecords });
 
   if (!hasRecords) {

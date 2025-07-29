@@ -1,11 +1,14 @@
+import React from 'react';
+
+import type { StatCardContentProps } from '../types';
+
+import { StatCardIcon } from './stat-card-icon';
+import { StatCardText } from './stat-card-text';
+
 import { Card, CardContent } from '@/components/card';
 import type { ThemeStatCardSize, ThemeStatCardVariant } from '@/constants/theme';
 import { THEME_STAT_CARD } from '@/constants/theme';
 import { cn } from '@/utils';
-import React from 'react';
-import type { StatCardContentProps } from '../types';
-import { StatCardIcon } from './stat-card-icon';
-import { StatCardText } from './stat-card-text';
 
 export const StatCardContent: React.FC<StatCardContentProps> = ({
   title,
@@ -13,7 +16,7 @@ export const StatCardContent: React.FC<StatCardContentProps> = ({
   icon,
   variant,
   size,
-  className
+  className,
 }) => {
   const { padding } = getStatCardStyles(variant, size);
 
@@ -41,4 +44,4 @@ export const StatCardContent: React.FC<StatCardContentProps> = ({
 const getStatCardStyles = (variant: ThemeStatCardVariant, size: ThemeStatCardSize) => {
   const padding = THEME_STAT_CARD.padding[size];
   return { padding };
-}; 
+};

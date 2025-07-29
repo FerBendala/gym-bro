@@ -18,4 +18,4 @@ export interface DataStats {
 
 export interface DataExportProps {
   className?: string;
-} 
+}

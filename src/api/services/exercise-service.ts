@@ -1,8 +1,9 @@
+import { addDoc, collection, deleteDoc, deleteField, doc, FieldValue, getDocs, updateDoc } from 'firebase/firestore';
+
 import { db } from '@/api/firebase';
 import { handleFirebaseError } from '@/api/services/error-handler';
 import type { Exercise } from '@/interfaces';
 import { logger } from '@/utils';
-import { addDoc, collection, deleteDoc, deleteField, doc, FieldValue, getDocs, updateDoc } from 'firebase/firestore';
 
 /**
  * Tipo para objetos que pueden tener campos undefined/null/empty
@@ -104,4 +105,4 @@ export class ExerciseService {
 export const createExercise = ExerciseService.create;
 export const getExercises = ExerciseService.getAll;
 export const updateExercise = ExerciseService.update;
-export const deleteExercise = ExerciseService.delete; 
+export const deleteExercise = ExerciseService.delete;

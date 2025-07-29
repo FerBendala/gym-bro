@@ -17,4 +17,4 @@ export interface InputClasses {
   label: string;
   error: string;
   helper: string;
-} 
+}

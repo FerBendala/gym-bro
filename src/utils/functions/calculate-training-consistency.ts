@@ -1,6 +1,7 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { calculateRegularityScore } from './calculate-regularity-score';
 import { getOptimalFrequency } from './get-optimal-frequency';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula la consistencia de entrenamiento para una categoría
@@ -28,6 +29,6 @@ export const calculateTrainingConsistency = (categoryRecords: WorkoutRecord[], a
   return {
     frequencyScore: Math.round(frequencyScore),
     regularityScore: Math.round(regularityScore),
-    overallScore
+    overallScore,
   };
-}; 
+};

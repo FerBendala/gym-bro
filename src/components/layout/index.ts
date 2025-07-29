@@ -11,6 +11,5 @@ export type {
   ModernNavItem, NavigationConfig,
   NavigationItem,
   NavigationType, PageProps,
-  SectionProps
+  SectionProps,
 } from './types';
-

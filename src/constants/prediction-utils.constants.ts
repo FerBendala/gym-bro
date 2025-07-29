@@ -11,7 +11,7 @@ export const ONE_RM_CONSTANTS = {
   /** Factor Brzycki B: 0.0278 */
   BRZYCKI_B: 0.0278,
   /** Máximo número de repeticiones para cálculo confiable de 1RM */
-  MAX_REPS_FOR_1RM: 20
+  MAX_REPS_FOR_1RM: 20,
 } as const;
 
 /** Constantes temporales */
@@ -25,7 +25,7 @@ export const TIME_CONSTANTS = {
   /** Días mínimos para análisis temporal */
   MIN_DAYS_FOR_ANALYSIS: 14,
   /** Entrenamientos mínimos para predicciones confiables */
-  MIN_WORKOUTS_FOR_PREDICTIONS: 6
+  MIN_WORKOUTS_FOR_PREDICTIONS: 6,
 } as const;
 
 /** Constantes para validación de progreso */
@@ -39,7 +39,7 @@ export const PROGRESS_CONSTANTS = {
   /** Máximo cambio de volumen semanal en kg */
   MAX_WEEKLY_VOLUME_CHANGE: 100,
   /** Porcentaje máximo de incremento de peso en 2 semanas (seguridad) */
-  MAX_SAFE_WEIGHT_INCREASE_2WEEKS: 20
+  MAX_SAFE_WEIGHT_INCREASE_2WEEKS: 20,
 } as const;
 
 /** Constantes para niveles de experiencia */
@@ -59,7 +59,7 @@ export const EXPERIENCE_CONSTANTS = {
   /** Variedad de ejercicios umbral para principiante */
   BEGINNER_EXERCISE_VARIETY: 5,
   /** Variedad de ejercicios umbral para intermedio */
-  INTERMEDIATE_EXERCISE_VARIETY: 12
+  INTERMEDIATE_EXERCISE_VARIETY: 12,
 } as const;
 
 /** Constantes para cálculos de confianza */
@@ -75,5 +75,5 @@ export const CONFIDENCE_CONSTANTS = {
   /** Incremento de confianza por datos adicionales (intermedios) */
   INTERMEDIATE_CONFIDENCE_PER_WORKOUT: 2 as number,
   /** Incremento de confianza por datos semanales */
-  WEEKLY_DATA_CONFIDENCE_BONUS: 5 as number
+  WEEKLY_DATA_CONFIDENCE_BONUS: 5 as number,
 };

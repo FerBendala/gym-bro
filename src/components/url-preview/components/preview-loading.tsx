@@ -1,8 +1,10 @@
-import { THEME_URL_PREVIEW } from '@/constants/theme';
-import { cn } from '@/utils';
 import { Globe } from 'lucide-react';
 import React from 'react';
+
 import type { PreviewLoadingProps } from '../types';
+
+import { THEME_URL_PREVIEW } from '@/constants/theme';
+import { cn } from '@/utils';
 
 export const PreviewLoading: React.FC<PreviewLoadingProps> = ({ className = '' }) => {
   return (
@@ -13,4 +15,4 @@ export const PreviewLoading: React.FC<PreviewLoadingProps> = ({ className = '' }
       </span>
     </div>
   );
-}; 
+};

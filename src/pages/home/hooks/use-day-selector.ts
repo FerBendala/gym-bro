@@ -17,6 +17,6 @@ export const useDaySelector = () => {
   return {
     showDaySelector,
     toggleDaySelector,
-    closeDaySelector
+    closeDaySelector,
   };
-}; 
+};

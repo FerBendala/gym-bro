@@ -1,3 +1,5 @@
+import { logger } from '@/utils';
+
 /**
  * Utilidades para operaciones de API y validación de URLs
  * Funciones puras para manejo de endpoints y validaciones
@@ -30,7 +32,7 @@ export const analyzeURL = (url: string): {
   if (!validateURL(url)) {
     return {
       type: 'unknown',
-      title: 'URL inválida'
+      title: 'URL inválida',
     };
   }
 
@@ -46,7 +48,7 @@ export const analyzeURL = (url: string): {
         title: 'Video de YouTube',
         thumbnail: videoId ? getYouTubeThumbnail(videoId) : undefined,
         embedUrl: videoId ? getYouTubeEmbedUrl(videoId) : undefined,
-        hostname
+        hostname,
       };
     }
 
@@ -56,7 +58,7 @@ export const analyzeURL = (url: string): {
         type: 'image',
         title: 'Imagen',
         thumbnail: url,
-        hostname
+        hostname,
       };
     }
 
@@ -65,7 +67,7 @@ export const analyzeURL = (url: string): {
       return {
         type: 'video',
         title: 'Video',
-        hostname
+        hostname,
       };
     }
 
@@ -75,20 +77,20 @@ export const analyzeURL = (url: string): {
       return {
         type: 'document',
         title: `Documento ${fileInfo.extension.toUpperCase()}`,
-        hostname
+        hostname,
       };
     }
 
     return {
       type: 'unknown',
       title: `Enlace de ${hostname}`,
-      hostname
+      hostname,
     };
 
   } catch {
     return {
       type: 'unknown',
-      title: 'URL inválida'
+      title: 'URL inválida',
     };
   }
 };
@@ -149,13 +151,13 @@ export const extractYouTubeId = (url: string): string | null => {
  */
 export const getYouTubeThumbnail = (
   videoId: string,
-  quality: 'default' | 'medium' | 'high' | 'maxres' = 'maxres'
+  quality: 'default' | 'medium' | 'high' | 'maxres' = 'maxres',
 ): string => {
   const qualities = {
     default: 'default.jpg',
     medium: 'mqdefault.jpg',
     high: 'hqdefault.jpg',
-    maxres: 'maxresdefault.jpg'
+    maxres: 'maxresdefault.jpg',
   };
 
   return `https://img.youtube.com/vi/${videoId}/${qualities[quality]}`;
@@ -171,7 +173,7 @@ export const getYouTubeEmbedUrl = (
     mute?: boolean;
     start?: number;
     end?: number;
-  }
+  },
 ): string => {
   const params = new URLSearchParams();
 
@@ -194,7 +196,7 @@ export const getFileInfo = (url: string): {
 } => {
   try {
     const urlObj = new URL(url);
-    const pathname = urlObj.pathname;
+    const { pathname } = urlObj;
     const fileName = pathname.split('/').pop() || '';
     const extension = fileName.split('.').pop()?.toLowerCase() || '';
 
@@ -204,13 +206,13 @@ export const getFileInfo = (url: string): {
     return {
       extension,
       fileName,
-      isMedia
+      isMedia,
     };
   } catch {
     return {
       extension: '',
       fileName: '',
-      isMedia: false
+      isMedia: false,
     };
   }
 };
@@ -220,14 +222,14 @@ export const getFileInfo = (url: string): {
  */
 export const openURLSafely = (url: string): void => {
   if (!validateURL(url)) {
-    console.error('URL inválida:', url);
+    logger.error('URL inválida:', url);
     return;
   }
 
   try {
     window.open(url, '_blank', 'noopener,noreferrer');
   } catch (error) {
-    console.error('Error al abrir URL:', error);
+    logger.error('Error al abrir URL:', error as Error);
   }
 };
 
@@ -236,7 +238,7 @@ export const openURLSafely = (url: string): void => {
  */
 export const showSuccessToast = (
   showNotification: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
-  message: string
+  message: string,
 ) => {
   showNotification(message, 'success');
 };
@@ -246,7 +248,7 @@ export const showSuccessToast = (
  */
 export const showErrorToast = (
   showNotification: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
-  message: string
+  message: string,
 ) => {
   showNotification(message, 'error');
 };
@@ -256,7 +258,7 @@ export const showErrorToast = (
  */
 export const showWarningToast = (
   showNotification: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
-  message: string
+  message: string,
 ) => {
   showNotification(message, 'warning');
 };
@@ -266,7 +268,7 @@ export const showWarningToast = (
  */
 export const showInfoToast = (
   showNotification: (message: string, type: 'success' | 'error' | 'warning' | 'info') => void,
-  message: string
+  message: string,
 ) => {
   showNotification(message, 'info');
-}; 
+};

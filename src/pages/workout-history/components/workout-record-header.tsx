@@ -1,8 +1,10 @@
-import { getCategoryColor, getCategoryIcon } from '@/utils';
 import { Calendar, Edit, Trash2 } from 'lucide-react';
 import React from 'react';
+
 import type { WorkoutRecordWithExercise } from '../types';
 import { formatDateForDisplay } from '../utils';
+
+import { getCategoryColor, getCategoryIcon } from '@/utils';
 
 interface WorkoutRecordHeaderProps {
   record: WorkoutRecordWithExercise;
@@ -13,7 +15,7 @@ interface WorkoutRecordHeaderProps {
 export const WorkoutRecordHeader: React.FC<WorkoutRecordHeaderProps> = ({
   record,
   onEdit,
-  onDelete
+  onDelete,
 }) => {
   const primaryCategory = record.exercise?.categories?.[0] || 'Pecho';
   const Icon = getCategoryIcon(primaryCategory);
@@ -82,4 +84,4 @@ export const WorkoutRecordHeader: React.FC<WorkoutRecordHeaderProps> = ({
       </div>
     </div>
   );
-}; 
+};

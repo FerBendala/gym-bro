@@ -1,8 +1,9 @@
+import React from 'react';
+
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { COLOR_VARIANTS, COMPONENT_SIZES, THEME_RESPONSIVE } from '@/constants/theme';
 import type { UISize, UIVariant } from '@/interfaces';
 import { cn } from '@/utils';
-import React from 'react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: UIVariant;
@@ -33,7 +34,7 @@ export const Button: React.FC<ButtonProps> = ({
     // Touch targets responsive
     size === 'sm' ? THEME_RESPONSIVE.touch.minTarget : COMPONENT_SIZES[size],
     fullWidth && 'w-full',
-    isDisabled && 'opacity-50 cursor-not-allowed'
+    isDisabled && 'opacity-50 cursor-not-allowed',
   );
 
   return (
@@ -42,7 +43,7 @@ export const Button: React.FC<ButtonProps> = ({
         baseClasses,
         COLOR_VARIANTS[variant],
         size !== 'sm' && COMPONENT_SIZES[size],
-        className
+        className,
       )}
       disabled={isDisabled}
       {...props}
@@ -93,7 +94,7 @@ export const FloatingButton: React.FC<Omit<ButtonProps, 'children'> & { icon: Re
     className={cn(
       'fixed bottom-20 right-4 w-14 h-14 rounded-full shadow-2xl z-30',
       'hover:scale-110 active:scale-95',
-      className
+      className,
     )}
     {...props}
   >

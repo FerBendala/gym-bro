@@ -5,4 +5,3 @@
 
 export { ExerciseList } from './exercise-list';
 export type { ExerciseListProps } from './types';
-

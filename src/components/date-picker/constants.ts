@@ -2,7 +2,7 @@ export const DATE_PICKER_DEFAULTS = {
   LABEL: 'Fecha',
   PLACEHOLDER: 'Seleccionar fecha',
   CLASS_NAME: '',
-  DISABLED: false
+  DISABLED: false,
 } as const;
 
 export const DATE_FORMATS = {
@@ -13,7 +13,7 @@ export const DATE_FORMATS = {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
-      day: 'numeric'
-    }
-  }
-} as const; 
+      day: 'numeric',
+    },
+  },
+} as const;

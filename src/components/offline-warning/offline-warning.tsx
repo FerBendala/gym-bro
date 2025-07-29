@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { WarningContent } from './components';
 import { useOfflineWarning } from './hooks';
 import type { OfflineWarningProps } from './types';
@@ -19,4 +20,4 @@ export const OfflineWarning: React.FC<OfflineWarningProps> = (props) => {
       />
     </div>
   );
-}; 
+};

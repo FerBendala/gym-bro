@@ -36,13 +36,13 @@ export interface StrengthProgressAnalysis {
     frequencyAdjustment: number;
     periodizationTip: string;
   };
-  repRangeAnalysis: Array<{
+  repRangeAnalysis: {
     range: string;
     volume: number;
     maxWeight: number;
     progressRate: number;
     effectiveness: number;
-  }>;
+  }[];
   qualityMetrics: {
     formConsistency: number;
     loadProgression: number;
@@ -53,4 +53,4 @@ export interface StrengthProgressAnalysis {
 
 export type PhaseType = 'elite' | 'advanced' | 'intermediate' | 'novice';
 export type RateType = 'exceptional' | 'fast' | 'moderate' | 'slow';
-export type ZoneType = 'deload' | 'peaking' | 'intensity' | 'volume'; 
+export type ZoneType = 'deload' | 'peaking' | 'intensity' | 'volume';

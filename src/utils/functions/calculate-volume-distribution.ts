@@ -1,9 +1,11 @@
-import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
 import { endOfMonth, endOfWeek, startOfMonth, startOfWeek, subMonths, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 import { getCurrentDateFromRecords } from './get-current-date-from-records';
 import { normalizeByWeekday, normalizeVolumeTrend } from './normalize-by-weekday';
 import { calculateVolume } from './volume-calculations';
+
+import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula la distribución de volumen temporal para una categoría
@@ -65,7 +67,7 @@ export const calculateVolumeDistribution = (categoryRecords: WorkoutRecord[], al
     thisWeekVolume,
     lastWeekVolume,
     now,
-    allAssignments
+    allAssignments,
   );
 
   // Calcular tendencia normalizada
@@ -79,6 +81,6 @@ export const calculateVolumeDistribution = (categoryRecords: WorkoutRecord[], al
     // Nuevos valores normalizados
     thisWeekNormalized: Math.round(thisWeekNormalized),
     weekdayFactor,
-    volumeTrend: Math.round(volumeTrend)
+    volumeTrend: Math.round(volumeTrend),
   };
-}; 
+};

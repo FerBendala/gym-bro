@@ -9,7 +9,7 @@ export { getCurrentDay, getInitialState } from './utils';
 
 // Exportar acciones (para testing o uso directo)
 export {
-  createCRUDActions, createDataActions, createFilterActions, createLoadingActions, createUIActions, createUtilityActions
+  createCRUDActions, createDataActions, createFilterActions, createLoadingActions, createUIActions, createUtilityActions,
 } from './actions';
 
 // Exportar configuración de persistencia
@@ -17,5 +17,5 @@ export { persistenceConfig } from './persistence';
 
 // Exportar selectores optimizados
 export {
-  useAdminAssignments, useAdminErrors, useAdminExercises, useAdminFilters, useAdminLoading, useAdminUI
+  useAdminAssignments, useAdminErrors, useAdminExercises, useAdminFilters, useAdminLoading, useAdminUI,
 } from './selectors';

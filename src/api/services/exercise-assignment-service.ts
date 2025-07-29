@@ -1,9 +1,10 @@
+import { addDoc, collection, deleteDoc, doc, getDocs, query, updateDoc, where, writeBatch } from 'firebase/firestore';
+
+import { handleFirebaseError } from './error-handler';
+
 import { db } from '@/api/firebase';
 import type { DayOfWeek, ExerciseAssignment } from '@/interfaces';
 import { logger } from '@/utils';
-import { addDoc, collection, deleteDoc, doc, getDocs, query, updateDoc, where, writeBatch } from 'firebase/firestore';
-import { handleFirebaseError } from './error-handler';
-
 
 /**
  * Servicio para operaciones CRUD de asignaciones de ejercicios
@@ -42,7 +43,7 @@ export class ExerciseAssignmentService {
 
       const q = query(
         collection(db, ExerciseAssignmentService.COLLECTION),
-        where('dayOfWeek', '==', dayOfWeek)
+        where('dayOfWeek', '==', dayOfWeek),
       );
       const querySnapshot = await getDocs(q);
       const assignments: ExerciseAssignment[] = [];
@@ -50,7 +51,7 @@ export class ExerciseAssignmentService {
       querySnapshot.forEach((doc) => {
         assignments.push({
           id: doc.id,
-          ...doc.data()
+          ...doc.data(),
         } as ExerciseAssignment);
       });
 
@@ -136,4 +137,4 @@ export const getAssignmentsByDay = ExerciseAssignmentService.getByDay;
 export const getAllAssignments = ExerciseAssignmentService.getAll;
 export const updateExerciseAssignment = ExerciseAssignmentService.update;
 export const deleteExerciseAssignment = ExerciseAssignmentService.delete;
-export const updateAssignmentsOrder = ExerciseAssignmentService.updateOrder; 
+export const updateAssignmentsOrder = ExerciseAssignmentService.updateOrder;

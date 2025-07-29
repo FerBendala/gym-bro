@@ -18,7 +18,7 @@ interface ChartLegendProps {
 export const ChartLegend: React.FC<ChartLegendProps> = ({
   items,
   className = '',
-  maxLabelLength = 32
+  maxLabelLength = 32,
 }) => {
   if (items.length === 0) {
     return null;
@@ -48,4 +48,4 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
       ))}
     </div>
   );
-}; 
+};

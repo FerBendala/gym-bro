@@ -50,7 +50,7 @@ class Logger {
         [LogLevel.DEBUG]: '🐛',
         [LogLevel.INFO]: 'ℹ️',
         [LogLevel.WARN]: '⚠️',
-        [LogLevel.ERROR]: '❌'
+        [LogLevel.ERROR]: '❌',
       };
 
       console.group(`${icon[level]} ${formattedMessage}`);

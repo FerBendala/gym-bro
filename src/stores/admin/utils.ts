@@ -1,5 +1,6 @@
-import type { DayOfWeek } from '@/interfaces';
 import type { AdminState } from './types';
+
+import type { DayOfWeek } from '@/interfaces';
 
 // Función para obtener el día actual
 export const getCurrentDay = (): DayOfWeek => {
@@ -11,7 +12,7 @@ export const getCurrentDay = (): DayOfWeek => {
     'jueves': 'jueves',
     'viernes': 'viernes',
     'sábado': 'sábado',
-    'domingo': 'domingo'
+    'domingo': 'domingo',
   };
   return dayMap[today] || 'lunes';
 };
@@ -52,4 +53,4 @@ export const getInitialState = (): AdminState => {
       searchTerm: '',
     },
   };
-}; 
+};

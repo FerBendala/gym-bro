@@ -1,11 +1,14 @@
+import React, { useMemo, useState } from 'react';
+
+import type { ExerciseCategory } from '../types';
+import { filterExercisesByCategory, getCategoriesWithCount } from '../utils';
+
+import { ExerciseCategoryTabs } from './exercise-category-tabs';
+import { ExerciseItem } from './exercise-item';
+
 import { Card, CardContent, CardHeader } from '@/components/card';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
-import React, { useMemo, useState } from 'react';
-import type { ExerciseCategory } from '../types';
-import { filterExercisesByCategory, getCategoriesWithCount } from '../utils';
-import { ExerciseCategoryTabs } from './exercise-category-tabs';
-import { ExerciseItem } from './exercise-item';
 
 /**
  * Lista de ejercicios existentes organizados por tabs de categoría
@@ -85,4 +88,4 @@ export const ExerciseList: React.FC = () => {
       </CardContent>
     </Card>
   );
-}; 
+};

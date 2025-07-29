@@ -1,8 +1,10 @@
-import { Card, CardContent, CardHeader } from '@/components/card';
-import { InfoTooltip } from '@/components/tooltip';
 import { Award } from 'lucide-react';
+
 import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
 import type { StrengthProgressAnalysis } from '../types';
+
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
 
 interface QualityMetricsProps {
   analysis: StrengthProgressAnalysis;
@@ -79,4 +81,4 @@ export const QualityMetrics: React.FC<QualityMetricsProps> = ({ analysis }) => {
       </CardContent>
     </Card>
   );
-}; 
+};

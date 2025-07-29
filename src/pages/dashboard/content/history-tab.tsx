@@ -1,13 +1,15 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { Activity } from 'lucide-react';
 import React from 'react';
+
 import {
   HistoryEvolutionChart,
   HistoryMetrics,
-  HistoryWeeklyDetails
+  HistoryWeeklyDetails,
 } from '../components';
 import { useHistoryData } from '../hooks/use-history-data';
 import { EmptyState } from '../shared/empty-state';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Props para el componente HistoryTab
@@ -41,4 +43,4 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
       <HistoryWeeklyDetails historyData={historyData} />
     </div>
   );
-}; 
+};

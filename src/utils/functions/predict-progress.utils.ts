@@ -1,10 +1,12 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 import { calculateBasicMetrics } from './calculate-basic-metrics';
 import { isValidRecord } from './is-valid-record.utils';
 import { clamp, roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Interfaz para predicción de progreso
@@ -27,7 +29,7 @@ export interface ProgressPrediction {
  * Constantes de tiempo
  */
 const TIME_CONSTANTS = {
-  MS_PER_DAY: 24 * 60 * 60 * 1000
+  MS_PER_DAY: 24 * 60 * 60 * 1000,
 };
 
 /**
@@ -48,7 +50,7 @@ const validateDataSufficiency = (records: WorkoutRecord[]): {
       hasTimeData: false,
       hasVolumeData: false,
       daysBetween: 0,
-      experienceLevel: 'beginner'
+      experienceLevel: 'beginner',
     };
   }
 
@@ -61,7 +63,7 @@ const validateDataSufficiency = (records: WorkoutRecord[]): {
       hasTimeData: false,
       hasVolumeData: false,
       daysBetween: 0,
-      experienceLevel: 'beginner'
+      experienceLevel: 'beginner',
     };
   }
 
@@ -89,7 +91,7 @@ const validateDataSufficiency = (records: WorkoutRecord[]): {
     hasTimeData,
     hasVolumeData,
     daysBetween,
-    experienceLevel
+    experienceLevel,
   };
 };
 
@@ -120,7 +122,7 @@ const calculateTrends = (validRecords: WorkoutRecord[]): { volumeTrend: number; 
     return {
       volumeTrend: 0,
       strengthTrend: 0,
-      weeklyDataLength: 0
+      weeklyDataLength: 0,
     };
   }
 
@@ -133,7 +135,7 @@ const calculateTrends = (validRecords: WorkoutRecord[]): { volumeTrend: number; 
   return {
     volumeTrend,
     strengthTrend,
-    weeklyDataLength
+    weeklyDataLength,
   };
 };
 
@@ -143,7 +145,7 @@ const calculateTrends = (validRecords: WorkoutRecord[]): { volumeTrend: number; 
 const determineTrendAnalysis = (
   validRecords: WorkoutRecord[],
   strengthTrend: number,
-  volumeTrend: number
+  volumeTrend: number,
 ): 'mejorando' | 'estable' | 'empeorando' | 'insuficiente' => {
   if (validRecords.length < 7) return 'insuficiente';
 
@@ -167,7 +169,7 @@ const determineTrendAnalysis = (
 const calculateConfidenceLevel = (
   experienceLevel: 'beginner' | 'intermediate' | 'advanced',
   validRecords: WorkoutRecord[],
-  weeklyDataLength: number
+  weeklyDataLength: number,
 ): number => {
   let baseConfidence = 0.5;
 
@@ -219,7 +221,7 @@ const calculateNextWeekPredictions = (
 
   return {
     nextWeekWeight,
-    nextWeekVolume
+    nextWeekVolume,
   };
 };
 
@@ -229,7 +231,7 @@ const calculateNextWeekPredictions = (
 const calculatePRPrediction = (
   current1RMMax: number,
   strengthTrend: number,
-  confidenceLevel: number
+  confidenceLevel: number,
 ): { weight: number; confidence: number; timeToNextPR: number } => {
   // Predicción conservadora de PR
   const predictedWeight = roundToDecimals(current1RMMax * (1 + strengthTrend / 100));
@@ -239,7 +241,7 @@ const calculatePRPrediction = (
   return {
     weight: predictedWeight,
     confidence: roundToDecimals(confidence),
-    timeToNextPR: roundToDecimals(timeToNextPR)
+    timeToNextPR: roundToDecimals(timeToNextPR),
   };
 };
 
@@ -250,7 +252,7 @@ const calculatePlateauRisk = (
   experienceLevel: 'beginner' | 'intermediate' | 'advanced',
   validRecords: WorkoutRecord[],
   overallProgress: number,
-  strengthTrend: number
+  strengthTrend: number,
 ): number => {
   let risk = 0;
 
@@ -292,7 +294,7 @@ const calculatePlateauRisk = (
 const generateRecommendations = (
   trendAnalysis: 'mejorando' | 'estable' | 'empeorando' | 'insuficiente',
   weeklyDataLength: number,
-  plateauRisk: number
+  plateauRisk: number,
 ): string[] => {
   const recommendations: string[] = [];
 
@@ -345,8 +347,8 @@ const validateAndCorrectPredictions = (
     nextWeekWeight: clamp(prediction.nextWeekWeight, 0, maxReasonableWeight),
     predictedPR: {
       weight: clamp(prediction.predictedPR.weight, basicMetrics.current1RMMax, basicMetrics.current1RMMax * 1.3),
-      confidence: clamp(prediction.predictedPR.confidence, 0.3, 0.9)
-    }
+      confidence: clamp(prediction.predictedPR.confidence, 0.3, 0.9),
+    },
   };
 };
 
@@ -355,7 +357,7 @@ const validateAndCorrectPredictions = (
  * Refactorizado para usar función centralizada
  */
 const groupRecordsByWeekForAnalysis = (records: WorkoutRecord[]): { volume: number; weight: number; date: Date }[] => {
-  const weeklyData: { [key: string]: { volume: number; weight: number; count: number; date: Date } } = {};
+  const weeklyData: Record<string, { volume: number; weight: number; count: number; date: Date }> = {};
 
   records.forEach(record => {
     const date = new Date(record.date);
@@ -375,7 +377,7 @@ const groupRecordsByWeekForAnalysis = (records: WorkoutRecord[]): { volume: numb
   return Object.values(weeklyData).map(week => ({
     volume: week.volume,
     weight: week.weight / week.count,
-    date: week.date
+    date: week.date,
   }));
 };
 
@@ -414,7 +416,7 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
       confidenceLevel: 0,
       volumeTrend: 0,
       strengthTrend: 0,
-      recommendations: ['Datos insuficientes para predicción']
+      recommendations: ['Datos insuficientes para predicción'],
     };
   }
 
@@ -434,7 +436,7 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
     monthlyGrowthRate: roundToDecimals(strengthTrend * 4), // Estimación mensual
     predictedPR: {
       weight: roundToDecimals(predictedPR.weight),
-      confidence: roundToDecimals(predictedPR.confidence)
+      confidence: roundToDecimals(predictedPR.confidence),
     },
     plateauRisk: roundToDecimals(plateauRisk),
     trendAnalysis,
@@ -442,8 +444,8 @@ export const predictProgress = (records: WorkoutRecord[]): ProgressPrediction =>
     confidenceLevel: roundToDecimals(confidenceLevel),
     volumeTrend: roundToDecimals(volumeTrend),
     strengthTrend: roundToDecimals(strengthTrend),
-    recommendations
+    recommendations,
   };
 
   return validateAndCorrectPredictions(prediction, basicMetrics);
-}; 
+};

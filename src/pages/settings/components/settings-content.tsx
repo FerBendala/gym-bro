@@ -1,11 +1,14 @@
+import { Bell, Info, User } from 'lucide-react';
+import React from 'react';
+
+import { SettingsSection } from '../types';
+
+import { ComingSoonCard } from './coming-soon-card';
+import { SectionHeader } from './section-header';
+
 import { DataExport } from '@/components/data-export';
 import { AdminPanel } from '@/pages/admin-panel';
 import { VolumeSettings } from '@/pages/volume-settings';
-import { Bell, Info, User } from 'lucide-react';
-import React from 'react';
-import { SettingsSection } from '../types';
-import { ComingSoonCard } from './coming-soon-card';
-import { SectionHeader } from './section-header';
 
 interface SettingsContentProps {
   activeSection: SettingsSection;
@@ -72,4 +75,4 @@ export const SettingsContent: React.FC<SettingsContentProps> = ({ activeSection,
     default:
       return null;
   }
-}; 
+};

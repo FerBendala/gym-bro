@@ -1,4 +1,3 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { calculateDayMetrics } from './day-metrics';
 import { findBestPerformancePeriod } from './performance-periods';
 import { calculateTemporalEvolution } from './temporal-evolution';
@@ -6,6 +5,8 @@ import { calculateTemporalTrends } from './temporal-trends';
 import type { DayMetrics, TrendsAnalysis } from './trends-interfaces';
 import { calculateVolumeTrendByDay } from './volume-trends';
 import { analyzeWorkoutHabits } from './workout-habits';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula análisis completo de tendencias
@@ -18,7 +19,7 @@ export const calculateTrendsAnalysis = (records: WorkoutRecord[]): TrendsAnalysi
     temporalEvolution: calculateTemporalEvolution(records),
     workoutHabits: analyzeWorkoutHabits(records),
     volumeTrendByDay: calculateVolumeTrendByDay(records),
-    bestPerformancePeriod: findBestPerformancePeriod(records)
+    bestPerformancePeriod: findBestPerformancePeriod(records),
   };
 };
 
@@ -64,10 +65,10 @@ export const getDayMetricsOrderedByWeek = (records: WorkoutRecord[]): DayMetrics
         topExercise: 'N/A',
         efficiency: 0,
         intensity: 0,
-        recommendations: ['Considera añadir entrenamientos en este día']
+        recommendations: ['Considera añadir entrenamientos en este día'],
       });
     }
   });
 
   return orderedMetrics;
-}; 
+};

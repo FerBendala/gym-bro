@@ -1,7 +1,8 @@
-import { formatNumberToString } from '@/utils';
 import type { ApexOptions } from 'apexcharts';
 import React from 'react';
 import Chart from 'react-apexcharts';
+
+import { formatNumberToString } from '@/utils';
 
 interface BalanceRadarChartProps {
   balanceScore: number;
@@ -18,7 +19,7 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
   intensity,
   frequency,
   progress,
-  balanceLevel
+  balanceLevel,
 }) => {
   const getRadarColor = (): string => {
     if (balanceLevel === 'excellent') return '#10b981'; // green
@@ -32,7 +33,7 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
       type: 'radar',
       height: 350,
       background: 'transparent',
-      toolbar: { show: false }
+      toolbar: { show: false },
     },
     plotOptions: {
       radar: {
@@ -40,25 +41,25 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
         polygons: {
           strokeColors: '#374151',
           fill: {
-            colors: ['transparent']
-          }
-        }
-      }
+            colors: ['transparent'],
+          },
+        },
+      },
     },
     colors: [getRadarColor()],
     fill: {
       opacity: 0.3,
-      colors: [getRadarColor()]
+      colors: [getRadarColor()],
     },
     stroke: {
       width: 3,
-      colors: [getRadarColor()]
+      colors: [getRadarColor()],
     },
     markers: {
       size: 6,
       colors: ['#ffffff'],
       strokeColors: getRadarColor(),
-      strokeWidth: 2
+      strokeWidth: 2,
     },
     xaxis: {
       categories: [
@@ -66,22 +67,22 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
         'Consistencia',
         'Intensidad',
         'Frecuencia',
-        'Progreso'
+        'Progreso',
       ],
       labels: {
         style: {
           colors: '#9ca3af',
-          fontSize: '12px'
-        }
-      }
+          fontSize: '12px',
+        },
+      },
     },
     yaxis: {
       show: false,
       min: 0,
-      max: 100
+      max: 100,
     },
     theme: {
-      mode: 'dark'
+      mode: 'dark',
     },
     tooltip: {
       theme: 'dark',
@@ -104,12 +105,12 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
             default:
               return `${formatNumberToString(val, 1)}%`;
           }
-        }
-      }
+        },
+      },
     },
     legend: {
-      show: false
-    }
+      show: false,
+    },
   };
 
   const series = [{
@@ -119,8 +120,8 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
       consistency,
       intensity,
       frequency,
-      progress
-    ]
+      progress,
+    ],
   }];
 
   return (
@@ -128,4 +129,4 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
       <Chart options={options} series={series} type="radar" height="100%" />
     </div>
   );
-}; 
+};

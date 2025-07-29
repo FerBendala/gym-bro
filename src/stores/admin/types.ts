@@ -1,5 +1,6 @@
-import type { DayOfWeek, Exercise, ExerciseAssignment } from '@/interfaces';
 import type { AdminPanelState } from '../types';
+
+import type { DayOfWeek, Exercise, ExerciseAssignment } from '@/interfaces';
 
 // Tipos para el estado del admin
 export interface AdminState {
@@ -68,4 +69,4 @@ export interface AdminActions {
 }
 
 // Store completo
-export type AdminStore = AdminState & AdminActions; 
+export type AdminStore = AdminState & AdminActions;

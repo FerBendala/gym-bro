@@ -1,8 +1,10 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
+
 import { calculateVolume } from './volume-calculations';
 import { getThisWeekRecords } from './week-records.utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Interfaz para densidad de entrenamiento
@@ -26,7 +28,7 @@ export const calculateTrainingDensity = (records: WorkoutRecord[]): TrainingDens
     {
       name: 'Esta semana',
       getRecords: () => getThisWeekRecords(records),
-      weeks: 1
+      weeks: 1,
     },
     {
       name: 'Últimas 2 semanas',
@@ -38,7 +40,7 @@ export const calculateTrainingDensity = (records: WorkoutRecord[]): TrainingDens
           return recordDate >= twoWeeksStart && recordDate <= twoWeeksEnd;
         });
       },
-      weeks: 2
+      weeks: 2,
     },
     {
       name: 'Último mes',
@@ -50,7 +52,7 @@ export const calculateTrainingDensity = (records: WorkoutRecord[]): TrainingDens
           return recordDate >= monthStart && recordDate <= monthEnd;
         });
       },
-      weeks: 4
+      weeks: 4,
     },
     {
       name: 'Últimos 2 meses',
@@ -62,8 +64,8 @@ export const calculateTrainingDensity = (records: WorkoutRecord[]): TrainingDens
           return recordDate >= twoMonthsStart && recordDate <= twoMonthsEnd;
         });
       },
-      weeks: 8
-    }
+      weeks: 8,
+    },
   ];
 
   const densityData: TrainingDensity[] = [];
@@ -94,10 +96,10 @@ export const calculateTrainingDensity = (records: WorkoutRecord[]): TrainingDens
         workoutsPerWeek: Math.round(workoutsPerWeek * 10) / 10,
         volumePerWorkout: Math.round(avgVolumePerWorkout),
         densityScore: Math.round(densityScore),
-        intensityLevel
+        intensityLevel,
       });
     }
   });
 
   return densityData;
-}; 
+};

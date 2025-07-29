@@ -1,6 +1,11 @@
+import { Plus, Save, XCircle } from 'lucide-react';
+import React from 'react';
+
+import type { ExerciseFormData } from '../types';
+
 import {
   createExercise,
-  updateExercise
+  updateExercise,
 } from '@/api/services';
 import { Button } from '@/components/button';
 import { Card, CardContent, CardHeader } from '@/components/card';
@@ -13,9 +18,6 @@ import type { Exercise } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
-import { Plus, Save, XCircle } from 'lucide-react';
-import React from 'react';
-import type { ExerciseFormData } from '../types';
 
 interface ExerciseFormProps {
   exercise?: Exercise;
@@ -26,7 +28,7 @@ interface ExerciseFormProps {
 export const ExerciseForm: React.FC<ExerciseFormProps> = ({
   exercise,
   onCancel,
-  onPreviewUrl
+  onPreviewUrl,
 }) => {
   const isOnline = useOnlineStatus();
   const { showNotification } = useNotification();
@@ -54,7 +56,7 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
         name: data.name,
         categories: data.categories,
         description: data.description?.trim() || undefined,
-        url: data.url?.trim() || undefined
+        url: data.url?.trim() || undefined,
       };
 
       if (editingExercise) {
@@ -68,7 +70,7 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
         const exerciseId = await createExercise(exerciseData);
         const newExercise: Exercise = {
           id: exerciseId,
-          ...exerciseData
+          ...exerciseData,
         };
         addExercise(newExercise);
         showNotification(`Ejercicio "${data.name}" creado exitosamente`, 'success');
@@ -92,7 +94,7 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
     watchedCategories,
     isEditing,
     validateURL,
-    setValue
+    setValue,
   } = useExerciseForm({ exercise, onSubmit: handleFormSubmit });
 
   return (
@@ -110,7 +112,7 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
               disabled={!isOnline}
               {...register('name', {
                 required: 'El nombre es requerido',
-                minLength: { value: 2, message: 'Mínimo 2 caracteres' }
+                minLength: { value: 2, message: 'Mínimo 2 caracteres' },
               })}
               error={errors.name?.message}
             />
@@ -123,7 +125,7 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
                       return 'Selecciona al menos una categoría';
                     }
                     return true;
-                  }
+                  },
                 })}
                 value={JSON.stringify(watchedCategories)}
               />
@@ -153,7 +155,7 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
               validate: (value) => {
                 if (!value) return true;
                 return validateURL(value) || 'URL no válida';
-              }
+              },
             })}
             error={errors.url?.message}
           />
@@ -201,4 +203,4 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
       </CardContent>
     </Card>
   );
-}; 
+};

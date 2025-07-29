@@ -1,8 +1,10 @@
-import { THEME_SELECT } from '@/constants/theme';
 import { forwardRef } from 'react';
+
 import { SelectFeedback, SelectGroups, SelectLabel, SelectOptions } from './components';
 import { useSelect } from './hooks';
 import { SelectProps } from './types';
+
+import { THEME_SELECT } from '@/constants/theme';
 
 /**
  * Componente Select usando sistema de tema genérico
@@ -68,4 +70,4 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(({
   );
 });
 
-Select.displayName = 'Select'; 
+Select.displayName = 'Select';

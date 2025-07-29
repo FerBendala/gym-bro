@@ -16,4 +16,4 @@ export const useModernNavigation = () => {
     setActiveTab,
     clearHistory,
   };
-}; 
+};

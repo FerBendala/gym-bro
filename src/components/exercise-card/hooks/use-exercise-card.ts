@@ -1,12 +1,12 @@
-import type { Exercise, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
-import { useEffect, useState } from 'react';
+import { useEffect, useState , useCallback } from 'react';
 import { useForm } from 'react-hook-form';
 
-import { logger } from '@/utils';
-import { useCallback } from 'react';
 import { EXERCISE_CARD_CONSTANTS } from '../constants';
 import type { ExerciseCardProps, UseExerciseCardReturn } from '../types';
 import { exerciseCardUtils } from '../utils';
+
+import type { Exercise, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
+import { logger } from '@/utils';
 
 /**
  * Hook específico para manejar el estado y lógica del ExerciseCard
@@ -16,7 +16,7 @@ import { exerciseCardUtils } from '../utils';
 export const useExerciseCard = (
   exerciseId?: string,
   exerciseObj?: Exercise,
-  workoutRecords?: WorkoutRecord[]
+  workoutRecords?: WorkoutRecord[],
 ): UseExerciseCardReturn & { lastRecord: WorkoutRecord | null, lastWorkoutSeries: WorkoutRecord[], loadingLast: boolean } => {
   const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -28,13 +28,13 @@ export const useExerciseCard = (
   // Formulario para modo simple
   const formMethods = useForm<WorkoutFormData>({
     mode: 'onChange',
-    defaultValues: EXERCISE_CARD_CONSTANTS.DEFAULT_FORM_VALUES
+    defaultValues: EXERCISE_CARD_CONSTANTS.DEFAULT_FORM_VALUES,
   });
 
   // Formulario para modo avanzado
   const advancedFormMethods = useForm<WorkoutFormDataAdvanced>({
     mode: 'onChange',
-    defaultValues: EXERCISE_CARD_CONSTANTS.DEFAULT_ADVANCED_FORM_VALUES
+    defaultValues: EXERCISE_CARD_CONSTANTS.DEFAULT_ADVANCED_FORM_VALUES,
   });
 
   // Función para obtener el último registro usando utilidades
@@ -45,7 +45,7 @@ export const useExerciseCard = (
     const { lastRecord: record, lastWorkoutSeries: series } = exerciseCardUtils.getLastWorkoutData(
       exerciseId,
       workoutRecords,
-      exerciseObj
+      exerciseObj,
     );
 
     setLastRecord(record);
@@ -70,7 +70,7 @@ export const useExerciseCard = (
   const handleSubmit = async (
     assignmentId: string,
     data: WorkoutFormData | WorkoutFormDataAdvanced,
-    onRecord: ExerciseCardProps['onRecord']
+    onRecord: ExerciseCardProps['onRecord'],
   ) => {
     setLoading(true);
     try {
@@ -102,6 +102,6 @@ export const useExerciseCard = (
     advancedFormMethods,
     lastRecord,
     lastWorkoutSeries,
-    loadingLast
+    loadingLast,
   };
-}; 
+};

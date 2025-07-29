@@ -1,6 +1,7 @@
-import { Button } from '@/components/button';
 import { CalendarDays } from 'lucide-react';
 import React from 'react';
+
+import { Button } from '@/components/button';
 
 interface DateActionsProps {
   onTodayClick: () => void;
@@ -13,7 +14,7 @@ export const DateActions: React.FC<DateActionsProps> = ({
   onTodayClick,
   onClearClick,
   hasValue,
-  disabled = false
+  disabled = false,
 }) => {
   return (
     <div className="mt-2 flex gap-2">
@@ -42,4 +43,4 @@ export const DateActions: React.FC<DateActionsProps> = ({
       )}
     </div>
   );
-}; 
+};

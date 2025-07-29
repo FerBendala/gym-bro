@@ -1,6 +1,7 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { groupRecordsByWeek, isSameWeek } from './group-records-by-week';
 import { clamp } from './math-utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula la consistencia específica del balance muscular
@@ -8,7 +9,7 @@ import { clamp } from './math-utils';
  */
 export const calculateBalanceConsistency = (
   categoryRecords: WorkoutRecord[],
-  allRecords: WorkoutRecord[]
+  allRecords: WorkoutRecord[],
 ): number => {
   if (categoryRecords.length === 0 || allRecords.length === 0) return 0;
 
@@ -39,4 +40,4 @@ export const calculateBalanceConsistency = (
   const score = clamp(100 - (stdDev / maxAcceptableStdDev) * 100, 0, 100);
 
   return score;
-}; 
+};

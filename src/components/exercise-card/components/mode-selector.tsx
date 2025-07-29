@@ -10,7 +10,7 @@ interface ModeSelectorProps {
  */
 export const ModeSelector: React.FC<ModeSelectorProps> = ({
   isAdvancedMode,
-  onModeChange
+  onModeChange,
 }) => {
   return (
     <div>
@@ -22,7 +22,7 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
           className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${!isAdvancedMode
             ? 'bg-blue-600 text-white border border-blue-500 shadow-md'
             : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 border border-gray-600/50'
-            }`}
+          }`}
         >
           🏃 Registro Rápido
         </button>
@@ -32,11 +32,11 @@ export const ModeSelector: React.FC<ModeSelectorProps> = ({
           className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 ${isAdvancedMode
             ? 'bg-blue-600 text-white border border-blue-500 shadow-md'
             : 'bg-gray-700/50 text-gray-300 hover:bg-gray-600/50 border border-gray-600/50'
-            }`}
+          }`}
         >
           ⚡ Series Individuales
         </button>
       </div>
     </div>
   );
-}; 
+};

@@ -1,3 +1,6 @@
+import { Edit2, Trash2 } from 'lucide-react';
+import React from 'react';
+
 import { deleteExercise } from '@/api/services';
 import { Button } from '@/components/button';
 import { URLPreview } from '@/components/url-preview';
@@ -5,8 +8,6 @@ import type { Exercise } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
-import { Edit2, Trash2 } from 'lucide-react';
-import React from 'react';
 
 interface ExerciseItemProps {
   exercise: Exercise;
@@ -15,7 +16,7 @@ interface ExerciseItemProps {
 
 export const ExerciseItem: React.FC<ExerciseItemProps> = ({
   exercise,
-  onPreviewUrl
+  onPreviewUrl,
 }) => {
   const isOnline = useOnlineStatus();
   const { showNotification } = useNotification();
@@ -25,7 +26,7 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
     setTab,
     setLoading,
     setError,
-    removeExerciseFromStore
+    removeExerciseFromStore,
   } = useAdminStore();
 
   const handleEditExercise = () => {
@@ -109,4 +110,4 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
       </div>
     </div>
   );
-}; 
+};

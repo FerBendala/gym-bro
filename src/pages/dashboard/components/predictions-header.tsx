@@ -1,6 +1,7 @@
-import { StatCard } from '@/components/stat-card';
 import { AlertTriangle, BarChart, TrendingUp, Trophy } from 'lucide-react';
 import React from 'react';
+
+import { StatCard } from '@/components/stat-card';
 
 export interface PredictionsHeaderProps {
   centralizedMetrics: {
@@ -33,7 +34,7 @@ export interface PredictionsHeaderProps {
 export const PredictionsHeader: React.FC<PredictionsHeaderProps> = ({
   centralizedMetrics,
   predictionMetrics,
-  confidenceInfo
+  confidenceInfo,
 }) => {
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
@@ -75,4 +76,4 @@ export const PredictionsHeader: React.FC<PredictionsHeaderProps> = ({
       />
     </div>
   );
-}; 
+};

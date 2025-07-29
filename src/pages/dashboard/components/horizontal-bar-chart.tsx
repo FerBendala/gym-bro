@@ -1,19 +1,20 @@
-import { formatNumberToString } from '@/utils';
 import React from 'react';
 
+import { formatNumberToString } from '@/utils';
+
 interface HorizontalBarChartProps {
-  data: Array<{
+  data: {
     name: string;
     value: number;
     ideal?: number;
     color?: string;
-  }>;
+  }[];
   onItemClick?: (itemName: string) => void;
 }
 
 export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({
   data,
-  onItemClick
+  onItemClick,
 }) => {
   const maxValue = Math.max(...data.map(item => Math.max(item.value, item.ideal || 0))) * 1.1;
 
@@ -50,7 +51,7 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({
                   className="absolute h-full bg-white/10 border-x border-white/20"
                   style={{
                     left: `${Math.max(0, (item.ideal - 2) / maxValue * 100)}%`,
-                    width: `${4 / maxValue * 100}%`
+                    width: `${4 / maxValue * 100}%`,
                   }}
                 />
               )}
@@ -60,7 +61,7 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({
                 className="h-full transition-all duration-1000 ease-out"
                 style={{
                   width: `${Math.min(100, (item.value / maxValue) * 100)}%`,
-                  backgroundColor: item.color || '#3B82F6'
+                  backgroundColor: item.color || '#3B82F6',
                 }}
               />
 
@@ -77,4 +78,4 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({
       ))}
     </div>
   );
-}; 
+};

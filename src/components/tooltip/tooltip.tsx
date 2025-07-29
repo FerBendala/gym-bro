@@ -1,9 +1,11 @@
-import { cn } from '@/utils';
 import React from 'react';
+
 import { TooltipContent, TooltipTrigger } from './components';
 import { TOOLTIP_DEFAULTS } from './constants';
 import { useTooltip } from './hooks';
 import { TooltipProps } from './types';
+
+import { cn } from '@/utils';
 
 /**
  * Componente de tooltip moderno con animaciones suaves
@@ -16,7 +18,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
   trigger = TOOLTIP_DEFAULTS.TRIGGER,
   showIcon = TOOLTIP_DEFAULTS.SHOW_ICON,
   delay = TOOLTIP_DEFAULTS.DELAY,
-  className
+  className,
 }) => {
   const {
     isVisible,
@@ -24,7 +26,7 @@ export const Tooltip: React.FC<TooltipProps> = ({
     triggerRef,
     handleMouseEnter,
     handleMouseLeave,
-    handleClick
+    handleClick,
   } = useTooltip({ position, trigger, delay });
 
   return (
@@ -46,4 +48,4 @@ export const Tooltip: React.FC<TooltipProps> = ({
       />
     </div>
   );
-}; 
+};

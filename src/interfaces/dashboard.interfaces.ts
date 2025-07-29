@@ -219,4 +219,4 @@ export interface PredictionMetrics {
 export interface ConfidenceInfo {
   level: string;
   color: string;
-} 
+}

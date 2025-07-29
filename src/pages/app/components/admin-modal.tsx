@@ -14,4 +14,4 @@ export const AdminModal = ({ show, onClose }: AdminModalProps) => {
       onClose={onClose}
     />
   );
-}; 
+};

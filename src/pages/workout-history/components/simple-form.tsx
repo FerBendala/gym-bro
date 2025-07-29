@@ -1,6 +1,7 @@
+import React from 'react';
+
 import { Input } from '@/components/input';
 import type { EditMode } from '@/pages/workout-history/types';
-import React from 'react';
 
 interface SimpleFormProps {
   editMode: EditMode;
@@ -9,7 +10,7 @@ interface SimpleFormProps {
 
 export const SimpleForm: React.FC<SimpleFormProps> = ({
   editMode,
-  onFieldChange
+  onFieldChange,
 }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -51,4 +52,4 @@ export const SimpleForm: React.FC<SimpleFormProps> = ({
       </div>
     </div>
   );
-}; 
+};

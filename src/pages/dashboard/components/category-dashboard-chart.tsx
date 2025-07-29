@@ -1,7 +1,8 @@
-import { formatNumberToString } from '@/utils';
-import { clamp } from '@/utils/functions/math-utils';
 import { Timer, TrendingDown, TrendingUp, Trophy } from 'lucide-react';
 import React from 'react';
+
+import { formatNumberToString } from '@/utils';
+import { clamp } from '@/utils/functions/math-utils';
 
 interface CategoryDashboardChartProps {
   data: {
@@ -36,7 +37,7 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
       max: Math.max(data.idealVolume * 1.5, data.volume, 100),
       ideal: data.idealVolume,
       unit: '%',
-      color: color
+      color,
     },
     {
       label: 'Intensidad',
@@ -44,7 +45,7 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
       max: 100,
       ideal: intensityIdeal,
       unit: '%',
-      color: '#3B82F6'
+      color: '#3B82F6',
     },
     {
       label: 'Frecuencia',
@@ -52,7 +53,7 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
       max: 100,
       ideal: idealFrequencyPercentage,
       unit: '/sem',
-      color: '#8B5CF6'
+      color: '#8B5CF6',
     },
     {
       label: 'Fuerza',
@@ -60,8 +61,8 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
       max: 100,
       ideal: strengthIdeal,
       unit: '%',
-      color: data.strength > 0 ? '#10B981' : data.strength < 0 ? '#EF4444' : '#6B7280'
-    }
+      color: data.strength > 0 ? '#10B981' : data.strength < 0 ? '#EF4444' : '#6B7280',
+    },
   ];
 
   return (
@@ -75,9 +76,9 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
               <div className="flex items-center space-x-2">
                 <span className="text-white font-bold">
                   {metric.label === 'Frecuencia'
-                    ? formatNumberToString(data.frequency, 1) + '/sem'
+                    ? `${formatNumberToString(data.frequency, 1)  }/sem`
                     : metric.label === 'Fuerza'
-                      ? (data.strength > 0 ? '+' : '') + formatNumberToString(data.strength, 0) + '%'
+                      ? `${(data.strength > 0 ? '+' : '') + formatNumberToString(data.strength, 0)  }%`
                       : formatNumberToString(metric.value, 0) + metric.unit
                   }
                 </span>
@@ -104,7 +105,7 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
                 className="h-full rounded-full transition-all duration-1000 ease-out relative"
                 style={{
                   width: `${Math.min(100, (metric.value / metric.max) * 100)}%`,
-                  backgroundColor: metric.color
+                  backgroundColor: metric.color,
                 }}
               >
                 {/* Brillo sutil */}
@@ -148,4 +149,4 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
       </div>
     </div>
   );
-}; 
+};

@@ -1,15 +1,17 @@
-import { THEME_CALENDAR } from '@/constants/theme';
-import type { CalendarDayData } from '@/utils';
 import React from 'react';
+
 import {
   CalendarGrid,
   CalendarHeader,
   CalendarLegend,
   CalendarStats,
-  CalendarWeekdays
+  CalendarWeekdays,
 } from './components';
 import { useWorkoutCalendar } from './hooks';
 import type { WorkoutCalendarProps } from './types';
+
+import { THEME_CALENDAR } from '@/constants/theme';
+import { logger, type CalendarDayData } from '@/utils';
 
 /**
  * Componente WorkoutCalendar refactorizado con arquitectura modular
@@ -26,12 +28,12 @@ export const WorkoutCalendar: React.FC<WorkoutCalendarProps> = ({ records }) => 
     legendData,
     monthStats,
     goToPreviousMonth,
-    goToNextMonth
+    goToNextMonth,
   } = useWorkoutCalendar(records);
 
   const handleDayClick = (dayData: CalendarDayData) => {
     // Funcionalidad futura: abrir modal con detalles del día
-    console.info('Día seleccionado:', dayData);
+    logger.info('Día seleccionado:', dayData);
   };
 
   return (

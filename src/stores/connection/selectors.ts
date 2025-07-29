@@ -11,6 +11,6 @@ export const useInitializeConnection = () => {
   return {
     initializeConnection,
     cleanupConnection,
-    isInitialized
+    isInitialized,
   };
-}; 
+};

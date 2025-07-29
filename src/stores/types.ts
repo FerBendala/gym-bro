@@ -7,4 +7,4 @@ export interface AdminPanelState {
   selectedDay: DayOfWeek;
   editingExercise: Exercise | null;
   previewUrl: string | null;
-} 
+}

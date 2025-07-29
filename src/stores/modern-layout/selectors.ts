@@ -1,4 +1,5 @@
 import { useCallback } from 'react';
+
 import { useModernLayoutStore } from './store';
 
 // Selectores para navegación - usando selectores individuales para evitar objetos
@@ -89,4 +90,4 @@ export const useConfigState = () => ({
   title: useTitle(),
   subtitle: useSubtitle(),
   showBackButton: useShowBackButton(),
-}); 
+});

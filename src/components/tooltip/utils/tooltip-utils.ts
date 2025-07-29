@@ -6,7 +6,7 @@ import { TooltipPosition } from '../types';
  */
 export const calculateOptimalPosition = (
   triggerElement: HTMLElement | null,
-  preferredPosition: TooltipPosition
+  preferredPosition: TooltipPosition,
 ): TooltipPosition => {
   if (!triggerElement) return preferredPosition;
 
@@ -44,5 +44,5 @@ export const getTooltipStyles = () => ({
   maxWidth: TOOLTIP_DEFAULTS.MAX_WIDTH,
   minWidth: TOOLTIP_DEFAULTS.MIN_WIDTH,
   wordWrap: 'break-word' as const,
-  lineHeight: '1.4'
-}); 
+  lineHeight: '1.4',
+});

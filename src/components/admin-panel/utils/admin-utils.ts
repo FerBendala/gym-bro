@@ -1,6 +1,6 @@
-import type { Exercise } from '@/interfaces';
 import type { ExerciseCategory } from '../types';
 
+import type { Exercise } from '@/interfaces';
 
 /**
  * Obtiene un array de categorías con el conteo de ejercicios cada una
@@ -20,13 +20,13 @@ export const getCategoriesWithCount = (exercises: Exercise[]) => {
   const validExercises = exercises.filter(ex => ex.name && typeof ex.name === 'string');
 
   const categories = [
-    { id: 'all', name: 'Todos', count: validExercises.length }
+    { id: 'all', name: 'Todos', count: validExercises.length },
   ];
 
   // Importar dinámicamente para evitar dependencias circulares
   const EXERCISE_CATEGORIES = [
     'Pecho', 'Espalda', 'Hombros', 'Bíceps', 'Tríceps',
-    'Piernas', 'Abdominales'
+    'Piernas', 'Abdominales',
   ];
 
   EXERCISE_CATEGORIES.forEach(category => {
@@ -39,7 +39,6 @@ export const getCategoriesWithCount = (exercises: Exercise[]) => {
   return categories;
 };
 
-
 /**
  * Filtra los ejercicios por categoría seleccionada
  * Si la categoría seleccionada es 'all', devuelve todos los ejercicios ordenados alfabéticamente
@@ -50,7 +49,7 @@ export const getCategoriesWithCount = (exercises: Exercise[]) => {
  */
 export const filterExercisesByCategory = (
   exercises: Exercise[],
-  selectedCategory: ExerciseCategory
+  selectedCategory: ExerciseCategory,
 ) => {
   // Filtrar ejercicios válidos (con nombre)
   const validExercises = exercises.filter(ex => ex.name && typeof ex.name === 'string');
@@ -63,7 +62,6 @@ export const filterExercisesByCategory = (
     .sort((a, b) => a.name.localeCompare(b.name));
 };
 
-
 /**
  * Formatea un día de la semana para que esté en singular y con mayúscula
  * @param day Día de la semana en singular (lunes, martes, etc.)
@@ -72,7 +70,6 @@ export const filterExercisesByCategory = (
 export const formatDayName = (day: string) => {
   return day.charAt(0).toUpperCase() + day.slice(1);
 };
-
 
 /**
  * Valida si una cadena es una URL válida
@@ -86,4 +83,4 @@ export const validateURL = (url: string): boolean => {
   } catch {
     return false;
   }
-}; 
+};

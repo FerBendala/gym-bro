@@ -1,9 +1,11 @@
+import { ExternalLink, Globe } from 'lucide-react';
+import React from 'react';
+
+import type { PreviewContentProps } from '../types';
+
 import { Button } from '@/components/button';
 import { THEME_URL_PREVIEW } from '@/constants/theme';
 import { openURLSafely } from '@/utils';
-import { ExternalLink, Globe } from 'lucide-react';
-import React from 'react';
-import type { PreviewContentProps } from '../types';
 
 export const PreviewContent: React.FC<PreviewContentProps> = ({ url, previewData }) => {
   if (previewData.type === 'youtube' && previewData.embedUrl) {
@@ -65,4 +67,4 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({ url, previewData
       </Button>
     </div>
   );
-}; 
+};

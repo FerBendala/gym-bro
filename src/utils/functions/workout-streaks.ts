@@ -49,6 +49,6 @@ export const calculateWorkoutStreaks = (records: WorkoutRecord[]): { current: nu
   return {
     current: currentActiveStreak,
     longest: longestStreak,
-    average: averageStreak
+    average: averageStreak,
   };
-}; 
+};

@@ -1,5 +1,6 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { differenceInDays } from 'date-fns';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Utilidades centralizadas para filtrado de registros por fecha
@@ -12,7 +13,7 @@ import { differenceInDays } from 'date-fns';
  */
 export const filterRecordsByDaysFromToday = (
   records: WorkoutRecord[],
-  days: number
+  days: number,
 ): WorkoutRecord[] => {
   const now = new Date();
   return records.filter(r => {
@@ -28,7 +29,7 @@ export const filterRecordsByDaysFromToday = (
 export const filterRecordsByDayRange = (
   records: WorkoutRecord[],
   minDays: number,
-  maxDays: number
+  maxDays: number,
 ): WorkoutRecord[] => {
   const now = new Date();
   return records.filter(r => {
@@ -44,7 +45,7 @@ export const filterRecordsByDayRange = (
 export const filterRecordsByDateRange = (
   records: WorkoutRecord[],
   startDate: Date,
-  endDate?: Date
+  endDate?: Date,
 ): WorkoutRecord[] => {
   const end = endDate || new Date();
   return records.filter(r => {
@@ -59,7 +60,7 @@ export const filterRecordsByDateRange = (
  */
 export const filterRecordsByWeek = (
   records: WorkoutRecord[],
-  targetWeek: Date
+  targetWeek: Date,
 ): WorkoutRecord[] => {
   const startOfWeek = new Date(targetWeek);
   startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay());
@@ -76,7 +77,7 @@ export const filterRecordsByWeek = (
  */
 export const filterRecordsByMonth = (
   records: WorkoutRecord[],
-  targetMonth: Date
+  targetMonth: Date,
 ): WorkoutRecord[] => {
   const startOfMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth(), 1);
   const endOfMonth = new Date(targetMonth.getFullYear(), targetMonth.getMonth() + 1, 0);
@@ -89,14 +90,14 @@ export const filterRecordsByMonth = (
  * Patrón usado +2 veces: records.filter(r => new Date(r.date).getTime() <= midpointTime)
  */
 export const splitRecordsByChronologicalMidpoint = (
-  records: WorkoutRecord[]
+  records: WorkoutRecord[],
 ): { firstHalf: WorkoutRecord[]; secondHalf: WorkoutRecord[] } => {
   if (records.length === 0) {
     return { firstHalf: [], secondHalf: [] };
   }
 
   const sortedRecords = [...records].sort((a, b) =>
-    new Date(a.date).getTime() - new Date(b.date).getTime()
+    new Date(a.date).getTime() - new Date(b.date).getTime(),
   );
 
   const totalTime = new Date(sortedRecords[sortedRecords.length - 1].date).getTime() -
@@ -115,7 +116,7 @@ export const splitRecordsByChronologicalMidpoint = (
  */
 export const filterRecordsByDayOfWeek = (
   records: WorkoutRecord[],
-  dayIndex: number
+  dayIndex: number,
 ): WorkoutRecord[] => {
   return records.filter(r => {
     const day = new Date(r.date).getDay();

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { SelectOptionsProps } from '../types';
 import { buildOptionClasses } from '../utils';
 
@@ -17,4 +18,4 @@ export const SelectOptions: React.FC<SelectOptionsProps> = ({ options }) => {
       ))}
     </>
   );
-}; 
+};

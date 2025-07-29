@@ -1,14 +1,16 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { Activity } from 'lucide-react';
 import React from 'react';
+
 import {
   AdvancedMetrics,
   FatigueAnalysis,
   OptimizationSuggestions,
-  PerformanceIndicators
+  PerformanceIndicators,
 } from '../components';
 import { useAdvancedTab } from '../hooks/use-advanced-tab';
 import { EmptyState } from '../shared/empty-state';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 interface AdvancedTabProps {
   records: WorkoutRecord[];

@@ -1,8 +1,9 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { calculateIntensityScore } from './calculate-intensity-score';
 import { clamp } from './math-utils';
 import { calculateVolume } from './volume-calculations';
 import { getThisWeekRecords } from './week-records.utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Interfaz para métricas de intensidad
@@ -25,7 +26,7 @@ export const analyzeIntensityMetrics = (records: WorkoutRecord[]): IntensityMetr
       volumeIntensity: 0,
       frequencyIntensity: 0,
       overallIntensity: 'Baja',
-      recommendations: ['Sin datos para análisis']
+      recommendations: ['Sin datos para análisis'],
     };
   }
 
@@ -109,6 +110,6 @@ export const analyzeIntensityMetrics = (records: WorkoutRecord[]): IntensityMetr
     volumeIntensity: Math.round(volumeIntensity),
     frequencyIntensity: Math.round(frequencyIntensity),
     overallIntensity,
-    recommendations
+    recommendations,
   };
-}; 
+};

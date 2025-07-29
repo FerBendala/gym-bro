@@ -1,8 +1,9 @@
-import { formatNumberToString } from '@/utils';
-import { clamp } from '@/utils/functions/math-utils';
 import { ApexOptions } from 'apexcharts';
 import React from 'react';
 import Chart from 'react-apexcharts';
+
+import { formatNumberToString } from '@/utils';
+import { clamp } from '@/utils/functions/math-utils';
 
 export interface PredictionTimelineProps {
   currentWeight: number;
@@ -16,7 +17,7 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
   currentWeight,
   nextWeekWeight,
   predictedPR,
-  strengthTrend
+  strengthTrend,
 }) => {
   const generateTimelineData = () => {
     const weeks = [];
@@ -40,14 +41,14 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
 
       weeks.push({
         x: date.getTime(),
-        y: y
+        y,
       });
     }
 
     // Dato actual
     weeks.push({
       x: currentDate.getTime(),
-      y: currentWeight
+      y: currentWeight,
     });
 
     // Predicciones futuras
@@ -55,7 +56,7 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
     nextWeek.setDate(nextWeek.getDate() + 7);
     weeks.push({
       x: nextWeek.getTime(),
-      y: nextWeekWeight
+      y: nextWeekWeight,
     });
 
     // Predicción de PR (estimando en 4-8 semanas)
@@ -63,7 +64,7 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
     prDate.setDate(prDate.getDate() + (6 * 7)); // 6 semanas
     weeks.push({
       x: prDate.getTime(),
-      y: predictedPR
+      y: predictedPR,
     });
 
     return weeks;
@@ -75,11 +76,11 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
       height: 300,
       background: 'transparent',
       toolbar: { show: false },
-      zoom: { enabled: false }
+      zoom: { enabled: false },
     },
     stroke: {
       width: 3,
-      curve: 'smooth'
+      curve: 'smooth',
     },
     colors: ['#3b82f6', '#10b981'],
     fill: {
@@ -91,8 +92,8 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
         type: 'vertical',
         opacityFrom: 0.8,
         opacityTo: 0.1,
-        stops: [0, 100]
-      }
+        stops: [0, 100],
+      },
     },
     markers: {
       size: 6,
@@ -100,50 +101,50 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
       strokeColors: ['#3b82f6', '#10b981'],
       strokeWidth: 2,
       hover: {
-        size: 8
-      }
+        size: 8,
+      },
     },
     xaxis: {
       type: 'datetime',
       labels: {
         style: {
-          colors: '#9ca3af'
+          colors: '#9ca3af',
         },
-        format: 'dd MMM'
+        format: 'dd MMM',
       },
       axisBorder: {
-        color: '#374151'
+        color: '#374151',
       },
       axisTicks: {
-        color: '#374151'
-      }
+        color: '#374151',
+      },
     },
     yaxis: {
       labels: {
         style: {
-          colors: '#9ca3af'
+          colors: '#9ca3af',
         },
-        formatter: (val: number) => `${formatNumberToString(val, 1)}kg`
+        formatter: (val: number) => `${formatNumberToString(val, 1)}kg`,
       },
       title: {
         text: 'Peso (kg)',
         style: {
-          color: '#9ca3af'
-        }
-      }
+          color: '#9ca3af',
+        },
+      },
     },
     grid: {
       borderColor: '#374151',
-      strokeDashArray: 3
+      strokeDashArray: 3,
     },
     theme: {
-      mode: 'dark'
+      mode: 'dark',
     },
     tooltip: {
       theme: 'dark',
       y: {
-        formatter: (val: number) => `${formatNumberToString(val, 1)}kg`
-      }
+        formatter: (val: number) => `${formatNumberToString(val, 1)}kg`,
+      },
     },
     annotations: {
       xaxis: [{
@@ -155,16 +156,16 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
           text: 'Hoy',
           style: {
             color: '#ffffff',
-            background: '#ef4444'
-          }
-        }
-      }]
-    }
+            background: '#ef4444',
+          },
+        },
+      }],
+    },
   };
 
   const series = [{
     name: 'Tendencia y Predicción',
-    data: generateTimelineData()
+    data: generateTimelineData(),
   }];
 
   return (
@@ -172,4 +173,4 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
       <Chart options={options} series={series} type="line" height="100%" />
     </div>
   );
-}; 
+};

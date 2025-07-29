@@ -1,9 +1,10 @@
+import { useMemo } from 'react';
+
 import type { WorkoutRecord } from '@/interfaces';
 import type { CategoryMetrics } from '@/utils';
 import { calculateAdvancedStrengthAnalysis, calculateIntensityScore } from '@/utils';
 import { roundToDecimals } from '@/utils/functions/math-utils';
 import { getMaxEstimated1RM, getMaxWeight, getMinWeight } from '@/utils/functions/workout-utils';
-import { useMemo } from 'react';
 
 export interface StrengthByCategory {
   categoryName: string;
@@ -56,21 +57,21 @@ const calculateSingleCategoryMetrics = (categoryName: string, categoryRecords: W
         thisWeek: 0,
         lastWeek: 0,
         thisMonth: 0,
-        lastMonth: 0
+        lastMonth: 0,
       },
       performanceMetrics: {
         bestSession: {
           date: new Date(),
           volume: 0,
-          maxWeight: 0
+          maxWeight: 0,
         },
         averageSessionVolume: 0,
         volumePerWorkout: 0,
-        sessionsAboveAverage: 0
+        sessionsAboveAverage: 0,
       },
       recommendations: [],
       recentImprovement: false,
-      warnings: []
+      warnings: [],
     };
   }
 
@@ -167,21 +168,21 @@ const calculateSingleCategoryMetrics = (categoryName: string, categoryRecords: W
       thisWeek: 0,
       lastWeek: 0,
       thisMonth: 0,
-      lastMonth: 0
+      lastMonth: 0,
     },
     performanceMetrics: {
       bestSession: {
         date: lastWorkout,
         volume: Math.max(...categoryRecords.map(r => r.weight * r.reps * r.sets)),
-        maxWeight
+        maxWeight,
       },
       averageSessionVolume: Math.round(totalVolume / workouts),
       volumePerWorkout: Math.round(totalVolume / workouts),
-      sessionsAboveAverage: 0
+      sessionsAboveAverage: 0,
     },
     recommendations: [],
     warnings: [],
-    recentImprovement: false
+    recentImprovement: false,
   };
 };
 
@@ -197,7 +198,7 @@ export const useStrengthByCategory = (records: WorkoutRecord[]): StrengthCategor
         worstCategory: null,
         totalStrengthScore: 0,
         balanceScore: 0,
-        focusRecommendations: ['Registra entrenamientos para ver el análisis por categorías']
+        focusRecommendations: ['Registra entrenamientos para ver el análisis por categorías'],
       };
     }
 
@@ -235,7 +236,7 @@ export const useStrengthByCategory = (records: WorkoutRecord[]): StrengthCategor
         strengthAnalysis,
         strengthScore,
         strengthRank: 0, // Se calculará después
-        recommendations
+        recommendations,
       };
     });
 
@@ -266,7 +267,7 @@ export const useStrengthByCategory = (records: WorkoutRecord[]): StrengthCategor
       worstCategory,
       totalStrengthScore: Math.round(totalStrengthScore),
       balanceScore: Math.round(balanceScore),
-      focusRecommendations
+      focusRecommendations,
     };
   }, [records]);
 };
@@ -276,7 +277,7 @@ export const useStrengthByCategory = (records: WorkoutRecord[]): StrengthCategor
  */
 const calculateCategoryStrengthScore = (
   strengthAnalysis: ReturnType<typeof calculateAdvancedStrengthAnalysis>,
-  categoryMetrics: CategoryMetrics
+  categoryMetrics: CategoryMetrics,
 ): number => {
   // Factores de puntuación con pesos específicos
   const factors = {
@@ -295,7 +296,7 @@ const calculateCategoryStrengthScore = (
       strengthAnalysis.qualityMetrics.volumeOptimization) / 3 * 0.15,
 
     // Potencial vs actual (10%)
-    potential: strengthAnalysis.strengthCurve.potential * 0.1
+    potential: strengthAnalysis.strengthCurve.potential * 0.1,
   };
 
   return Math.round(Object.values(factors).reduce((sum, factor) => sum + factor, 0));
@@ -307,7 +308,7 @@ const calculateCategoryStrengthScore = (
 const generateCategoryRecommendations = (
   strengthAnalysis: ReturnType<typeof calculateAdvancedStrengthAnalysis>,
   categoryMetrics: CategoryMetrics,
-  categoryName: string
+  categoryName: string,
 ): string[] => {
   const recommendations: string[] = [];
 
@@ -385,7 +386,7 @@ const calculateBalanceScore = (categories: StrengthByCategory[]): number => {
  */
 const generateFocusRecommendations = (
   categories: StrengthByCategory[],
-  balanceScore: number
+  balanceScore: number,
 ): string[] => {
   const recommendations: string[] = [];
 
@@ -400,7 +401,7 @@ const generateFocusRecommendations = (
 
     if (bestCategory && worstCategory) {
       recommendations.push(
-        `Desarrollo desbalanceado: enfócate más en ${worstCategory.categoryName} vs ${bestCategory.categoryName}`
+        `Desarrollo desbalanceado: enfócate más en ${worstCategory.categoryName} vs ${bestCategory.categoryName}`,
       );
     }
   } else if (balanceScore > 80) {
@@ -411,14 +412,14 @@ const generateFocusRecommendations = (
   const weakCategories = categories.filter(cat => cat.strengthScore < 60);
   if (weakCategories.length > 0) {
     recommendations.push(
-      `Prioriza: ${weakCategories.map(cat => cat.categoryName).join(', ')}`
+      `Prioriza: ${weakCategories.map(cat => cat.categoryName).join(', ')}`,
     );
   }
 
   const strongCategories = categories.filter(cat => cat.strengthScore > 80);
   if (strongCategories.length > 0) {
     recommendations.push(
-      `Mantén el nivel en: ${strongCategories.map(cat => cat.categoryName).join(', ')}`
+      `Mantén el nivel en: ${strongCategories.map(cat => cat.categoryName).join(', ')}`,
     );
   }
 
@@ -426,16 +427,16 @@ const generateFocusRecommendations = (
   const noviceCategories = categories.filter(cat => cat.strengthAnalysis.strengthCurve.phase === 'novice');
   if (noviceCategories.length > 0) {
     recommendations.push(
-      `Progresión lineal recomendada para: ${noviceCategories.map(cat => cat.categoryName).join(', ')}`
+      `Progresión lineal recomendada para: ${noviceCategories.map(cat => cat.categoryName).join(', ')}`,
     );
   }
 
   const advancedCategories = categories.filter(cat => cat.strengthAnalysis.strengthCurve.phase === 'advanced');
   if (advancedCategories.length > 0) {
     recommendations.push(
-      `Periodización avanzada para: ${advancedCategories.map(cat => cat.categoryName).join(', ')}`
+      `Periodización avanzada para: ${advancedCategories.map(cat => cat.categoryName).join(', ')}`,
     );
   }
 
   return recommendations.slice(0, 4); // Limitar a 4 recomendaciones más importantes
-}; 
+};

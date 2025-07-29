@@ -1,21 +1,23 @@
-import { Page } from '@/components/layout';
-import { LoadingSpinner } from '@/components/loading-spinner';
-import { OfflineWarning } from '@/components/offline-warning';
 import React, { useState } from 'react';
+
 import {
   BalanceTab,
   DashboardEmptyState,
-  DashboardTabNavigation
+  DashboardTabNavigation,
 } from './components';
 import { DEFAULT_DASHBOARD_TAB } from './constants';
 import {
   AdvancedTab,
   ExercisesTab,
   HistoryTab,
-  PredictionsTab
+  PredictionsTab,
 } from './content';
 import { useDashboardData } from './hooks';
 import { DashboardTab } from './types';
+
+import { Page } from '@/components/layout';
+import { LoadingSpinner } from '@/components/loading-spinner';
+import { OfflineWarning } from '@/components/offline-warning';
 
 /**
  * Dashboard como página completa sin modal
@@ -83,4 +85,4 @@ export const DashboardPage: React.FC = () => {
       </div>
     </Page>
   );
-}; 
+};

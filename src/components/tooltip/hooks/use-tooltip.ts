@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+
 import { TooltipPosition, TooltipTrigger } from '../types';
 import { calculateOptimalPosition } from '../utils';
 
@@ -69,6 +70,6 @@ export const useTooltip = ({ position, trigger, delay }: UseTooltipProps) => {
     triggerRef,
     handleMouseEnter,
     handleMouseLeave,
-    handleClick
+    handleClick,
   };
-}; 
+};

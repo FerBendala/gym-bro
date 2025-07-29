@@ -16,7 +16,7 @@ export const FactorsChart: React.FC<FactorsChartProps> = ({ factors }) => {
       type: 'bar',
       height: 250,
       background: 'transparent',
-      toolbar: { show: false }
+      toolbar: { show: false },
     },
     plotOptions: {
       bar: {
@@ -24,9 +24,9 @@ export const FactorsChart: React.FC<FactorsChartProps> = ({ factors }) => {
         distributed: true,
         borderRadius: 6,
         dataLabels: {
-          position: 'center'
-        }
-      }
+          position: 'center',
+        },
+      },
     },
     colors: factors.map(factor => {
       switch (factor.status) {
@@ -42,49 +42,49 @@ export const FactorsChart: React.FC<FactorsChartProps> = ({ factors }) => {
       style: {
         colors: ['#ffffff'],
         fontSize: '12px',
-        fontWeight: 600
+        fontWeight: 600,
       },
-      formatter: (val: number) => `${val}%`
+      formatter: (val: number) => `${val}%`,
     },
     xaxis: {
       categories: factors.map(f => f.name),
       labels: {
         style: {
-          colors: '#9ca3af'
-        }
+          colors: '#9ca3af',
+        },
       },
       axisBorder: {
-        color: '#374151'
-      }
+        color: '#374151',
+      },
     },
     yaxis: {
       labels: {
         style: {
-          colors: '#9ca3af'
-        }
-      }
+          colors: '#9ca3af',
+        },
+      },
     },
     grid: {
       borderColor: '#374151',
-      strokeDashArray: 3
+      strokeDashArray: 3,
     },
     theme: {
-      mode: 'dark'
+      mode: 'dark',
     },
     tooltip: {
       theme: 'dark',
       y: {
-        formatter: (val: number) => `${val}%`
-      }
+        formatter: (val: number) => `${val}%`,
+      },
     },
     legend: {
-      show: false
-    }
+      show: false,
+    },
   };
 
   const series = [{
     name: 'Score',
-    data: factors.map(f => typeof f.value === 'number' ? f.value : parseFloat(f.value as string) || 0)
+    data: factors.map(f => typeof f.value === 'number' ? f.value : parseFloat(f.value) || 0),
   }];
 
   return (
@@ -92,4 +92,4 @@ export const FactorsChart: React.FC<FactorsChartProps> = ({ factors }) => {
       <Chart options={options} series={series} type="bar" height="100%" />
     </div>
   );
-}; 
+};

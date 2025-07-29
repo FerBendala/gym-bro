@@ -6,22 +6,22 @@ import type { MuscleBalance } from '@/utils/functions/category-analysis-types';
 export interface MuscleBalanceData extends MuscleBalance {
   // Extendemos la interfaz base con propiedades adicionales específicas del componente
   totalVolume: number; // Agregar esta propiedad para compatibilidad
-  personalRecords: Array<{
+  personalRecords: {
     id: string;
     weight: number;
     reps: number;
     date: Date;
     exerciseId: string;
-  }>;
+  }[];
   balanceHistory: {
     trend: 'improving' | 'stable' | 'declining';
     consistency: number;
     volatility: number;
-    weeklyData: Array<{
+    weeklyData: {
       week: string;
       volume: number;
       percentage: number;
-    }>;
+    }[];
     // Propiedades requeridas por BalanceHistory
     lastWeekVolume: number;
     currentWeekVolume: number;
@@ -33,7 +33,7 @@ export interface MuscleBalanceData extends MuscleBalance {
  * Interface para el análisis de categorías compatible con el dashboard
  */
 export interface CategoryAnalysisData {
-  categoryMetrics: Array<{
+  categoryMetrics: {
     category: string;
     percentage: number;
     totalVolume: number;
@@ -80,7 +80,7 @@ export interface CategoryAnalysisData {
     volumeTrend: number;
     frequency: number;
     intensity: number;
-  }>;
+  }[];
   overallBalance: number;
   recommendations: string[];
 }

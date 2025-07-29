@@ -59,4 +59,4 @@ export interface MetricComparison {
   change: number;
   changePercent: number;
   trend: 'up' | 'down' | 'stable';
-} 
+}

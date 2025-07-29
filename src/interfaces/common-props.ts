@@ -210,7 +210,7 @@ export interface RecordsWithValidationProps extends RecordsProps {
   validation?: {
     validateOnChange?: boolean;
     showValidationErrors?: boolean;
-    customValidators?: Array<(record: WorkoutRecord) => string | null>;
+    customValidators?: ((record: WorkoutRecord) => string | null)[];
   };
 }
 

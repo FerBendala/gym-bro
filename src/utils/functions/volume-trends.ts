@@ -1,8 +1,10 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { getDay } from 'date-fns';
+
 import { clamp } from './math-utils';
 import { calculateVolume } from './volume-calculations';
 import { sortRecordsByDateAscending } from './workout-utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula tendencia de volumen por día de la semana
@@ -104,9 +106,9 @@ export const calculateVolumeTrendByDay = (records: WorkoutRecord[]): { day: stri
 
     trends.push({
       day: dayNames[dayIndex],
-      trend
+      trend,
     });
   }
 
   return trends;
-}; 
+};

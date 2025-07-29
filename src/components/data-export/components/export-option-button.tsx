@@ -1,7 +1,9 @@
+import { Download, Loader2 } from 'lucide-react';
+
+import type { ExportFormat, ExportOption } from '../types';
+
 import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils';
-import { Download, Loader2 } from 'lucide-react';
-import type { ExportFormat, ExportOption } from '../types';
 
 interface ExportOptionButtonProps {
   option: ExportOption;
@@ -16,7 +18,7 @@ export const ExportOptionButton: React.FC<ExportOptionButtonProps> = ({
   isExporting,
   exportingFormat,
   isDisabled,
-  onExport
+  onExport,
 }) => {
   const Icon = option.icon;
   const isCurrentlyExporting = isExporting && exportingFormat === option.format;
@@ -33,7 +35,7 @@ export const ExportOptionButton: React.FC<ExportOptionButtonProps> = ({
         isDisabled
           ? 'opacity-50 cursor-not-allowed'
           : 'hover:bg-gray-800/50 active:scale-[0.98]',
-        isCurrentlyExporting && 'bg-gray-800/70 scale-[0.98]'
+        isCurrentlyExporting && 'bg-gray-800/70 scale-[0.98]',
       )}
     >
       <div className="flex items-start space-x-4">
@@ -42,7 +44,7 @@ export const ExportOptionButton: React.FC<ExportOptionButtonProps> = ({
           'p-3 rounded-lg flex-shrink-0',
           isCurrentlyExporting
             ? 'bg-blue-600/20'
-            : 'bg-gray-800/50'
+            : 'bg-gray-800/50',
         )}>
           {isCurrentlyExporting ? (
             <Loader2 className={cn('w-6 h-6 animate-spin', option.color)} />
@@ -79,4 +81,4 @@ export const ExportOptionButton: React.FC<ExportOptionButtonProps> = ({
       </div>
     </button>
   );
-}; 
+};

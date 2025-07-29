@@ -3,7 +3,7 @@ import { MultiSelectOption } from '../types';
 export const getDisplayText = (
   value: string[],
   options: MultiSelectOption[],
-  placeholder: string
+  placeholder: string,
 ): string => {
   if (value.length === 0) return placeholder;
   if (value.length === 1) {
@@ -15,9 +15,9 @@ export const getDisplayText = (
 
 export const toggleOption = (
   optionValue: string,
-  currentValue: string[]
+  currentValue: string[],
 ): string[] => {
   return currentValue.includes(optionValue)
     ? currentValue.filter(v => v !== optionValue)
     : [...currentValue, optionValue];
-}; 
+};

@@ -1,8 +1,10 @@
-import { StatCard } from '@/components/stat-card';
-import { getDaysAgo } from '@/utils';
 import { Calendar, Target } from 'lucide-react';
 import React from 'react';
+
 import type { AdditionalStatsProps } from '../types';
+
+import { StatCard } from '@/components/stat-card';
+import { getDaysAgo } from '@/utils';
 
 /**
  * Estadísticas adicionales del ExerciseStats
@@ -40,4 +42,4 @@ export const AdditionalStats: React.FC<AdditionalStatsProps> = ({ stats }) => {
       />
     </div>
   );
-}; 
+};

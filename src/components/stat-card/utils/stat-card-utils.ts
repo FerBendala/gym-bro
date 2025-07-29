@@ -15,4 +15,4 @@ export const getStatCardStyles = (variant: ThemeStatCardVariant, size: ThemeStat
     valueSize,
     padding,
   };
-}; 
+};

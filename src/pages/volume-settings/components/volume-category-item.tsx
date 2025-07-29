@@ -1,8 +1,10 @@
-import { Card } from '@/components/card';
-import { cn } from '@/utils';
 import React from 'react';
+
 import { VOLUME_SETTINGS_CONSTANTS } from '../constants';
 import type { VolumeCategoryProps } from '../types';
+
+import { Card } from '@/components/card';
+import { cn } from '@/utils';
 
 export const VolumeCategoryItem: React.FC<VolumeCategoryProps> = ({
   category,
@@ -48,10 +50,10 @@ export const VolumeCategoryItem: React.FC<VolumeCategoryProps> = ({
           onChange={(e) => onVolumeChange(category, parseFloat(e.target.value) || 0)}
           className={cn(
             'w-20 px-3 py-1 rounded-lg text-center text-white bg-gray-800 border border-gray-600',
-            'focus:border-blue-500 focus:outline-none'
+            'focus:border-blue-500 focus:outline-none',
           )}
         />
       </div>
     </Card>
   );
-}; 
+};

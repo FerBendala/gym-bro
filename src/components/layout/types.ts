@@ -46,4 +46,4 @@ export interface NavigationConfig {
   item: string;
   active: string;
   inactive: string;
-} 
+}

@@ -1,15 +1,17 @@
-import { Section } from '@/components/layout';
 import { CALENDAR_CONSTANTS } from '../constants';
 import type { MonthStats } from '../types';
 import { formatStatsValue } from '../utils';
+
 import { MonthStatsCard } from './month-stats-card';
+
+import { Section } from '@/components/layout';
 
 interface MonthStatsSectionProps {
   monthStats: MonthStats;
 }
 
 export const MonthStatsSection: React.FC<MonthStatsSectionProps> = ({
-  monthStats
+  monthStats,
 }) => {
   return (
     <Section
@@ -21,7 +23,7 @@ export const MonthStatsSection: React.FC<MonthStatsSectionProps> = ({
           <MonthStatsCard
             key={card.key}
             title={card.title}
-            value={formatStatsValue(card.key, monthStats[card.key as keyof MonthStats] as number)}
+            value={formatStatsValue(card.key, monthStats[card.key as keyof MonthStats])}
             color={card.color}
             tooltipContent={card.tooltipContent}
           />
@@ -29,4 +31,4 @@ export const MonthStatsSection: React.FC<MonthStatsSectionProps> = ({
       </div>
     </Section>
   );
-}; 
+};

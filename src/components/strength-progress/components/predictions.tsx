@@ -1,10 +1,12 @@
-import { Card, CardContent, CardHeader } from '@/components/card';
-import { InfoTooltip } from '@/components/tooltip';
-import { formatNumberToString } from '@/utils';
 import { Zap } from 'lucide-react';
+
 import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
 import type { StrengthProgressAnalysis } from '../types';
 import { getPlateauRiskBgColor, getPlateauRiskColor } from '../utils';
+
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
+import { formatNumberToString } from '@/utils';
 
 interface PredictionsProps {
   analysis: StrengthProgressAnalysis;
@@ -78,4 +80,4 @@ export const Predictions: React.FC<PredictionsProps> = ({ analysis }) => {
       </CardContent>
     </Card>
   );
-}; 
+};

@@ -20,7 +20,7 @@ export const exerciseCardUtils = {
       totalSets: expandedSeries.length,
       averageWeight: expandedSeries.reduce((sum, series) => sum + series.weight, 0) / expandedSeries.length,
       maxWeight: Math.max(...expandedSeries.map(series => series.weight)),
-      date: records[0]?.date
+      date: records[0]?.date,
     };
   },
 
@@ -28,13 +28,13 @@ export const exerciseCardUtils = {
    * Expande las series de entrenamiento para mostrar cada una individualmente
    */
   expandWorkoutSeries(records: WorkoutRecord[]) {
-    const expandedSeries: Array<{
+    const expandedSeries: {
       weight: number;
       reps: number;
       volume: number;
       recordIndex: number;
       setIndex: number;
-    }> = [];
+    }[] = [];
 
     records.forEach((record, recordIndex) => {
       if (record.individualSets && record.individualSets.length > 0) {
@@ -45,7 +45,7 @@ export const exerciseCardUtils = {
             reps: set.reps,
             volume: set.weight * set.reps,
             recordIndex,
-            setIndex
+            setIndex,
           });
         });
       } else {
@@ -56,7 +56,7 @@ export const exerciseCardUtils = {
             reps: record.reps,
             volume: record.weight * record.reps,
             recordIndex,
-            setIndex: i
+            setIndex: i,
           });
         }
       }
@@ -110,14 +110,14 @@ export const exerciseCardUtils = {
     return {
       totalReps,
       totalVolume,
-      sets
+      sets,
     };
   },
 
   /**
    * Calcula estadísticas para series individuales
    */
-  calculateAdvancedFormStats(sets: Array<{ weight: number; reps: number }>) {
+  calculateAdvancedFormStats(sets: { weight: number; reps: number }[]) {
     const totalSets = sets.length;
     const totalReps = sets.reduce((sum, set) => sum + set.reps, 0);
     const totalVolume = sets.reduce((sum, set) => sum + (set.weight * set.reps), 0);
@@ -125,7 +125,7 @@ export const exerciseCardUtils = {
     return {
       totalSets,
       totalReps,
-      totalVolume
+      totalVolume,
     };
-  }
-}; 
+  },
+};

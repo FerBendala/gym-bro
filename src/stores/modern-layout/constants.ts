@@ -30,4 +30,4 @@ export const PERSISTENCE_CONFIG = {
     title: state.title,
     subtitle: state.subtitle,
   }),
-} as const; 
+} as const;

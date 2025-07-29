@@ -1,6 +1,7 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { calculateOptimal1RM } from './calculate-1rm.utils';
 import { getLastCompleteWeekRecords } from './week-records.utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula el 1RM promedio de la última semana completa
@@ -46,7 +47,7 @@ export interface PredictionMetrics {
  */
 export const calculatePredictionMetrics = (
   records: WorkoutRecord[],
-  predictedPRWeight: number
+  predictedPRWeight: number,
 ): PredictionMetrics => {
   const baseline1RM = calculateBaseline1RM(records);
   const improvement = calculatePRImprovement(records, predictedPRWeight);
@@ -55,6 +56,6 @@ export const calculatePredictionMetrics = (
     baseline1RM,
     improvement,
     formattedBaseline: baseline1RM > 0 ? baseline1RM.toFixed(1) : '0.0',
-    formattedImprovement: improvement > 0 ? `+${improvement.toFixed(1)}kg` : 'Sin mejora'
+    formattedImprovement: improvement > 0 ? `+${improvement.toFixed(1)}kg` : 'Sin mejora',
   };
-}; 
+};

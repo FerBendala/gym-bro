@@ -1,7 +1,9 @@
-import { formatNumberToString } from '@/utils';
 import { ArrowDown, ArrowUp, Minus } from 'lucide-react';
 import React from 'react';
+
 import type { ExtendedTimelinePoint } from '../hooks/use-timeline-data';
+
+import { formatNumberToString } from '@/utils';
 
 interface TimelineItemProps {
   point: ExtendedTimelinePoint;
@@ -38,7 +40,7 @@ export const TimelineItem: React.FC<TimelineItemProps> = ({ point }) => {
             {point.date.toLocaleDateString('es-ES', {
               day: 'numeric',
               month: 'short',
-              year: 'numeric'
+              year: 'numeric',
             })}
           </span>
         </div>
@@ -88,4 +90,4 @@ export const TimelineItem: React.FC<TimelineItemProps> = ({ point }) => {
       )}
     </div>
   );
-}; 
+};

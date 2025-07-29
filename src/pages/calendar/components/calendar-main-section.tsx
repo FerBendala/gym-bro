@@ -1,16 +1,17 @@
+import { Calendar } from 'lucide-react';
+
 import { Card, CardContent, CardHeader } from '@/components/card';
 import { Section } from '@/components/layout';
 import { InfoTooltip } from '@/components/tooltip';
 import { WorkoutCalendar } from '@/components/workout-calendar';
 import type { WorkoutRecord } from '@/interfaces';
-import { Calendar } from 'lucide-react';
 
 interface CalendarMainSectionProps {
   records: WorkoutRecord[];
 }
 
 export const CalendarMainSection: React.FC<CalendarMainSectionProps> = ({
-  records
+  records,
 }) => {
   return (
     <Section>
@@ -32,4 +33,4 @@ export const CalendarMainSection: React.FC<CalendarMainSectionProps> = ({
       </Card>
     </Section>
   );
-}; 
+};

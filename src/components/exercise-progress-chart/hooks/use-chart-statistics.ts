@@ -1,8 +1,10 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { useMemo } from 'react';
+
 import type { ChartStatistics } from '../types';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Hook para calcular estadísticas adicionales del gráfico de progreso
@@ -16,7 +18,7 @@ export const useChartStatistics = (records: WorkoutRecord[]): ChartStatistics =>
         averageWeightIncrease: 0,
         bestProgress: { exercise: 'N/A', improvement: 0 },
         consistencyScore: 0,
-        timeRange: 'Sin datos'
+        timeRange: 'Sin datos',
       };
     }
 
@@ -44,7 +46,7 @@ export const useChartStatistics = (records: WorkoutRecord[]): ChartStatistics =>
           exercise: exerciseName,
           improvement: 0,
           hasProgress: false,
-          recordCount: sortedRecords.length
+          recordCount: sortedRecords.length,
         };
       }
 
@@ -60,7 +62,7 @@ export const useChartStatistics = (records: WorkoutRecord[]): ChartStatistics =>
         exercise: exerciseName,
         improvement,
         hasProgress: improvement > 0,
-        recordCount: sortedRecords.length
+        recordCount: sortedRecords.length,
       };
     });
 
@@ -70,7 +72,7 @@ export const useChartStatistics = (records: WorkoutRecord[]): ChartStatistics =>
     // Mejor progreso
     const bestProgress = exerciseProgress.reduce((best, current) =>
       current.improvement > best.improvement ? current : best
-      , { exercise: 'N/A', improvement: 0 });
+    , { exercise: 'N/A', improvement: 0 });
 
     // Puntuación de consistencia (% de ejercicios con progreso positivo)
     const exercisesWithProgress = exerciseProgress.filter(ep => ep.hasProgress).length;
@@ -90,10 +92,10 @@ export const useChartStatistics = (records: WorkoutRecord[]): ChartStatistics =>
       averageWeightIncrease: Number(averageWeightIncrease.toFixed(1)),
       bestProgress: {
         exercise: bestProgress.exercise,
-        improvement: Number(bestProgress.improvement.toFixed(1))
+        improvement: Number(bestProgress.improvement.toFixed(1)),
       },
       consistencyScore,
-      timeRange
+      timeRange,
     };
   }, [records]);
-}; 
+};

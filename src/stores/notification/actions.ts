@@ -11,13 +11,13 @@ export const createNotificationActions = (set: (fn: (state: NotificationStore) =
       current: {
         show: true,
         message: message.trim(),
-        type: validType
-      }
+        type: validType,
+      },
     };
   }),
 
   hideNotification: () => set((state: NotificationStore) => ({
-    current: { ...state.current, show: false }
+    current: { ...state.current, show: false },
   })),
 
   addNotificationToList: (message: string, type: NotificationType) => set((state: NotificationStore) => ({
@@ -28,15 +28,15 @@ export const createNotificationActions = (set: (fn: (state: NotificationStore) =
         message,
         type,
         timestamp: Date.now(),
-      }
-    ]
+      },
+    ],
   })),
 
   removeNotificationFromList: (id: string) => set((state: NotificationStore) => ({
-    items: state.items.filter((notification) => notification.id !== id)
+    items: state.items.filter((notification) => notification.id !== id),
   })),
 
   clearNotificationsList: () => set(() => ({
-    items: []
+    items: [],
   })),
-}); 
+});

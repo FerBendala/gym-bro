@@ -1,7 +1,9 @@
-import { formatNumberToString } from '@/utils';
 import { Calendar, Minus, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
+
 import type { ExtendedTimelinePoint } from '../hooks/use-timeline-data';
+
+import { formatNumberToString } from '@/utils';
 
 interface TimelineStatsProps {
   timelineData: ExtendedTimelinePoint[];
@@ -12,7 +14,7 @@ interface TimelineStatsProps {
 export const TimelineStats: React.FC<TimelineStatsProps> = ({
   timelineData,
   maxValue,
-  totalGrowthPercent
+  totalGrowthPercent,
 }) => {
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -57,4 +59,4 @@ export const TimelineStats: React.FC<TimelineStatsProps> = ({
       </div>
     </div>
   );
-}; 
+};

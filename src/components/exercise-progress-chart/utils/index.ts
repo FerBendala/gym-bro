@@ -14,7 +14,7 @@ export const getChartCoordinates = (
   record: WorkoutRecord,
   dateRange: DataRange,
   weightRange: DataRange,
-  dimensions: ChartDimensions
+  dimensions: ChartDimensions,
 ) => {
   const estimated1RM = calculateOptimal1RM(record.weight, record.reps);
   const x = getChartX(record.date.getTime(), dateRange, dimensions);
@@ -30,7 +30,7 @@ export const generateProgressPath = (
   records: WorkoutRecord[],
   dateRange: DataRange,
   weightRange: DataRange,
-  dimensions: ChartDimensions
+  dimensions: ChartDimensions,
 ): string => {
   return records.map((record, index) => {
     const { x, y } = getChartCoordinates(record, dateRange, weightRange, dimensions);
@@ -45,7 +45,7 @@ export const generateAreaPath = (
   records: WorkoutRecord[],
   dateRange: DataRange,
   weightRange: DataRange,
-  dimensions: ChartDimensions
+  dimensions: ChartDimensions,
 ): string => {
   const pathData = records.map((record, index) => {
     const { x, y } = getChartCoordinates(record, dateRange, weightRange, dimensions);
@@ -61,5 +61,5 @@ export const generateAreaPath = (
   const lastX = getChartX(lastRecord.date.getTime(), dateRange, dimensions);
   const bottomY = dimensions.height - dimensions.padding;
 
-  return pathData + ` L ${lastX} ${bottomY} Z`;
-}; 
+  return `${pathData  } L ${lastX} ${bottomY} Z`;
+};

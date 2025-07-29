@@ -1,9 +1,10 @@
+import { AlertTriangle, Brain, Calendar, Target, TrendingUp } from 'lucide-react';
+import { useMemo } from 'react';
+
 import { useAdvancedAnalysis } from '@/hooks/use-advanced-analysis';
 import type { WorkoutRecord } from '@/interfaces';
 import { generateAdvancedOptimizationSuggestions } from '@/utils/functions/optimization-suggestions.utils';
 import { generateEnhancedPerformanceIndicators } from '@/utils/functions/performance-indicators.utils';
-import { AlertTriangle, Brain, Calendar, Target, TrendingUp } from 'lucide-react';
-import { useMemo } from 'react';
 
 export const useAdvancedTab = (records: WorkoutRecord[]) => {
   // ✅ USAR HOOK CENTRALIZADO: Evita duplicación de análisis
@@ -19,7 +20,7 @@ export const useAdvancedTab = (records: WorkoutRecord[]) => {
         projectedWeight: 0,
         projectedVolume: 0,
         nextPredictedPR: 0,
-        monthlyGrowth: 0
+        monthlyGrowth: 0,
       };
     }
 
@@ -31,7 +32,7 @@ export const useAdvancedTab = (records: WorkoutRecord[]) => {
       projectedWeight: analysis.progressPrediction.nextWeekWeight || 0,
       projectedVolume: analysis.progressPrediction.nextWeekVolume || 0,
       nextPredictedPR: analysis.progressPrediction.predictedPR.weight || 0,
-      monthlyGrowth: analysis.progressPrediction.monthlyGrowthRate || 0
+      monthlyGrowth: analysis.progressPrediction.monthlyGrowthRate || 0,
     };
   }, [analysis, records.length]);
 
@@ -74,7 +75,7 @@ export const useAdvancedTab = (records: WorkoutRecord[]) => {
         title: `Sugerencia ${index + 1}`,
         description: suggestion,
         action: 'Implementar gradualmente',
-        icon: Icon
+        icon: Icon,
       };
     });
   }, [records]);
@@ -83,6 +84,6 @@ export const useAdvancedTab = (records: WorkoutRecord[]) => {
     analysis,
     advancedMetrics,
     enhancedPerformanceIndicators,
-    categorizedSuggestions
+    categorizedSuggestions,
   };
-}; 
+};

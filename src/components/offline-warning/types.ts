@@ -1,5 +1,6 @@
-import type { ThemeAlertVariant } from '@/constants/theme';
 import type { LucideIcon } from 'lucide-react';
+
+import type { ThemeAlertVariant } from '@/constants/theme';
 
 export interface OfflineWarningProps {
   message?: string;
@@ -16,4 +17,4 @@ export interface WarningIconProps {
 
 export interface WarningMessageProps {
   message: string;
-} 
+}

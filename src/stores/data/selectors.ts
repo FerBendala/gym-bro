@@ -12,4 +12,4 @@ export const useExercisesError = () => useDataStore((state) => state.exercises.e
 // Selectores específicos para asignaciones
 export const useAssignmentsItems = () => useDataStore((state) => state.assignments.items);
 export const useAssignmentsLoading = () => useDataStore((state) => state.assignments.loading);
-export const useAssignmentsError = () => useDataStore((state) => state.assignments.error); 
+export const useAssignmentsError = () => useDataStore((state) => state.assignments.error);

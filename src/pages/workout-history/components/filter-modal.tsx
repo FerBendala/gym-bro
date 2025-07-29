@@ -1,11 +1,14 @@
-import { useModalOverflow } from '@/hooks';
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+
 import type { FilterModalProps } from '../types';
+
 import { DateSorting } from './filter-date-sorting';
 import { FilterModalFooter } from './filter-modal-footer';
 import { FilterModalHeader } from './filter-modal-header';
 import { SearchFilters } from './filter-search-filters';
+
+import { useModalOverflow } from '@/hooks';
 
 export const FilterModal: React.FC<FilterModalProps> = ({
   isOpen,
@@ -25,7 +28,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   onDateToChange,
   onSortByChange,
   onSortOrderChange,
-  onClearFilters
+  onClearFilters,
 }) => {
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
 
@@ -98,4 +101,4 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   );
 
   return createPortal(modalContent, portalContainer);
-}; 
+};

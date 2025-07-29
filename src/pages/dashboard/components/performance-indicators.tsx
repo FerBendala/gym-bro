@@ -1,7 +1,3 @@
-import { Card, CardContent, CardHeader } from '@/components/card';
-import { DASHBOARD_COLORS } from '@/constants';
-import type { PerformanceIndicator } from '@/interfaces';
-import { formatNumberToString } from '@/utils';
 import {
   Activity,
   AlertTriangle,
@@ -19,9 +15,14 @@ import {
   Target as TargetIcon,
   TrendingDown,
   TrendingUp,
-  Zap
+  Zap,
 } from 'lucide-react';
 import React from 'react';
+
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { DASHBOARD_COLORS } from '@/constants';
+import type { PerformanceIndicator } from '@/interfaces';
+import { formatNumberToString } from '@/utils';
 
 interface PerformanceIndicatorsProps {
   indicators: PerformanceIndicator[];
@@ -49,7 +50,7 @@ export const PerformanceIndicators: React.FC<PerformanceIndicatorsProps> = ({ in
       'check-circle': CheckCircle,
       'clock': Clock,
       'bar-chart-3': BarChart3,
-      'data': BarChart3 // fallback para datos
+      'data': BarChart3, // fallback para datos
     };
 
     const IconComponent = iconMap[iconName] || BarChart3;
@@ -101,9 +102,9 @@ export const PerformanceIndicators: React.FC<PerformanceIndicatorsProps> = ({ in
                       {indicator.value && (
                         <span className="text-sm font-bold">
                           {indicator.value.includes('%')
-                            ? formatNumberToString(parseFloat(indicator.value), 1) + '%'
+                            ? `${formatNumberToString(parseFloat(indicator.value), 1)  }%`
                             : indicator.value.includes('kg')
-                              ? formatNumberToString(parseFloat(indicator.value), 1) + 'kg'
+                              ? `${formatNumberToString(parseFloat(indicator.value), 1)  }kg`
                               : formatNumberToString(parseFloat(indicator.value), 1)
                           }
                         </span>
@@ -116,7 +117,7 @@ export const PerformanceIndicators: React.FC<PerformanceIndicatorsProps> = ({ in
                           className={`h-1.5 rounded-full transition-all duration-500 ${indicator.type === 'excellent' ? 'bg-green-500' :
                             indicator.type === 'good' ? 'bg-blue-500' :
                               indicator.type === 'warning' ? 'bg-yellow-500' : 'bg-red-500'
-                            }`}
+                          }`}
                           style={{ width: `${Math.min(100, indicator.progress)}%` }}
                         />
                       </div>
@@ -134,4 +135,4 @@ export const PerformanceIndicators: React.FC<PerformanceIndicatorsProps> = ({ in
       </CardContent>
     </Card>
   );
-}; 
+};

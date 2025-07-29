@@ -12,6 +12,6 @@ export const useNotification = () => {
   return {
     notification,
     showNotification,
-    hideNotification
+    hideNotification,
   };
-}; 
+};

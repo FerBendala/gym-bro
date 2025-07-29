@@ -1,6 +1,7 @@
-import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
 import { analyzeAntagonistImbalance, getAntagonistGroup } from './antagonist-analysis';
 import type { CategoryMetrics, MuscleBalance } from './category-analysis-types';
+
+import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
 
 /**
  * Genera recomendaciones específicas para un grupo muscular
@@ -8,7 +9,7 @@ import type { CategoryMetrics, MuscleBalance } from './category-analysis-types';
 export const generateSpecificRecommendations = (
   category: string,
   balance: Partial<MuscleBalance>,
-  context?: { recentImprovement?: boolean }
+  context?: { recentImprovement?: boolean },
 ): string[] => {
   const recommendations: string[] = [];
 
@@ -24,23 +25,23 @@ export const generateSpecificRecommendations = (
   // Recomendaciones por frecuencia con reconocimiento de mejoras recientes
   if (balance.weeklyFrequency && balance.weeklyFrequency < 2) {
     if (context?.recentImprovement) {
-      recommendations.push(`¡Excelente progreso en frecuencia! Mantén esta mejora y busca llegar a 2-3 sesiones semanales consistentes`);
+      recommendations.push('¡Excelente progreso en frecuencia! Mantén esta mejora y busca llegar a 2-3 sesiones semanales consistentes');
     } else {
-      recommendations.push(`Aumentar frecuencia a 2-3 sesiones por semana`);
+      recommendations.push('Aumentar frecuencia a 2-3 sesiones por semana');
     }
   } else if (balance.weeklyFrequency && balance.weeklyFrequency >= 2 && balance.weeklyFrequency < 3) {
     if (context?.recentImprovement) {
-      recommendations.push(`¡Muy bien! Has mejorado significativamente la frecuencia. Mantén este ritmo de 2+ sesiones semanales`);
+      recommendations.push('¡Muy bien! Has mejorado significativamente la frecuencia. Mantén este ritmo de 2+ sesiones semanales');
     }
   } else if (balance.weeklyFrequency && balance.weeklyFrequency > 4) {
-    recommendations.push(`Reducir frecuencia para mejorar recuperación`);
+    recommendations.push('Reducir frecuencia para mejorar recuperación');
   }
 
   // Recomendaciones por tendencia
   if (balance.progressTrend === 'declining') {
     recommendations.push(`Revisar técnica y progresión en ${category.toLowerCase()}`);
   } else if (balance.progressTrend === 'stable') {
-    recommendations.push(`Variar ejercicios para estimular crecimiento`);
+    recommendations.push('Variar ejercicios para estimular crecimiento');
   }
 
   // Recomendaciones por ratio antagonista - Nueva lógica basada en ratios ideales
@@ -59,7 +60,7 @@ export const generateSpecificRecommendations = (
 
   // Recomendaciones por intensidad
   if (balance.intensityScore && balance.intensityScore < 70) {
-    recommendations.push(`Aumentar intensidad progresivamente`);
+    recommendations.push('Aumentar intensidad progresivamente');
   }
 
   return recommendations;
@@ -71,7 +72,7 @@ export const generateSpecificRecommendations = (
 export const generateWarnings = (
   category: string,
   balance: Partial<MuscleBalance>,
-  categoryMetrics: CategoryMetrics[] = []
+  categoryMetrics: CategoryMetrics[] = [],
 ): string[] => {
   const warnings: string[] = [];
 
@@ -137,7 +138,7 @@ export const generateWarnings = (
 export const shouldShowAntagonistWarning = (
   category: string,
   antagonist: string,
-  categoryMetrics: CategoryMetrics[]
+  categoryMetrics: CategoryMetrics[],
 ): boolean => {
   // Obtener métricas de ambos grupos
   const categoryData = categoryMetrics.find(m => m.category === category);
@@ -159,4 +160,4 @@ export const shouldShowAntagonistWarning = (
   }
 
   return categoryDeviation > antagonistDeviation;
-}; 
+};

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { AdditionalStats, MainStats } from './components';
 import { useExerciseStats } from './hooks';
 import type { ExerciseStatsProps } from './types';

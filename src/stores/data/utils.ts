@@ -22,4 +22,4 @@ export const persistenceConfig = {
     exercises: { items: state.exercises.items },
     assignments: { items: state.assignments.items },
   }),
-}; 
+};

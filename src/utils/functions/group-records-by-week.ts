@@ -4,7 +4,7 @@ import type { WorkoutRecord } from '@/interfaces';
  * Función auxiliar para agrupar registros por semana
  */
 export const groupRecordsByWeek = (records: WorkoutRecord[]): WorkoutRecord[][] => {
-  const weekGroups: { [key: string]: WorkoutRecord[] } = {};
+  const weekGroups: Record<string, WorkoutRecord[]> = {};
 
   records.forEach(record => {
     const date = new Date(record.date);
@@ -17,7 +17,7 @@ export const groupRecordsByWeek = (records: WorkoutRecord[]): WorkoutRecord[][] 
   });
 
   return Object.values(weekGroups).sort((a, b) =>
-    new Date(a[0].date).getTime() - new Date(b[0].date).getTime()
+    new Date(a[0].date).getTime() - new Date(b[0].date).getTime(),
   );
 };
 
@@ -41,4 +41,4 @@ export const isSameWeek = (date1: string, date2: string): boolean => {
   const week1 = getWeekNumber(d1);
   const week2 = getWeekNumber(d2);
   return d1.getFullYear() === d2.getFullYear() && week1 === week2;
-}; 
+};

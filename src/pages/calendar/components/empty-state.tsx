@@ -1,6 +1,7 @@
+import { Calendar } from 'lucide-react';
+
 import { Card, CardContent } from '@/components/card';
 import { Section } from '@/components/layout';
-import { Calendar } from 'lucide-react';
 
 export const EmptyState: React.FC = () => {
   return (
@@ -20,4 +21,4 @@ export const EmptyState: React.FC = () => {
       </Card>
     </Section>
   );
-}; 
+};

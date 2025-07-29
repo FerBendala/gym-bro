@@ -1,5 +1,6 @@
-import type { ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced } from '@/interfaces';
 import type { UseFormReturn } from 'react-hook-form';
+
+import type { ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced } from '@/interfaces';
 
 /**
  * Props principales del ExerciseCard
@@ -57,4 +58,4 @@ export interface ExerciseModalProps {
   advancedFormMethods: UseFormReturn<WorkoutFormDataAdvanced>;
   lastRecord?: import('@/interfaces').WorkoutRecord | null;
   lastWorkoutSeries?: import('@/interfaces').WorkoutRecord[];
-} 
+}

@@ -1,8 +1,9 @@
-import { formatNumberToString } from '@/utils';
-import { clamp } from '@/utils/functions/math-utils';
 import { ApexOptions } from 'apexcharts';
 import React from 'react';
 import Chart from 'react-apexcharts';
+
+import { formatNumberToString } from '@/utils';
+import { clamp } from '@/utils/functions/math-utils';
 
 export interface PRProgressChartProps {
   currentWeight: number;
@@ -42,7 +43,7 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
       type: 'radialBar',
       height: 300,
       background: 'transparent',
-      toolbar: { show: false }
+      toolbar: { show: false },
     },
     plotOptions: {
       radialBar: {
@@ -50,12 +51,12 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
         endAngle: 135,
         hollow: {
           size: '60%',
-          background: 'transparent'
+          background: 'transparent',
         },
         track: {
           background: '#374151',
           strokeWidth: '100%',
-          margin: 5
+          margin: 5,
         },
         dataLabels: {
           show: true,
@@ -64,7 +65,7 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
             fontSize: '14px',
             fontWeight: 600,
             color: '#ffffff',
-            offsetY: -10
+            offsetY: -10,
           },
           value: {
             show: true,
@@ -72,10 +73,10 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
             fontWeight: 700,
             color: getProgressColor(progressPercentage),
             offsetY: 5,
-            formatter: () => `${formatNumberToString(validCurrentWeight, 1)}kg`
-          }
-        }
-      }
+            formatter: () => `${formatNumberToString(validCurrentWeight, 1)}kg`,
+          },
+        },
+      },
     },
     fill: {
       type: 'gradient',
@@ -87,16 +88,16 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
         inverseColors: true,
         opacityFrom: 1,
         opacityTo: 0.8,
-        stops: [0, 100]
-      }
+        stops: [0, 100],
+      },
     },
     stroke: {
-      lineCap: 'round'
+      lineCap: 'round',
     },
-    labels: [`Peso Actual`],
+    labels: ['Peso Actual'],
     theme: {
-      mode: 'dark'
-    }
+      mode: 'dark',
+    },
   };
 
   const series = [progressPercentage];
@@ -140,4 +141,4 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
       </div>
     </div>
   );
-}; 
+};

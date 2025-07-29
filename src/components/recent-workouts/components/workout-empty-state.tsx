@@ -1,6 +1,7 @@
-import { THEME_WORKOUTS } from '@/constants/theme';
 import { Dumbbell } from 'lucide-react';
 import React from 'react';
+
+import { THEME_WORKOUTS } from '@/constants/theme';
 
 /**
  * Estado vacío para cuando no hay entrenamientos recientes
@@ -17,4 +18,4 @@ export const WorkoutEmptyState: React.FC = () => {
       </p>
     </div>
   );
-}; 
+};

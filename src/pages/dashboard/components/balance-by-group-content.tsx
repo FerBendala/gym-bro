@@ -1,10 +1,13 @@
-import { Card, CardContent, CardHeader } from '@/components/card';
-import { formatNumberToString } from '@/utils';
 import { AlertTriangle, BarChart, CheckCircle, Timer, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
+
 import type { CategoryAnalysis, CategoryMetric, MuscleBalanceItem } from '../types';
+
 import { CategoryDashboardChart } from './category-dashboard-chart';
 import { HorizontalBarChart } from './horizontal-bar-chart';
+
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { formatNumberToString } from '@/utils';
 
 interface BalanceByGroupContentProps {
   muscleBalance: MuscleBalanceItem[];
@@ -13,14 +16,14 @@ interface BalanceByGroupContentProps {
 }
 
 // Función de utilidad para manejar valores seguros
-const safeNumber = (value: number | undefined, fallback: number = 0): number => {
+const safeNumber = (value: number | undefined, fallback = 0): number => {
   return typeof value === 'number' && !isNaN(value) ? value : fallback;
 };
 
 // Función para formatear porcentajes de forma consistente
-const formatSafePercentage = (value: number, decimals: number = 1): string => {
+const formatSafePercentage = (value: number, decimals = 1): string => {
   const safeValue = safeNumber(value, 0);
-  return formatNumberToString(safeValue, decimals) + '%';
+  return `${formatNumberToString(safeValue, decimals)  }%`;
 };
 
 // Funciones auxiliares para colores e iconos de categorías
@@ -51,7 +54,7 @@ const getCategoryIcon = (category: string) => {
 export const BalanceByGroupContent: React.FC<BalanceByGroupContentProps> = ({
   muscleBalance,
   categoryAnalysis,
-  onItemClick
+  onItemClick,
 }) => (
   <div className="space-y-6">
     {/* Gráfico de barras horizontales para balance por categoría */}
@@ -78,7 +81,7 @@ export const BalanceByGroupContent: React.FC<BalanceByGroupContentProps> = ({
                   getCategoryColor(balance.category).includes('green') ? '#10B981' :
                     getCategoryColor(balance.category).includes('purple') ? '#8B5CF6' :
                       getCategoryColor(balance.category).includes('orange') ? '#F59E0B' :
-                        getCategoryColor(balance.category).includes('indigo') ? '#6366F1' : '#6B7280'
+                        getCategoryColor(balance.category).includes('indigo') ? '#6366F1' : '#6B7280',
             }))
           }
           onItemClick={onItemClick}
@@ -120,7 +123,7 @@ export const BalanceByGroupContent: React.FC<BalanceByGroupContentProps> = ({
                     frequency: safeNumber(balance.weeklyFrequency, 0),
                     strength: categoryMetric ? categoryMetric.weightProgression : 0,
                     records: categoryMetric ? categoryMetric.personalRecords : 0,
-                    trend: balance.balanceHistory?.trend || 'stable'
+                    trend: balance.balanceHistory?.trend || 'stable',
                   }}
                   color={getCategoryColor(balance.category).includes('red') ? '#EF4444' :
                     getCategoryColor(balance.category).includes('blue') ? '#3B82F6' :
@@ -193,4 +196,4 @@ export const BalanceByGroupContent: React.FC<BalanceByGroupContentProps> = ({
         })}
     </div>
   </div>
-); 
+);

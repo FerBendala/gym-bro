@@ -4,7 +4,7 @@ import { calculateTrainingConsistency, calculateTrainingFrequency } from '@/util
 /**
  * Genera indicadores de rendimiento pico mejorados
  */
-export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]): Array<{
+export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]): {
   type: 'excellent' | 'good' | 'warning' | 'critical';
   icon: string;
   title: string;
@@ -12,7 +12,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
   value?: string;
   progress?: number;
   category: 'consistency' | 'progress' | 'intensity' | 'recovery' | 'volume' | 'prediction' | 'plateau' | 'safety';
-}> => {
+}[] => {
   if (records.length === 0) {
     return [
       {
@@ -20,12 +20,12 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
         icon: 'data',
         title: 'Sin datos',
         description: 'Comienza registrando tus entrenamientos para obtener análisis detallados',
-        category: 'consistency'
-      }
+        category: 'consistency',
+      },
     ];
   }
 
-  const indicators: Array<{
+  const indicators: {
     type: 'excellent' | 'good' | 'warning' | 'critical';
     icon: string;
     title: string;
@@ -33,7 +33,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
     value?: string;
     progress?: number;
     category: 'consistency' | 'progress' | 'intensity' | 'recovery' | 'volume' | 'prediction' | 'plateau' | 'safety';
-  }> = [];
+  }[] = [];
 
   // Análisis de consistencia
   const consistency = calculateTrainingConsistency(records, 30);
@@ -45,7 +45,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       description: 'Mantienes un patrón de entrenamiento muy regular',
       value: `${consistency.toFixed(0)}%`,
       progress: consistency,
-      category: 'consistency'
+      category: 'consistency',
     });
   } else if (consistency >= 60) {
     indicators.push({
@@ -55,7 +55,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       description: 'Tu rutina es bastante regular, pero hay espacio para mejorar',
       value: `${consistency.toFixed(0)}%`,
       progress: consistency,
-      category: 'consistency'
+      category: 'consistency',
     });
   } else {
     indicators.push({
@@ -65,7 +65,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       description: 'Necesitas establecer horarios más regulares para tu entrenamiento',
       value: `${consistency.toFixed(0)}%`,
       progress: consistency,
-      category: 'consistency'
+      category: 'consistency',
     });
   }
 
@@ -79,7 +79,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       description: 'Entrenas con la frecuencia ideal para progreso',
       value: `${frequency.toFixed(1)} días/semana`,
       progress: Math.min(100, frequency * 20),
-      category: 'progress'
+      category: 'progress',
     });
   } else if (frequency >= 3) {
     indicators.push({
@@ -89,7 +89,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       description: 'Tu frecuencia de entrenamiento es adecuada',
       value: `${frequency.toFixed(1)} días/semana`,
       progress: Math.min(100, frequency * 20),
-      category: 'progress'
+      category: 'progress',
     });
   } else {
     indicators.push({
@@ -99,7 +99,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       description: 'Considera aumentar la frecuencia de entrenamiento',
       value: `${frequency.toFixed(1)} días/semana`,
       progress: Math.min(100, frequency * 20),
-      category: 'progress'
+      category: 'progress',
     });
   }
 
@@ -116,7 +116,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       description: 'Tu volumen de entrenamiento está bien balanceado',
       value: `${volumeScore.toFixed(0)}%`,
       progress: volumeScore,
-      category: 'volume'
+      category: 'volume',
     });
   } else if (volumeScore >= 60) {
     indicators.push({
@@ -126,7 +126,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       description: 'Tu volumen está bien, pero hay espacio para optimizar',
       value: `${volumeScore.toFixed(0)}%`,
       progress: volumeScore,
-      category: 'volume'
+      category: 'volume',
     });
   } else {
     indicators.push({
@@ -136,7 +136,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       description: 'Considera ajustar tu volumen de entrenamiento',
       value: `${volumeScore.toFixed(0)}%`,
       progress: volumeScore,
-      category: 'volume'
+      category: 'volume',
     });
   }
 
@@ -153,7 +153,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       description: 'Tu intensidad de entrenamiento está en el rango ideal',
       value: `${intensityScore.toFixed(0)}%`,
       progress: intensityScore,
-      category: 'intensity'
+      category: 'intensity',
     });
   } else if (intensityScore >= 60) {
     indicators.push({
@@ -163,7 +163,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       description: 'Buena intensidad, pero hay espacio para mejorar',
       value: `${intensityScore.toFixed(0)}%`,
       progress: intensityScore,
-      category: 'intensity'
+      category: 'intensity',
     });
   } else {
     indicators.push({
@@ -173,9 +173,9 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       description: 'Considera aumentar la intensidad gradualmente',
       value: `${intensityScore.toFixed(0)}%`,
       progress: intensityScore,
-      category: 'intensity'
+      category: 'intensity',
     });
   }
 
   return indicators;
-}; 
+};

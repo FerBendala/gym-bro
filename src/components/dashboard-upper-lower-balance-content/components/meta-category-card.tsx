@@ -1,13 +1,16 @@
+import React from 'react';
+
+import type { MetaCategoryCardProps } from '../types';
+
+import { CategoryDashboardChart } from './category-dashboard-chart';
+
 import { Card } from '@/components/card';
 import { formatNumberToString } from '@/utils';
-import React from 'react';
-import type { MetaCategoryCardProps } from '../types';
-import { CategoryDashboardChart } from './category-dashboard-chart';
 
 export const MetaCategoryCard: React.FC<MetaCategoryCardProps> = ({
   meta,
   categoryAnalysis,
-  muscleBalance
+  muscleBalance,
 }) => {
   const Icon = meta.icon;
 
@@ -52,7 +55,7 @@ export const MetaCategoryCard: React.FC<MetaCategoryCardProps> = ({
     frequency: totalFrequency,
     strength: avgStrength,
     records: totalRecords,
-    trend: trend === 'improving' ? '+' : trend === 'declining' ? '-' : '='
+    trend: trend === 'improving' ? '+' : trend === 'declining' ? '-' : '=',
   };
 
   return (
@@ -79,13 +82,13 @@ export const MetaCategoryCard: React.FC<MetaCategoryCardProps> = ({
             <span className={`text-xs px-2 py-1 rounded-full ${meta.isBalanced
               ? 'bg-green-500/20 text-green-400'
               : 'bg-yellow-500/20 text-yellow-400'
-              }`}>
+            }`}>
               {meta.isBalanced ? 'Equilibrado' : 'Desequilibrado'}
             </span>
             <span className={`text-xs px-2 py-1 rounded-full ${trend === 'improving' ? 'bg-blue-500/20 text-blue-400' :
               trend === 'declining' ? 'bg-red-500/20 text-red-400' :
                 'bg-gray-500/20 text-gray-400'
-              }`}>
+            }`}>
               {trend === 'improving' ? 'Mejorando' :
                 trend === 'declining' ? 'Declinando' :
                   'Estable'}
@@ -109,7 +112,7 @@ export const MetaCategoryCard: React.FC<MetaCategoryCardProps> = ({
                 <div key={category} className="flex justify-between text-xs">
                   <span className="text-gray-500">{category}</span>
                   <span className="text-gray-400">
-                    {catData ? formatNumberToString(catData.percentage, 1) + '%' : '0%'}
+                    {catData ? `${formatNumberToString(catData.percentage, 1)  }%` : '0%'}
                   </span>
                 </div>
               );
@@ -119,4 +122,4 @@ export const MetaCategoryCard: React.FC<MetaCategoryCardProps> = ({
       </div>
     </Card>
   );
-}; 
+};

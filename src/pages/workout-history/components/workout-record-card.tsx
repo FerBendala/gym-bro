@@ -1,10 +1,13 @@
-import { getCategoryColor } from '@/utils';
 import React from 'react';
+
 import type { WorkoutRecordWithExercise } from '../types';
 import { calculateWorkoutStats, hasIndividualSets } from '../utils';
+
 import { IndividualSets } from './individual-sets';
 import { WorkoutMetrics } from './metrics';
 import { WorkoutRecordHeader } from './workout-record-header';
+
+import { getCategoryColor } from '@/utils';
 
 interface WorkoutRecordCardProps {
   record: WorkoutRecordWithExercise;
@@ -15,7 +18,7 @@ interface WorkoutRecordCardProps {
 export const WorkoutRecordCard: React.FC<WorkoutRecordCardProps> = ({
   record,
   onEdit,
-  onDelete
+  onDelete,
 }) => {
   const primaryCategory = record.exercise?.categories?.[0] || 'Pecho';
   const colorGradient = getCategoryColor(primaryCategory);
@@ -24,7 +27,7 @@ export const WorkoutRecordCard: React.FC<WorkoutRecordCardProps> = ({
 
   return (
     <div
-      className={`relative p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/30 hover:border-gray-600/50 transition-all duration-200 hover:shadow-xl`}
+      className={'relative p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/30 hover:border-gray-600/50 transition-all duration-200 hover:shadow-xl'}
     >
       {/* Indicador visual de categoría */}
       <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${colorGradient}`} />
@@ -48,4 +51,4 @@ export const WorkoutRecordCard: React.FC<WorkoutRecordCardProps> = ({
       )}
     </div>
   );
-}; 
+};

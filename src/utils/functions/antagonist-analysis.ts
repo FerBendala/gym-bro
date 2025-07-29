@@ -1,9 +1,10 @@
-import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
-import type { WorkoutRecord } from '@/interfaces';
 import type { CategoryMetrics } from './category-analysis-types';
 import { ANTAGONIST_PAIRS } from './category-analysis-types';
 import { roundToDecimals } from './math-utils';
 import { STRENGTH_STANDARDS } from './strength-standards';
+
+import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula el score de simetría para una categoría
@@ -158,4 +159,4 @@ export const getStrengthLevelLabel = (strengthIndex: number): 'principiante' | '
   if (strengthIndex >= 70) return 'avanzado';
   if (strengthIndex >= 50) return 'intermedio';
   return 'principiante';
-}; 
+};

@@ -20,8 +20,8 @@ export const calculate1RMEpley = (weight: number, reps: number): number => {
 /**
  * Calcula 1RM usando la fórmula óptima basada en el número de repeticiones
  * Usa Epley para reps altas y Brzycki para reps bajas
- * 
- * NOTA: Esta es la función principal. Los alias calculateEstimated1RM y 
+ *
+ * NOTA: Esta es la función principal. Los alias calculateEstimated1RM y
  * calculateEstimated1RMStats han sido eliminados para evitar redundancia.
  */
 export const calculateOptimal1RM = (weight: number, reps: number): number => {
@@ -34,4 +34,4 @@ export const calculateOptimal1RM = (weight: number, reps: number): number => {
 
   // Usar Brzycki para repeticiones bajas (1-10)
   return calculate1RMBrzycki(weight, reps);
-}; 
+};

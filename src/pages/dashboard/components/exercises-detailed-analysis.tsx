@@ -1,21 +1,22 @@
+import { Calendar, TrendingDown, TrendingUp } from 'lucide-react';
+import React from 'react';
+
 import { Card, CardContent, CardHeader } from '@/components/card';
 import { PROGRESS_THRESHOLDS } from '@/constants';
 import type { ExerciseAnalysis } from '@/interfaces';
 import { formatNumberToString, getCategoryColor, getCategoryIcon } from '@/utils';
 import { clamp } from '@/utils/functions/math-utils';
-import { Calendar, TrendingDown, TrendingUp } from 'lucide-react';
-import React from 'react';
 
 interface ExercisesDetailedAnalysisProps {
   exercises: ExerciseAnalysis[];
   selectedCategory: string;
-  categoriesWithCount: Array<{ id: string; name: string; count: number }>;
+  categoriesWithCount: { id: string; name: string; count: number }[];
 }
 
 export const ExercisesDetailedAnalysis: React.FC<ExercisesDetailedAnalysisProps> = ({
   exercises,
   selectedCategory,
-  categoriesWithCount
+  categoriesWithCount,
 }) => {
   const getProgressBadge = (progressPercent: number) => {
     if (progressPercent > PROGRESS_THRESHOLDS.EXCELLENT) return { text: 'Excelente', color: 'bg-green-500 text-white', icon: TrendingUp };
@@ -58,7 +59,7 @@ export const ExercisesDetailedAnalysis: React.FC<ExercisesDetailedAnalysisProps>
               return (
                 <div
                   key={exercise.name}
-                  className={`relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/50 hover:border-gray-600/50 transition-all duration-200`}
+                  className={'relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/50 hover:border-gray-600/50 transition-all duration-200'}
                 >
                   {/* Header con posición, ícono y estado */}
                   <div className="flex items-start justify-between mb-4">
@@ -174,4 +175,4 @@ export const ExercisesDetailedAnalysis: React.FC<ExercisesDetailedAnalysisProps>
       </CardContent>
     </Card>
   );
-}; 
+};

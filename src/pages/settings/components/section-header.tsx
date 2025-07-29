@@ -1,6 +1,7 @@
+import React from 'react';
+
 import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils';
-import React from 'react';
 
 interface SectionHeaderProps {
   title: string;
@@ -15,7 +16,7 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({ title, onBack }) =
         'p-2 rounded-lg',
         MODERN_THEME.components.button.base,
         MODERN_THEME.touch.tap,
-        MODERN_THEME.accessibility.focusRing
+        MODERN_THEME.accessibility.focusRing,
       )}
     >
       <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -24,4 +25,4 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({ title, onBack }) =
     </button>
     <h2 className="text-xl font-bold text-white">{title}</h2>
   </div>
-); 
+);

@@ -1,8 +1,3 @@
-import { Button } from '@/components/button';
-import { DatePicker } from '@/components/date-picker';
-import { Input } from '@/components/input';
-import type { WorkoutFormDataAdvanced } from '@/interfaces';
-import { formatNumberToString } from '@/utils';
 import { Plus, Trash2 } from 'lucide-react';
 import React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
@@ -10,12 +5,18 @@ import { FieldArrayWithId } from 'react-hook-form';
 
 import { EXERCISE_CARD_CONSTANTS } from '../constants';
 
+import { Button } from '@/components/button';
+import { DatePicker } from '@/components/date-picker';
+import { Input } from '@/components/input';
+import type { WorkoutFormDataAdvanced } from '@/interfaces';
+import { formatNumberToString } from '@/utils';
+
 interface AdvancedFormProps {
   loading: boolean;
   onSubmit: (data: WorkoutFormDataAdvanced) => Promise<void>;
   onCancel: () => void;
   formMethods: UseFormReturn<WorkoutFormDataAdvanced>;
-  fields: FieldArrayWithId<WorkoutFormDataAdvanced, "sets", "id">[];
+  fields: FieldArrayWithId<WorkoutFormDataAdvanced, 'sets', 'id'>[];
   addSet: () => void;
   removeSet: (index: number) => void;
   stats: {
@@ -36,7 +37,7 @@ export const AdvancedForm: React.FC<AdvancedFormProps> = ({
   fields,
   addSet,
   removeSet,
-  stats
+  stats,
 }) => {
   const { register, handleSubmit, formState: { errors }, watch, setValue } = formMethods;
 
@@ -72,7 +73,7 @@ export const AdvancedForm: React.FC<AdvancedFormProps> = ({
                     {...register(`sets.${index}.weight`, {
                       required: EXERCISE_CARD_CONSTANTS.ERROR_MESSAGES.weight.required,
                       min: { value: 0, message: EXERCISE_CARD_CONSTANTS.ERROR_MESSAGES.weight.min },
-                      valueAsNumber: true
+                      valueAsNumber: true,
                     })}
                     error={errors.sets?.[index]?.weight?.message}
                     className="bg-gray-700/50 border-gray-600/50"
@@ -85,7 +86,7 @@ export const AdvancedForm: React.FC<AdvancedFormProps> = ({
                     {...register(`sets.${index}.reps`, {
                       required: EXERCISE_CARD_CONSTANTS.ERROR_MESSAGES.reps.required,
                       min: { value: 1, message: EXERCISE_CARD_CONSTANTS.ERROR_MESSAGES.reps.min },
-                      valueAsNumber: true
+                      valueAsNumber: true,
                     })}
                     error={errors.sets?.[index]?.reps?.message}
                     className="bg-gray-700/50 border-gray-600/50"
@@ -142,4 +143,4 @@ export const AdvancedForm: React.FC<AdvancedFormProps> = ({
       </div>
     </form>
   );
-}; 
+};

@@ -1,12 +1,15 @@
+import React from 'react';
+
+import { formatDayName } from '../utils';
+
+import { AssignmentForm } from './assignment-form';
+import { AssignmentItem } from './assignment-item';
+
 import { Button } from '@/components/button';
 import { Card, CardContent, CardHeader } from '@/components/card';
 import { DAYS } from '@/constants/days.constants';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
-import React from 'react';
-import { formatDayName } from '../utils';
-import { AssignmentForm } from './assignment-form';
-import { AssignmentItem } from './assignment-item';
 
 /**
  * Componente para asignar ejercicios por día con select agrupado por categorías
@@ -79,4 +82,4 @@ export const ExerciseAssignments: React.FC = () => {
       </CardContent>
     </Card>
   );
-}; 
+};

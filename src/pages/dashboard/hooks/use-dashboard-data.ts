@@ -1,9 +1,10 @@
+import { useCallback, useEffect, useState } from 'react';
+
 import { deleteWorkoutRecord, getExercises, getWorkoutRecords } from '@/api/services';
 import type { Exercise, WorkoutRecord } from '@/interfaces';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
 import { logger } from '@/utils';
-import { useCallback, useEffect, useState } from 'react';
 
 export const useDashboardData = () => {
   const { showNotification } = useNotification();
@@ -23,7 +24,7 @@ export const useDashboardData = () => {
     try {
       const [recordsData, exercisesData] = await Promise.all([
         getWorkoutRecords(),
-        getExercises()
+        getExercises(),
       ]);
 
       // Enriquecer los registros con información del ejercicio
@@ -36,7 +37,7 @@ export const useDashboardData = () => {
 
         return {
           ...record,
-          exercise
+          exercise,
         };
       });
 
@@ -66,7 +67,7 @@ export const useDashboardData = () => {
 
       // Actualizar el estado local inmediatamente
       setWorkoutRecords(prevRecords =>
-        prevRecords.filter(record => record.id !== recordId)
+        prevRecords.filter(record => record.id !== recordId),
       );
 
       // Mostrar notificación de éxito
@@ -91,6 +92,6 @@ export const useDashboardData = () => {
     loading,
     isOnline,
     loadData,
-    handleDeleteRecord
+    handleDeleteRecord,
   };
-}; 
+};

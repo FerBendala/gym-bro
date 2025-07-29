@@ -1,14 +1,16 @@
+import React from 'react';
+
+import { SectionProps } from '../types';
+
 import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils';
-import React from 'react';
-import { SectionProps } from '../types';
 
 export const Section: React.FC<SectionProps> = ({
   title,
   subtitle,
   children,
   className,
-  headerActions
+  headerActions,
 }) => {
   return (
     <section className={cn('space-y-4', className)}>
@@ -35,4 +37,4 @@ export const Section: React.FC<SectionProps> = ({
       </div>
     </section>
   );
-}; 
+};

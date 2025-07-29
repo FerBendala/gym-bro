@@ -1,9 +1,11 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { getHours } from 'date-fns';
+
 import { calculateDayMetrics } from './day-metrics';
 import { clamp, roundToDecimals } from './math-utils';
 import type { WorkoutHabits } from './trends-interfaces';
 import { calculateWorkoutStreaks } from './workout-streaks';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Analiza hábitos de entrenamiento
@@ -26,7 +28,7 @@ export const analyzeWorkoutHabits = (records: WorkoutRecord[]): WorkoutHabits =>
       workoutStreaks: { current: 0, longest: 0, average: 0 },
       behaviorInsights: [],
       recommendations: [],
-      riskFactors: []
+      riskFactors: [],
     };
   }
 
@@ -49,7 +51,7 @@ export const analyzeWorkoutHabits = (records: WorkoutRecord[]): WorkoutHabits =>
   });
 
   const preferredTime = Object.entries(hourCounts).reduce((a, b) =>
-    hourCounts[a[0]] > hourCounts[b[0]] ? a : b
+    hourCounts[a[0]] > hourCounts[b[0]] ? a : b,
   )?.[0] || 'N/A';
 
   // Duración promedio estimada (mejorado)
@@ -126,7 +128,7 @@ export const analyzeWorkoutHabits = (records: WorkoutRecord[]): WorkoutHabits =>
 
   // Mejor día y hora de rendimiento (basado en volumen promedio)
   const bestPerformanceDay = dayMetrics.length > 0 ? dayMetrics.reduce((best, current) =>
-    current.avgVolume > best.avgVolume ? current : best
+    current.avgVolume > best.avgVolume ? current : best,
   ).dayName : 'N/A';
 
   // Mejor hora de rendimiento basado en volumen por rango horario
@@ -226,6 +228,6 @@ export const analyzeWorkoutHabits = (records: WorkoutRecord[]): WorkoutHabits =>
     workoutStreaks,
     behaviorInsights,
     recommendations,
-    riskFactors
+    riskFactors,
   };
-}; 
+};

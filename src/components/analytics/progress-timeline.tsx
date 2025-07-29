@@ -1,11 +1,13 @@
-import { Card, CardContent, CardHeader } from '@/components/card';
-import { InfoTooltip } from '@/components/tooltip';
 import { Calendar } from 'lucide-react';
 import React from 'react';
+
 import { TimelineItem, TimelineStats } from './components';
 import { useTimelineData } from './hooks';
 import type { ExtendedTimelinePoint } from './hooks/use-timeline-data';
 import type { ProgressTimelineProps } from './types';
+
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
 
 /**
  * Componente de timeline de progreso
@@ -66,4 +68,4 @@ export const ProgressTimeline: React.FC<ProgressTimelineProps> = ({ records }) =
       </CardContent>
     </Card>
   );
-}; 
+};

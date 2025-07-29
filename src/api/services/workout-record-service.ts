@@ -1,7 +1,8 @@
+import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, Timestamp, updateDoc, where } from 'firebase/firestore';
+
 import { db } from '@/api/firebase';
 import { handleFirebaseError } from '@/api/services/error-handler';
 import type { WorkoutRecord } from '@/interfaces';
-import { addDoc, collection, deleteDoc, doc, getDocs, orderBy, query, Timestamp, updateDoc, where } from 'firebase/firestore';
 
 /**
  * Servicio para operaciones CRUD de registros de entrenamiento
@@ -21,7 +22,7 @@ export class WorkoutRecordService {
     try {
       const recordWithDate = {
         ...record,
-        date: customDate ? Timestamp.fromDate(customDate) : Timestamp.now()
+        date: customDate ? Timestamp.fromDate(customDate) : Timestamp.now(),
       };
       const docRef = await addDoc(collection(db, WorkoutRecordService.COLLECTION), recordWithDate);
       return docRef.id;
@@ -40,7 +41,7 @@ export class WorkoutRecordService {
     try {
       const q = query(
         collection(db, WorkoutRecordService.COLLECTION),
-        orderBy('date', 'desc')
+        orderBy('date', 'desc'),
       );
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs.map(doc => {
@@ -48,7 +49,7 @@ export class WorkoutRecordService {
         return {
           id: doc.id,
           ...data,
-          date: data.date.toDate()
+          date: data.date.toDate(),
         } as WorkoutRecord;
       });
     } catch (error) {
@@ -68,7 +69,7 @@ export class WorkoutRecordService {
       const q = query(
         collection(db, WorkoutRecordService.COLLECTION),
         where('exerciseId', '==', exerciseId),
-        orderBy('date', 'desc')
+        orderBy('date', 'desc'),
       );
       const querySnapshot = await getDocs(q);
       return querySnapshot.docs.map(doc => {
@@ -76,7 +77,7 @@ export class WorkoutRecordService {
         return {
           id: doc.id,
           ...data,
-          date: data.date.toDate()
+          date: data.date.toDate(),
         } as WorkoutRecord;
       });
     } catch (error) {
@@ -120,4 +121,4 @@ export const createWorkoutRecord = WorkoutRecordService.create;
 export const getWorkoutRecords = WorkoutRecordService.getAll;
 export const getWorkoutRecordsByExercise = WorkoutRecordService.getByExercise;
 export const updateWorkoutRecord = WorkoutRecordService.update;
-export const deleteWorkoutRecord = WorkoutRecordService.delete; 
+export const deleteWorkoutRecord = WorkoutRecordService.delete;

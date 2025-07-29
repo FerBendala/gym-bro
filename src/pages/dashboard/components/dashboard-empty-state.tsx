@@ -1,5 +1,6 @@
 import { Activity } from 'lucide-react';
 import React from 'react';
+
 import { EmptyState } from '../shared';
 
 interface DashboardEmptyStateProps {
@@ -18,4 +19,4 @@ export const DashboardEmptyState: React.FC<DashboardEmptyStateProps> = ({ isOnli
       }
     />
   );
-}; 
+};

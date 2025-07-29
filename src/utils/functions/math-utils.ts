@@ -7,7 +7,7 @@
  * Redondea un número a un número específico de decimales
  * Patrón usado +50 veces en todo el código base
  */
-export const roundToDecimals = (value: number, decimals: number = 2): number => {
+export const roundToDecimals = (value: number, decimals = 2): number => {
   const factor = Math.pow(10, decimals);
   return Math.round(value * factor) / factor;
 };
@@ -27,7 +27,7 @@ export const clamp = (value: number, min: number, max: number): number => {
  */
 export const roundToDecimalsBatch = (
   values: Record<string, number>,
-  decimals: Record<string, number> = {}
+  decimals: Record<string, number> = {},
 ): Record<string, number> => {
   const result: Record<string, number> = {};
 
@@ -58,7 +58,7 @@ export const roundMetricsBatch = (metrics: {
     weights: (metrics.weights || []).map(w => roundToDecimals(w, 1)),
     percentages: (metrics.percentages || []).map(p => roundToDecimals(p, 1)),
     volumes: (metrics.volumes || []).map(v => roundToDecimals(v, 0)),
-    scores: (metrics.scores || []).map(s => roundToDecimals(s, 0))
+    scores: (metrics.scores || []).map(s => roundToDecimals(s, 0)),
   };
 };
 
@@ -70,7 +70,7 @@ export const validateAndRound = (
   value: number,
   min: number,
   max: number,
-  decimals: number = 2
+  decimals = 2,
 ): number => {
   return roundToDecimals(clamp(value, min, max), decimals);
 };
@@ -80,7 +80,7 @@ export const validateAndRound = (
  * Para múltiples valores que necesitan validación y redondeo
  */
 export const validateAndRoundBatch = (
-  values: Record<string, { value: number; min: number; max: number; decimals?: number }>
+  values: Record<string, { value: number; min: number; max: number; decimals?: number }>,
 ): Record<string, number> => {
   const result: Record<string, number> = {};
 
@@ -89,9 +89,9 @@ export const validateAndRoundBatch = (
       config.value,
       config.min,
       config.max,
-      config.decimals || 2
+      config.decimals || 2,
     );
   }
 
   return result;
-}; 
+};

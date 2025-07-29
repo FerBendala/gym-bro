@@ -1,5 +1,6 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { calculateVolume } from './volume-calculations';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula el número de récords personales en una categoría

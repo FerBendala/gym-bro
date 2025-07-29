@@ -13,7 +13,7 @@ export const formatDateForInput = (date: Date): string => {
 export const formatDateForDisplay = (date: Date): string => {
   return date.toLocaleDateString(
     DATE_FORMATS.DISPLAY.locale,
-    DATE_FORMATS.DISPLAY.options
+    DATE_FORMATS.DISPLAY.options,
   );
 };
 
@@ -29,4 +29,4 @@ export const getTodayFormatted = (): string => {
  */
 export const isValidDate = (date: Date): boolean => {
   return !isNaN(date.getTime());
-}; 
+};

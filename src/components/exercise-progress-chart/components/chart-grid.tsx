@@ -1,7 +1,9 @@
+import React from 'react';
+
+import type { ChartGridProps } from '../types';
+
 import { THEME_CHART } from '@/constants/theme';
 import { generateGridPoints } from '@/utils';
-import React from 'react';
-import type { ChartGridProps } from '../types';
 
 /**
  * Grid y ejes del ExerciseProgressChart
@@ -9,7 +11,7 @@ import type { ChartGridProps } from '../types';
  */
 export const ChartGrid: React.FC<ChartGridProps> = ({
   dimensions,
-  weightRange
+  weightRange,
 }) => {
   const { width, height, padding } = dimensions;
   const gridPoints = generateGridPoints(weightRange, dimensions);
@@ -77,4 +79,4 @@ export const ChartGrid: React.FC<ChartGridProps> = ({
       })}
     </>
   );
-}; 
+};

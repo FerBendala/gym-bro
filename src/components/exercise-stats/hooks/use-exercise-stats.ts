@@ -1,3 +1,7 @@
+import { useMemo } from 'react';
+
+import type { CalculatedStats, UseExerciseStatsReturn } from '../types';
+
 import type { WorkoutRecord } from '@/interfaces';
 import {
   calculateAverage,
@@ -5,10 +9,8 @@ import {
   calculateMostFrequent,
   countUniqueBy,
   findMostRecent,
-  formatDateForComparison
+  formatDateForComparison,
 } from '@/utils';
-import { useMemo } from 'react';
-import type { CalculatedStats, UseExerciseStatsReturn } from '../types';
 
 /**
  * Hook específico para calcular estadísticas del ExerciseStats
@@ -24,13 +26,13 @@ export const useExerciseStats = (records: WorkoutRecord[]): UseExerciseStatsRetu
         maxWeight: 0,
         workoutDays: 0,
         lastWorkout: null,
-        mostFrequentExercise: null
+        mostFrequentExercise: null,
       };
     }
 
     // Filtrar registros válidos con información de ejercicio (igual que en analytics)
     const validRecords = records.filter(record =>
-      record.exercise && record.exercise.name && record.exercise.name !== 'Ejercicio desconocido'
+      record.exercise?.name && record.exercise.name !== 'Ejercicio desconocido',
     );
 
     // Total de entrenamientos (usar validRecords para consistencia)
@@ -38,7 +40,7 @@ export const useExerciseStats = (records: WorkoutRecord[]): UseExerciseStatsRetu
 
     // Volumen total (peso × reps × series) - usar validRecords para consistencia
     const totalVolume = validRecords.reduce((sum, record) =>
-      sum + (record.weight * record.reps * record.sets), 0
+      sum + (record.weight * record.reps * record.sets), 0,
     );
 
     // Peso promedio usando utilidad genérica - usar validRecords para consistencia
@@ -68,12 +70,12 @@ export const useExerciseStats = (records: WorkoutRecord[]): UseExerciseStatsRetu
       maxWeight,
       workoutDays,
       lastWorkout,
-      mostFrequentExercise
+      mostFrequentExercise,
     };
   }, [records]);
 
   return {
     stats,
-    isEmpty: records.length === 0
+    isEmpty: records.length === 0,
   };
-}; 
+};

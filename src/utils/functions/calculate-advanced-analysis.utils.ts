@@ -1,6 +1,7 @@
-import type { WorkoutRecord } from '@/interfaces';
 import type { FatigueAnalysis, IntensityMetrics, PeriodComparison, ProgressPrediction, TrainingDensity, TrainingEfficiency } from './';
 import { analyzeFatigue, analyzeIntensityMetrics, analyzeTrainingEfficiency, calculateTrainingDensity, comparePeriods, generateAdvancedOptimizationSuggestions, generateEnhancedPerformanceIndicators, predictProgress } from './';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Interfaz para análisis avanzado
@@ -12,7 +13,7 @@ export interface AdvancedAnalysis {
   periodComparisons: PeriodComparison[];
   progressPrediction: ProgressPrediction;
   intensityMetrics: IntensityMetrics;
-  peakPerformanceIndicators: Array<{
+  peakPerformanceIndicators: {
     type: 'excellent' | 'good' | 'warning' | 'critical';
     icon: string;
     title: string;
@@ -20,7 +21,7 @@ export interface AdvancedAnalysis {
     value?: string;
     progress?: number;
     category: 'consistency' | 'progress' | 'intensity' | 'recovery' | 'volume' | 'prediction' | 'plateau' | 'safety';
-  }>;
+  }[];
   optimizationSuggestions: string[];
 }
 
@@ -87,6 +88,6 @@ export const calculateAdvancedAnalysis = (records: WorkoutRecord[]): AdvancedAna
     progressPrediction: prediction,
     intensityMetrics,
     peakPerformanceIndicators,
-    optimizationSuggestions: Array.from(new Set(optimizationSuggestions)).slice(0, 6) // Eliminar duplicados y limitar a 6
+    optimizationSuggestions: Array.from(new Set(optimizationSuggestions)).slice(0, 6), // Eliminar duplicados y limitar a 6
   };
-}; 
+};

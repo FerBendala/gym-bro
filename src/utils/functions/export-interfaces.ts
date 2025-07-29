@@ -48,18 +48,18 @@ export interface WorkoutRecordExportData {
   date: string;
   dayOfWeek: string;
   estimated1RM: number;
-  individualSets?: Array<{ weight: number; reps: number; volume: number }>;
+  individualSets?: { weight: number; reps: number; volume: number }[];
 }
 
 export interface ExercisesByDayData {
   dayOfWeek: string;
-  exercises: Array<{
+  exercises: {
     exerciseName: string;
     categories: string[];
     frequency: number;
     averageVolume: number;
     totalVolume: number;
-  }>;
+  }[];
   totalVolume: number;
   averageVolume: number;
   workoutCount: number;
@@ -67,19 +67,19 @@ export interface ExercisesByDayData {
 
 export interface VolumeAnalysisData {
   totalVolume: number;
-  volumeByCategory: Array<{
+  volumeByCategory: {
     category: string;
     volume: number;
     percentage: number;
     averagePerWorkout: number;
-  }>;
-  volumeByExercise: Array<{
+  }[];
+  volumeByExercise: {
     exerciseName: string;
     volume: number;
     percentage: number;
     averagePerWorkout: number;
     categories: string[];
-  }>;
+  }[];
 }
 
 export interface WeeklyVolumeData {
@@ -89,11 +89,11 @@ export interface WeeklyVolumeData {
   workoutCount: number;
   averageVolumePerWorkout: number;
   uniqueExercises: number;
-  categoryBreakdown: Array<{
+  categoryBreakdown: {
     category: string;
     volume: number;
     percentage: number;
-  }>;
+  }[];
 }
 
 export interface CategoryMetricsExportData {
@@ -127,10 +127,10 @@ export interface ProgressSummaryData {
   consistencyScore: number;
   topPerformingCategories: string[];
   areasForImprovement: string[];
-  personalRecords: Array<{
+  personalRecords: {
     exerciseName: string;
     weight: number;
     date: string;
     estimated1RM: number;
-  }>;
-} 
+  }[];
+}
