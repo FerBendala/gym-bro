@@ -1,4 +1,5 @@
 import type { WorkoutRecord } from '@/interfaces';
+import { calculateVolume } from './volume-calculations';
 
 /**
  * Interfaz para eficiencia de entrenamiento
@@ -26,7 +27,7 @@ export const analyzeTrainingEfficiency = (records: WorkoutRecord[]): TrainingEff
   }
 
   // Ratio volumen/peso promedio
-  const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const totalVolume = records.reduce((sum, r) => sum + calculateVolume(r), 0);
   const avgWeight = records.reduce((sum, r) => sum + r.weight, 0) / records.length;
   const volumeToWeightRatio = totalVolume / avgWeight;
 

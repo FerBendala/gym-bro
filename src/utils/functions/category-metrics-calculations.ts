@@ -1,4 +1,5 @@
 import type { WorkoutRecord } from '@/interfaces';
+import { calculateVolume } from './volume-calculations';
 
 /**
  * Calcula el número de récords personales en una categoría
@@ -32,7 +33,7 @@ export const calculatePersonalRecords = (categoryRecords: WorkoutRecord[]): numb
 export const calculateEfficiencyScore = (categoryRecords: WorkoutRecord[]): number => {
   if (categoryRecords.length === 0) return 0;
 
-  const totalVolume = categoryRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const totalVolume = categoryRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
   const totalSets = categoryRecords.reduce((sum, r) => sum + r.sets, 0);
 
   if (totalSets === 0) return 0;

@@ -1,4 +1,5 @@
 import type { WorkoutRecord } from '@/interfaces';
+import { differenceInDays } from 'date-fns';
 import { calculateOptimal1RM } from './calculate-1rm.utils';
 import { clamp, roundToDecimals } from './math-utils';
 
@@ -31,7 +32,7 @@ export const getMaxEstimated1RM = (records: WorkoutRecord[]): number => {
 
 /**
  * Obtiene la fecha más reciente de los registros
- * Patrón usado +5 veces: new Date(Math.max(...records.map(r => new Date(r.date).getTime())))
+ * Patrón usado +8 veces: new Date(Math.max(...records.map(r => new Date(r.date).getTime())))
  */
 export const getLatestDate = (records: WorkoutRecord[]): Date => {
   if (records.length === 0) return new Date();
@@ -40,19 +41,51 @@ export const getLatestDate = (records: WorkoutRecord[]): Date => {
 
 /**
  * Obtiene registros de los últimos N días
- * Patrón usado +3 veces: records.filter(r => differenceInDays(now, r.date) <= days)
+ * Patrón usado +6 veces: records.filter(r => differenceInDays(now, new Date(r.date)) <= days)
  */
 export const getRecordsFromLastDays = (records: WorkoutRecord[], days: number): WorkoutRecord[] => {
   const now = new Date();
   return records.filter(r => {
-    const daysDiff = (now.getTime() - new Date(r.date).getTime()) / (1000 * 60 * 60 * 24);
-    return daysDiff <= days;
+    const daysDiff = differenceInDays(now, new Date(r.date));
+    return daysDiff >= 0 && daysDiff <= days;
   });
 };
 
 /**
+ * Filtra registros por rango de días
+ * Patrón usado +4 veces: records.filter(r => daysDiff >= minDays && daysDiff <= maxDays)
+ */
+export const getRecordsByDayRange = (records: WorkoutRecord[], minDays: number, maxDays: number): WorkoutRecord[] => {
+  const now = new Date();
+  return records.filter(r => {
+    const daysDiff = differenceInDays(now, new Date(r.date));
+    return daysDiff >= minDays && daysDiff <= maxDays;
+  });
+};
+
+/**
+ * Ordena registros por fecha (más reciente primero)
+ * Patrón usado +8 veces: records.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+ */
+export const sortRecordsByDate = (records: WorkoutRecord[], ascending: boolean = false): WorkoutRecord[] => {
+  return [...records].sort((a, b) => {
+    const timeA = new Date(a.date).getTime();
+    const timeB = new Date(b.date).getTime();
+    return ascending ? timeA - timeB : timeB - timeA;
+  });
+};
+
+/**
+ * Ordena registros por fecha (más antiguo primero)
+ * Patrón usado +6 veces: records.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+ */
+export const sortRecordsByDateAscending = (records: WorkoutRecord[]): WorkoutRecord[] => {
+  return sortRecordsByDate(records, true);
+};
+
+/**
  * Valida y corrige tendencia de fuerza
- * Patrón usado +6 veces: Math.max(-max, Math.min(max, value))
+ * Patrón usado +4 veces: Math.max(-max, Math.min(max, value))
  */
 export const validateStrengthTrend = (trend: number, maxTrend: number = 2): number => {
   return clamp(trend, -maxTrend, maxTrend);
@@ -97,7 +130,7 @@ export const validateImprovement = (improvement: number, min: number = -80, max:
 export const getCurrentWeight = (records: WorkoutRecord[], days: number = 30): number => {
   const recentRecords = getRecordsFromLastDays(records, days);
   if (recentRecords.length === 0) return 0;
-  return getMaxWeight(recentRecords);
+  return Math.max(...recentRecords.map(r => r.weight));
 };
 
 /**
@@ -110,8 +143,8 @@ export const getBaseline1RM = (records: WorkoutRecord[]): number => {
 };
 
 /**
- * Calcula la mejora porcentual
- * Patrón usado +2 veces: ((current - baseline) / baseline) * 100
+ * Calcula mejora porcentual
+ * Patrón usado +3 veces: ((current - baseline) / baseline) * 100
  */
 export const calculateImprovement = (current: number, baseline: number): number => {
   if (baseline === 0) return 0;

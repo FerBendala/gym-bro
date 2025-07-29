@@ -1,6 +1,7 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { isValidRecord } from './is-valid-record.utils';
 import { clamp, roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
 import { getBaseline1RM, getMaxWeight } from './workout-utils';
@@ -51,7 +52,7 @@ const validateDataSufficiency = (records: WorkoutRecord[]): {
     };
   }
 
-  const validRecords = records.filter(r => r.weight > 0 && r.reps > 0 && r.sets > 0);
+  const validRecords = records.filter(isValidRecord);
 
   if (validRecords.length < 3) {
     return {
@@ -269,7 +270,7 @@ const calculatePRPrediction = (
   // Predicción conservadora de PR
   const predictedWeight = roundToDecimals(current1RMMax * (1 + strengthTrend / 100));
   const confidence = clamp(confidenceLevel * 0.8, 0.3, 0.9);
-  const timeToNextPR = strengthTrend > 0 ? Math.max(2, Math.min(12, 8 - strengthTrend * 2)) : 12;
+  const timeToNextPR = strengthTrend > 0 ? clamp(8 - strengthTrend * 2, 2, 12) : 12;
 
   return {
     weight: predictedWeight,

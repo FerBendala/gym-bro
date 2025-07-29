@@ -1,6 +1,7 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { calculateCategoryEffortDistribution } from './exercise-patterns';
 import { normalizeByWeekday } from './normalize-by-weekday';
+import { calculateVolume } from './volume-calculations';
 
 /**
  * Calcula la progresión de volumen para una categoría
@@ -52,7 +53,7 @@ export const calculateVolumeProgression = (categoryRecords: WorkoutRecord[], tar
     const categories = r.exercise?.categories || [];
     const effortDistribution = calculateCategoryEffortDistribution(categories, r.exercise?.name);
     const categoryEffort = effortDistribution[categoryName] || 0;
-    const totalVolume = r.weight * r.reps * r.sets;
+    const totalVolume = calculateVolume(r);
     const categoryVolume = totalVolume * categoryEffort;
     return sum + categoryVolume;
   }, 0) / firstHalf.length;
@@ -61,7 +62,7 @@ export const calculateVolumeProgression = (categoryRecords: WorkoutRecord[], tar
     const categories = r.exercise?.categories || [];
     const effortDistribution = calculateCategoryEffortDistribution(categories, r.exercise?.name);
     const categoryEffort = effortDistribution[categoryName] || 0;
-    const totalVolume = r.weight * r.reps * r.sets;
+    const totalVolume = calculateVolume(r);
     const categoryVolume = totalVolume * categoryEffort;
     return sum + categoryVolume;
   }, 0) / secondHalf.length;
@@ -92,12 +93,12 @@ export const calculateVolumeProgression = (categoryRecords: WorkoutRecord[], tar
 
       if (exerciseFirstHalf.length > 0 && exerciseSecondHalf.length > 0) {
         const firstAvgVolume = exerciseFirstHalf.reduce((sum, r) => {
-          const totalVolume = r.weight * r.reps * r.sets;
+          const totalVolume = calculateVolume(r);
           return sum + totalVolume;
         }, 0) / exerciseFirstHalf.length;
 
         const secondAvgVolume = exerciseSecondHalf.reduce((sum, r) => {
-          const totalVolume = r.weight * r.reps * r.sets;
+          const totalVolume = calculateVolume(r);
           return sum + totalVolume;
         }, 0) / exerciseSecondHalf.length;
 

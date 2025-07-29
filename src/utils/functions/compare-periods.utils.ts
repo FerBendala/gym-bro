@@ -2,6 +2,7 @@ import type { WorkoutRecord } from '@/interfaces';
 import { endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { calculateOptimal1RM } from './calculate-1rm.utils';
+import { calculateVolume } from './volume-calculations';
 import { getLastWeekRecords, getThisWeekRecords } from './week-records.utils';
 
 /**
@@ -118,7 +119,7 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
     const hasValidComparison = currentRecords.length >= 2 && prevRecords.length >= 2;
 
     if (currentRecords.length > 0) {
-      totalVolume = currentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+      totalVolume = currentRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
       avgWeight = currentRecords.reduce((sum, r) => {
         const oneRM = calculateOptimal1RM(r.weight, r.reps);
         return sum + oneRM;
@@ -128,7 +129,7 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
       if (hasEnoughData && hasValidComparison) {
         const currentAvgVolumePerSession = totalVolume / currentRecords.length;
 
-        const prevVolume = prevRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+        const prevVolume = prevRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
         const prevAvgVolumePerSession = prevVolume / prevRecords.length;
 
         const prevAvg1RM = prevRecords.reduce((sum, r) => {

@@ -2,6 +2,7 @@ import type { WorkoutRecord } from '@/interfaces';
 import { getDay } from 'date-fns';
 import { clamp } from './math-utils';
 import { calculateVolume } from './volume-calculations';
+import { sortRecordsByDateAscending } from './workout-utils';
 
 /**
  * Calcula tendencia de volumen por día de la semana
@@ -24,7 +25,7 @@ export const calculateVolumeTrendByDay = (records: WorkoutRecord[]): { day: stri
 
     if (dayRecords.length >= 3) {
       // Calcular tendencias con 3+ entrenamientos usando lógica realista
-      const sortedDayRecords = dayRecords.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      const sortedDayRecords = sortRecordsByDateAscending(dayRecords);
 
       if (dayRecords.length >= 4) {
         // CORRECCIÓN CLAVE: Verificar si hay distribución temporal real
@@ -55,6 +56,7 @@ export const calculateVolumeTrendByDay = (records: WorkoutRecord[]): { day: stri
         }
       } else {
         // Para exactamente 3 entrenamientos: verificar distribución temporal
+        const sortedDayRecords = sortRecordsByDateAscending(dayRecords);
         const uniqueDates = new Set(sortedDayRecords.map(r => r.date.toDateString()));
 
         if (uniqueDates.size <= 1) {
@@ -76,7 +78,7 @@ export const calculateVolumeTrendByDay = (records: WorkoutRecord[]): { day: stri
       }
     } else if (dayRecords.length === 2) {
       // Para 2 entrenamientos: verificar si están en días diferentes
-      const sortedDayRecords = dayRecords.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      const sortedDayRecords = sortRecordsByDateAscending(dayRecords);
       const uniqueDates = new Set(sortedDayRecords.map(r => r.date.toDateString()));
 
       if (uniqueDates.size <= 1) {

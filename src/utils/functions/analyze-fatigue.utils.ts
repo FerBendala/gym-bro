@@ -3,7 +3,7 @@ import { differenceInDays, endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { clamp, roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
-import { getLatestDate } from './workout-utils';
+import { getLatestDate, getRecordsByDayRange } from './workout-utils';
 
 /**
  * Interfaz para análisis de fatiga y recuperación
@@ -91,14 +91,8 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   // OPCIÓN A: Fallback si no hay datos en semanas anteriores completas
   if (recentRecords.length === 0 || olderRecords.length === 0) {
     // Usar últimos 7-14 días como fallback
-    const recent7Days = records.filter(r => {
-      const daysDiff = differenceInDays(now, new Date(r.date));
-      return daysDiff >= 0 && daysDiff <= 7;
-    });
-    const older7Days = records.filter(r => {
-      const daysDiff = differenceInDays(now, new Date(r.date));
-      return daysDiff >= 7 && daysDiff <= 14;
-    });
+    const recent7Days = getRecordsByDayRange(records, 0, 7);
+    const older7Days = getRecordsByDayRange(records, 7, 14);
 
     if (recentRecords.length === 0 && recent7Days.length > 0) {
       recentVolume = recent7Days.reduce((sum, r) => sum + calculateVolume(r), 0);
@@ -230,9 +224,10 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   }
 
   // Tiempo estimado de recuperación más realista
-  const predictedRecoveryTime = Math.round(Math.max(8, Math.min(72,
-    (fatigueIndex / 100) * 48 + (recoveryDays === 0 ? 12 : 0)
-  )));
+  const predictedRecoveryTime = Math.round(clamp(
+    (fatigueIndex / 100) * 48 + (recoveryDays === 0 ? 12 : 0),
+    8, 72
+  ));
 
   // Análisis de historial de fatiga usando semanas completas CON CONTEXTO
   // CORRECCIÓN: Considerar si el aumento es progreso controlado o deterioro

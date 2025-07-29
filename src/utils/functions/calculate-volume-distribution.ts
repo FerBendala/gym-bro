@@ -3,6 +3,7 @@ import { endOfMonth, endOfWeek, startOfMonth, startOfWeek, subMonths, subWeeks }
 import { es } from 'date-fns/locale';
 import { getCurrentDateFromRecords } from './get-current-date-from-records';
 import { normalizeByWeekday, normalizeVolumeTrend } from './normalize-by-weekday';
+import { calculateVolume } from './volume-calculations';
 
 /**
  * Calcula la distribución de volumen temporal para una categoría
@@ -56,8 +57,8 @@ export const calculateVolumeDistribution = (categoryRecords: WorkoutRecord[], al
   });
 
   // Calcular volúmenes base
-  const thisWeekVolume = thisWeekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-  const lastWeekVolume = lastWeekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const thisWeekVolume = thisWeekRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
+  const lastWeekVolume = lastWeekRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
 
   // **MEJORA CRÍTICA**: Normalizar volumen de esta semana por día actual
   const { normalizedCurrent: thisWeekNormalized, weekdayFactor } = normalizeByWeekday(
@@ -73,8 +74,8 @@ export const calculateVolumeDistribution = (categoryRecords: WorkoutRecord[], al
   return {
     thisWeek: thisWeekVolume,
     lastWeek: lastWeekVolume,
-    thisMonth: thisMonthRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0),
-    lastMonth: lastMonthRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0),
+    thisMonth: thisMonthRecords.reduce((sum, r) => sum + calculateVolume(r), 0),
+    lastMonth: lastMonthRecords.reduce((sum, r) => sum + calculateVolume(r), 0),
     // Nuevos valores normalizados
     thisWeekNormalized: Math.round(thisWeekNormalized),
     weekdayFactor,

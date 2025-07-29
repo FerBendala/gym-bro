@@ -1,6 +1,7 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { calculateVolume } from './volume-calculations';
 import { getThisWeekRecords } from './week-records.utils';
 
 /**
@@ -71,7 +72,7 @@ export const calculateTrainingDensity = (records: WorkoutRecord[]): TrainingDens
     const periodRecords = period.getRecords();
 
     if (periodRecords.length > 0) {
-      const totalVolume = periodRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+      const totalVolume = periodRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
       const avgVolumePerWorkout = totalVolume / periodRecords.length;
       // Calcular días únicos por semana en lugar de ejercicios individuales
       const uniqueDays = new Set(periodRecords.map(r => r.date.toDateString())).size;

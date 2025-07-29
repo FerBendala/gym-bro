@@ -1,4 +1,5 @@
 import type { WorkoutRecord } from '@/interfaces';
+import { getMaxWeight } from './workout-utils';
 
 /**
  * Calcula las métricas de rendimiento para una categoría
@@ -24,7 +25,7 @@ export const calculateCategoryPerformanceMetrics = (categoryRecords: WorkoutReco
   const sessions = Object.entries(sessionMap).map(([dateStr, records]) => ({
     date: new Date(dateStr),
     volume: records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0),
-    maxWeight: Math.max(...records.map(r => r.weight))
+    maxWeight: getMaxWeight(records)
   }));
 
   const bestSession = sessions.reduce((best, session) =>

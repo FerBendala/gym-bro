@@ -1,6 +1,7 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { determineExperienceLevel } from './determine-experience-level.utils';
 import { clamp } from './math-utils';
+import { calculateVolume } from './volume-calculations';
 
 /**
  * Analiza el balance de grupos musculares
@@ -106,7 +107,7 @@ export const analyzeRecoveryPatterns = (records: WorkoutRecord[]) => {
  * Analiza volumen óptimo
  */
 export const analyzeOptimalVolume = (records: WorkoutRecord[]) => {
-  const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const totalVolume = records.reduce((sum, r) => sum + calculateVolume(r), 0);
   const avgVolume = totalVolume / records.length;
 
   // Volumen óptimo depende del nivel de experiencia
@@ -159,7 +160,7 @@ export const analyzeGoalSpecificity = (records: WorkoutRecord[]) => {
  * Analiza demandas energéticas
  */
 export const analyzeEnergyDemands = (records: WorkoutRecord[]) => {
-  const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const totalVolume = records.reduce((sum, r) => sum + calculateVolume(r), 0);
   const avgVolume = totalVolume / records.length;
 
   // Demandas energéticas basadas en volumen e intensidad

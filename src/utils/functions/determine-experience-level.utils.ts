@@ -1,6 +1,7 @@
 import { EXPERIENCE_CONSTANTS } from '@/constants';
 import type { WorkoutRecord } from '@/interfaces';
 import { getValidSortedRecords } from './get-valid-sorted-records.utils';
+import { getMaxWeight } from './workout-utils';
 
 /**
  * Determina el nivel de experiencia basado en múltiples factores
@@ -11,7 +12,7 @@ export const determineExperienceLevel = (records: WorkoutRecord[]): 'beginner' |
   if (validRecords.length === 0) return 'beginner';
 
   const totalWeeks = Math.max(1, validRecords.length / 3); // Estimación: ~3 entrenamientos por semana
-  const maxWeight = Math.max(...validRecords.map(r => r.weight));
+  const maxWeight = getMaxWeight(validRecords);
   const exerciseVariety = new Set(validRecords.map(r => r.exercise?.name || 'unknown')).size;
 
   // Criterios para principiante
