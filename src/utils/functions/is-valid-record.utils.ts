@@ -16,7 +16,7 @@ export const isValidRecord = (record: WorkoutRecord): boolean => {
     return false;
   }
 
-  // CORRECCIÓN: Rechazar fechas futuras que distorsionan cálculos
+  // Rechazar fechas futuras que distorsionan cálculos
   const now = new Date();
   const tolerance = 24 * 60 * 60 * 1000; // 1 día de tolerancia para zona horaria
 

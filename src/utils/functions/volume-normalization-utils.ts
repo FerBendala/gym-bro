@@ -51,7 +51,7 @@ export const getVolumeByDayOfWeek = (records: WorkoutRecord[]): Record<string, n
 
 /**
  * Normaliza un volumen de un día específico basado en el patrón semanal
- * CORRECCIÓN: Usa volumen total del día, no registro individual
+ * Usa volumen total del día, no registro individual
  */
 export const normalizeVolumeByDay = (
   date: Date,
@@ -112,7 +112,7 @@ export const calculateNormalizedVolumeTrend = (records: WorkoutRecord[]): number
     normalizedVolume: normalizeVolumeByDay(date, volume, avgVolumeByDay)
   }));
 
-  // CORRECCIÓN CRÍTICA: Usar períodos de tiempo reales para calcular tendencia
+  // Usar períodos de tiempo reales para calcular tendencia
   const length = normalizedDays.length;
   const halfPoint = Math.floor(length / 2);
 
@@ -124,7 +124,7 @@ export const calculateNormalizedVolumeTrend = (records: WorkoutRecord[]): number
 
   if (olderAvg === 0) return 0;
 
-  // CORRECCIÓN CRÍTICA: Calcular días transcurridos entre períodos
+  // Calcular días transcurridos entre períodos
   const oldestDate = olderPeriod[0].date.getTime();
   const newestDate = recentPeriod[recentPeriod.length - 1].date.getTime();
   const daysBetween = Math.max(1, (newestDate - oldestDate) / (1000 * 60 * 60 * 24));
@@ -190,7 +190,7 @@ export const predictVolumeForDay = (
 
 /**
  * Obtiene información de contexto sobre patrones semanales
- * CORRECCIÓN: Sin valores hardcodeados, lógica robusta
+ * Sin valores hardcodeados, lógica robusta
  */
 export const getWeeklyVolumeInsights = (records: WorkoutRecord[]): {
   avgVolumeByDay: Record<string, number>;

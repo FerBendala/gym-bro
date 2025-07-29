@@ -1,12 +1,10 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { calculateBasicMetrics } from './calculate-basic-metrics';
 import { isValidRecord } from './is-valid-record.utils';
 import { clamp, roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
-import { getBaseline1RM, getMaxWeight } from './workout-utils';
-import { calculateBasicMetrics } from './calculate-basic-metrics';
-import { groupRecordsByWeek } from './group-records-by-week';
 
 /**
  * Interfaz para predicción de progreso

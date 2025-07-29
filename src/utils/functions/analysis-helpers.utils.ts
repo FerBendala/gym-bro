@@ -1,169 +1,128 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { determineExperienceLevel } from './determine-experience-level.utils';
-import { clamp } from './math-utils';
-import { calculateVolume } from './volume-calculations';
+import { sortRecordsByDateAscending } from './workout-utils';
 
 /**
- * Analiza el balance de grupos musculares
+ * Utilidades de análisis centralizadas
+ * Optimizado para usar funciones de ordenamiento centralizadas
  */
-export const analyzeMuscleGroupBalance = (records: WorkoutRecord[]) => {
-  const categoryAnalysis: { [key: string]: number } = {};
 
-  records.forEach(record => {
-    const category = record.exercise?.name.split(' ')[0]; // Simplificado
-    categoryAnalysis[category || ''] = (categoryAnalysis[category || ''] || 0) + (record.weight * record.reps * record.sets);
-  });
+/**
+ * Calcula la tendencia de peso en un período específico
+ */
+export const calculateWeightTrend = (records: WorkoutRecord[], days: number = 30): number => {
+  if (records.length < 2) return 0;
 
-  return categoryAnalysis;
+  // ✅ OPTIMIZACIÓN: Usar función centralizada de ordenamiento
+  const sortedRecords = sortRecordsByDateAscending(records);
+
+  const recentRecords = sortedRecords.slice(-Math.min(days, sortedRecords.length));
+  const olderRecords = sortedRecords.slice(0, Math.max(0, sortedRecords.length - days));
+
+  if (recentRecords.length === 0 || olderRecords.length === 0) return 0;
+
+  const recentAvgWeight = recentRecords.reduce((sum, r) => sum + r.weight, 0) / recentRecords.length;
+  const olderAvgWeight = olderRecords.reduce((sum, r) => sum + r.weight, 0) / olderRecords.length;
+
+  return recentAvgWeight - olderAvgWeight;
 };
 
 /**
- * Analiza patrones de entrenamiento diarios
+ * Calcula la tendencia de volumen en un período específico
  */
-export const analyzeDailyTrainingPatterns = (records: WorkoutRecord[]) => {
-  const dailyPatterns: { [key: string]: number } = {};
+export const calculateVolumeTrend = (records: WorkoutRecord[], days: number = 30): number => {
+  if (records.length < 2) return 0;
 
-  records.forEach(record => {
-    const day = new Date(record.date).toLocaleDateString('es-ES', { weekday: 'long' });
-    dailyPatterns[day] = (dailyPatterns[day] || 0) + 1;
-  });
+  // ✅ OPTIMIZACIÓN: Usar función centralizada de ordenamiento
+  const sortedRecords = sortRecordsByDateAscending(records);
 
-  return dailyPatterns;
+  const recentRecords = sortedRecords.slice(-Math.min(days, sortedRecords.length));
+  const olderRecords = sortedRecords.slice(0, Math.max(0, sortedRecords.length - days));
+
+  if (recentRecords.length === 0 || olderRecords.length === 0) return 0;
+
+  const recentAvgVolume = recentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / recentRecords.length;
+  const olderAvgVolume = olderRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / olderRecords.length;
+
+  return recentAvgVolume - olderAvgVolume;
 };
 
 /**
- * Analiza rangos de repeticiones
+ * Calcula la frecuencia de entrenamiento en un período específico
  */
-export const analyzeRepRanges = (records: WorkoutRecord[]) => {
-  let lowRep = 0;
-  let highRep = 0;
-  let total = 0;
+export const calculateTrainingFrequency = (records: WorkoutRecord[], days: number = 30): number => {
+  if (records.length === 0) return 0;
 
-  records.forEach(record => {
-    total += record.reps;
-    if (record.reps <= 6) lowRep += record.reps;
-    if (record.reps >= 12) highRep += record.reps;
-  });
+  // ✅ OPTIMIZACIÓN: Usar función centralizada de ordenamiento
+  const sortedRecords = sortRecordsByDateAscending(records);
 
-  return { lowRep, highRep, total };
+  const recentRecords = sortedRecords.slice(-Math.min(days, sortedRecords.length));
+  const uniqueDays = new Set(recentRecords.map(r => r.date.toDateString())).size;
+
+  return (uniqueDays / days) * 7; // Frecuencia semanal
 };
 
 /**
- * Analiza consistencia temporal
+ * Calcula la consistencia de entrenamiento
  */
-export const analyzeTemporalConsistency = (records: WorkoutRecord[]) => {
-  const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  const daysBetween = sortedRecords.length > 1 ?
-    (new Date(sortedRecords[sortedRecords.length - 1].date).getTime() - new Date(sortedRecords[0].date).getTime()) / (1000 * 60 * 60 * 24) : 0;
+export const calculateTrainingConsistency = (records: WorkoutRecord[], days: number = 30): number => {
+  if (records.length === 0) return 0;
 
-  const consistencyScore = clamp((records.length / Math.max(1, daysBetween / 7)) * 100, 0, 100);
+  // ✅ OPTIMIZACIÓN: Usar función centralizada de ordenamiento
+  const sortedRecords = sortRecordsByDateAscending(records);
 
-  return { consistencyScore };
+  const recentRecords = sortedRecords.slice(-Math.min(days, sortedRecords.length));
+  const uniqueDays = new Set(recentRecords.map(r => r.date.toDateString())).size;
+
+  // Calcular consistencia basada en días de entrenamiento vs días totales
+  const consistency = (uniqueDays / days) * 100;
+
+  // Penalizar por gaps largos
+  const gaps = calculateTrainingGaps(recentRecords);
+  const gapPenalty = Math.min(20, gaps * 2); // Máximo 20% de penalización
+
+  return Math.max(0, consistency - gapPenalty);
 };
 
 /**
- * Analiza sobrecarga progresiva
+ * Calcula los gaps de entrenamiento
  */
-export const analyzeProgressiveOverload = (records: WorkoutRecord[]) => {
-  if (records.length < 2) return { overloadScore: 0 };
+const calculateTrainingGaps = (records: WorkoutRecord[]): number => {
+  if (records.length < 2) return 0;
 
-  const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  let progressionCount = 0;
+  // ✅ OPTIMIZACIÓN: Usar función centralizada de ordenamiento
+  const sortedRecords = sortRecordsByDateAscending(records);
 
-  for (let i = 1; i < sortedRecords.length; i++) {
-    if (sortedRecords[i].weight > sortedRecords[i - 1].weight) {
-      progressionCount++;
-    }
-  }
-
-  const overloadScore = (progressionCount / (sortedRecords.length - 1)) * 100;
-  return { overloadScore };
-};
-
-/**
- * Analiza patrones de recuperación
- */
-export const analyzeRecoveryPatterns = (records: WorkoutRecord[]) => {
-  const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  let consecutiveDays = 0;
-  let maxConsecutive = 0;
+  let totalGaps = 0;
+  let gapCount = 0;
 
   for (let i = 1; i < sortedRecords.length; i++) {
     const daysDiff = (new Date(sortedRecords[i].date).getTime() - new Date(sortedRecords[i - 1].date).getTime()) / (1000 * 60 * 60 * 24);
 
-    if (daysDiff <= 1) {
-      consecutiveDays++;
-      maxConsecutive = Math.max(maxConsecutive, consecutiveDays);
-    } else {
-      consecutiveDays = 0;
+    if (daysDiff > 3) { // Gap de más de 3 días
+      totalGaps += daysDiff;
+      gapCount++;
     }
   }
 
-  const recoveryScore = maxConsecutive <= 3 ? 100 : Math.max(0, 100 - (maxConsecutive - 3) * 20);
-  return { recoveryScore };
+  return gapCount > 0 ? totalGaps / gapCount : 0;
 };
 
 /**
- * Analiza volumen óptimo
+ * Calcula la progresión de intensidad
  */
-export const analyzeOptimalVolume = (records: WorkoutRecord[]) => {
-  const totalVolume = records.reduce((sum, r) => sum + calculateVolume(r), 0);
-  const avgVolume = totalVolume / records.length;
+export const calculateIntensityProgression = (records: WorkoutRecord[], days: number = 30): number => {
+  if (records.length < 2) return 0;
 
-  // Volumen óptimo depende del nivel de experiencia
-  const experienceLevel = determineExperienceLevel(records);
-  let optimalVolume = 1000;
+  // ✅ OPTIMIZACIÓN: Usar función centralizada de ordenamiento
+  const sortedRecords = sortRecordsByDateAscending(records);
 
-  if (experienceLevel === 'intermediate') optimalVolume = 2000;
-  if (experienceLevel === 'advanced') optimalVolume = 3000;
+  const recentRecords = sortedRecords.slice(-Math.min(days, sortedRecords.length));
+  const olderRecords = sortedRecords.slice(0, Math.max(0, sortedRecords.length - days));
 
-  const volumeScore = Math.min(100, (avgVolume / optimalVolume) * 100);
-  return { volumeScore };
-};
+  if (recentRecords.length === 0 || olderRecords.length === 0) return 0;
 
-/**
- * Analiza patrones de seguridad
- */
-export const analyzeSafetyPatterns = (records: WorkoutRecord[]) => {
-  if (records.length < 2) return { safetyScore: 50 };
+  const recentAvgIntensity = recentRecords.reduce((sum, r) => sum + (r.weight / r.reps), 0) / recentRecords.length;
+  const olderAvgIntensity = olderRecords.reduce((sum, r) => sum + (r.weight / r.reps), 0) / olderRecords.length;
 
-  const sortedRecords = [...records].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
-  let safeProgression = 0;
-
-  for (let i = 1; i < sortedRecords.length; i++) {
-    const weightIncrease = ((sortedRecords[i].weight - sortedRecords[i - 1].weight) / sortedRecords[i - 1].weight) * 100;
-    if (weightIncrease <= 10) safeProgression++;
-  }
-
-  const safetyScore = (safeProgression / (sortedRecords.length - 1)) * 100;
-  return { safetyScore };
-};
-
-/**
- * Analiza especificidad de objetivos
- */
-export const analyzeGoalSpecificity = (records: WorkoutRecord[]) => {
-  const repRanges = analyzeRepRanges(records);
-  const avgReps = repRanges.total / records.length;
-
-  // Especificidad basada en rangos de repeticiones
-  let specificityScore = 50;
-
-  if (avgReps >= 8 && avgReps <= 12) specificityScore = 80; // Hipertrofia
-  else if (avgReps >= 3 && avgReps <= 6) specificityScore = 80; // Fuerza
-  else if (avgReps >= 12) specificityScore = 70; // Resistencia
-
-  return { specificityScore };
-};
-
-/**
- * Analiza demandas energéticas
- */
-export const analyzeEnergyDemands = (records: WorkoutRecord[]) => {
-  const totalVolume = records.reduce((sum, r) => sum + calculateVolume(r), 0);
-  const avgVolume = totalVolume / records.length;
-
-  // Demandas energéticas basadas en volumen e intensidad
-  const energyScore = clamp(100 - (avgVolume / 100), 0, 100);
-  return { energyScore };
+  return recentAvgIntensity - olderAvgIntensity;
 }; 

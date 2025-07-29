@@ -2,6 +2,7 @@ import { deleteWorkoutRecord, getExercises, getWorkoutRecords } from '@/api/serv
 import type { Exercise, WorkoutRecord } from '@/interfaces';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
+import { logger } from '@/utils';
 import { useCallback, useEffect, useState } from 'react';
 
 export const useDashboardData = () => {
@@ -30,7 +31,7 @@ export const useDashboardData = () => {
         const exercise = exercisesData.find((ex: Exercise) => ex.id === record.exerciseId);
 
         if (!exercise) {
-          console.warn(`⚠️ Ejercicio no encontrado para record ${record.id} con exerciseId: ${record.exerciseId}`);
+          logger.warn(`Ejercicio no encontrado para record ${record.id} con exerciseId: ${record.exerciseId}`, { recordId: record.id, exerciseId: record.exerciseId }, 'DASHBOARD');
         }
 
         return {
@@ -42,7 +43,7 @@ export const useDashboardData = () => {
       setWorkoutRecords(enrichedRecords);
       setExercises(exercisesData);
     } catch (error: unknown) {
-      console.error('❌ Error cargando datos del dashboard:', error);
+      logger.error('Error cargando datos del dashboard:', error as Error, undefined, 'DASHBOARD');
       const errorMessage = error instanceof Error ? error.message : 'Error al cargar los datos del dashboard';
       showNotification(errorMessage, 'error');
     } finally {
@@ -73,7 +74,7 @@ export const useDashboardData = () => {
       showNotification(`Entrenamiento de ${exerciseName} eliminado exitosamente`, 'success');
 
     } catch (error: unknown) {
-      console.error('Error eliminando entrenamiento:', error);
+      logger.error('Error eliminando entrenamiento:', error as Error, { recordId }, 'DASHBOARD');
       const errorMessage = error instanceof Error ? error.message : 'Error al eliminar el entrenamiento';
       showNotification(errorMessage, 'error');
       throw error;

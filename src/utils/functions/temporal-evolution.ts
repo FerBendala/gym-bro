@@ -67,15 +67,13 @@ export const calculateTemporalEvolution = (records: WorkoutRecord[]): TemporalEv
   const recentTrends = trends.slice(-3);
   const avgRecentVolume = recentTrends.reduce((sum, t) => sum + t.volume, 0) / recentTrends.length;
   const avgRecentWorkouts = recentTrends.reduce((sum, t) => sum + t.workouts, 0) / recentTrends.length;
-  const recentGrowth = recentTrends.length > 1 ?
-    recentTrends[recentTrends.length - 1].volume - recentTrends[0].volume : 0;
 
   // Calcular predicciones
   const predictions = {
     nextWeekVolume: Math.round(avgRecentVolume * (1 + growthRate / 100)),
     nextWeekWorkouts: Math.round(avgRecentWorkouts * (1 + growthRate / 100)),
     confidence: clamp(0.7 - volatility, 0.3, 0.9),
-    trend: growthRate > 5 ? 'Alcista' : growthRate < -5 ? 'Bajista' : 'Lateral'
+    trend: (growthRate > 5 ? 'Alcista' : growthRate < -5 ? 'Bajista' : 'Lateral') as 'Alcista' | 'Bajista' | 'Lateral'
   };
 
   // Análisis de ciclos (usando análisis de días existente)

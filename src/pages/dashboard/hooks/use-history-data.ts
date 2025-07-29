@@ -111,7 +111,7 @@ export const useHistoryData = (records: WorkoutRecord[]) => {
       if (index > 0) {
         const previousPoint = sortedData[index - 1];
 
-        // CORRECCIÓN: Comparación justa temporal - mismo punto en ambas semanas
+        // Comparación justa temporal - mismo punto en ambas semanas
         const now = new Date();
         const currentWeekStart = startOfWeek(point.date, { locale: es });
         const isCurrentWeekIncomplete = point.date.getTime() >= startOfWeek(now, { locale: es }).getTime();

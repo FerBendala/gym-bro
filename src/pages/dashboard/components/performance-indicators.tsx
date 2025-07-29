@@ -56,6 +56,25 @@ export const PerformanceIndicators: React.FC<PerformanceIndicatorsProps> = ({ in
     return <IconComponent className="w-5 h-5" />;
   };
 
+  // Validación de seguridad
+  if (!indicators || !Array.isArray(indicators)) {
+    return (
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <Target className="w-5 h-5 mr-2" />
+            Indicadores de Rendimiento
+          </h3>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-400 text-center py-4">
+            Cargando indicadores de rendimiento...
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>

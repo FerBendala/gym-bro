@@ -18,6 +18,30 @@ export const OptimizationSuggestions: React.FC<OptimizationSuggestionsProps> = (
     return DASHBOARD_COLORS.PRIORITY_COLORS[priority as keyof typeof DASHBOARD_COLORS.PRIORITY_COLORS] || DASHBOARD_COLORS.PRIORITY_COLORS.low;
   };
 
+  // Validación de seguridad
+  if (!suggestions || !Array.isArray(suggestions)) {
+    return (
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <Brain className="w-5 h-5 mr-2" />
+            Sugerencias de Optimización
+            <InfoTooltip
+              content="Recomendaciones personalizadas y priorizadas basadas en análisis detallado de tus datos de entrenamiento."
+              position="top"
+              className="ml-2"
+            />
+          </h3>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-400 text-center py-4">
+            Cargando sugerencias de optimización...
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card>
       <CardHeader>

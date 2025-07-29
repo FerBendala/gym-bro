@@ -2,6 +2,7 @@ import type { Exercise, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord 
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 
+import { logger } from '@/utils';
 import { useCallback } from 'react';
 import { EXERCISE_CARD_CONSTANTS } from '../constants';
 import type { ExerciseCardProps, UseExerciseCardReturn } from '../types';
@@ -77,7 +78,7 @@ export const useExerciseCard = (
       resetModal();
       fetchLastRecord();
     } catch (error) {
-      console.error('Error recording workout:', error);
+      logger.error('Error recording workout:', error as Error, { exerciseId, assignmentId }, 'EXERCISE_CARD');
       throw error;
     } finally {
       setLoading(false);

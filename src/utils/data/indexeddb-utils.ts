@@ -1,3 +1,4 @@
+import { logger } from '@/utils';
 import {
   DB_NAME,
   DB_VERSION,
@@ -47,7 +48,7 @@ export const initializeDB = (): Promise<IDBDatabase> => {
 
       // Manejar cierres inesperados
       dbInstance.onclose = () => {
-        console.warn('Base de datos cerrada inesperadamente');
+        logger.warn('Base de datos cerrada inesperadamente', undefined, 'INDEXEDDB');
         dbInstance = null;
         dbPromise = null;
       };

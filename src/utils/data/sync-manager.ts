@@ -1,3 +1,4 @@
+import { logger } from '@/utils';
 import { STORES, SYNC_OPERATIONS, SYNC_PRIORITY, SYNC_STATUS } from './indexeddb-config';
 import type {
   DatabaseResult,
@@ -20,9 +21,9 @@ type SyncEventListener = (event: SyncEvent) => void;
 
 class SyncManager {
   private eventListeners: SyncEventListener[] = [];
-  private syncInterval: number | null = null;
+  private syncInterval: ReturnType<typeof setInterval> | null = null;
   private isSyncing = false;
-  private retryTimeouts: Map<number, number> = new Map();
+  private retryTimeouts: Map<number, ReturnType<typeof setTimeout>> = new Map();
 
   constructor() {
     this.setupOnlineListener();
@@ -53,7 +54,7 @@ class SyncManager {
       if (navigator.onLine && !this.isSyncing) {
         this.processSyncQueue();
       }
-    }, intervalMinutes * 60 * 1000) as number;
+    }, intervalMinutes * 60 * 1000);
   }
 
   /**
@@ -91,7 +92,7 @@ class SyncManager {
       try {
         listener(event);
       } catch (error) {
-        console.error('Error en listener de eventos de sync:', error);
+        logger.error('Error en listener de eventos de sync:', error as Error, undefined, 'SYNC');
       }
     });
   }
@@ -170,7 +171,7 @@ class SyncManager {
             total: pendingItems.length
           });
         } catch (error) {
-          console.error('Error procesando item de sync:', error);
+          logger.error('Error procesando item de sync:', error as Error, { itemId: item.id }, 'SYNC');
           await this.handleSyncError(item, error as Error);
         }
       }
@@ -182,7 +183,7 @@ class SyncManager {
       });
 
     } catch (error) {
-      console.error('Error en processSyncQueue:', error);
+      logger.error('Error en processSyncQueue:', error as Error, undefined, 'SYNC');
       this.emit({
         type: 'sync_failed',
         error: error instanceof Error ? error.message : 'Error desconocido'
@@ -313,7 +314,7 @@ class SyncManager {
         }
       }
     } catch (error) {
-      console.error('Error limpiando elementos completados:', error);
+      logger.error('Error limpiando elementos completados:', error as Error, undefined, 'SYNC');
     }
   }
 

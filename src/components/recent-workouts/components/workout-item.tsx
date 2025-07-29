@@ -3,6 +3,7 @@ import {
   formatRelativeTime,
   formatVolumeToKg,
   getVolumeAdjustmentColor,
+  logger,
 } from '@/utils';
 import { Clock, Dumbbell, Target, Trash2, TrendingUp, Zap } from 'lucide-react';
 import React, { useState } from 'react';
@@ -34,7 +35,7 @@ export const WorkoutItem: React.FC<WorkoutItemProps> = ({ record, onDelete }) =>
     try {
       await onDelete(record.id);
     } catch (error) {
-      console.error('Error eliminando entrenamiento:', error);
+      logger.error('Error eliminando entrenamiento:', error as Error, { recordId: record.id }, 'WORKOUT_ITEM');
     } finally {
       setIsDeleting(false);
     }

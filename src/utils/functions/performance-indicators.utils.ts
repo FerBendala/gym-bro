@@ -1,5 +1,5 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { analyzeFatigue, analyzeIntensityMetrics, analyzeOptimalVolume, analyzeSafetyPatterns, analyzeTemporalConsistency, calculateProgressionRate, predictProgress } from './';
+import { calculateTrainingConsistency, calculateTrainingFrequency } from '@/utils/functions';
 
 /**
  * Genera indicadores de rendimiento pico mejorados
@@ -36,25 +36,25 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
   }> = [];
 
   // Análisis de consistencia
-  const consistencyAnalysis = analyzeTemporalConsistency(records);
-  if (consistencyAnalysis.consistencyScore >= 80) {
+  const consistency = calculateTrainingConsistency(records, 30);
+  if (consistency >= 80) {
     indicators.push({
       type: 'excellent',
       icon: 'calendar-check',
       title: 'Consistencia Excelente',
       description: 'Mantienes un patrón de entrenamiento muy regular',
-      value: `${consistencyAnalysis.consistencyScore}%`,
-      progress: consistencyAnalysis.consistencyScore,
+      value: `${consistency.toFixed(0)}%`,
+      progress: consistency,
       category: 'consistency'
     });
-  } else if (consistencyAnalysis.consistencyScore >= 60) {
+  } else if (consistency >= 60) {
     indicators.push({
       type: 'good',
       icon: 'calendar',
       title: 'Consistencia Buena',
       description: 'Tu rutina es bastante regular, pero hay espacio para mejorar',
-      value: `${consistencyAnalysis.consistencyScore}%`,
-      progress: consistencyAnalysis.consistencyScore,
+      value: `${consistency.toFixed(0)}%`,
+      progress: consistency,
       category: 'consistency'
     });
   } else {
@@ -63,154 +63,69 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       icon: 'calendar-x',
       title: 'Consistencia Baja',
       description: 'Necesitas establecer horarios más regulares para tu entrenamiento',
-      value: `${consistencyAnalysis.consistencyScore}%`,
-      progress: consistencyAnalysis.consistencyScore,
+      value: `${consistency.toFixed(0)}%`,
+      progress: consistency,
       category: 'consistency'
     });
   }
 
-  // Análisis de progreso
-  const progressionRate = calculateProgressionRate(records);
-  if (progressionRate >= 2) {
+  // Análisis de frecuencia
+  const frequency = calculateTrainingFrequency(records, 30);
+  if (frequency >= 4) {
     indicators.push({
       type: 'excellent',
       icon: 'trending-up',
-      title: 'Progreso Excelente',
-      description: 'Estás progresando a un ritmo muy bueno',
-      value: `${progressionRate.toFixed(1)}%`,
-      progress: Math.min(100, progressionRate * 20),
+      title: 'Frecuencia Excelente',
+      description: 'Entrenas con la frecuencia ideal para progreso',
+      value: `${frequency.toFixed(1)} días/semana`,
+      progress: Math.min(100, frequency * 20),
       category: 'progress'
     });
-  } else if (progressionRate >= 0.5) {
+  } else if (frequency >= 3) {
     indicators.push({
       type: 'good',
       icon: 'trending-up',
-      title: 'Progreso Estable',
-      description: 'Tu progreso es consistente y sostenible',
-      value: `${progressionRate.toFixed(1)}%`,
-      progress: Math.min(100, progressionRate * 20),
+      title: 'Frecuencia Buena',
+      description: 'Tu frecuencia de entrenamiento es adecuada',
+      value: `${frequency.toFixed(1)} días/semana`,
+      progress: Math.min(100, frequency * 20),
       category: 'progress'
     });
   } else {
     indicators.push({
       type: 'warning',
       icon: 'trending-down',
-      title: 'Progreso Lento',
-      description: 'Considera ajustar tu rutina para mejorar el progreso',
-      value: `${progressionRate.toFixed(1)}%`,
-      progress: Math.min(100, progressionRate * 20),
+      title: 'Frecuencia Baja',
+      description: 'Considera aumentar la frecuencia de entrenamiento',
+      value: `${frequency.toFixed(1)} días/semana`,
+      progress: Math.min(100, frequency * 20),
       category: 'progress'
     });
   }
 
-  // Análisis de intensidad
-  const intensityMetrics = analyzeIntensityMetrics(records);
-  if (intensityMetrics.overallIntensity === 'Óptima') {
-    indicators.push({
-      type: 'excellent',
-      icon: 'zap',
-      title: 'Intensidad Óptima',
-      description: 'Tu intensidad de entrenamiento está en el rango ideal',
-      value: `${intensityMetrics.averageIntensity}%`,
-      progress: intensityMetrics.averageIntensity,
-      category: 'intensity'
-    });
-  } else if (intensityMetrics.overallIntensity === 'Alta') {
-    indicators.push({
-      type: 'good',
-      icon: 'zap',
-      title: 'Intensidad Alta',
-      description: 'Buena intensidad, pero monitorea la recuperación',
-      value: `${intensityMetrics.averageIntensity}%`,
-      progress: intensityMetrics.averageIntensity,
-      category: 'intensity'
-    });
-  } else if (intensityMetrics.overallIntensity === 'Excesiva') {
-    indicators.push({
-      type: 'critical',
-      icon: 'zap',
-      title: 'Intensidad Excesiva',
-      description: 'Riesgo de sobreentrenamiento - reduce intensidad',
-      value: `${intensityMetrics.averageIntensity}%`,
-      progress: intensityMetrics.averageIntensity,
-      category: 'intensity'
-    });
-  } else {
-    indicators.push({
-      type: 'warning',
-      icon: 'zap',
-      title: 'Intensidad Baja',
-      description: 'Considera aumentar la intensidad gradualmente',
-      value: `${intensityMetrics.averageIntensity}%`,
-      progress: intensityMetrics.averageIntensity,
-      category: 'intensity'
-    });
-  }
-
-  // Análisis de recuperación
-  const fatigueAnalysis = analyzeFatigue(records);
-  if (fatigueAnalysis.fatigueIndex <= 30) {
-    indicators.push({
-      type: 'excellent',
-      icon: 'heart',
-      title: 'Recuperación Excelente',
-      description: 'Tu cuerpo se está recuperando muy bien',
-      value: `${fatigueAnalysis.fatigueIndex}%`,
-      progress: 100 - fatigueAnalysis.fatigueIndex,
-      category: 'recovery'
-    });
-  } else if (fatigueAnalysis.fatigueIndex <= 50) {
-    indicators.push({
-      type: 'good',
-      icon: 'heart',
-      title: 'Recuperación Buena',
-      description: 'Tu recuperación está en buen nivel',
-      value: `${fatigueAnalysis.fatigueIndex}%`,
-      progress: 100 - fatigueAnalysis.fatigueIndex,
-      category: 'recovery'
-    });
-  } else if (fatigueAnalysis.fatigueIndex <= 70) {
-    indicators.push({
-      type: 'warning',
-      icon: 'heart',
-      title: 'Fatiga Moderada',
-      description: 'Considera más descanso o reducir intensidad',
-      value: `${fatigueAnalysis.fatigueIndex}%`,
-      progress: 100 - fatigueAnalysis.fatigueIndex,
-      category: 'recovery'
-    });
-  } else {
-    indicators.push({
-      type: 'critical',
-      icon: 'heart',
-      title: 'Fatiga Crítica',
-      description: 'Descanso inmediato necesario - riesgo de lesión',
-      value: `${fatigueAnalysis.fatigueIndex}%`,
-      progress: 100 - fatigueAnalysis.fatigueIndex,
-      category: 'recovery'
-    });
-  }
-
   // Análisis de volumen
-  const volumeAnalysis = analyzeOptimalVolume(records);
-  if (volumeAnalysis.volumeScore >= 80) {
+  const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const avgVolumePerSession = totalVolume / records.length;
+  const volumeScore = Math.min(100, (avgVolumePerSession / 2000) * 100);
+
+  if (volumeScore >= 80) {
     indicators.push({
       type: 'excellent',
       icon: 'layers',
       title: 'Volumen Óptimo',
       description: 'Tu volumen de entrenamiento está bien balanceado',
-      value: `${volumeAnalysis.volumeScore}%`,
-      progress: volumeAnalysis.volumeScore,
+      value: `${volumeScore.toFixed(0)}%`,
+      progress: volumeScore,
       category: 'volume'
     });
-  } else if (volumeAnalysis.volumeScore >= 60) {
+  } else if (volumeScore >= 60) {
     indicators.push({
       type: 'good',
       icon: 'layers',
       title: 'Volumen Adecuado',
       description: 'Tu volumen está bien, pero hay espacio para optimizar',
-      value: `${volumeAnalysis.volumeScore}%`,
-      progress: volumeAnalysis.volumeScore,
+      value: `${volumeScore.toFixed(0)}%`,
+      progress: volumeScore,
       category: 'volume'
     });
   } else {
@@ -219,120 +134,46 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       icon: 'layers',
       title: 'Volumen Subóptimo',
       description: 'Considera ajustar tu volumen de entrenamiento',
-      value: `${volumeAnalysis.volumeScore}%`,
-      progress: volumeAnalysis.volumeScore,
+      value: `${volumeScore.toFixed(0)}%`,
+      progress: volumeScore,
       category: 'volume'
     });
   }
 
-  // Análisis de predicción
-  const prediction = predictProgress(records);
-  if (prediction.confidenceLevel >= 80) {
-    indicators.push({
-      type: 'excellent',
-      icon: 'target',
-      title: 'Predicciones Confiables',
-      description: 'Tus datos permiten predicciones muy precisas',
-      value: `${prediction.confidenceLevel}%`,
-      progress: prediction.confidenceLevel,
-      category: 'prediction'
-    });
-  } else if (prediction.confidenceLevel >= 60) {
-    indicators.push({
-      type: 'good',
-      icon: 'target',
-      title: 'Predicciones Moderadas',
-      description: 'Tus predicciones son razonablemente confiables',
-      value: `${prediction.confidenceLevel}%`,
-      progress: prediction.confidenceLevel,
-      category: 'prediction'
-    });
-  } else {
-    indicators.push({
-      type: 'warning',
-      icon: 'target',
-      title: 'Predicciones Limitadas',
-      description: 'Necesitas más datos para predicciones precisas',
-      value: `${prediction.confidenceLevel}%`,
-      progress: prediction.confidenceLevel,
-      category: 'prediction'
-    });
-  }
+  // Análisis de intensidad (simplificado)
+  const avgWeight = records.reduce((sum, r) => sum + r.weight, 0) / records.length;
+  const maxWeight = Math.max(...records.map(r => r.weight));
+  const intensityScore = (avgWeight / maxWeight) * 100;
 
-  // Análisis de meseta
-  if (prediction.plateauRisk <= 20) {
+  if (intensityScore >= 80) {
     indicators.push({
       type: 'excellent',
-      icon: 'shield',
-      title: 'Bajo Riesgo de Meseta',
-      description: 'Tu progreso es sostenible a largo plazo',
-      value: `${prediction.plateauRisk}%`,
-      progress: 100 - prediction.plateauRisk,
-      category: 'plateau'
+      icon: 'zap',
+      title: 'Intensidad Óptima',
+      description: 'Tu intensidad de entrenamiento está en el rango ideal',
+      value: `${intensityScore.toFixed(0)}%`,
+      progress: intensityScore,
+      category: 'intensity'
     });
-  } else if (prediction.plateauRisk <= 50) {
+  } else if (intensityScore >= 60) {
     indicators.push({
       type: 'good',
-      icon: 'shield',
-      title: 'Riesgo Moderado de Meseta',
-      description: 'Considera variar tu rutina para evitar estancamiento',
-      value: `${prediction.plateauRisk}%`,
-      progress: 100 - prediction.plateauRisk,
-      category: 'plateau'
-    });
-  } else if (prediction.plateauRisk <= 80) {
-    indicators.push({
-      type: 'warning',
-      icon: 'shield',
-      title: 'Alto Riesgo de Meseta',
-      description: 'Cambia tu rutina para evitar el estancamiento',
-      value: `${prediction.plateauRisk}%`,
-      progress: 100 - prediction.plateauRisk,
-      category: 'plateau'
-    });
-  } else {
-    indicators.push({
-      type: 'critical',
-      icon: 'shield',
-      title: 'Riesgo Crítico de Meseta',
-      description: 'Cambio inmediato de rutina necesario',
-      value: `${prediction.plateauRisk}%`,
-      progress: 100 - prediction.plateauRisk,
-      category: 'plateau'
-    });
-  }
-
-  // Análisis de seguridad
-  const safetyAnalysis = analyzeSafetyPatterns(records);
-  if (safetyAnalysis.safetyScore >= 80) {
-    indicators.push({
-      type: 'excellent',
-      icon: 'shield-check',
-      title: 'Seguridad Excelente',
-      description: 'Tus patrones de entrenamiento son muy seguros',
-      value: `${safetyAnalysis.safetyScore}%`,
-      progress: safetyAnalysis.safetyScore,
-      category: 'safety'
-    });
-  } else if (safetyAnalysis.safetyScore >= 60) {
-    indicators.push({
-      type: 'good',
-      icon: 'shield-check',
-      title: 'Seguridad Buena',
-      description: 'Tus patrones son seguros, pero hay espacio para mejorar',
-      value: `${safetyAnalysis.safetyScore}%`,
-      progress: safetyAnalysis.safetyScore,
-      category: 'safety'
+      icon: 'zap',
+      title: 'Intensidad Buena',
+      description: 'Buena intensidad, pero hay espacio para mejorar',
+      value: `${intensityScore.toFixed(0)}%`,
+      progress: intensityScore,
+      category: 'intensity'
     });
   } else {
     indicators.push({
       type: 'warning',
-      icon: 'shield-alert',
-      title: 'Seguridad Mejorable',
-      description: 'Revisa tu técnica y progresión para mayor seguridad',
-      value: `${safetyAnalysis.safetyScore}%`,
-      progress: safetyAnalysis.safetyScore,
-      category: 'safety'
+      icon: 'zap',
+      title: 'Intensidad Baja',
+      description: 'Considera aumentar la intensidad gradualmente',
+      value: `${intensityScore.toFixed(0)}%`,
+      progress: intensityScore,
+      category: 'intensity'
     });
   }
 

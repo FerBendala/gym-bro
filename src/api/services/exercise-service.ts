@@ -1,6 +1,7 @@
 import { db } from '@/api/firebase';
 import { handleFirebaseError } from '@/api/services/error-handler';
 import type { Exercise } from '@/interfaces';
+import { logger } from '@/utils';
 import { addDoc, collection, deleteDoc, deleteField, doc, FieldValue, getDocs, updateDoc } from 'firebase/firestore';
 
 /**
@@ -54,9 +55,8 @@ export class ExerciseService {
       const exercises = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Exercise));
       return exercises;
     } catch (error) {
-      console.error('🔥 ExerciseService.getAll - Error:', error);
-      handleFirebaseError(error, 'obtener ejercicios');
-      return []; // Fallback para evitar crashes
+      logger.error('ExerciseService.getAll - Error:', error as Error, { operation: 'getAll' }, 'API');
+      throw error;
     }
   }
 

@@ -37,7 +37,11 @@ export * from './category-ui-utils';
 export * from './chart-utils';
 export * from './compare-periods.utils';
 
-// Funciones de fechas y métricas temporales
+// Funciones de confianza y explicaciones
+export * from './confidence-utils';
+
+// Funciones de fechas y filtrado
+export * from './date-filter-utils';
 export * from './date.utils';
 export * from './day-metrics';
 export * from './determine-experience-level.utils';
@@ -49,6 +53,9 @@ export * from './exercise-patterns';
 export * from './export-functions';
 export * from './export-interfaces';
 export * from './export-utils';
+
+// Funciones de formateo y presentación
+export * from './format-utils';
 
 // Funciones de generación y obtención de datos
 export * from './generate-category-recommendations';
@@ -94,4 +101,3 @@ export * from './week-records.utils';
 export * from './workout-habits';
 export * from './workout-streaks';
 export * from './workout-utils';
-

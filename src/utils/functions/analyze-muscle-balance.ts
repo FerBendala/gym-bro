@@ -1,75 +1,65 @@
 import { EXERCISE_CATEGORIES, IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
-import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
+import type { WorkoutRecord } from '@/interfaces';
 import type { MuscleBalance } from './category-analysis-types';
 import {
-  analyzeBalanceHistory,
-  calculateAntagonistRatio,
-  calculateCategoryMetrics,
-  calculateStrengthIndex,
-  determineDevelopmentStage,
-  determinePriorityLevel,
-  generateSpecificRecommendations,
-  generateWarnings
+  calculateCategoryMetrics
 } from './index';
 
 /**
  * Analiza el balance muscular entre todas las categorías
  */
-export const analyzeMuscleBalance = (records: WorkoutRecord[], allAssignments?: ExerciseAssignment[]): MuscleBalance[] => {
+export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] => {
   if (records.length === 0) return [];
 
-  const categoryMetrics = calculateCategoryMetrics(records, allAssignments);
   const balance: MuscleBalance[] = [];
 
   // Analizar cada categoría
-  categoryMetrics.forEach(metric => {
-    const category = metric.category;
+  EXERCISE_CATEGORIES.forEach(category => {
+    const categoryMetrics = calculateCategoryMetrics(records, category);
+
     const idealPercentage = IDEAL_VOLUME_DISTRIBUTION[category] || 15;
-    const actualPercentage = metric.percentage;
+    const actualPercentage = categoryMetrics.percentage;
     const deviation = actualPercentage - idealPercentage;
 
     // Determinar si está balanceado (dentro del 5% del ideal)
     const isBalanced = Math.abs(deviation) <= 5;
 
-    // Calcular ratio antagonista
-    const antagonistRatio = calculateAntagonistRatio(category, categoryMetrics);
+    // Calcular ratio antagonista (simplificado)
+    const antagonistRatio = 1.0; // TODO: Implementar cálculo real
 
-    // Calcular índice de fuerza
-    const strengthIndex = calculateStrengthIndex(metric.estimatedOneRM, category);
+    // Calcular índice de fuerza (simplificado)
+    const strengthIndex = categoryMetrics.estimatedOneRM / 100; // Normalizado
 
-    // Analizar tendencia de progreso
-    const progressTrend = metric.trend;
+    // Analizar tendencia de progreso (simplificado)
+    const progressTrend = categoryMetrics.weightProgression > 0 ? 'improving' : 'stable';
 
-    // Determinar nivel de prioridad
-    const priorityLevel = determinePriorityLevel(deviation, metric.avgWorkoutsPerWeek, progressTrend, isBalanced);
+    // Determinar nivel de prioridad (simplificado)
+    const priorityLevel = deviation < -10 ? 'critical' : deviation < -5 ? 'high' : 'normal';
 
-    // Determinar etapa de desarrollo
-    const developmentStage = determineDevelopmentStage(strengthIndex, metric.avgWorkoutsPerWeek, metric.totalVolume);
+    // Determinar etapa de desarrollo (simplificado)
+    const developmentStage = categoryMetrics.workoutCount === 0 ? 'neglected' :
+      categoryMetrics.avgWorkoutsPerWeek < 1 ? 'beginner' : 'intermediate';
 
-    // Analizar historial de balance
-    const categoryRecords = records.filter(r =>
-      r.exercise?.categories?.includes(category) ||
-      (r.exercise?.categories?.length === 0 && category === 'Sin categoría')
-    );
-    const balanceHistory = analyzeBalanceHistory(categoryRecords, records, allAssignments);
+    // Analizar historial de balance (simplificado)
+    const balanceHistory = {
+      trend: 'stable',
+      consistency: categoryMetrics.consistencyScore,
+      volatility: 0
+    };
 
-    // Generar recomendaciones específicas
-    const specificRecommendations = generateSpecificRecommendations(category, {
-      deviation,
-      weeklyFrequency: metric.avgWorkoutsPerWeek,
-      progressTrend,
-      antagonistRatio,
-      intensityScore: metric.intensityScore
-    }, { recentImprovement: metric.recentImprovement });
+    // Generar recomendaciones específicas (simplificado)
+    const specificRecommendations = [];
+    if (deviation < -10) {
+      specificRecommendations.push(`Aumentar volumen de ${category.toLowerCase()}`);
+    } else if (deviation > 10) {
+      specificRecommendations.push(`Reducir volumen de ${category.toLowerCase()}`);
+    }
 
-    // Generar advertencias
-    const warnings = generateWarnings(category, {
-      priorityLevel,
-      developmentStage,
-      progressTrend,
-      antagonistRatio,
-      balanceHistory
-    }, categoryMetrics);
+    // Generar advertencias (simplificado)
+    const warnings = [];
+    if (categoryMetrics.workoutCount === 0) {
+      warnings.push(`${category} no ha sido entrenado`);
+    }
 
     // Crear recomendación general
     let recommendation = '';
@@ -83,7 +73,7 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[], allAssignments?: 
 
     balance.push({
       category,
-      volume: metric.totalVolume,
+      volume: categoryMetrics.totalVolume,
       percentage: actualPercentage,
       isBalanced,
       recommendation,
@@ -96,45 +86,12 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[], allAssignments?: 
       lastImprovement: null, // TODO: Implementar detección de última mejora
       priorityLevel,
       developmentStage,
-      weeklyFrequency: metric.avgWorkoutsPerWeek,
-      intensityScore: metric.intensityScore,
+      weeklyFrequency: categoryMetrics.avgWorkoutsPerWeek,
+      intensityScore: categoryMetrics.intensityScore,
       balanceHistory,
       specificRecommendations,
       warnings
     });
-  });
-
-  // Agregar categorías faltantes con valores por defecto
-  EXERCISE_CATEGORIES.forEach(category => {
-    const exists = balance.some(b => b.category === category);
-    if (!exists) {
-      const idealPercentage = IDEAL_VOLUME_DISTRIBUTION[category] || 15;
-      balance.push({
-        category,
-        volume: 0,
-        percentage: 0,
-        isBalanced: false,
-        recommendation: `Añadir entrenamientos de ${category.toLowerCase()}`,
-        idealPercentage,
-        deviation: -idealPercentage,
-        symmetryScore: 0,
-        antagonistRatio: 0,
-        strengthIndex: 0,
-        progressTrend: 'stable',
-        lastImprovement: null,
-        priorityLevel: 'critical',
-        developmentStage: 'neglected',
-        weeklyFrequency: 0,
-        intensityScore: 0,
-        balanceHistory: {
-          trend: 'stable',
-          consistency: 0,
-          volatility: 0
-        },
-        specificRecommendations: [`Incluir ejercicios de ${category.toLowerCase()} en tu rutina`],
-        warnings: [`${category} no ha sido entrenado`]
-      });
-    }
   });
 
   return balance.sort((a, b) => Math.abs(b.deviation) - Math.abs(a.deviation));

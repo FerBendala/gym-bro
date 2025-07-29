@@ -230,7 +230,7 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   ));
 
   // Análisis de historial de fatiga usando semanas completas CON CONTEXTO
-  // CORRECCIÓN: Considerar si el aumento es progreso controlado o deterioro
+  // Considerar si el aumento es progreso controlado o deterioro
   let trend: FatigueAnalysis['fatigueHistory']['trend'];
 
   if (volumeChange > 25) {

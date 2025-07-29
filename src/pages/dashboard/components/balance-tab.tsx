@@ -1,5 +1,5 @@
 import { UpperLowerBalanceContent } from '@/components/dashboard-upper-lower-balance-content';
-import type { WorkoutRecord } from '@/interfaces';
+import type { CategoryAnalysisData, MuscleBalanceData, UpperLowerBalanceData, WorkoutRecord } from '@/interfaces';
 import { BarChart3, Brain, PieChart, Scale } from 'lucide-react';
 import React from 'react';
 import { BalanceByGroupContent, GeneralContent, TrendsContent } from '.';
@@ -104,22 +104,17 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
 
       {activeSubTab === 'balanceByGroup' && muscleBalance.length > 0 && (
         <BalanceByGroupContent
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          muscleBalance={muscleBalance as any}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          categoryAnalysis={categoryAnalysis as any}
+          muscleBalance={muscleBalance as MuscleBalanceData[]}
+          categoryAnalysis={categoryAnalysis as CategoryAnalysisData}
           onItemClick={handleBalanceItemClick}
         />
       )}
 
       {activeSubTab === 'upperLower' && Object.keys(upperLowerBalance).length > 0 && (
         <UpperLowerBalanceContent
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          upperLowerBalance={upperLowerBalance as any}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          categoryAnalysis={categoryAnalysis as any}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          muscleBalance={muscleBalance as any}
+          upperLowerBalance={upperLowerBalance as UpperLowerBalanceData}
+          categoryAnalysis={categoryAnalysis as CategoryAnalysisData}
+          muscleBalance={muscleBalance as MuscleBalanceData[]}
           onItemClick={handleUpperLowerItemClick}
         />
       )}

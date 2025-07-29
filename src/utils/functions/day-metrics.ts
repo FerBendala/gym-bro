@@ -27,7 +27,7 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
   // Calcular volumen total usando función centralizada
   const totalVolume = records.reduce((sum, r) => sum + calculateVolume(r), 0);
 
-  // Días de la semana en orden
+  // Días de la semana en orden correcto (Lunes a Domingo)
   const daysOfWeek = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
 
   return daysOfWeek.map((dayName, dayIndex) => {
@@ -36,8 +36,8 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
 
     if (workoutCount === 0) {
       return {
-        dayName,
-        dayIndex,
+        dayName: dayName.charAt(0).toUpperCase() + dayName.slice(1), // Capitalizar
+        dayIndex: dayIndex === 6 ? 0 : dayIndex + 1, // Domingo = 0, Lunes = 1, etc.
         workouts: 0,
         avgVolume: 0,
         totalVolume: 0,
@@ -66,8 +66,9 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
     const sets = dayWorkouts.map(r => r.sets);
 
     const avgVolume = volumes.reduce((sum, v) => sum + v, 0) / volumes.length;
-    const totalVolume = volumes.reduce((sum, v) => sum + v, 0);
-    const percentage = totalVolume > 0 ? (totalVolume / totalVolume) * 100 : 0;
+    const dayTotalVolume = volumes.reduce((sum, v) => sum + v, 0);
+    // CORREGIR: Usar el volumen total de todos los registros, no solo del día
+    const percentage = totalVolume > 0 ? (dayTotalVolume / totalVolume) * 100 : 0;
 
     // Usar función centralizada para calcular máximo
     const maxWeight = getMaxWeight(dayWorkouts);
@@ -140,7 +141,7 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
     }
 
     // Calcular scores de rendimiento
-    const volumeScore = totalVolume > 0 ? clamp((totalVolume / totalVolume) * 700, 0, 100) : 0;
+    const volumeScore = totalVolume > 0 ? clamp((dayTotalVolume / totalVolume) * 100, 0, 100) : 0;
     const consistencyScore = clamp(consistency * 2, 0, 100);
     const varietyScore = clamp(uniqueExercises * 20, 0, 100);
     const performanceScore = Math.round((volumeScore + consistencyScore + varietyScore) / 3);
@@ -184,11 +185,11 @@ export const calculateDayMetrics = (records: WorkoutRecord[]): DayMetrics[] => {
     }
 
     return {
-      dayName,
-      dayIndex,
+      dayName: dayName.charAt(0).toUpperCase() + dayName.slice(1), // Capitalizar
+      dayIndex: dayIndex === 6 ? 0 : dayIndex + 1, // Domingo = 0, Lunes = 1, etc.
       workouts: workoutCount,
       avgVolume: roundToDecimals(avgVolume),
-      totalVolume: roundToDecimals(totalVolume),
+      totalVolume: roundToDecimals(dayTotalVolume),
       percentage: roundToDecimals(percentage, 1),
       mostFrequentTime,
       maxWeight: roundToDecimals(maxWeight),

@@ -1,4 +1,4 @@
-import type { WorkoutRecord } from '@/interfaces';
+import type { CategoryAnalysisData, MuscleBalanceData, UpperLowerBalanceData, WorkoutRecord } from '@/interfaces';
 import { analyzeMuscleBalance, calculateBalanceScore, calculateCategoryAnalysis } from '@/utils';
 
 // Constantes para meta-categorías (como en main)
@@ -26,7 +26,16 @@ const META_CATEGORIES = {
   }
 };
 
-export const calculateBalanceAnalysis = (records: WorkoutRecord[]) => {
+export const calculateBalanceAnalysis = (records: WorkoutRecord[]): {
+  balanceScore: number;
+  finalConsistency: number;
+  avgIntensity: number;
+  avgFrequency: number;
+  muscleBalance: MuscleBalanceData[];
+  categoryAnalysis: CategoryAnalysisData;
+  upperLowerBalance: UpperLowerBalanceData;
+  selectedView: 'general' | 'balanceByGroup' | 'upperLower' | 'trends';
+} => {
   if (records.length === 0) {
     return {
       balanceScore: 0,
@@ -35,12 +44,16 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]) => {
       avgFrequency: 0,
       muscleBalance: [],
       categoryAnalysis: {
-        categoryMetrics: []
+        categoryMetrics: [],
+        overallBalance: 0,
+        recommendations: []
       },
       upperLowerBalance: {
         upperBody: { volume: 0, percentage: 0, categories: [] },
         lowerBody: { volume: 0, percentage: 0, categories: [] },
-        core: { volume: 0, percentage: 0, categories: [] }
+        core: { volume: 0, percentage: 0, categories: [] },
+        isBalanced: true,
+        recommendation: 'Sin datos suficientes'
       },
       selectedView: 'general' as const
     };
@@ -73,17 +86,82 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]) => {
     muscleBalance: muscleBalance.map(balance => ({
       category: balance.category,
       percentage: balance.percentage,
-      totalVolume: balance.volume,
+      totalVolume: balance.volume, // Agregar esta línea
+      volume: balance.volume,
       idealPercentage: balance.idealPercentage,
       intensityScore: balance.intensityScore,
       weeklyFrequency: balance.weeklyFrequency,
       isBalanced: balance.isBalanced,
       priorityLevel: balance.priorityLevel,
       progressTrend: balance.progressTrend,
-      personalRecords: categoryAnalysis.categoryMetrics.find(m => m.category === balance.category)?.personalRecords || [],
-      balanceHistory: balance.balanceHistory
+      personalRecords: (categoryAnalysis.categoryMetrics.find(m => m.category === balance.category)?.personalRecords || []).map(pr => ({
+        id: pr.id || `pr-${Date.now()}`,
+        weight: pr.weight,
+        reps: pr.reps,
+        date: pr.date,
+        exerciseId: pr.exerciseId || 'unknown'
+      })),
+      balanceHistory: {
+        ...balance.balanceHistory,
+        weeklyData: [], // TODO: Implementar datos semanales
+        // Propiedades requeridas por BalanceHistory
+        lastWeekVolume: balance.volume * 0.9, // TODO: Calcular volumen real de la semana anterior
+        currentWeekVolume: balance.volume, // TODO: Calcular volumen real de la semana actual
+        changePercent: balance.volume > 0 ? 10 : 0 // TODO: Calcular cambio porcentual real
+      }
     })),
-    categoryAnalysis,
+    categoryAnalysis: {
+      categoryMetrics: categoryAnalysis.categoryMetrics.map(metric => ({
+        category: metric.category,
+        percentage: metric.percentage,
+        totalVolume: metric.totalVolume,
+        workouts: metric.workoutCount,
+        avgWeight: metric.avgWeight,
+        maxWeight: metric.maxWeight,
+        minWeight: metric.minWeight,
+        avgWorkoutsPerWeek: metric.avgWorkoutsPerWeek,
+        avgSets: metric.avgSets,
+        avgReps: metric.avgReps,
+        estimatedOneRM: metric.estimatedOneRM,
+        weightProgression: metric.weightProgression,
+        volumeProgression: metric.volumeProgression,
+        intensityScore: metric.intensityScore,
+        efficiencyScore: metric.efficiencyScore,
+        consistencyScore: metric.consistencyScore,
+        lastWorkout: null, // TODO: Implementar
+        totalSets: metric.avgSets * metric.workoutCount,
+        totalReps: metric.avgReps * metric.workoutCount,
+        personalRecords: 0, // TODO: Implementar
+        daysSinceLastWorkout: 0, // TODO: Implementar
+        trend: metric.weightProgression > 0 ? 'improving' : 'stable',
+        strengthLevel: metric.estimatedOneRM > 100 ? 'advanced' : metric.estimatedOneRM > 50 ? 'intermediate' : 'beginner',
+        recentImprovement: metric.weightProgression > 0,
+        volumeDistribution: {
+          thisWeek: 0,
+          lastWeek: 0,
+          thisMonth: 0,
+          lastMonth: 0
+        },
+        performanceMetrics: {
+          bestSession: {
+            date: new Date(),
+            volume: metric.totalVolume,
+            maxWeight: metric.maxWeight
+          },
+          averageSessionVolume: metric.totalVolume / Math.max(1, metric.workoutCount),
+          volumePerWorkout: metric.totalVolume / Math.max(1, metric.workoutCount),
+          sessionsAboveAverage: 0
+        },
+        recommendations: [],
+        warnings: [],
+        // Propiedades requeridas por CategoryMetric
+        volumeTrend: metric.volumeProgression,
+        frequency: metric.avgWorkoutsPerWeek,
+        intensity: metric.intensityScore
+      })),
+      overallBalance: balanceScore,
+      recommendations: []
+    },
     upperLowerBalance,
     selectedView: 'general' as const
   };

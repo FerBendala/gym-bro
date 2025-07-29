@@ -1,42 +1,18 @@
 import { Card, CardContent, CardHeader } from '@/components/card';
 import type { WorkoutRecord } from '@/interfaces';
-import { calculateTrendsAnalysis, formatNumberToString } from '@/utils';
+import { formatNumberToString } from '@/utils';
 import { Activity, AlertTriangle, Calendar, CheckCircle, TrendingDown, TrendingUp, Zap } from 'lucide-react';
 import React, { useMemo } from 'react';
+import { useTrendsContent } from '../hooks/use-trends-content';
 import { EmptyState } from '../shared';
+import { dayColors, dayIcons, safeNumber } from './trends-utils';
 
 interface TrendsContentProps {
   records: WorkoutRecord[];
 }
 
-// Función de utilidad para manejar valores seguros
-const safeNumber = (value: number | undefined, fallback: number = 0): number => {
-  return typeof value === 'number' && !isNaN(value) ? value : fallback;
-};
-
-// Iconos y colores para días de la semana (como en main)
-const dayIcons: Record<string, React.ComponentType<{ className?: string }>> = {
-  'Lunes': Calendar,
-  'Martes': Activity,
-  'Miércoles': Zap,
-  'Jueves': TrendingUp,
-  'Viernes': CheckCircle,
-  'Sábado': Calendar,
-  'Domingo': Calendar
-};
-
-const dayColors: Record<string, string> = {
-  'Lunes': 'from-blue-500/80 to-cyan-500/80',
-  'Martes': 'from-green-500/80 to-emerald-500/80',
-  'Miércoles': 'from-purple-500/80 to-violet-500/80',
-  'Jueves': 'from-orange-500/80 to-amber-500/80',
-  'Viernes': 'from-red-500/80 to-pink-500/80',
-  'Sábado': 'from-indigo-500/80 to-blue-500/80',
-  'Domingo': 'from-teal-500/80 to-green-500/80'
-};
-
 export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
-  const analysis = useMemo(() => calculateTrendsAnalysis(records), [records]);
+  const { trendsData } = useTrendsContent(records);
 
   // Calcular indicador de experiencia basado en registros
   const experienceLevel = useMemo(() => {
@@ -91,7 +67,7 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            {analysis.dayMetricsOrdered.map((day) => {
+            {trendsData.dailyTrends.map((day) => {
               const Icon = dayIcons[day.dayName] || Calendar;
               const colorGradient = dayColors[day.dayName] || 'from-gray-500/80 to-gray-600/80';
 

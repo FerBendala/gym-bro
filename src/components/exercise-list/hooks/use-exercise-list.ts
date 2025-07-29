@@ -2,7 +2,7 @@ import { createWorkoutRecord, getAssignmentsByDay, getExercises, getWorkoutRecor
 import type { DayOfWeek, ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
-import { getExercisesTrainedTodayForCurrentDay } from '@/utils';
+import { getExercisesTrainedTodayForCurrentDay, logger } from '@/utils';
 import { useCallback, useEffect, useState } from 'react';
 import type { UseExerciseListReturn } from '../types';
 
@@ -30,7 +30,7 @@ export const useExerciseList = (dayOfWeek: DayOfWeek): UseExerciseListReturn => 
 
     // Validar que dayOfWeek sea válido antes de hacer la consulta
     if (!dayOfWeek) {
-      console.warn('⚠️ dayOfWeek es undefined, saltando carga de asignaciones');
+      logger.warn('dayOfWeek es undefined, saltando carga de asignaciones', { dayOfWeek }, 'EXERCISE_LIST');
       setLoading(false);
       return;
     }

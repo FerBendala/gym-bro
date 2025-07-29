@@ -6,5 +6,8 @@
 export * from './data';
 export * from './functions';
 
+// Sistema de logging
+export * from './logger';
+
 
 
