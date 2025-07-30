@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { PreviewCompact, PreviewFull, PreviewLoading } from './components';
+import { PreviewCompact, PreviewFull } from './components';
 import { useURLPreview } from './hooks';
 import type { URLPreviewProps } from './types';
 
@@ -20,14 +20,9 @@ export const URLPreview: React.FC<URLPreviewProps> = ({
 }) => {
   const { previewData, isLoading, hasData } = useURLPreview(url);
 
-  // Estado de carga
-  if (isLoading) {
-    return <PreviewLoading className={className} />;
-  }
-
   // Sin datos válidos
-  if (!hasData || !previewData) {
-    return <PreviewLoading className={className} />;
+  if (isLoading || !hasData || !previewData) {
+    return null;
   }
 
   // Vista completa (modal)

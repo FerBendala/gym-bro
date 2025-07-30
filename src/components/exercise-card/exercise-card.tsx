@@ -1,16 +1,15 @@
-import { WifiOff } from 'lucide-react';
+import { ClipboardList, Play, WifiOff } from 'lucide-react';
 import React from 'react';
 
-import { ExerciseCardHeader, ExerciseModal } from './components';
+import { ExerciseModal } from './components';
 import { LastWorkoutSummary } from './components/last-workout-summary';
 import { useExerciseCard } from './hooks';
 import type { ExerciseCardProps } from './types';
 
 import { Card, CardContent } from '@/components/card';
-import { OfflineWarning } from '@/components/offline-warning';
 import { URLPreview } from '@/components/url-preview';
 import type { WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
-import { getCategoryColor } from '@/utils';
+import { getCategoryColor, getCategoryIcon } from '@/utils';
 
 /**
  * Componente principal del ExerciseCard
@@ -48,57 +47,123 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({
 
   const primaryCategory = assignment.exercise?.categories?.[0] || 'Pecho';
   const colorGradient = getCategoryColor(primaryCategory);
+  const CategoryIcon = getCategoryIcon(primaryCategory);
+
+  const handleCardClick = () => {
+    if (!disabled) {
+      toggleModal();
+    }
+  };
+
+  const handleVideoClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (assignment.exercise?.url) {
+      setShowPreview(true);
+    }
+  };
 
   return (
     <>
-      <Card className={`mb-3 relative overflow-hidden transition-all duration-300 hover:shadow-xl ${isTrainedToday
-        ? 'border-green-500/50 shadow-lg shadow-green-500/20 bg-gradient-to-br from-gray-800/90 to-gray-900/90'
-        : 'bg-gradient-to-br from-gray-800/50 to-gray-900/70 border-gray-700/50 hover:border-gray-600/50'
-      }`}>
+      <Card
+        className={`relative overflow-hidden transition-all duration-300 hover:shadow-lg cursor-pointer ${isTrainedToday
+          ? 'border-green-500/50 shadow-md shadow-green-500/20 bg-gradient-to-r from-gray-800/90 to-gray-900/90'
+          : 'bg-gradient-to-r from-gray-800/50 to-gray-900/70 border-gray-700/50 hover:border-gray-600/50'
+          } ${disabled ? 'cursor-not-allowed opacity-60' : 'hover:scale-[1.02]'}`}
+        onClick={handleCardClick}
+      >
         {/* Indicador visual de categoría */}
-        <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${colorGradient}`} />
+        <div className={`absolute top-0 left-0 w-full h-0.5 bg-gradient-to-r ${colorGradient}`} />
 
         {/* Indicador de entrenamiento completado */}
         {isTrainedToday && (
-          <div className="absolute top-2 right-2 w-3 h-3 bg-green-500 rounded-full animate-pulse shadow-lg shadow-green-500/50" />
+          <div className="absolute top-2 right-2 w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-md shadow-green-500/50" />
         )}
 
-        <CardContent className="p-4 sm:p-6">
-          <ExerciseCardHeader
-            assignment={assignment}
-            disabled={disabled}
-            onToggleModal={toggleModal}
-            onShowPreview={() => setShowPreview(true)}
-            onGoToHistory={onGoToHistory}
-          />
+        <CardContent className="p-4">
+          {/* Título y categorías en la parte superior */}
+          <div className="flex items-start space-x-3 mb-3">
+            {/* Icono con gradiente por categoría - más grande */}
+            <div className={`p-3 rounded-xl bg-gradient-to-br ${colorGradient} flex-shrink-0 shadow-lg`}>
+              <CategoryIcon className="w-5 h-5 text-white" />
+            </div>
 
-          {assignment.exercise?.description && (
-            <p className="text-xs sm:text-sm text-gray-300 mb-3 leading-relaxed bg-gray-800/30 p-2 rounded-lg border border-gray-700/50">
+            {/* Título y categorías en columna */}
+            <div className="flex-1 min-w-0">
+              {/* Categorías encima del título */}
+              {assignment.exercise?.categories && assignment.exercise.categories.length > 0 && (
+                <div className="flex items-center space-x-1 mb-1">
+                  {assignment.exercise.categories.slice(0, 2).map((category) => (
+                    <span
+                      key={category}
+                      className={`inline-flex items-center text-xs text-white bg-gradient-to-r ${getCategoryColor(category)} px-1.5 py-0.5 rounded-full font-medium shadow-sm border border-white/20`}
+                    >
+                      {category}
+                    </span>
+                  ))}
+                  {assignment.exercise.categories.length > 2 && (
+                    <span className="text-xs text-gray-400 bg-gray-700/50 px-1 py-0.5 rounded-full">
+                      +{assignment.exercise.categories.length - 2}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Título debajo de las categorías - más pequeño */}
+              <h3 className="text-base font-semibold text-white leading-tight truncate text-justify">
+                {assignment.exercise?.name || 'Ejercicio'}
+              </h3>
+            </div>
+          </div>
+
+          {/* Contenido principal en layout horizontal */}
+          <div className="flex items-center justify-between space-x-4 w-full">
+            {/* Sección de información del último entrenamiento */}
+            <div className="flex-shrink-0 text-right">
+              <LastWorkoutSummary record={lastRecord} compact />
+            </div>
+
+            {/* Sección de acciones */}
+            <div className="flex items-center space-x-2 flex-shrink-0">
+              {/* Warning de conexión */}
+              {disabled && (
+                <div className="p-2 bg-red-500/20 rounded-lg border border-red-500/30">
+                  <WifiOff className="w-4 h-4 text-red-400" />
+                </div>
+              )}
+
+              {/* Botón de historial */}
+              {onGoToHistory && assignment.exercise && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onGoToHistory(assignment.exerciseId, assignment.exercise!.name);
+                  }}
+                  title={`Ver historial de ${assignment.exercise.name}`}
+                  className="p-2 rounded-lg bg-purple-600/20 hover:bg-purple-600/30 border border-purple-500/30 transition-all duration-200 hover:scale-105"
+                >
+                  <ClipboardList className="w-4 h-4 text-purple-400" />
+                </button>
+              )}
+
+              {/* Botón de video (solo si existe URL) */}
+              {assignment.exercise?.url && (
+                <button
+                  onClick={handleVideoClick}
+                  title="Ver video del ejercicio"
+                  className="p-2 rounded-lg bg-orange-600/20 hover:bg-orange-600/30 border border-orange-500/30 transition-all duration-200 hover:scale-105"
+                >
+                  <Play className="w-4 h-4 text-orange-400" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Descripción (solo si existe y es corta) */}
+          {assignment.exercise?.description && assignment.exercise.description.length < 120 && (
+            <p className="text-xs text-gray-300 mt-3 leading-relaxed bg-gray-800/30 p-3 rounded-lg border border-gray-700/50">
               {assignment.exercise.description}
             </p>
           )}
-
-          {/* Vista previa de URL */}
-          {assignment.exercise?.url && (
-            <div className="mb-3">
-              <URLPreview
-                url={assignment.exercise.url}
-                onClick={() => setShowPreview(true)}
-              />
-            </div>
-          )}
-
-          {/* Warning de conexión */}
-          {disabled && (
-            <OfflineWarning
-              message="Sin conexión. No se pueden registrar entrenamientos."
-              icon={WifiOff}
-              variant="warning"
-            />
-          )}
-
-          {/* Resumen del último entrenamiento */}
-          <LastWorkoutSummary record={lastRecord} />
         </CardContent>
       </Card>
 
@@ -114,7 +179,7 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({
         lastWorkoutSeries={lastWorkoutSeries}
       />
 
-      {/* Modal de vista previa completa */}
+      {/* Modal de vista previa completa - solo se renderiza cuando se necesita */}
       {showPreview && assignment.exercise?.url && (
         <URLPreview
           url={assignment.exercise.url}
