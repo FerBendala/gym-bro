@@ -1,7 +1,6 @@
 import React from 'react';
 
-import { DaySelector, ExerciseListSection, QuickDayNavigation } from './components';
-import { useDaySelector } from './hooks';
+import { ExerciseListSection, QuickDayNavigation } from './components';
 import type { ModernHomeProps } from './types';
 import { formatDayName, getSelectedDayInfo } from './utils';
 
@@ -17,24 +16,12 @@ export const ModernHome: React.FC<ModernHomeProps> = ({
   onOpenAdmin,
   onGoToHistory,
 }) => {
-  const { showDaySelector, toggleDaySelector, closeDaySelector } = useDaySelector();
   const selectedDayInfo = getSelectedDayInfo(activeDay);
 
   return (
     <Page
       title="Entrenamientos"
       subtitle={`${formatDayName(activeDay)} • ${selectedDayInfo.formattedDate}`}
-      headerActions={
-        <div className="flex items-center space-x-2">
-          <DaySelector
-            activeDay={activeDay}
-            onDayChange={onDayChange}
-            showDaySelector={showDaySelector}
-            onToggle={toggleDaySelector}
-            onClose={closeDaySelector}
-          />
-        </div>
-      }
     >
       <QuickDayNavigation
         activeDay={activeDay}
