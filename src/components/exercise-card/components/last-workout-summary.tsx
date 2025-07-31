@@ -38,7 +38,7 @@ export const LastWorkoutSummary: React.FC<LastWorkoutSummaryProps> = ({ record, 
         {showIndividualSets ? (
           // Mostrar series individuales con formato simplificado
           <div className="space-y-1">
-            {hasExplicitIndividualSets ? (
+            {hasExplicitIndividualSets && (
               // Series explícitas con formato simplificado
               record.individualSets!.slice(0, 2).map((set, index) => (
                 <div key={index} className="text-xs text-white font-medium flex items-center space-x-1">
@@ -51,32 +51,6 @@ export const LastWorkoutSummary: React.FC<LastWorkoutSummaryProps> = ({ record, 
                   </span>
                 </div>
               ))
-            ) : (
-              // Series inferidas con formato simplificado
-              Array.from({ length: Math.min(record.sets, 2) }, (_, index) => {
-                const weightVariation = (index - record.sets / 2) * 2.5;
-                const repsVariation = index % 2 === 0 ? 1 : -1;
-                const weight = Math.max(0, record.weight + weightVariation);
-                const reps = Math.max(1, record.reps + repsVariation);
-                const setVolume = weight * reps;
-
-                return (
-                  <div key={index} className="text-xs text-white font-medium flex items-center space-x-1">
-                    <Zap className="w-3 h-3 text-yellow-400" />
-                    <span className="text-yellow-400">{weight.toFixed(weight % 1 === 0 ? 0 : 1)}</span>
-                    <Target className="w-3 h-3 text-green-400" />
-                    <span className="text-green-400">{reps}</span>
-                    <span className="text-gray-400 text-xs ml-1">
-                      ({setVolume.toFixed(0)}kg)
-                    </span>
-                  </div>
-                );
-              })
-            )}
-            {record.sets > 2 && (
-              <div className="text-xs text-gray-400">
-                +{record.sets - 2} series más
-              </div>
             )}
             <div className="text-xs text-gray-400 font-medium">
               {volume.toFixed(0)}kg total

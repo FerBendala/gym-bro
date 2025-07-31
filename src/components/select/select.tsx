@@ -26,11 +26,8 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(({
   value,
   onChange,
   disabled = false,
-  ...props
 }, ref) => {
   const {
-    useGroups,
-    selectClasses,
     hasError,
     isOpen,
     dropdownRef,
@@ -66,7 +63,6 @@ export const Select = forwardRef<HTMLDivElement, SelectProps>(({
           isOpen={isOpen}
           disabled={disabled}
           hasError={hasError}
-          size={size}
           displayText={displayText}
           placeholder={placeholder}
           onToggle={handleToggle}

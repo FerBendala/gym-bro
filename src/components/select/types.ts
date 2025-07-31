@@ -24,7 +24,6 @@ export interface SelectButtonProps {
   isOpen: boolean;
   disabled?: boolean;
   hasError: boolean;
-  size: SelectSize;
   displayText?: string;
   placeholder?: string;
   onToggle: () => void;

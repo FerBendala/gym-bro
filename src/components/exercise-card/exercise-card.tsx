@@ -1,4 +1,4 @@
-import { Bookmark, ClipboardList, Play, WifiOff } from 'lucide-react';
+import { Bookmark, ClipboardList, Info, Play, WifiOff } from 'lucide-react';
 import React from 'react';
 
 import { ExerciseModal } from './components';
@@ -55,11 +55,18 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({
     }
   };
 
+  const [showDescription, setShowDescription] = React.useState(false);
+
   const handleVideoClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (assignment.exercise?.url) {
       setShowPreview(true);
     }
+  };
+
+  const handleDescriptionClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setShowDescription(!showDescription);
   };
 
   return (
@@ -143,6 +150,20 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({
                 </button>
               )}
 
+              {/* Botón de descripción (solo si existe descripción) */}
+              {assignment.exercise?.description && (
+                <button
+                  onClick={handleDescriptionClick}
+                  title="Ver descripción del ejercicio"
+                  className={`p-2 rounded-lg border transition-all duration-200 hover:scale-105 ${showDescription
+                    ? 'bg-blue-600/30 border-blue-500/50'
+                    : 'bg-blue-600/20 hover:bg-blue-600/30 border-blue-500/30'
+                    }`}
+                >
+                  <Info className="w-4 h-4 text-blue-400" />
+                </button>
+              )}
+
               {/* Botón de video (solo si existe URL) */}
               {assignment.exercise?.url && (
                 <button
@@ -154,6 +175,18 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({
                 </button>
               )}
             </div>
+          </div>
+
+          {/* Descripción del ejercicio con animación */}
+          <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showDescription && assignment.exercise?.description ? 'max-h-96 opacity-100' : 'max-h-0 opacity-0'
+            }`}>
+            {assignment.exercise?.description && (
+              <div className="mt-3 p-3 bg-blue-900/20 border border-blue-500/30 rounded-lg">
+                <p className="text-sm text-blue-200 leading-relaxed">
+                  {assignment.exercise.description}
+                </p>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>

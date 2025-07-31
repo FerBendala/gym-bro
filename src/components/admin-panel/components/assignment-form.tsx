@@ -30,7 +30,6 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) =
   } = useAdminStore();
 
   const {
-    register,
     handleSubmit,
     reset,
     setValue,

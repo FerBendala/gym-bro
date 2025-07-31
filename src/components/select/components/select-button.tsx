@@ -8,7 +8,6 @@ export const SelectButton: React.FC<SelectButtonProps> = ({
   isOpen,
   disabled,
   hasError,
-  size,
   displayText,
   placeholder,
   onToggle,
