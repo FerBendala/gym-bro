@@ -70,6 +70,7 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({
           : 'bg-gradient-to-r from-gray-800/50 to-gray-900/70 border-gray-700/50 hover:border-gray-600/50'
           } ${disabled ? 'cursor-not-allowed opacity-60' : 'hover:scale-[1.02]'}`}
         onClick={handleCardClick}
+        asButton={false}
       >
         {/* Indicador visual de categoría */}
         <div className={`absolute top-0 left-0 w-full h-4 bg-gradient-to-r ${colorGradient}`} />

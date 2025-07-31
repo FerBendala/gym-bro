@@ -43,8 +43,6 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ dayOfWeek, onOpenAdm
       THEME_RESPONSIVE.spacing.section.tablet,
     )}>
       <ExerciseListHeader
-        dayOfWeek={dayOfWeek}
-        isOnline={isOnline}
         onOpenAdmin={onOpenAdmin}
         hasExercises={assignments.length > 0}
         isDragModeActive={isDragModeActive}

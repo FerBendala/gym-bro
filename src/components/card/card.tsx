@@ -15,6 +15,7 @@ export interface CardProps {
   onClick?: () => void;
   isClickable?: boolean;
   isActive?: boolean;
+  asButton?: boolean;
 }
 
 /**
@@ -31,8 +32,9 @@ export const Card: React.FC<CardProps> = ({
   onClick,
   isClickable = false,
   isActive = false,
+  asButton = false,
 }) => {
-  const Component = onClick || isClickable ? 'button' : 'div';
+  const Component = asButton ? 'button' : 'div';
 
   const cardClasses = cn(
     THEME_CONTAINERS.card.base,

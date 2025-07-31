@@ -34,6 +34,7 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) =
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors },
   } = useForm<AssignmentFormData>({
     mode: 'onChange',
@@ -43,10 +44,18 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) =
     },
   });
 
+  // Observar el valor del formulario
+  const exerciseId = watch('exerciseId');
+
   // Actualizar el formulario cuando cambie selectedDay
   useEffect(() => {
     setValue('dayOfWeek', selectedDay);
   }, [selectedDay, setValue]);
+
+  // Manejar el cambio del select manualmente
+  const handleExerciseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setValue('exerciseId', e.target.value);
+  };
 
   const handleFormSubmit = async (data: AssignmentFormData) => {
     if (!isOnline) {
@@ -97,7 +106,8 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) =
         disabled={!isOnline}
         placeholder={isOnline ? 'Selecciona un ejercicio...' : 'Sin conexión'}
         groups={exerciseGroups}
-        {...register('exerciseId', { required: 'Selecciona un ejercicio' })}
+        value={exerciseId}
+        onChange={handleExerciseChange}
         error={errors.exerciseId?.message}
       />
 
