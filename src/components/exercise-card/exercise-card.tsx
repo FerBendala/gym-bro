@@ -1,4 +1,4 @@
-import { ClipboardList, Play, WifiOff } from 'lucide-react';
+import { Bookmark, ClipboardList, Play, WifiOff } from 'lucide-react';
 import React from 'react';
 
 import { ExerciseModal } from './components';
@@ -77,7 +77,9 @@ export const ExerciseCard: React.FC<ExerciseCardWithRecordsProps> = ({
 
         {/* Indicador de entrenamiento completado */}
         {isTrainedToday && (
-          <div className="absolute top-8 right-4 w-2.5 h-2.5 bg-green-500 rounded-full animate-pulse shadow-md shadow-green-500/50" />
+          <div className="absolute -top-1.5 right-5">
+            <Bookmark className="w-10 h-10 text-green-400 fill-green-400" />
+          </div>
         )}
 
         <CardContent className="px-1 pt-5 flex flex-col gap-1">
