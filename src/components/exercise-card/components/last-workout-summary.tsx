@@ -3,7 +3,7 @@ import React from 'react';
 import { WorkoutItem } from '@/components/recent-workouts/components/workout-item';
 import type { WorkoutRecord } from '@/interfaces';
 
-import { Layers, Target, Zap } from 'lucide-react';
+import { Dumbbell, Repeat, Target } from 'lucide-react';
 
 interface LastWorkoutSummaryProps {
   record?: WorkoutRecord | null;
@@ -42,7 +42,7 @@ export const LastWorkoutSummary: React.FC<LastWorkoutSummaryProps> = ({ record, 
               // Series explícitas con formato simplificado
               record.individualSets!.slice(0, 2).map((set, index) => (
                 <div key={index} className="text-xs text-white font-medium flex items-center space-x-1">
-                  <Zap className="w-3 h-3 text-yellow-400" />
+                  <Dumbbell className="w-3 h-3 text-yellow-400" />
                   <span className="text-yellow-400">{set.weight}</span>
                   <Target className="w-3 h-3 text-green-400" />
                   <span className="text-green-400">{set.reps}</span>
@@ -60,11 +60,11 @@ export const LastWorkoutSummary: React.FC<LastWorkoutSummaryProps> = ({ record, 
           // Mostrar formato simple mejorado
           <div className="space-y-1">
             <div className="text-sm font-bold text-white flex items-center space-x-1">
-              <Zap className="w-3 h-3 text-yellow-400" />
+              <Dumbbell className="w-3 h-3 text-yellow-400" />
               <span className="text-yellow-400">{record.weight}</span>
               <Target className="w-3 h-3 text-green-400" />
               <span className="text-green-400">{record.reps}</span>
-              <Layers className="w-3 h-3 text-blue-400" />
+              <Repeat className="w-3 h-3 text-blue-400" />
               <span className="text-blue-400">{record.sets}</span>
             </div>
             <div className="text-xs text-gray-400 font-medium">
