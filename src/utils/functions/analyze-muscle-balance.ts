@@ -15,12 +15,31 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
 
   const balance: MuscleBalance[] = [];
 
-  // Analizar cada categoría
+  // Primero calcular todos los porcentajes para normalizar
+  const categoryPercentages: Record<string, number> = {};
+  let totalPercentage = 0;
+
+  // Calcular porcentajes brutos
+  EXERCISE_CATEGORIES.forEach(category => {
+    const categoryMetrics = calculateCategoryMetrics(records, category);
+    categoryPercentages[category] = categoryMetrics.percentage;
+    totalPercentage += categoryMetrics.percentage;
+  });
+
+  // Normalizar porcentajes para que sumen 100%
+  const normalizedPercentages: Record<string, number> = {};
+  if (totalPercentage > 0) {
+    EXERCISE_CATEGORIES.forEach(category => {
+      normalizedPercentages[category] = (categoryPercentages[category] / totalPercentage) * 100;
+    });
+  }
+
+  // Analizar cada categoría con porcentajes normalizados
   EXERCISE_CATEGORIES.forEach(category => {
     const categoryMetrics = calculateCategoryMetrics(records, category);
 
     const idealPercentage = IDEAL_VOLUME_DISTRIBUTION[category] || 15;
-    const actualPercentage = categoryMetrics.percentage;
+    const actualPercentage = normalizedPercentages[category] || 0;
     const deviation = actualPercentage - idealPercentage;
 
     // Determinar si está balanceado (dentro del 5% del ideal)
@@ -36,7 +55,7 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
     const progressTrend = categoryMetrics.weightProgression > 0 ? 'improving' : 'stable';
 
     // Determinar nivel de prioridad (simplificado)
-    const priorityLevel = deviation < -10 ? 'critical' : deviation < -5 ? 'high' : 'normal';
+    const priorityLevel = deviation < -10 ? 'critical' : deviation < -5 ? 'high' : 'medium';
 
     // Determinar etapa de desarrollo (simplificado)
     const developmentStage = categoryMetrics.workoutCount === 0 ? 'neglected' :
@@ -44,7 +63,7 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
 
     // Analizar historial de balance (simplificado)
     const balanceHistory = {
-      trend: 'stable',
+      trend: 'stable' as const,
       consistency: categoryMetrics.consistencyScore,
       volatility: 0,
     };

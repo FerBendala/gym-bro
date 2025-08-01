@@ -7,4 +7,4 @@ export const determineValidationState = (
   if (error) return 'error';
   if (validation) return validation;
   return 'default';
-}; 
+};

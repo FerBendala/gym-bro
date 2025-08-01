@@ -27,4 +27,4 @@ export const getDisplayText = (
 
   // Si no se encuentra, devolver el valor original o placeholder
   return placeholder || String(value);
-}; 
+};

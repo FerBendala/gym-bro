@@ -31,9 +31,12 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
   const options: ApexOptions = {
     chart: {
       type: 'radar',
-      height: 350,
+      height: '100%',
       background: 'transparent',
       toolbar: { show: false },
+      // Mejorar el responsive
+      redrawOnWindowResize: true,
+      redrawOnParentResize: true,
     },
     plotOptions: {
       radar: {
@@ -72,8 +75,13 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
       labels: {
         style: {
           colors: '#9ca3af',
-          fontSize: '12px',
+          fontSize: '11px',
+          fontWeight: 500,
         },
+        // Mejorar el responsive de las etiquetas
+        maxHeight: 60,
+        trim: false,
+        hideOverlappingLabels: false,
       },
     },
     yaxis: {
@@ -111,6 +119,43 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
     legend: {
       show: false,
     },
+    // Mejorar el responsive
+    responsive: [
+      {
+        breakpoint: 768,
+        options: {
+          plotOptions: {
+            radar: {
+              size: 120,
+            },
+          },
+          xaxis: {
+            labels: {
+              style: {
+                fontSize: '10px',
+              },
+            },
+          },
+        },
+      },
+      {
+        breakpoint: 480,
+        options: {
+          plotOptions: {
+            radar: {
+              size: 100,
+            },
+          },
+          xaxis: {
+            labels: {
+              style: {
+                fontSize: '9px',
+              },
+            },
+          },
+        },
+      },
+    ],
   };
 
   const series = [{
@@ -125,7 +170,7 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
   }];
 
   return (
-    <div className="w-full h-96">
+    <div className="w-full h-full min-h-[280px] sm:min-h-[320px] lg:min-h-[350px]">
       <Chart options={options} series={series} type="radar" height="100%" />
     </div>
   );

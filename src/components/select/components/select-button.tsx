@@ -21,14 +21,14 @@ export const SelectButton: React.FC<SelectButtonProps> = ({
       'opacity-50 cursor-not-allowed': disabled,
       'border-red-500/50 text-red-400': hasError,
       'bg-blue-600/20 text-blue-400 border-blue-500/30': isOpen,
-    }
+    },
   );
 
   const iconClasses = cn(
     'w-4 h-4 transition-transform duration-200',
     {
       'rotate-180': isOpen,
-    }
+    },
   );
 
   return (
@@ -44,4 +44,4 @@ export const SelectButton: React.FC<SelectButtonProps> = ({
       <ChevronDown className={iconClasses} />
     </button>
   );
-}; 
+};

@@ -48,8 +48,11 @@ export * from './determine-experience-level.utils';
 export * from './determine-priority-level';
 export * from './determine-strength-level';
 
-// Funciones de patrones y exportación
+// Funciones de ejercicios y categorías
+export * from './exercise-categories.utils';
 export * from './exercise-patterns';
+
+// Funciones de patrones y exportación
 export * from './export-functions';
 export * from './export-interfaces';
 export * from './export-utils';

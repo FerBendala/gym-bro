@@ -62,7 +62,7 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
             'bg-blue-600/20 text-blue-400 border border-blue-500/30': isSelected,
             'text-gray-300 hover:bg-gray-800/50 hover:text-white': !isSelected && !isDisabled,
             'text-gray-500 cursor-not-allowed': isDisabled,
-          }
+          },
         )}
         disabled={isDisabled}
       >
@@ -141,4 +141,4 @@ export const SelectDropdown: React.FC<SelectDropdownProps> = ({
   );
 
   return createPortal(dropdownContent, portalContainer);
-}; 
+};

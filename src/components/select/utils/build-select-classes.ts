@@ -15,4 +15,4 @@ export const buildSelectClasses = (
     THEME_SELECT.validation[validation],
     className,
   );
-}; 
+};

@@ -7,4 +7,4 @@ export const buildErrorClasses = (size: SelectSize): string => {
     THEME_FORM.error.base,
     THEME_FORM.error.sizes[size],
   );
-}; 
+};

@@ -11,4 +11,4 @@ export const buildLabelClasses = (
     THEME_FORM.label.sizes[size],
     hasError ? THEME_FORM.label.colors.error : THEME_FORM.label.colors.default,
   );
-}; 
+};

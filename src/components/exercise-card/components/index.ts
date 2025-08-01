@@ -12,3 +12,8 @@ export { LastWorkoutSummary } from './last-workout-summary';
 export { ModalHeader } from './modal-header';
 export { ModeSelector } from './mode-selector';
 export { SimpleForm } from './simple-form';
+
+// Nuevos componentes refactorizados
+export { ExerciseCardActions } from './exercise-card-actions';
+export { ExerciseCardDescription } from './exercise-card-description';
+export { ExerciseCardIndicators } from './exercise-card-indicators';

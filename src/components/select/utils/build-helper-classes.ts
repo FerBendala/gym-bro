@@ -7,4 +7,4 @@ export const buildHelperClasses = (size: SelectSize): string => {
     THEME_FORM.helper.base,
     THEME_FORM.helper.sizes[size],
   );
-}; 
+};

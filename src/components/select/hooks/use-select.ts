@@ -22,17 +22,17 @@ export const useSelect = ({
 
   const validationState = useMemo(() =>
     determineValidationState(validation, error),
-    [validation, error],
+  [validation, error],
   );
 
   const useGroups = useMemo(() =>
     shouldUseGroups(groups),
-    [groups],
+  [groups],
   );
 
   const selectClasses = useMemo(() =>
     buildSelectClasses(size, variant, validationState, className),
-    [size, variant, validationState, className],
+  [size, variant, validationState, className],
   );
 
   const displayText = useMemo(() => {
