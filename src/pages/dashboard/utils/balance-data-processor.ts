@@ -11,6 +11,19 @@ import type { CategoryWeeklyData, ProcessedUserData, WeeklyData } from './balanc
  * @returns Datos procesados para cálculos posteriores
  */
 export const processUserDataInSinglePass = (records: WorkoutRecord[]): ProcessedUserData => {
+  // Validación inicial
+  if (!records || records.length === 0) {
+    return {
+      weeklyWorkouts: new Map(),
+      exerciseMaxWeights: new Map(),
+      exerciseVolumes: new Map(),
+      lastWorkoutByCategory: new Map(),
+      personalRecordsByCategory: new Map(),
+      totalVolume: 0,
+      totalWorkouts: 0,
+    };
+  }
+
   const weeklyWorkouts = new Map<string, Set<string>>();
   const exerciseMaxWeights = new Map<string, number>();
   const exerciseVolumes = new Map<string, number>();
@@ -20,7 +33,8 @@ export const processUserDataInSinglePass = (records: WorkoutRecord[]): Processed
   let totalVolume = 0;
   let totalWorkouts = 0;
 
-  records.forEach(record => {
+  // Procesamiento optimizado en una sola pasada
+  for (const record of records) {
     // Procesar datos semanales para consistencia y frecuencia
     const weekStart = startOfWeek(record.date, { locale: es });
     const weekKey = weekStart.toISOString().split('T')[0];
@@ -55,7 +69,7 @@ export const processUserDataInSinglePass = (records: WorkoutRecord[]): Processed
 
     totalVolume += record.weight * record.reps * record.sets;
     totalWorkouts++;
-  });
+  }
 
   return {
     weeklyWorkouts,

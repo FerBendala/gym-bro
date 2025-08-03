@@ -1,6 +1,6 @@
 import { useCallback, useState } from 'react';
 
-import { UserSettingsService } from '@/api/services';
+import { UserSettingsData, UserSettingsService } from '@/api/services';
 import { useNotification } from '@/stores/notification';
 import { logger } from '@/utils';
 import type { UserSettings } from '@/utils/data/indexeddb-types';
@@ -36,7 +36,6 @@ export const useSettingsSync = () => {
           lastSync: Date.now(),
           error: null
         }));
-        logger.info('Configuración sincronizada con Firebase');
         return true;
       } else {
         throw new Error(result.error || 'Error sincronizando con Firebase');
@@ -85,7 +84,6 @@ export const useSettingsSync = () => {
           lastSync: Date.now(),
           error: null
         }));
-        logger.info('Configuración cargada desde Firebase y sincronizada con IndexedDB');
         return firebaseResult.data;
       } else {
         setState(prev => ({
@@ -93,7 +91,6 @@ export const useSettingsSync = () => {
           syncing: false,
           error: null
         }));
-        logger.info('No se encontró configuración en Firebase');
         return null;
       }
     } catch (error) {
@@ -147,11 +144,10 @@ export const useSettingsSync = () => {
           lastSync: Date.now(),
           error: null
         }));
-        logger.info('Configuración sincronizada bidireccionalmente');
         return mergedSettings;
       } else {
         // Solo guardar configuración local en Firebase
-        const result = await UserSettingsService.saveUserSettings(localSettings);
+        const result = await UserSettingsService.saveUserSettings(localSettings as Partial<UserSettingsData>);
 
         if (result.success) {
           setState(prev => ({
@@ -160,7 +156,6 @@ export const useSettingsSync = () => {
             lastSync: Date.now(),
             error: null
           }));
-          logger.info('Configuración local sincronizada con Firebase');
           return localSettings;
         } else {
           throw new Error(result.error || 'Error sincronizando con Firebase');

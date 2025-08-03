@@ -50,28 +50,31 @@ export const calculateBalanceAnalysis = (
       finalConsistency: consistency,
       avgIntensity: intensity,
       avgFrequency: frequency,
-      muscleBalance: muscleBalance.map(balance => ({
-        ...balance,
-        totalVolume: balance.volume,
-        personalRecords: categoryWeeklyData.get(balance.category)?.personalRecords ? [{
-          id: `pr_${balance.category}`,
-          weight: categoryWeeklyData.get(balance.category)?.personalRecords || 0,
-          reps: 1,
-          date: categoryWeeklyData.get(balance.category)?.lastWorkout || new Date(),
-          exerciseId: `${balance.category}_exercise`,
-        }] : [],
-        balanceHistory: {
-          ...balance.balanceHistory,
-          weeklyData: categoryWeeklyData.get(balance.category)?.weeklyData.map(w => ({
-            week: w.weekStart,
-            volume: w.volume,
-            percentage: w.volume > 0 ? (w.volume / (categoryWeeklyData.get(balance.category)?.currentWeekVolume || 1)) * 100 : 0,
-          })) || [],
-          lastWeekVolume: categoryWeeklyData.get(balance.category)?.lastWeekVolume || 0,
-          currentWeekVolume: categoryWeeklyData.get(balance.category)?.currentWeekVolume || 0,
-          changePercent: categoryWeeklyData.get(balance.category)?.changePercent || 0,
-        },
-      })),
+      muscleBalance: muscleBalance.map(balance => {
+        const weeklyData = categoryWeeklyData.get(balance.category);
+        return {
+          ...balance,
+          totalVolume: balance.volume,
+          personalRecords: weeklyData?.personalRecords ? [{
+            id: `pr_${balance.category}`,
+            weight: weeklyData.personalRecords,
+            reps: 1,
+            date: weeklyData.lastWorkout || new Date(),
+            exerciseId: `${balance.category}_exercise`,
+          }] : [],
+          balanceHistory: {
+            ...balance.balanceHistory,
+            weeklyData: weeklyData?.weeklyData.map(w => ({
+              week: w.weekStart,
+              volume: w.volume,
+              percentage: w.volume > 0 ? (w.volume / (weeklyData?.currentWeekVolume || 1)) * 100 : 0,
+            })) || [],
+            lastWeekVolume: weeklyData?.lastWeekVolume || 0,
+            currentWeekVolume: weeklyData?.currentWeekVolume || 0,
+            changePercent: weeklyData?.changePercent || 0,
+          },
+        };
+      }),
       categoryAnalysis: {
         categoryMetrics: categoryAnalysis.categoryMetrics.map(metric => {
           const weeklyData = categoryWeeklyData.get(metric.category);
@@ -80,7 +83,7 @@ export const calculateBalanceAnalysis = (
             lastWorkout: weeklyData?.lastWorkout || null,
             totalSets: metric.avgSets * metric.workouts,
             totalReps: metric.avgReps * metric.workouts,
-            personalRecords: weeklyData?.personalRecords || 0,
+            personalRecords: metric.personalRecords, // Usar el valor calculado en calculateCategoryMetrics
             daysSinceLastWorkout: weeklyData?.daysSinceLastWorkout || 0,
             trend: metric.weightProgression > 0 ? 'improving' : 'stable',
             strengthLevel: metric.estimatedOneRM > 100 ? 'advanced' : metric.estimatedOneRM > 50 ? 'intermediate' : 'beginner',
@@ -130,10 +133,26 @@ export const calculateBalanceAnalysis = (
       selectedView: 'general' as const,
     };
   } catch (error) {
-    // Usar un logger apropiado en lugar de console.error
+    // Log detallado del error para debugging
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    const errorStack = error instanceof Error ? error.stack : '';
+
     // eslint-disable-next-line no-console
-    console.error('Error en cálculo de balance:', error);
-    return getEmptyBalanceAnalysis();
+    console.error('Error en cálculo de balance:', {
+      message: errorMessage,
+      stack: errorStack,
+      recordsCount: records.length,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Retornar análisis vacío con información de error
+    return {
+      ...getEmptyBalanceAnalysis(),
+      error: {
+        message: errorMessage,
+        timestamp: new Date().toISOString(),
+      },
+    };
   }
 };
 

@@ -82,4 +82,8 @@ export interface BalanceAnalysisResult {
   categoryAnalysis: CategoryAnalysisData;
   upperLowerBalance: UpperLowerBalanceData;
   selectedView: 'general' | 'balanceByGroup' | 'upperLower' | 'trends';
+  error?: {
+    message: string;
+    timestamp: string;
+  };
 }

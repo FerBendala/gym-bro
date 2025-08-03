@@ -46,10 +46,8 @@ export class UserSettingsService {
 
       if (docSnap.exists()) {
         const data = docSnap.data() as UserSettingsData;
-        logger.info('Configuración de usuario cargada desde Firebase');
         return { success: true, data };
       } else {
-        logger.info('No se encontró configuración de usuario en Firebase');
         return { success: true, data: undefined };
       }
     } catch (error) {
@@ -72,7 +70,6 @@ export class UserSettingsService {
 
       await setDoc(docRef, settingsData, { merge: true });
 
-      logger.info('Configuración de usuario guardada en Firebase');
       return { success: true, data: settingsData };
     } catch (error) {
       handleFirebaseError(error as Error, 'saveUserSettings');
@@ -93,7 +90,6 @@ export class UserSettingsService {
         updatedAt: Date.now(),
       });
 
-      logger.info('Configuración de volumen actualizada en Firebase');
       return { success: true };
     } catch (error) {
       handleFirebaseError(error as Error, 'updateVolumeDistribution');

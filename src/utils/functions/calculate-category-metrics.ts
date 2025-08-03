@@ -1,10 +1,12 @@
+import { startOfWeek } from 'date-fns';
+import { es } from 'date-fns/locale';
 import { calculateConsistencyScore } from './calculate-consistency-score';
 import { calculateIntensityScore } from './calculate-intensity-score';
 import { calculateVolumeProgression } from './calculate-volume-progression';
 import { calculateWeightProgression } from './calculate-weight-progression';
 import { calculateCategoryEffortDistribution } from './exercise-patterns';
 import { roundToDecimalsBatch } from './math-utils';
-import { getLatestDate, getMaxEstimated1RM, getMaxWeight, getMinWeight, sortRecordsByDate } from './workout-utils';
+import { getMaxEstimated1RM, getMaxWeight, getMinWeight, sortRecordsByDate } from './workout-utils';
 
 import type { WorkoutRecord } from '@/interfaces';
 
@@ -31,6 +33,9 @@ export const calculateCategoryMetrics = (
   intensityScore: number;
   efficiencyScore: number;
   consistencyScore: number;
+  lastWorkout: Date | null;
+  daysSinceLastWorkout: number;
+  personalRecords: number;
 } => {
   if (records.length === 0) {
     return {
@@ -49,6 +54,9 @@ export const calculateCategoryMetrics = (
       intensityScore: 0,
       efficiencyScore: 0,
       consistencyScore: 0,
+      lastWorkout: null,
+      daysSinceLastWorkout: 0,
+      personalRecords: 0,
     };
   }
 
@@ -74,6 +82,9 @@ export const calculateCategoryMetrics = (
       intensityScore: 0,
       efficiencyScore: 0,
       consistencyScore: 0,
+      lastWorkout: null,
+      daysSinceLastWorkout: 0,
+      personalRecords: 0,
     };
   }
 
@@ -103,8 +114,24 @@ export const calculateCategoryMetrics = (
 
   // Calcular métricas de frecuencia
   const workoutCount = categoryRecords.length;
-  const totalDays = Math.max(1, (new Date().getTime() - new Date(getLatestDate(records).getTime()).getTime()) / (1000 * 60 * 60 * 24));
-  const avgWorkoutsPerWeek = (workoutCount / totalDays) * 7;
+
+  // Calcular frecuencia real basada en semanas únicas
+  const uniqueWeeks = new Set();
+  const uniqueSessions = new Set(); // Para contar sesiones únicas, no ejercicios
+
+  categoryRecords.forEach(record => {
+    const weekStart = startOfWeek(record.date, { locale: es });
+    const weekKey = weekStart.toISOString().split('T')[0];
+    uniqueWeeks.add(weekKey);
+
+    // Contar sesiones únicas por día
+    const sessionKey = `${record.date.toDateString()}`;
+    uniqueSessions.add(sessionKey);
+  });
+
+  const totalWeeks = uniqueWeeks.size;
+  const totalSessions = uniqueSessions.size;
+  const avgWorkoutsPerWeek = totalWeeks > 0 ? totalSessions / totalWeeks : 0;
 
   // **CORRECCIÓN CRÍTICA**: Calcular porcentaje del total aplicando porcentajes de categorías
   const totalVolume = records.reduce((sum, record) => {
@@ -146,6 +173,10 @@ export const calculateCategoryMetrics = (
   const efficiencyScore = 75; // Valor por defecto - función no disponible
   const consistencyScore = calculateConsistencyScore(categoryRecords, avgWorkoutsPerWeek);
 
+  // Validar que los valores estén en rangos razonables
+  const validatedIntensityScore = Math.min(100, Math.max(0, intensityScore));
+  const validatedConsistencyScore = Math.min(100, Math.max(0, consistencyScore));
+
   // ✅ OPTIMIZACIÓN: Usar batch processing para redondeo
   const roundedMetrics = roundToDecimalsBatch({
     totalVolume: categoryVolume,
@@ -180,6 +211,39 @@ export const calculateCategoryMetrics = (
     consistencyScore: 0,
   });
 
+  // Calcular datos adicionales requeridos
+  const lastWorkout = categoryRecords.length > 0 ?
+    new Date(Math.max(...categoryRecords.map(r => r.date.getTime()))) : null;
+
+  const daysSinceLastWorkout = lastWorkout ?
+    Math.floor((new Date().getTime() - lastWorkout.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+
+  // Calcular PRs reales (récords personales por ejercicio)
+  const personalRecords = (() => {
+    if (categoryRecords.length === 0) return 0;
+
+    // Filtrar ejercicios que son específicos de esta categoría
+    const categorySpecificRecords = categoryRecords.filter(record => {
+      const categories = record.exercise?.categories || [];
+      // Solo contar ejercicios donde esta categoría es la principal o única
+      return categories.length === 1 || categories[0] === targetCategory;
+    });
+
+    // Agrupar por ejercicio y encontrar el peso máximo de cada uno
+    const exercisePRs = new Map<string, number>();
+
+    categorySpecificRecords.forEach(record => {
+      const exerciseId = record.exerciseId;
+      const currentMax = exercisePRs.get(exerciseId) || 0;
+      if (record.weight > currentMax) {
+        exercisePRs.set(exerciseId, record.weight);
+      }
+    });
+
+    // Contar cuántos ejercicios específicos de esta categoría tienen PRs
+    return exercisePRs.size;
+  })();
+
   return {
     totalVolume: roundedMetrics.totalVolume,
     avgWeight: roundedMetrics.avgWeight,
@@ -193,8 +257,11 @@ export const calculateCategoryMetrics = (
     estimatedOneRM: roundedMetrics.estimatedOneRM,
     weightProgression: roundedMetrics.weightProgression,
     volumeProgression: roundedMetrics.volumeProgression,
-    intensityScore: roundedMetrics.intensityScore,
+    intensityScore: validatedIntensityScore,
     efficiencyScore: roundedMetrics.efficiencyScore,
-    consistencyScore: roundedMetrics.consistencyScore,
+    consistencyScore: validatedConsistencyScore,
+    lastWorkout,
+    daysSinceLastWorkout,
+    personalRecords,
   };
 };

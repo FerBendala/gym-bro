@@ -25,7 +25,6 @@ export const useAuth = () => {
           loading: false,
           error: null,
         });
-        logger.info('Estado de autenticación actualizado:', user ? 'Usuario autenticado' : 'Usuario no autenticado');
       },
       (error) => {
         setState({

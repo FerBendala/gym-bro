@@ -16,5 +16,13 @@ export const calculateIntensityScore = (categoryRecords: WorkoutRecord[]): numbe
 
   // Intensidad basada en % de 1RM (más precisa)
   const intensityPercentage = (avgOneRM / maxOneRM) * 100;
-  return Math.round(intensityPercentage);
+
+  // Limitar valores extremos y aplicar escala más realista
+  const clampedIntensity = Math.min(100, Math.max(0, intensityPercentage));
+
+  // Aplicar escala más conservadora para valores altos
+  const adjustedIntensity = clampedIntensity > 80 ?
+    80 + (clampedIntensity - 80) * 0.5 : clampedIntensity;
+
+  return Math.round(adjustedIntensity);
 };

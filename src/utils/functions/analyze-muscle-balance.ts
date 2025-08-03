@@ -45,8 +45,8 @@ export const analyzeMuscleBalance = (
     const actualPercentage = normalizedPercentages[category] || 0;
     const deviation = actualPercentage - idealPercentage;
 
-    // Determinar si está balanceado (dentro del 5% del ideal)
-    const isBalanced = Math.abs(deviation) <= 5;
+    // Determinar si está balanceado (dentro del 10% del ideal para ser más realista)
+    const isBalanced = Math.abs(deviation) <= 10;
 
     // Calcular ratio antagonista (simplificado)
     const antagonistRatio = 1.0; // TODO: Implementar cálculo real
@@ -57,16 +57,30 @@ export const analyzeMuscleBalance = (
     // Analizar tendencia de progreso (simplificado)
     const progressTrend = categoryMetrics.weightProgression > 0 ? 'improving' : 'stable';
 
-    // Determinar nivel de prioridad (simplificado)
-    const priorityLevel = deviation < -10 ? 'critical' : deviation < -5 ? 'high' : 'medium';
+    // Determinar nivel de prioridad basado en desviación y rendimiento
+    let priorityLevel: 'low' | 'medium' | 'high' | 'critical';
+
+    if (deviation < -15) {
+      priorityLevel = 'critical';
+    } else if (deviation < -5) {
+      priorityLevel = 'high';
+    } else if (deviation > 15) {
+      priorityLevel = 'high'; // También alta prioridad si está muy sobre-entrenado
+    } else if (Math.abs(deviation) <= 3) {
+      priorityLevel = 'low';
+    } else {
+      priorityLevel = 'medium';
+    }
 
     // Determinar etapa de desarrollo (simplificado)
     const developmentStage = categoryMetrics.workoutCount === 0 ? 'neglected' :
       categoryMetrics.avgWorkoutsPerWeek < 1 ? 'beginner' : 'intermediate';
 
-    // Analizar historial de balance (simplificado)
+    // Analizar historial de balance basado en progresión real
+    const trend = categoryMetrics.weightProgression > 5 ? 'improving' :
+      categoryMetrics.weightProgression < -5 ? 'declining' : 'stable';
     const balanceHistory = {
-      trend: 'stable' as const,
+      trend: trend as 'improving' | 'stable' | 'declining',
       consistency: categoryMetrics.consistencyScore,
       volatility: 0,
     };
@@ -118,5 +132,6 @@ export const analyzeMuscleBalance = (
     });
   });
 
-  return balance.sort((a, b) => Math.abs(b.deviation) - Math.abs(a.deviation));
+  // Mantener el orden original de las categorías en lugar de ordenar por desviación
+  return balance;
 };

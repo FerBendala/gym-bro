@@ -10,11 +10,8 @@ export const VolumeSettingsTestSync: React.FC = () => {
 
   const testFirebaseConnection = async () => {
     try {
-      logger.info('Probando conexión con Firebase...');
-
       // Probar lectura
       const readResult = await UserSettingsService.getUserSettings();
-      logger.info('Resultado de lectura:', readResult);
 
       // Probar escritura
       const testData = {
@@ -29,7 +26,6 @@ export const VolumeSettingsTestSync: React.FC = () => {
       };
 
       const writeResult = await UserSettingsService.saveUserSettings(testData);
-      logger.info('Resultado de escritura:', writeResult);
 
       if (readResult.success && writeResult.success) {
         showNotification('Conexión con Firebase exitosa', 'success');

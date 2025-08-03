@@ -92,11 +92,11 @@ export const calculateCategoryAnalysis = (
       efficiencyScore: metrics.efficiencyScore,
       consistencyScore: metrics.consistencyScore,
       // Propiedades adicionales requeridas
-      lastWorkout: null, // TODO: Implementar
+      lastWorkout: metrics.lastWorkout,
       totalSets: metrics.avgSets * metrics.workoutCount,
       totalReps: metrics.avgReps * metrics.workoutCount,
-      personalRecords: 0, // TODO: Implementar
-      daysSinceLastWorkout: 0, // TODO: Implementar
+      personalRecords: metrics.personalRecords,
+      daysSinceLastWorkout: metrics.daysSinceLastWorkout,
       trend: metrics.weightProgression > 0 ? 'improving' : 'stable',
       strengthLevel: metrics.estimatedOneRM > 100 ? 'advanced' : metrics.estimatedOneRM > 50 ? 'intermediate' : 'beginner',
       recentImprovement: metrics.weightProgression > 0,

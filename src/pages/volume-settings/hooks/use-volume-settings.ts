@@ -32,7 +32,6 @@ export const useVolumeSettings = () => {
             ...prev,
             volumeDistribution: firebaseResult.data!.customVolumeDistribution!,
           }));
-          logger.info('Configuración de volumen cargada desde Firebase');
         } else {
           // Si no hay datos en Firebase, intentar cargar desde IndexedDB
           const indexedDbResult = await getItem<UserSettings>('metadata', 'userSettings');
@@ -41,7 +40,6 @@ export const useVolumeSettings = () => {
               ...prev,
               volumeDistribution: indexedDbResult.data!.value.customVolumeDistribution!,
             }));
-            logger.info('Configuración de volumen cargada desde IndexedDB');
           }
         }
       } catch (error) {
@@ -101,7 +99,6 @@ export const useVolumeSettings = () => {
 
       if (firebaseResult.success) {
         showNotification(VOLUME_SETTINGS_MESSAGES.SAVE_SUCCESS, 'success');
-        logger.info('Configuración de volumen guardada en IndexedDB y Firebase');
 
         // ✅ NOTIFICAR ACTUALIZACIÓN AUTOMÁTICA
         notifyVolumeConfigUpdate();

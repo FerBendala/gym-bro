@@ -7,9 +7,9 @@ import { META_CATEGORIES } from './balance-types';
  * @returns Balance superior/inferior
  */
 export const calculateUpperLowerBalance = (categoryMetrics: { category: string; percentage: number; totalVolume: number }[]) => {
-  const upperBodyCategories = ['Pecho', 'Espalda', 'Hombros', 'Brazos'];
-  const lowerBodyCategories = ['Piernas'];
-  const coreCategories = ['Core'];
+  const upperBodyCategories = META_CATEGORIES.UPPER_BODY.categories;
+  const lowerBodyCategories = META_CATEGORIES.LOWER_BODY.categories;
+  const coreCategories = META_CATEGORIES.CORE.categories;
 
   const upperBody = {
     percentage: categoryMetrics

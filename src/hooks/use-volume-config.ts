@@ -44,7 +44,6 @@ export const useVolumeConfig = () => {
           loading: false,
           error: null,
         });
-        logger.info('Configuración de volumen cargada desde Firebase');
       } else {
         // Si no hay datos en Firebase, intentar cargar desde IndexedDB
         const indexedDbResult = await getItem<UserSettings>('metadata', 'userSettings');
@@ -55,7 +54,6 @@ export const useVolumeConfig = () => {
             loading: false,
             error: null,
           });
-          logger.info('Configuración de volumen cargada desde IndexedDB');
         } else {
           // Usar valores por defecto si no hay configuración personalizada
           setState({
@@ -63,7 +61,6 @@ export const useVolumeConfig = () => {
             loading: false,
             error: null,
           });
-          logger.info('Usando configuración de volumen por defecto');
         }
       }
     } catch (error) {
@@ -83,7 +80,6 @@ export const useVolumeConfig = () => {
   // ✅ SUSCRIBIRSE A ACTUALIZACIONES
   useEffect(() => {
     const unsubscribe = subscribeToVolumeConfigUpdates(() => {
-      logger.info('Actualizando configuración de volumen automáticamente');
       loadVolumeConfig();
     });
 

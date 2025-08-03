@@ -16,7 +16,31 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({
   data,
   onItemClick,
 }) => {
-  const maxValue = Math.max(...data.map(item => Math.max(item.value, item.ideal || 0))) * 1.1;
+  // Validación de datos
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-8 text-gray-400">
+        <span>No hay datos disponibles para mostrar</span>
+      </div>
+    );
+  }
+
+  // Validar que todos los valores sean números válidos
+  const validData = data.filter(item =>
+    typeof item.value === 'number' &&
+    !isNaN(item.value) &&
+    item.value >= 0
+  );
+
+  if (validData.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-8 text-gray-400">
+        <span>Datos inválidos para mostrar</span>
+      </div>
+    );
+  }
+
+  const maxValue = Math.max(...validData.map(item => Math.max(item.value, item.ideal || 0))) * 1.1;
 
   const handleItemClick = (itemName: string) => {
     if (onItemClick) {
@@ -26,7 +50,7 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({
 
   return (
     <div className="space-y-4">
-      {data.map((item, index) => (
+      {validData.map((item, index) => (
         <div
           key={index}
           className="space-y-2 cursor-pointer hover:bg-gray-800/50 p-2 rounded-lg transition-colors duration-200"

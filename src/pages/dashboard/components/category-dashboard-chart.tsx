@@ -18,6 +18,42 @@ interface CategoryDashboardChartProps {
 }
 
 export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ data, color }) => {
+  // Validación de datos
+  if (!data) {
+    return (
+      <div className="flex items-center justify-center p-4 text-gray-400">
+        <span>Datos no disponibles</span>
+      </div>
+    );
+  }
+
+  // Validar que todos los valores sean números válidos (permitir valores negativos para strength)
+  const isValidData = Object.entries(data).every(([key, value]) => {
+    // Ignorar propiedades que no son números (como 'trend')
+    if (key === 'trend') return true;
+    if (typeof value !== 'number' || isNaN(value)) return false;
+    // Permitir valores negativos solo para strength (puede indicar regresión)
+    if (key === 'strength') return true;
+    // Para otros valores, deben ser >= 0
+    return value >= 0;
+  });
+
+  if (!isValidData) {
+    // Debug: identificar qué valores son inválidos
+    const invalidValues = Object.entries(data).filter(([key, value]) => {
+      if (key === 'trend') return false; // trend es string, no número
+      if (typeof value !== 'number' || isNaN(value)) return true;
+      if (key === 'strength') return false; // strength puede ser negativo
+      return value < 0;
+    });
+
+    return (
+      <div className="flex items-center justify-center p-4 text-gray-400">
+        <span>Datos inválidos: {invalidValues.map(([key]) => key).join(', ')}</span>
+      </div>
+    );
+  }
+
   // Calcular valores dinámicos basados en datos reales
   const maxFrequency = Math.max(data.frequency, 3.5); // Máximo realista para frecuencia semanal
   const frequencyPercentage = (data.frequency / maxFrequency) * 100;
@@ -76,9 +112,9 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
               <div className="flex items-center space-x-2">
                 <span className="text-white font-bold">
                   {metric.label === 'Frecuencia'
-                    ? `${formatNumberToString(data.frequency, 1)  }/sem`
+                    ? `${formatNumberToString(data.frequency, 1)}/sem`
                     : metric.label === 'Fuerza'
-                      ? `${(data.strength > 0 ? '+' : '') + formatNumberToString(data.strength, 0)  }%`
+                      ? `${(data.strength > 0 ? '+' : '') + formatNumberToString(data.strength, 0)}%`
                       : formatNumberToString(metric.value, 0) + metric.unit
                   }
                 </span>
