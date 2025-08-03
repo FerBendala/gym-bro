@@ -1,4 +1,3 @@
-import { calculateCategoryEffortDistribution } from './exercise-patterns';
 import { normalizeByWeekday } from './normalize-by-weekday';
 import { calculateVolume } from './volume-calculations';
 
@@ -49,23 +48,15 @@ export const calculateVolumeProgression = (categoryRecords: WorkoutRecord[], tar
   // Si hay pocos ejercicios comunes, usar análisis más conservador
   const hasSignificantExerciseChange = commonExercises.length < Math.min(firstHalfExercises.size, secondHalfExercises.size) * 0.5;
 
-  // **CORRECCIÓN CRÍTICA**: Usar volumen ponderado por esfuerzo de categoría
+  // **CORRECCIÓN CRÍTICA**: Los registros ya están filtrados por categoría, no aplicar porcentajes adicionales
   const firstHalfAvgVolume = firstHalf.reduce((sum, r) => {
-    const categories = r.exercise?.categories || [];
-    const effortDistribution = calculateCategoryEffortDistribution(categories, r.exercise?.name);
-    const categoryEffort = effortDistribution[categoryName] || 0;
     const totalVolume = calculateVolume(r);
-    const categoryVolume = totalVolume * categoryEffort;
-    return sum + categoryVolume;
+    return sum + totalVolume; // ✅ Usar volumen completo ya que está filtrado por categoría
   }, 0) / firstHalf.length;
 
   const secondHalfAvgVolume = secondHalf.reduce((sum, r) => {
-    const categories = r.exercise?.categories || [];
-    const effortDistribution = calculateCategoryEffortDistribution(categories, r.exercise?.name);
-    const categoryEffort = effortDistribution[categoryName] || 0;
     const totalVolume = calculateVolume(r);
-    const categoryVolume = totalVolume * categoryEffort;
-    return sum + categoryVolume;
+    return sum + totalVolume; // ✅ Usar volumen completo ya que está filtrado por categoría
   }, 0) / secondHalf.length;
 
   if (firstHalfAvgVolume === 0) return 0;

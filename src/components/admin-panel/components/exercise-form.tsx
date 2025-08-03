@@ -19,6 +19,8 @@ import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
 
+import { CategoryPercentagesInput } from './category-percentages-input';
+
 interface ExerciseFormProps {
   exercise?: Exercise;
   onCancel?: () => void;
@@ -57,6 +59,9 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
         categories: data.categories,
         description: data.description?.trim() || undefined,
         url: data.url?.trim() || undefined,
+        categoryPercentages: data.categoryPercentages && Object.keys(data.categoryPercentages).length > 0
+          ? data.categoryPercentages
+          : undefined,
       };
 
       if (editingExercise) {
@@ -92,6 +97,7 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
     errors,
     watchedUrl,
     watchedCategories,
+    watchedPercentages,
     isEditing,
     validateURL,
     setValue,
@@ -140,6 +146,37 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
               />
             </div>
           </div>
+
+          {/* Componente de porcentajes de categorías */}
+          <CategoryPercentagesInput
+            selectedCategories={watchedCategories}
+            percentages={watchedPercentages}
+            onPercentagesChange={(percentages) => {
+              setValue('categoryPercentages', percentages);
+            }}
+            disabled={!isOnline}
+          />
+
+          {/* Campo oculto para categoryPercentages - solo para validación */}
+          <input
+            type="hidden"
+            {...register('categoryPercentages', {
+              validate: (value) => {
+                // Solo validar si hay categorías seleccionadas
+                if (watchedCategories.length === 0) return true;
+
+                // Si hay categorías, verificar que los porcentajes sumen 100%
+                if (value && Object.keys(value).length > 0) {
+                  const total = Object.values(value).reduce((sum, val) => sum + (val || 0), 0);
+                  if (Math.abs(total - 100) > 0.1) {
+                    return 'Los porcentajes deben sumar exactamente 100%';
+                  }
+                }
+                return true;
+              },
+            })}
+            value={JSON.stringify(watchedPercentages)}
+          />
 
           <Input
             label="Descripción (opcional)"

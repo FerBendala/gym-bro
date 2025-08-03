@@ -2,6 +2,7 @@ import { calculateConsistencyScore } from './calculate-consistency-score';
 import { calculateIntensityScore } from './calculate-intensity-score';
 import { calculateVolumeProgression } from './calculate-volume-progression';
 import { calculateWeightProgression } from './calculate-weight-progression';
+import { calculateCategoryEffortDistribution } from './exercise-patterns';
 import { roundToDecimalsBatch } from './math-utils';
 import { getLatestDate, getMaxEstimated1RM, getMaxWeight, getMinWeight, sortRecordsByDate } from './workout-utils';
 
@@ -79,10 +80,21 @@ export const calculateCategoryMetrics = (
   // Obtener registros recientes para cálculos de progresión
   const sortedRecords = sortRecordsByDate(categoryRecords);
 
-  // Calcular métricas básicas
-  const categoryVolume = categoryRecords.reduce((sum, record) =>
-    sum + (record.weight * record.reps * record.sets), 0,
-  );
+  // **CORRECCIÓN CRÍTICA**: Calcular volumen aplicando porcentajes de categorías
+  const categoryVolume = categoryRecords.reduce((sum, record) => {
+    const categories = record.exercise?.categories || [];
+    const totalVolume = record.weight * record.reps * record.sets;
+
+    // Si es multi-categoría, aplicar porcentaje de la categoría objetivo
+    if (categories.length > 1) {
+      const effortDistribution = calculateCategoryEffortDistribution(categories, record.exercise?.name, record.exercise);
+      const categoryEffort = effortDistribution[targetCategory] || 0;
+      return sum + (totalVolume * categoryEffort);
+    } else {
+      // Si es una sola categoría, usar volumen completo
+      return sum + totalVolume;
+    }
+  }, 0);
 
   const weights = categoryRecords.map(r => r.weight);
   const avgWeight = weights.length > 0 ? weights.reduce((sum, w) => sum + w, 0) / weights.length : 0;
@@ -94,8 +106,26 @@ export const calculateCategoryMetrics = (
   const totalDays = Math.max(1, (new Date().getTime() - new Date(getLatestDate(records).getTime()).getTime()) / (1000 * 60 * 60 * 24));
   const avgWorkoutsPerWeek = (workoutCount / totalDays) * 7;
 
-  // Calcular porcentaje del total
-  const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  // **CORRECCIÓN CRÍTICA**: Calcular porcentaje del total aplicando porcentajes de categorías
+  const totalVolume = records.reduce((sum, record) => {
+    const categories = record.exercise?.categories || [];
+    const totalVolume = record.weight * record.reps * record.sets;
+
+    // Para cada categoría del ejercicio, aplicar su porcentaje
+    let exerciseVolume = 0;
+    if (categories.length > 1) {
+      const effortDistribution = calculateCategoryEffortDistribution(categories, record.exercise?.name, record.exercise);
+      categories.forEach(category => {
+        const categoryEffort = effortDistribution[category] || 0;
+        exerciseVolume += totalVolume * categoryEffort;
+      });
+    } else {
+      exerciseVolume = totalVolume;
+    }
+
+    return sum + exerciseVolume;
+  }, 0);
+
   const percentage = totalVolume > 0 ? (categoryVolume / totalVolume) * 100 : 0;
 
   // Calcular métricas de series y repeticiones

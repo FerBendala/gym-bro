@@ -13,6 +13,7 @@ export interface ExerciseFormData {
   categories: string[];
   description: string;
   url: string;
+  categoryPercentages: Record<string, number>;
 }
 
 export interface AssignmentFormData {

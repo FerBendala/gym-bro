@@ -25,11 +25,13 @@ export const useExerciseForm = ({ exercise, onSubmit }: UseExerciseFormProps) =>
       categories: [],
       description: '',
       url: '',
+      categoryPercentages: {},
     },
   });
 
   const watchedUrl = watch('url');
   const watchedCategories = watch('categories');
+  const watchedPercentages = watch('categoryPercentages');
   const isEditing = !!exercise;
 
   // Reset del formulario cuando cambia el ejercicio a editar
@@ -40,6 +42,7 @@ export const useExerciseForm = ({ exercise, onSubmit }: UseExerciseFormProps) =>
         categories: exercise.categories || [],
         description: exercise.description || '',
         url: exercise.url || '',
+        categoryPercentages: exercise.categoryPercentages || {},
       });
     } else {
       // Reset a valores vacíos cuando no hay ejercicio (modo crear)
@@ -48,6 +51,7 @@ export const useExerciseForm = ({ exercise, onSubmit }: UseExerciseFormProps) =>
         categories: [],
         description: '',
         url: '',
+        categoryPercentages: {},
       });
     }
   }, [exercise, reset]);
@@ -69,6 +73,7 @@ export const useExerciseForm = ({ exercise, onSubmit }: UseExerciseFormProps) =>
     errors,
     watchedUrl,
     watchedCategories,
+    watchedPercentages,
     isEditing,
     validateURL,
     setValue,

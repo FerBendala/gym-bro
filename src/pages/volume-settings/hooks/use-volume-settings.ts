@@ -5,6 +5,7 @@ import type { VolumeDistribution, VolumeSettingsState } from '../types';
 
 import { UserSettingsService } from '@/api/services';
 import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants/exercise.constants';
+import { notifyVolumeConfigUpdate } from '@/hooks/use-volume-config';
 import { useNotification } from '@/stores/notification';
 import { logger } from '@/utils';
 import type { UserSettings } from '@/utils/data/indexeddb-types';
@@ -101,11 +102,19 @@ export const useVolumeSettings = () => {
       if (firebaseResult.success) {
         showNotification(VOLUME_SETTINGS_MESSAGES.SAVE_SUCCESS, 'success');
         logger.info('Configuración de volumen guardada en IndexedDB y Firebase');
+
+        // ✅ NOTIFICAR ACTUALIZACIÓN AUTOMÁTICA
+        notifyVolumeConfigUpdate();
+
         return true;
       } else {
         // Si Firebase falla, al menos se guardó en IndexedDB
         showNotification('Configuración guardada localmente. Error al sincronizar con la nube.', 'warning');
         logger.warn('Error guardando en Firebase, pero se guardó en IndexedDB');
+
+        // ✅ NOTIFICAR ACTUALIZACIÓN AUTOMÁTICA (aunque Firebase falló)
+        notifyVolumeConfigUpdate();
+
         return true;
       }
     } catch (error) {

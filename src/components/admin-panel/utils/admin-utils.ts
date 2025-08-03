@@ -1,5 +1,6 @@
 import type { ExerciseCategory } from '../types';
 
+import { EXERCISE_CATEGORIES } from '@/constants';
 import type { Exercise } from '@/interfaces';
 
 /**
@@ -23,12 +24,7 @@ export const getCategoriesWithCount = (exercises: Exercise[]) => {
     { id: 'all', name: 'Todos', count: validExercises.length },
   ];
 
-  // Importar dinámicamente para evitar dependencias circulares
-  const EXERCISE_CATEGORIES = [
-    'Pecho', 'Espalda', 'Hombros', 'Bíceps', 'Tríceps',
-    'Piernas', 'Abdominales',
-  ];
-
+  // Usar las categorías oficiales del sistema
   EXERCISE_CATEGORIES.forEach(category => {
     const count = validExercises.filter(ex => ex.categories?.includes(category)).length;
     if (count > 0) {

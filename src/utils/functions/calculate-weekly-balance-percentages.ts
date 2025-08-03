@@ -26,10 +26,17 @@ export const calculateWeeklyBalancePercentages = (categoryRecords: WorkoutRecord
     const recordCategories = record.exercise?.categories || [];
     const targetCategory = categoryRecords[0]?.exercise?.categories?.[0];
     if (recordCategories.includes(targetCategory || '')) {
-      // Usar distribución de esfuerzo si es multi-categoría
-      const effortDistribution = calculateCategoryEffortDistribution(recordCategories);
-      const categoryEffort = effortDistribution[targetCategory || ''] || 1;
-      weeklyData[weekKey].categoryVolume += recordVolume * categoryEffort;
+      // Usar distribución de esfuerzo solo si es multi-categoría
+      const recordVolume = record.weight * record.reps * record.sets;
+
+      if (recordCategories.length > 1) {
+        const effortDistribution = calculateCategoryEffortDistribution(recordCategories, record.exercise?.name, record.exercise);
+        const categoryEffort = effortDistribution[targetCategory || ''] || 1;
+        weeklyData[weekKey].categoryVolume += recordVolume * categoryEffort;
+      } else {
+        // Si es una sola categoría, usar volumen completo
+        weeklyData[weekKey].categoryVolume += recordVolume;
+      }
     }
   });
 

@@ -1,4 +1,4 @@
-import { Edit2, Trash2 } from 'lucide-react';
+import { Edit2, Percent, Trash2 } from 'lucide-react';
 import React from 'react';
 
 import { deleteExercise } from '@/api/services';
@@ -74,6 +74,27 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
                 ))}
               </div>
             )}
+
+            {/* Mostrar porcentajes de categorías si están disponibles */}
+            {exercise.categoryPercentages && Object.keys(exercise.categoryPercentages).length > 0 && (
+              <div className="mt-2 space-y-1">
+                <div className="flex items-center gap-1 text-xs text-gray-400">
+                  <Percent className="w-3 h-3" />
+                  <span>Distribución:</span>
+                </div>
+                <div className="flex flex-wrap gap-1">
+                  {Object.entries(exercise.categoryPercentages).map(([category, percentage]) => (
+                    <span
+                      key={category}
+                      className="text-xs text-green-300 bg-green-500/15 px-2 py-1 rounded-full font-medium border border-green-500/20"
+                    >
+                      {category}: {percentage}%
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {exercise.description && (
               <p className="text-sm text-gray-500 mt-2 line-clamp-2">{exercise.description}</p>
             )}
