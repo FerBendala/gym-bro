@@ -62,8 +62,11 @@ const findLeastTrainedCategory = (records: WorkoutRecord[]): string | null => {
 /**
  * Calcula el análisis completo por categorías
  */
-export const calculateCategoryAnalysis = (records: WorkoutRecord[]): CategoryAnalysis => {
-  const muscleBalance = analyzeMuscleBalance(records);
+export const calculateCategoryAnalysis = (
+  records: WorkoutRecord[],
+  customVolumeDistribution?: Record<string, number>
+): CategoryAnalysis => {
+  const muscleBalance = analyzeMuscleBalance(records, customVolumeDistribution);
   const balanceScore = calculateBalanceScore(muscleBalance);
   const dominantCategory = findDominantCategory(records);
   const leastTrainedCategory = findLeastTrainedCategory(records);

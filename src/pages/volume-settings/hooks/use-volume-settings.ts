@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { VOLUME_SETTINGS_CONSTANTS, VOLUME_SETTINGS_MESSAGES } from '../constants';
 import type { VolumeDistribution, VolumeSettingsState } from '../types';
 
+import { UserSettingsService } from '@/api/services';
 import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants/exercise.constants';
 import { useNotification } from '@/stores/notification';
 import { logger } from '@/utils';
@@ -22,12 +23,25 @@ export const useVolumeSettings = () => {
   useEffect(() => {
     const loadCurrentSettings = async () => {
       try {
-        const result = await getItem<UserSettings>('metadata', 'userSettings');
-        if (result.success && result.data?.value?.customVolumeDistribution) {
+        // Intentar cargar desde Firebase primero
+        const firebaseResult = await UserSettingsService.getUserSettings();
+
+        if (firebaseResult.success && firebaseResult.data?.customVolumeDistribution) {
           setState(prev => ({
             ...prev,
-            volumeDistribution: result.data?.value.customVolumeDistribution || IDEAL_VOLUME_DISTRIBUTION,
+            volumeDistribution: firebaseResult.data!.customVolumeDistribution!,
           }));
+          logger.info('Configuración de volumen cargada desde Firebase');
+        } else {
+          // Si no hay datos en Firebase, intentar cargar desde IndexedDB
+          const indexedDbResult = await getItem<UserSettings>('metadata', 'userSettings');
+          if (indexedDbResult.success && indexedDbResult.data?.value?.customVolumeDistribution) {
+            setState(prev => ({
+              ...prev,
+              volumeDistribution: indexedDbResult.data!.value.customVolumeDistribution!,
+            }));
+            logger.info('Configuración de volumen cargada desde IndexedDB');
+          }
         }
       } catch (error) {
         logger.error('Error cargando configuración de volumen:', error as Error);
@@ -66,6 +80,7 @@ export const useVolumeSettings = () => {
 
     setState(prev => ({ ...prev, saving: true }));
     try {
+      // Guardar en IndexedDB primero
       const currentResult = await getItem<UserSettings>('metadata', 'userSettings');
       const currentSettings = currentResult.success ? currentResult.data : null;
 
@@ -78,12 +93,20 @@ export const useVolumeSettings = () => {
         updatedAt: Date.now(),
       };
 
-      const result = await updateItem<UserSettings>('metadata', newSettings);
-      if (result.success) {
+      await updateItem<UserSettings>('metadata', newSettings);
+
+      // Luego guardar en Firebase
+      const firebaseResult = await UserSettingsService.updateVolumeDistribution(state.volumeDistribution);
+
+      if (firebaseResult.success) {
         showNotification(VOLUME_SETTINGS_MESSAGES.SAVE_SUCCESS, 'success');
+        logger.info('Configuración de volumen guardada en IndexedDB y Firebase');
         return true;
       } else {
-        throw new Error(result.error || 'Error guardando configuración');
+        // Si Firebase falla, al menos se guardó en IndexedDB
+        showNotification('Configuración guardada localmente. Error al sincronizar con la nube.', 'warning');
+        logger.warn('Error guardando en Firebase, pero se guardó en IndexedDB');
+        return true;
       }
     } catch (error) {
       logger.error('Error guardando configuración:', error as Error);

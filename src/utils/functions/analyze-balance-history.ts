@@ -10,7 +10,12 @@ import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
  * Analiza el historial de balance para un grupo muscular
  * Actualizado para medir consistencia real de balance, no solo fuerza
  */
-export const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecords?: WorkoutRecord[], allAssignments?: ExerciseAssignment[]): {
+export const analyzeBalanceHistory = (
+  categoryRecords: WorkoutRecord[],
+  allRecords?: WorkoutRecord[],
+  allAssignments?: ExerciseAssignment[],
+  customVolumeDistribution?: Record<string, number>
+): {
   trend: 'improving' | 'stable' | 'declining';
   consistency: number;
   volatility: number;
@@ -26,7 +31,8 @@ export const analyzeBalanceHistory = (categoryRecords: WorkoutRecord[], allRecor
 
     if (weeklyBalanceData.length >= 3) {
       // Analizar tendencia de balance (se acerca o aleja del ideal)
-      const idealPercentage = IDEAL_VOLUME_DISTRIBUTION[categoryRecords[0]?.exercise?.categories?.[0] || ''] || 15;
+      const category = categoryRecords[0]?.exercise?.categories?.[0] || '';
+      const idealPercentage = customVolumeDistribution?.[category] || IDEAL_VOLUME_DISTRIBUTION[category] || 15;
       const trendTowardsIdeal = analyzeTrendTowardsIdeal(weeklyBalanceData, idealPercentage);
 
       // **MEJORA**: Verificar progreso de fuerza y volumen también en el camino principal

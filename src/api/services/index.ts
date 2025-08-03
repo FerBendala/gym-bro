@@ -6,4 +6,6 @@
 export * from './error-handler';
 export * from './exercise-assignment-service';
 export * from './exercise-service';
+export * from './user-settings-service';
 export * from './workout-record-service';
+

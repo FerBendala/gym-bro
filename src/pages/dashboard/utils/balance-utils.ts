@@ -10,9 +10,13 @@ import { calculateUpperLowerBalance } from './balance-upper-lower';
 /**
  * Función principal para calcular análisis de balance muscular
  * @param records - Registros de entrenamiento
+ * @param customVolumeDistribution - Configuración personalizada de volumen (opcional)
  * @returns Análisis completo de balance con métricas globales y por categoría
  */
-export const calculateBalanceAnalysis = (records: WorkoutRecord[]): BalanceAnalysisResult => {
+export const calculateBalanceAnalysis = (
+  records: WorkoutRecord[],
+  customVolumeDistribution?: Record<string, number>
+): BalanceAnalysisResult => {
   try {
     if (records.length === 0) {
       return getEmptyBalanceAnalysis();
@@ -28,8 +32,8 @@ export const calculateBalanceAnalysis = (records: WorkoutRecord[]): BalanceAnaly
     const processedData = processUserDataInSinglePass(validRecords);
 
     // Usar las funciones correctas de category-analysis
-    const categoryAnalysis = calculateCategoryAnalysis(validRecords);
-    const muscleBalance = analyzeMuscleBalance(validRecords);
+    const categoryAnalysis = calculateCategoryAnalysis(validRecords, customVolumeDistribution);
+    const muscleBalance = analyzeMuscleBalance(validRecords, customVolumeDistribution);
     const balanceScore = calculateBalanceScore(muscleBalance);
 
     // Calcular balance superior/inferior

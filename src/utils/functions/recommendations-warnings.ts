@@ -10,6 +10,7 @@ export const generateSpecificRecommendations = (
   category: string,
   balance: Partial<MuscleBalance>,
   context?: { recentImprovement?: boolean },
+  customVolumeDistribution?: Record<string, number>,
 ): string[] => {
   const recommendations: string[] = [];
 
@@ -46,7 +47,7 @@ export const generateSpecificRecommendations = (
 
   // Recomendaciones por ratio antagonista - Nueva lógica basada en ratios ideales
   if (balance.antagonistRatio && balance.antagonistRatio > 0) {
-    const imbalanceAnalysis = analyzeAntagonistImbalance(category, balance.antagonistRatio);
+    const imbalanceAnalysis = analyzeAntagonistImbalance(category, balance.antagonistRatio, customVolumeDistribution);
     const antagonist = getAntagonistGroup(category);
 
     if (imbalanceAnalysis.hasImbalance && antagonist) {
@@ -90,7 +91,7 @@ export const generateWarnings = (
 
   // Nueva lógica de desequilibrio antagonista basada en ratios ideales
   if (balance.antagonistRatio && balance.antagonistRatio > 0) {
-    const imbalanceAnalysis = analyzeAntagonistImbalance(category, balance.antagonistRatio);
+    const imbalanceAnalysis = analyzeAntagonistImbalance(category, balance.antagonistRatio, customVolumeDistribution);
     const antagonist = getAntagonistGroup(category);
 
     if (imbalanceAnalysis.hasImbalance && antagonist) {
@@ -139,6 +140,7 @@ export const shouldShowAntagonistWarning = (
   category: string,
   antagonist: string,
   categoryMetrics: CategoryMetrics[],
+  customVolumeDistribution?: Record<string, number>,
 ): boolean => {
   // Obtener métricas de ambos grupos
   const categoryData = categoryMetrics.find(m => m.category === category);
@@ -147,8 +149,8 @@ export const shouldShowAntagonistWarning = (
   if (!categoryData || !antagonistData) return false;
 
   // Calcular desviaciones absolutas respecto a sus ideales individuales
-  const categoryIdeal = IDEAL_VOLUME_DISTRIBUTION[category] || 15;
-  const antagonistIdeal = IDEAL_VOLUME_DISTRIBUTION[antagonist] || 15;
+  const categoryIdeal = customVolumeDistribution?.[category] || IDEAL_VOLUME_DISTRIBUTION[category] || 15;
+  const antagonistIdeal = customVolumeDistribution?.[antagonist] || IDEAL_VOLUME_DISTRIBUTION[antagonist] || 15;
 
   const categoryDeviation = Math.abs(categoryData.percentage - categoryIdeal);
   const antagonistDeviation = Math.abs(antagonistData.percentage - antagonistIdeal);

@@ -56,12 +56,15 @@ export const getAntagonistGroup = (category: string): string | null => {
 /**
  * Calcula el ratio ideal entre un grupo muscular y su antagonista
  */
-export const calculateIdealAntagonistRatio = (category: string): number => {
+export const calculateIdealAntagonistRatio = (
+  category: string,
+  customVolumeDistribution?: Record<string, number>
+): number => {
   const antagonist = ANTAGONIST_PAIRS[category];
   if (!antagonist) return 1;
 
-  const categoryIdeal = IDEAL_VOLUME_DISTRIBUTION[category] || 15;
-  const antagonistIdeal = IDEAL_VOLUME_DISTRIBUTION[antagonist] || 15;
+  const categoryIdeal = customVolumeDistribution?.[category] || IDEAL_VOLUME_DISTRIBUTION[category] || 15;
+  const antagonistIdeal = customVolumeDistribution?.[antagonist] || IDEAL_VOLUME_DISTRIBUTION[antagonist] || 15;
 
   return categoryIdeal / antagonistIdeal;
 };
@@ -69,13 +72,17 @@ export const calculateIdealAntagonistRatio = (category: string): number => {
 /**
  * Analiza el desequilibrio antagonista comparando con el ratio ideal
  */
-export const analyzeAntagonistImbalance = (category: string, actualRatio: number): {
+export const analyzeAntagonistImbalance = (
+  category: string,
+  actualRatio: number,
+  customVolumeDistribution?: Record<string, number>
+): {
   hasImbalance: boolean;
   type: 'too_much' | 'too_little' | 'balanced';
   severity: 'mild' | 'moderate' | 'severe';
   deviation: number;
 } => {
-  const idealRatio = calculateIdealAntagonistRatio(category);
+  const idealRatio = calculateIdealAntagonistRatio(category, customVolumeDistribution);
   const deviation = ((actualRatio - idealRatio) / idealRatio) * 100;
 
   // Umbrales basados en porcentaje de desviación del ratio ideal

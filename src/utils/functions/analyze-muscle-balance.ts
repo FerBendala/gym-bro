@@ -10,7 +10,10 @@ import type { WorkoutRecord } from '@/interfaces';
 /**
  * Analiza el balance muscular entre todas las categorías
  */
-export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] => {
+export const analyzeMuscleBalance = (
+  records: WorkoutRecord[],
+  customVolumeDistribution?: Record<string, number>
+): MuscleBalance[] => {
   if (records.length === 0) return [];
 
   const balance: MuscleBalance[] = [];
@@ -38,7 +41,7 @@ export const analyzeMuscleBalance = (records: WorkoutRecord[]): MuscleBalance[] 
   EXERCISE_CATEGORIES.forEach(category => {
     const categoryMetrics = calculateCategoryMetrics(records, category);
 
-    const idealPercentage = IDEAL_VOLUME_DISTRIBUTION[category] || 15;
+    const idealPercentage = customVolumeDistribution?.[category] || IDEAL_VOLUME_DISTRIBUTION[category] || 15;
     const actualPercentage = normalizedPercentages[category] || 0;
     const deviation = actualPercentage - idealPercentage;
 

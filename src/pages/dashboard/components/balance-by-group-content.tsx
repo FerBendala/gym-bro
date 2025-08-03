@@ -23,7 +23,7 @@ const safeNumber = (value: number | undefined, fallback = 0): number => {
 // Función para formatear porcentajes de forma consistente
 const formatSafePercentage = (value: number, decimals = 1): string => {
   const safeValue = safeNumber(value, 0);
-  return `${formatNumberToString(safeValue, decimals)  }%`;
+  return `${formatNumberToString(safeValue, decimals)}%`;
 };
 
 // Funciones auxiliares para colores e iconos de categorías

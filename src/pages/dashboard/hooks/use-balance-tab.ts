@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 
+import { useAppVolumeConfig } from '@/hooks/use-volume-provider.tsx';
 import { calculateBalanceAnalysis } from '../utils/balance-utils';
 
 import type { WorkoutRecord } from '@/interfaces';
@@ -8,6 +9,7 @@ export type BalanceSubTab = 'general' | 'balanceByGroup' | 'upperLower' | 'trend
 
 export const useBalanceTab = (records: WorkoutRecord[]) => {
   const [activeSubTab, setActiveSubTab] = useState<BalanceSubTab>('general');
+  const { getVolumeDistribution } = useAppVolumeConfig();
 
   const balanceData = useMemo(() => {
     if (records.length === 0) {
@@ -23,8 +25,9 @@ export const useBalanceTab = (records: WorkoutRecord[]) => {
       };
     }
 
-    return calculateBalanceAnalysis(records);
-  }, [records]);
+    const customVolumeDistribution = getVolumeDistribution();
+    return calculateBalanceAnalysis(records, customVolumeDistribution);
+  }, [records, getVolumeDistribution]);
 
   const handleViewChange = (view: 'general' | 'upperLower' | 'byGroup' | 'trends') => {
     // Esta función se puede expandir si necesitamos manejar cambios de vista
