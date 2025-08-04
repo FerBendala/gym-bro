@@ -1,9 +1,9 @@
 import { Calendar, Target, TrendingDown, TrendingUp, Zap } from 'lucide-react';
 import React from 'react';
 
+import type { WorkoutRecord } from '@/interfaces';
 import { formatNumberToString } from '@/utils';
 import type { DayMetrics } from '@/utils/functions/trends-interfaces';
-import type { WorkoutRecord } from '@/interfaces';
 
 interface WeeklySummaryMetricsProps {
   dailyTrends: DayMetrics[];
@@ -76,7 +76,7 @@ export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
     // Analizar cada día con datos
     const dayAnalysis = daysWithData.map(day => {
       const dayRecords = dayGroups.get(day.dayName) || [];
-      
+
       // Agrupar por categoría de ejercicio
       const categoryGroups = new Map<string, WorkoutRecord[]>();
       dayRecords.forEach(record => {
@@ -111,18 +111,78 @@ export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
       };
     });
 
-    // Encontrar el día con la categoría más débil (peso máximo más bajo)
+    // Analizar tendencias de mejora por categoría
+    const analyzeCategoryTrends = () => {
+      const categoryTrends = new Map<string, { weights: number[], trend: number }>();
+      
+      // Agrupar todos los registros por categoría y ordenar por fecha
+      records.forEach(record => {
+        const category = record.exercise?.categories?.[0] || 'Sin categoría';
+        if (!categoryTrends.has(category)) {
+          categoryTrends.set(category, { weights: [], trend: 0 });
+        }
+        categoryTrends.get(category)!.weights.push(record.weight);
+      });
+
+      // Calcular tendencia para cada categoría
+      categoryTrends.forEach((data, category) => {
+        if (data.weights.length >= 3) {
+          // Dividir en dos períodos para calcular tendencia
+          const sortedWeights = [...data.weights].sort((a, b) => a - b);
+          const halfPoint = Math.floor(sortedWeights.length / 2);
+          const olderWeights = sortedWeights.slice(0, halfPoint);
+          const recentWeights = sortedWeights.slice(halfPoint);
+          
+          const olderAvg = olderWeights.reduce((sum, w) => sum + w, 0) / olderWeights.length;
+          const recentAvg = recentWeights.reduce((sum, w) => sum + w, 0) / recentWeights.length;
+          
+          if (olderAvg > 0) {
+            data.trend = ((recentAvg - olderAvg) / olderAvg) * 100;
+          }
+        }
+      });
+
+      return categoryTrends;
+    };
+
+    const categoryTrends = analyzeCategoryTrends();
+
+    // Encontrar el día con la categoría más débil, pero considerar tendencias
     const dayWithWeakestCategory = dayAnalysis.reduce((weakest, current) => {
       if (weakest.lowestCategory.name === 'N/A') return current;
       if (current.lowestCategory.name === 'N/A') return weakest;
+      
+      const currentTrend = categoryTrends.get(current.lowestCategory.name)?.trend || 0;
+      const weakestTrend = categoryTrends.get(weakest.lowestCategory.name)?.trend || 0;
+      
+      // Si la categoría actual tiene mejor tendencia, darle prioridad
+      if (currentTrend > weakestTrend + 5) {
+        return weakest; // Mantener el más débil si la tendencia es significativamente mejor
+      }
+      
       return current.lowestCategory.maxWeight < weakest.lowestCategory.maxWeight ? current : weakest;
     });
 
+    const selectedCategory = dayWithWeakestCategory.lowestCategory.name;
+    const categoryTrend = categoryTrends.get(selectedCategory)?.trend || 0;
+    const maxWeight = dayWithWeakestCategory.lowestCategory.maxWeight;
+
+    // Determinar el mensaje basado en la tendencia
+    let message = '';
+    if (categoryTrend > 10) {
+      message = `${dayWithWeakestCategory.day} - ${selectedCategory} (${maxWeight} kg) mejorando (+${categoryTrend.toFixed(1)}%)`;
+    } else if (categoryTrend > 0) {
+      message = `${dayWithWeakestCategory.day} - ${selectedCategory} (${maxWeight} kg) estable`;
+    } else {
+      message = `${dayWithWeakestCategory.day} - ${selectedCategory} (${maxWeight} kg) necesita mejora`;
+    }
+
     return {
       day: dayWithWeakestCategory.day,
-      category: dayWithWeakestCategory.lowestCategory.name,
-      maxWeight: dayWithWeakestCategory.lowestCategory.maxWeight,
-      message: `${dayWithWeakestCategory.day} - ${dayWithWeakestCategory.lowestCategory.name} (${dayWithWeakestCategory.lowestCategory.maxWeight} kg) necesita mejora`
+      category: selectedCategory,
+      maxWeight,
+      message,
+      trend: categoryTrend
     };
   };
 
