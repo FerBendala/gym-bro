@@ -5,6 +5,7 @@ import { useTrendsContent } from '../hooks/use-trends-content';
 import { EmptyState } from '../shared';
 
 import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
 import type { WorkoutRecord } from '@/interfaces';
 import { WeeklyAnalysisChart, WeeklySummaryMetrics } from '.';
 
@@ -61,9 +62,11 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
           <h3 className="text-lg font-semibold text-white flex items-center">
             <Calendar className="w-5 h-5 mr-2" />
             Análisis por Día de la Semana
-            <div className="ml-2 flex-shrink-0 text-gray-400 hover:text-gray-300 cursor-help" title="Análisis completo de tus patrones de entrenamiento por día, incluyendo rendimiento, tendencias y recomendaciones personalizadas.">
-              ℹ️
-            </div>
+            <InfoTooltip
+              content="Análisis completo de tus patrones de entrenamiento por día, incluyendo rendimiento, tendencias y recomendaciones personalizadas."
+              position="top"
+              className="ml-2 flex-shrink-0"
+            />
           </h3>
         </CardHeader>
         <CardContent>
