@@ -74,32 +74,42 @@ export const WeeklyAnalysisChart: React.FC<WeeklyAnalysisChartProps> = ({
         },
       },
     },
-    colors: ['#3b82f6', '#10b981', '#f59e0b', '#ef4444'],
+    colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
     stroke: {
       width: [0, 3, 3, 3], // Barras sin stroke, líneas con stroke
       curve: 'smooth',
       dashArray: [0, 0, 5, 0], // Línea punteada para peso máximo
     },
     fill: {
-      type: ['solid', 'gradient', 'gradient', 'gradient'],
+      type: ['gradient', 'gradient', 'gradient', 'gradient'],
       gradient: {
         shade: 'dark',
         type: 'vertical',
-        shadeIntensity: 0.1,
-        gradientToColors: ['#1d4ed8', '#059669', '#d97706', '#dc2626'],
+        shadeIntensity: 0.3,
+        gradientToColors: ['#1d4ed8', '#059669', '#d97706', '#7c3aed'],
         inverseColors: false,
-        opacityFrom: 0.8,
-        opacityTo: 0.2,
-        stops: [0, 100],
+        opacityFrom: 1,
+        opacityTo: 0.4,
+        stops: [0, 50, 100],
       },
     },
     plotOptions: {
       bar: {
-        borderRadius: 4,
-        columnWidth: '60%',
+        borderRadius: 6,
+        columnWidth: '70%',
         dataLabels: {
           position: 'top',
         },
+        distributed: false,
+        colors: {
+          ranges: [
+            {
+              from: 0,
+              to: 100000,
+              color: '#3b82f6'
+            }
+          ]
+        }
       },
     },
     dataLabels: {
