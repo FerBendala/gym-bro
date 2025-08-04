@@ -4,6 +4,24 @@ import React from 'react';
 import { formatNumberToString } from '@/utils';
 import { clamp } from '@/utils/functions/math-utils';
 
+// Función para obtener un color más oscuro para el gradiente
+const getDarkerColor = (color: string): string => {
+  // Mapeo de colores a versiones más oscuras
+  const colorMap: Record<string, string> = {
+    '#3B82F6': '#1D4ED8', // Azul
+    '#10B981': '#059669', // Verde
+    '#F59E0B': '#D97706', // Naranja
+    '#EF4444': '#DC2626', // Rojo
+    '#8B5CF6': '#7C3AED', // Púrpura
+    '#F97316': '#EA580C', // Naranja oscuro
+    '#06B6D4': '#0891B2', // Cian
+    '#84CC16': '#65A30D', // Verde lima
+    '#6B7280': '#4B5563', // Gris
+  };
+  
+  return colorMap[color] || color;
+};
+
 interface CategoryDashboardChartProps {
   data: {
     volume: number;
@@ -141,7 +159,7 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
                 className="h-full rounded-full transition-all duration-1000 ease-out relative"
                 style={{
                   width: `${Math.min(100, (metric.value / metric.max) * 100)}%`,
-                  backgroundColor: metric.color,
+                  background: `linear-gradient(90deg, ${metric.color} 0%, ${getDarkerColor(metric.color)} 100%)`,
                 }}
               >
                 {/* Brillo sutil */}

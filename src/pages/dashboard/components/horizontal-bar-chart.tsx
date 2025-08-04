@@ -2,6 +2,23 @@ import React from 'react';
 
 import { formatNumberToString } from '@/utils';
 
+// Función para obtener un color más oscuro para el gradiente
+const getDarkerColor = (color: string): string => {
+  // Mapeo de colores a versiones más oscuras
+  const colorMap: Record<string, string> = {
+    '#3B82F6': '#1D4ED8', // Azul
+    '#10B981': '#059669', // Verde
+    '#F59E0B': '#D97706', // Naranja
+    '#EF4444': '#DC2626', // Rojo
+    '#8B5CF6': '#7C3AED', // Púrpura
+    '#F97316': '#EA580C', // Naranja oscuro
+    '#06B6D4': '#0891B2', // Cian
+    '#84CC16': '#65A30D', // Verde lima
+  };
+  
+  return colorMap[color] || color;
+};
+
 interface HorizontalBarChartProps {
   data: {
     name: string;
@@ -85,7 +102,7 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({
                 className="h-full transition-all duration-1000 ease-out"
                 style={{
                   width: `${Math.min(100, (item.value / maxValue) * 100)}%`,
-                  backgroundColor: item.color || '#3B82F6',
+                  background: `linear-gradient(90deg, ${item.color || '#3B82F6'} 0%, ${getDarkerColor(item.color || '#3B82F6')} 100%)`,
                 }}
               />
 
