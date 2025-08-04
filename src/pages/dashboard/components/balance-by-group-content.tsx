@@ -1,4 +1,4 @@
-import { AlertTriangle, BarChart, CheckCircle, Timer, TrendingDown, TrendingUp } from 'lucide-react';
+import { AlertTriangle, CheckCircle, Timer, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
 
 import { InfoTooltip } from '@/components/tooltip';
@@ -10,6 +10,7 @@ import { HorizontalBarChart } from './horizontal-bar-chart';
 
 import { Card, CardContent, CardHeader } from '@/components/card';
 import { formatNumberToString } from '@/utils';
+import { CATEGORY_ICONS } from '@/constants/exercise.constants';
 
 interface BalanceByGroupContentProps {
   muscleBalance: MuscleBalanceItem[];
@@ -42,15 +43,7 @@ const getCategoryColor = (category: string): string => {
 };
 
 const getCategoryIcon = (category: string) => {
-  switch (category) {
-    case 'Pecho': return BarChart;
-    case 'Espalda': return BarChart;
-    case 'Piernas': return BarChart;
-    case 'Hombros': return BarChart;
-    case 'Brazos': return BarChart;
-    case 'Core': return BarChart;
-    default: return BarChart;
-  }
+  return CATEGORY_ICONS[category] || CATEGORY_ICONS['Sin categoría'];
 };
 
 export const BalanceByGroupContent: React.FC<BalanceByGroupContentProps> = ({
