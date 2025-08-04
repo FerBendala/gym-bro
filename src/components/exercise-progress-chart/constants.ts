@@ -4,7 +4,7 @@
 
 export const CHART_DIMENSIONS = {
   width: 600,
-  height: 300,
+  height: 400,
   padding: 50,
 } as const;
 

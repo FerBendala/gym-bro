@@ -1,6 +1,5 @@
 import { useMemo, useState } from 'react';
 
-
 import { calculateBalanceAnalysis } from '../utils/balance-utils';
 
 import { useAppVolumeConfig } from '@/hooks';

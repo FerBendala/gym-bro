@@ -40,7 +40,7 @@ export const WeeklyAnalysisChart: React.FC<WeeklyAnalysisChartProps> = ({
   const options: ApexOptions = {
     chart: {
       type: 'line',
-      height: 300,
+      height: 400,
       background: 'transparent',
       toolbar: { show: false },
       animations: { enabled: false },
@@ -158,7 +158,7 @@ export const WeeklyAnalysisChart: React.FC<WeeklyAnalysisChartProps> = ({
 
   return (
     <div className="w-full">
-      <Chart options={options} series={series} type="line" height={300} />
+      <Chart options={options} series={series} type="line" height={400} />
     </div>
   );
 };

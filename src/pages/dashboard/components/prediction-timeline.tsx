@@ -73,7 +73,7 @@ export const PredictionTimeline: React.FC<PredictionTimelineProps> = ({
   const options: ApexOptions = {
     chart: {
       type: 'line',
-      height: 300,
+      height: 400,
       background: 'transparent',
       toolbar: { show: false },
       zoom: { enabled: false },

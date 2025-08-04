@@ -33,7 +33,7 @@ export const DataQualityRadial: React.FC<DataQualityRadialProps> = ({
   const options: ApexOptions = {
     chart: {
       type: 'radialBar',
-      height: 300,
+      height: 400,
       background: 'transparent',
       toolbar: { show: false },
     },
