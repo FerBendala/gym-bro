@@ -1,4 +1,4 @@
-import { AlertTriangle, CheckCircle, Timer, TrendingDown, TrendingUp } from 'lucide-react';
+import { AlertTriangle, BarChart3, CheckCircle, Timer, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
 
 import { InfoTooltip } from '@/components/tooltip';
@@ -9,8 +9,8 @@ import { CategoryDashboardChart } from './category-dashboard-chart';
 import { HorizontalBarChart } from './horizontal-bar-chart';
 
 import { Card, CardContent, CardHeader } from '@/components/card';
-import { formatNumberToString } from '@/utils';
 import { CATEGORY_ICONS } from '@/constants/exercise.constants';
+import { formatNumberToString } from '@/utils';
 
 interface BalanceByGroupContentProps {
   muscleBalance: MuscleBalanceItem[];
@@ -74,7 +74,7 @@ export const BalanceByGroupContent: React.FC<BalanceByGroupContentProps> = ({
       <Card>
         <CardHeader className="pb-4">
           <h3 className="text-base lg:text-lg font-semibold text-white flex items-center">
-            <BarChart className="w-4 h-4 lg:w-5 lg:h-5 mr-2 flex-shrink-0" />
+            <BarChart3 className="w-4 h-4 lg:w-5 lg:h-5 mr-2 flex-shrink-0" />
             <span className="truncate">Balance por Categoría</span>
             <InfoTooltip
               content="Comparación visual del volumen actual vs ideal para cada grupo muscular"
