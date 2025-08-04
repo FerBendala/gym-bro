@@ -95,6 +95,7 @@ export * from './temporal-evolution';
 export * from './temporal-trends';
 export * from './trends-analysis';
 export * from './trends-interfaces';
+export * from './category-trends';
 
 // Funciones de volumen y entrenamiento
 export * from './volume-calculations';
