@@ -5,7 +5,32 @@ import type { HorizontalBarChartProps } from '../types';
 import { formatNumberToString } from '@/utils';
 
 export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({ data, onItemClick }) => {
-  const maxValue = Math.max(...data.map(item => Math.max(item.value, item.ideal))) * 1.1;
+  // Validar datos de entrada
+  if (!data || data.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center text-gray-500 text-sm">Sin datos disponibles</div>
+      </div>
+    );
+  }
+
+  // Validar y calcular el valor máximo con protección contra valores inválidos
+  const validData = data.filter(item =>
+    typeof item.value === 'number' &&
+    typeof item.ideal === 'number' &&
+    !isNaN(item.value) &&
+    !isNaN(item.ideal)
+  );
+
+  if (validData.length === 0) {
+    return (
+      <div className="space-y-4">
+        <div className="text-center text-gray-500 text-sm">Datos inválidos</div>
+      </div>
+    );
+  }
+
+  const maxValue = Math.max(...validData.map(item => Math.max(item.value, item.ideal))) * 1.1;
 
   const handleItemClick = (itemName: string) => {
     if (onItemClick) {
@@ -15,7 +40,7 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({ data, on
 
   return (
     <div className="space-y-4">
-      {data.map((item, index) => (
+      {validData.map((item, index) => (
         <div
           key={index}
           className="space-y-2 cursor-pointer hover:bg-gray-800/50 p-2 rounded-lg transition-colors duration-200"

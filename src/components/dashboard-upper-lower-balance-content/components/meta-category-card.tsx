@@ -1,6 +1,7 @@
 import React from 'react';
 
 import type { MetaCategoryCardProps } from '../types';
+import { calculateTrendFromMuscleBalance } from '../utils/upper-lower-utils';
 
 import { CategoryDashboardChart } from './category-dashboard-chart';
 
@@ -29,24 +30,8 @@ export const MetaCategoryCard: React.FC<MetaCategoryCardProps> = ({
   const totalRecords = categoryMetrics.reduce((sum: number, m) => sum + (m.personalRecords || 0), 0);
   const avgStrength = categoryMetrics.reduce((sum: number, m) => sum + (m.progressTrend?.strength || 0), 0) / Math.max(1, categoryMetrics.length);
 
-  // Determinar tendencia general basada en muscleBalance (más confiable)
-  const improvingCount = muscleBalanceData.filter((b) => b.balanceHistory?.trend === 'improving').length;
-  const stableCount = muscleBalanceData.filter((b) => b.balanceHistory?.trend === 'stable').length;
-  const decliningCount = muscleBalanceData.filter((b) => b.balanceHistory?.trend === 'declining').length;
-
-  // Lógica mejorada: si la mayoría está mejorando, es improving
-  let trend = 'stable';
-  if (improvingCount > decliningCount && improvingCount > stableCount) {
-    trend = 'improving';
-  } else if (decliningCount > improvingCount && decliningCount > stableCount) {
-    trend = 'declining';
-  } else if (stableCount > improvingCount && stableCount > decliningCount) {
-    trend = 'stable';
-  } else if (improvingCount === decliningCount && improvingCount > 0) {
-    trend = 'stable'; // Empate entre improving y declining
-  } else if (improvingCount > 0) {
-    trend = 'improving'; // Si hay al menos uno mejorando y no hay declining mayoritario
-  }
+  // Usar función centralizada para determinar tendencia
+  const trend = calculateTrendFromMuscleBalance(muscleBalanceData);
 
   const chartData = {
     volume: meta.percentage,
@@ -82,13 +67,13 @@ export const MetaCategoryCard: React.FC<MetaCategoryCardProps> = ({
             <span className={`text-xs px-2 py-1 rounded-full ${meta.isBalanced
               ? 'bg-green-500/20 text-green-400'
               : 'bg-yellow-500/20 text-yellow-400'
-            }`}>
+              }`}>
               {meta.isBalanced ? 'Equilibrado' : 'Desequilibrado'}
             </span>
             <span className={`text-xs px-2 py-1 rounded-full ${trend === 'improving' ? 'bg-blue-500/20 text-blue-400' :
               trend === 'declining' ? 'bg-red-500/20 text-red-400' :
                 'bg-gray-500/20 text-gray-400'
-            }`}>
+              }`}>
               {trend === 'improving' ? 'Mejorando' :
                 trend === 'declining' ? 'Declinando' :
                   'Estable'}
@@ -112,7 +97,7 @@ export const MetaCategoryCard: React.FC<MetaCategoryCardProps> = ({
                 <div key={category} className="flex justify-between text-xs">
                   <span className="text-gray-500">{category}</span>
                   <span className="text-gray-400">
-                    {catData ? `${formatNumberToString(catData.percentage, 1)  }%` : '0%'}
+                    {catData ? `${formatNumberToString(catData.percentage, 1)}%` : '0%'}
                   </span>
                 </div>
               );

@@ -24,6 +24,7 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
     muscleBalance,
     categoryAnalysis,
     upperLowerBalance,
+    userVolumeDistribution,
     handleBalanceItemClick,
     handleUpperLowerItemClick,
   } = useBalanceTab(records);
@@ -118,6 +119,7 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
           categoryAnalysis={categoryAnalysis}
           muscleBalance={muscleBalance}
           onItemClick={handleUpperLowerItemClick}
+          userVolumeDistribution={userVolumeDistribution}
         />
       )}
 

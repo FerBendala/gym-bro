@@ -1,14 +1,12 @@
-import { Activity, AlertTriangle, Calendar, CheckCircle, TrendingDown, TrendingUp, Zap } from 'lucide-react';
+import { Activity, Calendar } from 'lucide-react';
 import React, { useMemo } from 'react';
 
 import { useTrendsContent } from '../hooks/use-trends-content';
 import { EmptyState } from '../shared';
 
-import { dayColors, dayIcons, safeNumber } from './trends-utils';
-
 import { Card, CardContent, CardHeader } from '@/components/card';
 import type { WorkoutRecord } from '@/interfaces';
-import { formatNumberToString } from '@/utils';
+import { WeeklyAnalysisChart, WeeklySummaryMetrics } from '.';
 
 interface TrendsContentProps {
   records: WorkoutRecord[];
@@ -28,7 +26,7 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
   if (records.length === 0) {
     return (
       <EmptyState
-        icon={TrendingUp}
+        icon={Activity}
         title="Sin datos de tendencias"
         description="Registra algunos entrenamientos para ver tus patrones temporales"
       />
@@ -69,163 +67,15 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
           </h3>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {trendsData.dailyTrends.map((day) => {
-              const Icon = dayIcons[day.dayName] || Calendar;
-              const colorGradient = dayColors[day.dayName] || 'from-gray-500/80 to-gray-600/80';
+          <div className="space-y-6">
+            {/* Gráfico único de análisis semanal */}
+            <div className="mb-6">
+              <h4 className="text-sm font-medium text-gray-300 mb-4">Vista General Semanal</h4>
+              <WeeklyAnalysisChart dailyTrends={trendsData.dailyTrends} />
+            </div>
 
-              const getPerformanceBadge = () => {
-                if (day.performanceScore >= 80) return { text: 'Excelente', color: 'bg-green-500 text-white' };
-                if (day.performanceScore >= 60) return { text: 'Bueno', color: 'bg-blue-500 text-white' };
-                if (day.performanceScore >= 40) return { text: 'Regular', color: 'bg-yellow-500 text-black' };
-                return { text: 'Necesita Mejora', color: 'bg-red-500 text-white' };
-              };
-
-              const performanceBadge = getPerformanceBadge();
-
-              return (
-                <div
-                  key={day.dayName}
-                  className={'relative p-4 sm:p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/30 hover:border-gray-600/50 transition-all duration-200'}
-                >
-                  {/* Header con ícono y estado */}
-                  <div className="flex items-start justify-between mb-4">
-                    <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
-                      <div className={`p-2 sm:p-3 rounded-lg bg-gradient-to-br ${colorGradient}`}>
-                        <Icon className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6 text-white" />
-                      </div>
-                      <div className="flex-1 min-w-0">
-                        <h4 className="text-sm sm:text-base md:text-lg font-semibold text-white truncate">
-                          {day.dayName}
-                        </h4>
-                        <div className="flex items-center gap-1 sm:gap-2 mt-1 flex-wrap">
-                          {day.workouts > 0 && (
-                            <span className={`px-2 py-1 rounded-full text-xs font-medium ${performanceBadge.color}`}>
-                              {performanceBadge.text}
-                            </span>
-                          )}
-                          {day.trend > 0 && (
-                            <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 text-green-400" />
-                          )}
-                          {day.trend < 0 && (
-                            <TrendingDown className="w-3 h-3 sm:w-4 sm:h-4 text-red-400" />
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="text-right ml-2 sm:ml-4">
-                      <div className="text-lg sm:text-xl md:text-2xl font-bold text-white">
-                        {formatNumberToString(day.workouts, 0)}
-                      </div>
-                      <div className="text-xs text-gray-400">
-                        entrenamientos
-                      </div>
-                      <div className="mt-1 sm:mt-2 flex justify-end">
-                        {day.workouts > 0 ? (
-                          <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 text-green-400" />
-                        ) : (
-                          <AlertTriangle className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400" />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {day.workouts > 0 ? (
-                    <>
-                      {/* Barra de progreso de volumen */}
-                      <div className="mb-4">
-                        <div className="flex justify-between text-xs text-gray-400 mb-2">
-                          <span>Volumen: {formatNumberToString(day.totalVolume, 0)} kg</span>
-                          <span className="text-gray-300">
-                            {formatNumberToString(day.percentage, 1)}% del total
-                          </span>
-                        </div>
-                        <div className="relative h-6 bg-gray-800 rounded-full overflow-hidden">
-                          <div
-                            className={`relative h-full bg-gradient-to-r ${colorGradient} transition-all duration-300`}
-                            style={{ width: `${Math.min(100, safeNumber(day.percentage, 0))}%` }}
-                          >
-                            <div className="absolute inset-0 bg-white/10 backdrop-blur-sm" />
-                            {safeNumber(day.percentage, 0) > 15 && (
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <span className="text-xs font-medium text-white drop-shadow-sm">
-                                  {formatNumberToString(day.totalVolume, 0)} kg
-                                </span>
-                              </div>
-                            )}
-                          </div>
-                          {safeNumber(day.percentage, 0) <= 15 && safeNumber(day.percentage, 0) > 0 && (
-                            <div className="absolute top-0 left-2 h-full flex items-center">
-                              <span className="text-xs font-medium text-white drop-shadow-sm">
-                                {formatNumberToString(day.totalVolume, 0)} kg
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Grid de métricas responsivo */}
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-3 mb-4">
-                        <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                          <div className="text-xs text-gray-400 mb-1">Peso Máximo</div>
-                          <div className="text-sm sm:text-lg font-semibold text-white">
-                            {formatNumberToString(day.maxWeight, 0)} kg
-                          </div>
-                        </div>
-
-                        <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                          <div className="text-xs text-gray-400 mb-1">Ejercicios</div>
-                          <div className="text-sm sm:text-lg font-semibold text-white">
-                            {formatNumberToString(day.uniqueExercises, 0)}
-                          </div>
-                        </div>
-
-                        <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                          <div className="text-xs text-gray-400 mb-1">Consistencia</div>
-                          <div className="text-sm sm:text-lg font-semibold text-white">
-                            {formatNumberToString(day.consistency, 0)}%
-                          </div>
-                        </div>
-
-                        <div className="bg-gray-800/50 rounded-lg p-2 sm:p-3 text-center">
-                          <div className="text-xs text-gray-400 mb-1">Peso Promedio</div>
-                          <div className="text-sm sm:text-lg font-semibold text-white">
-                            {formatNumberToString(day.avgWeight, 0)} kg
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Recomendaciones específicas */}
-                      {day.recommendations.length > 0 && (
-                        <div className="bg-blue-900/20 border border-blue-500/30 rounded-lg p-3">
-                          <div className="flex items-start gap-2">
-                            <Zap className="w-4 h-4 text-blue-400 mt-0.5 flex-shrink-0" />
-                            <div className="flex-1 min-w-0">
-                              <p className="text-sm text-blue-300 break-words">
-                                {day.recommendations[0]}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-center py-4">
-                      <div className="bg-yellow-900/20 border border-yellow-500/30 rounded-lg p-3">
-                        <div className="flex items-start gap-2">
-                          <AlertTriangle className="w-4 h-4 text-yellow-400 mt-0.5 flex-shrink-0" />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm text-yellow-300 break-words">
-                              Sin entrenamientos registrados. Considera añadir entrenamientos en este día para equilibrar tu rutina semanal.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+            {/* Métricas de resumen semanal */}
+            <WeeklySummaryMetrics dailyTrends={trendsData.dailyTrends} />
           </div>
         </CardContent>
       </Card>

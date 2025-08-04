@@ -35,3 +35,6 @@ export * from './radar-chart-card';
 export * from './trend-analysis-chart';
 export * from './trend-analysis-section';
 export * from './trends-content';
+export * from './weekly-analysis-chart';
+export * from './weekly-summary-metrics';
+

@@ -1,60 +1,69 @@
 import { Timer, TrendingDown, TrendingUp, Trophy } from 'lucide-react';
 import React from 'react';
 
-import { TREND_THRESHOLDS } from '../constants';
+import { TREND_THRESHOLDS, validatePercentage } from '../constants';
 import type { CategoryDashboardChartProps } from '../types';
 
 import { formatNumberToString } from '@/utils';
 import { clamp } from '@/utils/functions/math-utils';
 
 export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ data, color }) => {
-  // Calcular valores dinámicos basados en datos reales
-  const maxFrequency = Math.max(data.frequency, TREND_THRESHOLDS.MAX_FREQUENCY);
-  const frequencyPercentage = (data.frequency / maxFrequency) * 100;
+  // Validar datos de entrada
+  if (!data) {
+    return (
+      <div className="space-y-3">
+        <div className="text-center text-gray-500 text-sm">Sin datos disponibles</div>
+      </div>
+    );
+  }
+
+  // Calcular valores dinámicos basados en datos reales con validaciones
+  const maxFrequency = Math.max(data.frequency || 0, TREND_THRESHOLDS.MAX_FREQUENCY);
+  const frequencyPercentage = maxFrequency > 0 ? ((data.frequency || 0) / maxFrequency) * 100 : 0;
   const idealFrequencyPercentage = (TREND_THRESHOLDS.IDEAL_FREQUENCY / maxFrequency) * 100;
 
   // Normalizar fuerza: convertir progresión (-100 a +100) a escala 0-100
-  const normalizedStrength = clamp(((data.strength + 100) / 2), 0, 100);
+  const normalizedStrength = clamp(((data.strength || 0) + 100) / 2, 0, 100);
   const strengthIdeal = 50; // 0% de progresión como punto neutral
 
   // Calcular ideal de intensidad basado en datos disponibles
   const intensityIdeal = Math.min(
     TREND_THRESHOLDS.MAX_INTENSITY,
-    Math.max(TREND_THRESHOLDS.MIN_INTENSITY, data.intensity * TREND_THRESHOLDS.INTENSITY_REDUCTION_FACTOR),
+    Math.max(TREND_THRESHOLDS.MIN_INTENSITY, (data.intensity || 0) * TREND_THRESHOLDS.INTENSITY_REDUCTION_FACTOR),
   );
 
   const metrics = [
     {
       label: 'Volumen',
-      value: data.volume,
-      max: Math.max(data.idealVolume * 1.5, data.volume, 100),
-      ideal: data.idealVolume,
+      value: validatePercentage(data.volume || 0),
+      max: Math.max((data.idealVolume || 0) * 1.5, data.volume || 0, 100),
+      ideal: validatePercentage(data.idealVolume || 0),
       unit: '%',
       color,
     },
     {
       label: 'Intensidad',
-      value: data.intensity,
+      value: validatePercentage(data.intensity || 0),
       max: 100,
-      ideal: intensityIdeal,
+      ideal: validatePercentage(intensityIdeal),
       unit: '%',
       color: '#3B82F6',
     },
     {
       label: 'Frecuencia',
-      value: frequencyPercentage,
+      value: validatePercentage(frequencyPercentage),
       max: 100,
-      ideal: idealFrequencyPercentage,
+      ideal: validatePercentage(idealFrequencyPercentage),
       unit: '/sem',
       color: '#8B5CF6',
     },
     {
       label: 'Fuerza',
-      value: normalizedStrength,
+      value: validatePercentage(normalizedStrength),
       max: 100,
-      ideal: strengthIdeal,
+      ideal: validatePercentage(strengthIdeal),
       unit: '%',
-      color: data.strength > 0 ? '#10B981' : data.strength < 0 ? '#EF4444' : '#6B7280',
+      color: (data.strength || 0) > 0 ? '#10B981' : (data.strength || 0) < 0 ? '#EF4444' : '#6B7280',
     },
   ];
 
@@ -69,9 +78,9 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
               <div className="flex items-center space-x-2">
                 <span className="text-white font-bold">
                   {metric.label === 'Frecuencia'
-                    ? `${formatNumberToString(data.frequency, 1)  }/sem`
+                    ? `${formatNumberToString(data.frequency || 0, 1)}/sem`
                     : metric.label === 'Fuerza'
-                      ? `${(data.strength > 0 ? '+' : '') + formatNumberToString(data.strength, 0)  }%`
+                      ? `${((data.strength || 0) > 0 ? '+' : '') + formatNumberToString(data.strength || 0, 0)}%`
                       : formatNumberToString(metric.value, 0) + metric.unit
                   }
                 </span>
@@ -115,7 +124,7 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
           <Trophy className="w-4 h-4 text-yellow-400" />
           <span className="text-xs text-gray-400">PRs:</span>
           <span className="text-sm font-bold text-yellow-400">
-            {formatNumberToString(data.records, 0)}
+            {formatNumberToString(data.records || 0, 0)}
           </span>
         </div>
 

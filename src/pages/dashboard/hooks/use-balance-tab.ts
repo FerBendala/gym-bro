@@ -29,6 +29,10 @@ export const useBalanceTab = (records: WorkoutRecord[]) => {
     return calculateBalanceAnalysis(records, customVolumeDistribution);
   }, [records, getVolumeDistribution]);
 
+  const userVolumeDistribution = useMemo(() => {
+    return getVolumeDistribution();
+  }, [getVolumeDistribution]);
+
   const handleViewChange = (view: 'general' | 'upperLower' | 'byGroup' | 'trends') => {
     // Esta función se puede expandir si necesitamos manejar cambios de vista
     return view;
@@ -61,6 +65,7 @@ export const useBalanceTab = (records: WorkoutRecord[]) => {
     activeSubTab,
     setActiveSubTab,
     ...balanceData,
+    userVolumeDistribution,
     handleViewChange,
     handleBalanceItemClick,
     handleUpperLowerItemClick,

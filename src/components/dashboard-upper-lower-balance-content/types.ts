@@ -45,6 +45,7 @@ export interface UpperLowerBalanceContentProps {
   categoryAnalysis: CategoryAnalysis;
   muscleBalance: MuscleBalanceItem[];
   onItemClick: (itemName: string) => void;
+  userVolumeDistribution: Record<string, number>;
 }
 
 export interface MetaCategoryData {

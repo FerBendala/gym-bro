@@ -36,8 +36,11 @@ export const calculateBalanceAnalysis = (
     const muscleBalance = analyzeMuscleBalance(validRecords, customVolumeDistribution);
     const balanceScore = calculateBalanceScore(muscleBalance);
 
-    // Calcular balance superior/inferior
-    const upperLowerBalance = calculateUpperLowerBalance(categoryAnalysis.categoryMetrics);
+    // Calcular balance superior/inferior usando la configuración del usuario
+    const upperLowerBalance = calculateUpperLowerBalance(
+      categoryAnalysis.categoryMetrics,
+      customVolumeDistribution || {}
+    );
 
     // Calcular métricas globales optimizadas
     const { consistency, intensity, frequency } = calculateOptimizedGlobalMetrics(processedData);

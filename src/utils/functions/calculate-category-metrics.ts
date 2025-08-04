@@ -107,6 +107,29 @@ export const calculateCategoryMetrics = (
     }
   }, 0);
 
+  // **CORRECCIÓN CRÍTICA**: Calcular porcentaje del total aplicando porcentajes de categorías
+  // IMPORTANTE: El totalVolume debe ser el volumen total de TODOS los registros para calcular porcentajes correctos
+  const globalTotalVolume = records.reduce((sum, record) => {
+    const categories = record.exercise?.categories || [];
+    const recordVolume = record.weight * record.reps * record.sets;
+
+    // Para cada categoría del ejercicio, aplicar su porcentaje
+    let exerciseVolume = 0;
+    if (categories.length > 1) {
+      const effortDistribution = calculateCategoryEffortDistribution(categories, record.exercise?.name, record.exercise);
+      categories.forEach(category => {
+        const categoryEffort = effortDistribution[category] || 0;
+        exerciseVolume += recordVolume * categoryEffort;
+      });
+    } else {
+      exerciseVolume = recordVolume;
+    }
+
+    return sum + exerciseVolume;
+  }, 0);
+
+  const percentage = globalTotalVolume > 0 ? (categoryVolume / globalTotalVolume) * 100 : 0;
+
   const weights = categoryRecords.map(r => r.weight);
   const avgWeight = weights.length > 0 ? weights.reduce((sum, w) => sum + w, 0) / weights.length : 0;
   const maxWeight = getMaxWeight(categoryRecords);
@@ -132,28 +155,6 @@ export const calculateCategoryMetrics = (
   const totalWeeks = uniqueWeeks.size;
   const totalSessions = uniqueSessions.size;
   const avgWorkoutsPerWeek = totalWeeks > 0 ? totalSessions / totalWeeks : 0;
-
-  // **CORRECCIÓN CRÍTICA**: Calcular porcentaje del total aplicando porcentajes de categorías
-  const totalVolume = records.reduce((sum, record) => {
-    const categories = record.exercise?.categories || [];
-    const totalVolume = record.weight * record.reps * record.sets;
-
-    // Para cada categoría del ejercicio, aplicar su porcentaje
-    let exerciseVolume = 0;
-    if (categories.length > 1) {
-      const effortDistribution = calculateCategoryEffortDistribution(categories, record.exercise?.name, record.exercise);
-      categories.forEach(category => {
-        const categoryEffort = effortDistribution[category] || 0;
-        exerciseVolume += totalVolume * categoryEffort;
-      });
-    } else {
-      exerciseVolume = totalVolume;
-    }
-
-    return sum + exerciseVolume;
-  }, 0);
-
-  const percentage = totalVolume > 0 ? (categoryVolume / totalVolume) * 100 : 0;
 
   // Calcular métricas de series y repeticiones
   const totalSets = categoryRecords.reduce((sum, r) => sum + r.sets, 0);
