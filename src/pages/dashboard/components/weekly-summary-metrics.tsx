@@ -50,6 +50,8 @@ export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
     current.maxWeight < lowest.maxWeight ? current : lowest
   );
 
+
+
   // Calcular tendencia general (solo días con datos)
   const avgTrend = daysWithData.reduce((sum, day) => sum + day.trend, 0) / daysWithData.length;
 
@@ -151,7 +153,7 @@ export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
           <div className="text-sm text-gray-400">Peso Máximo</div>
         </div>
         <div className="text-xs text-gray-400">
-          {dayWithLowestMaxWeight.dayName} necesita mejora
+          {dayWithLowestMaxWeight.dayName} ({dayWithLowestMaxWeight.maxWeight} kg) necesita mejora
         </div>
       </div>
     </div>
