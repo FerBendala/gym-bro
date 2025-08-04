@@ -20,7 +20,7 @@ const getDarkerColor = (color: string): string => {
     '#6B7280': '#4B5563', // Gris
     '#6366F1': '#4F46E5', // Indigo
   };
-  
+
   return colorMap[color] || color;
 };
 

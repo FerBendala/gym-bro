@@ -15,7 +15,7 @@ const getDarkerColor = (color: string): string => {
     '#06B6D4': '#0891B2', // Cian
     '#84CC16': '#65A30D', // Verde lima
   };
-  
+
   return colorMap[color] || color;
 };
 

@@ -18,7 +18,7 @@ const getDarkerColor = (color: string): string => {
     '#84CC16': '#65A30D', // Verde lima
     '#6B7280': '#4B5563', // Gris
   };
-  
+
   return colorMap[color] || color;
 };
 

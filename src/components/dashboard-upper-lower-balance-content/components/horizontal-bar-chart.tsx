@@ -17,7 +17,7 @@ const getDarkerColor = (color: string): string => {
     '#06B6D4': '#0891B2', // Cian
     '#84CC16': '#65A30D', // Verde lima
   };
-  
+
   return colorMap[color] || color;
 };
 
@@ -96,7 +96,7 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({ data, on
               {/* Indicador ideal */}
               <div
                 className="absolute top-0 w-0.5 h-full"
-                style={{ 
+                style={{
                   left: `${(item.ideal / maxValue) * 100}%`,
                   background: 'linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.8) 100%)',
                   boxShadow: '0 0 4px rgba(255,255,255,0.6)',
