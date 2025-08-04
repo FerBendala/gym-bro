@@ -33,7 +33,7 @@ export const useAuth = () => {
           error: error.message,
         });
         logger.error('Error en autenticación:', error);
-      }
+      },
     );
 
     return () => unsubscribe();
@@ -51,4 +51,4 @@ export const useAuth = () => {
     ...state,
     getUserId,
   };
-}; 
+};

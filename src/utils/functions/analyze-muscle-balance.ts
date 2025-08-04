@@ -12,7 +12,7 @@ import type { WorkoutRecord } from '@/interfaces';
  */
 export const analyzeMuscleBalance = (
   records: WorkoutRecord[],
-  customVolumeDistribution?: Record<string, number>
+  customVolumeDistribution?: Record<string, number>,
 ): MuscleBalance[] => {
   if (records.length === 0) return [];
 
@@ -80,7 +80,7 @@ export const analyzeMuscleBalance = (
     const trend = categoryMetrics.weightProgression > 5 ? 'improving' :
       categoryMetrics.weightProgression < -5 ? 'declining' : 'stable';
     const balanceHistory = {
-      trend: trend as 'improving' | 'stable' | 'declining',
+      trend,
       consistency: categoryMetrics.consistencyScore,
       volatility: 0,
     };

@@ -46,11 +46,10 @@ const validateBalanceData = (upperLowerBalance: UpperLowerBalanceData): boolean 
 
 export const createMetaCategoryData = (
   upperLowerBalance: UpperLowerBalanceData,
-  userVolumeDistribution: Record<string, number>
+  userVolumeDistribution: Record<string, number>,
 ): MetaCategoryData[] => {
   // Validar datos de entrada
   if (!validateBalanceData(upperLowerBalance)) {
-    console.warn('Datos de balance inválidos:', upperLowerBalance);
     return [];
   }
 

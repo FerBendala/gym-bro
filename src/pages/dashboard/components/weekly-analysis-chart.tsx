@@ -161,4 +161,4 @@ export const WeeklyAnalysisChart: React.FC<WeeklyAnalysisChartProps> = ({
       <Chart options={options} series={series} type="line" height={300} />
     </div>
   );
-}; 
+};

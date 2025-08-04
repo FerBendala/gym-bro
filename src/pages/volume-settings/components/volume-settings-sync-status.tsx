@@ -55,4 +55,4 @@ export const VolumeSettingsSyncStatus: React.FC<VolumeSettingsSyncStatusProps> =
       </button>
     </div>
   );
-}; 
+};

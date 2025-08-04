@@ -5,4 +5,3 @@
 
 export { ExerciseStats } from './exercise-stats';
 export type { ExerciseStatsProps } from './types';
-

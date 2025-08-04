@@ -31,7 +31,7 @@ export const analyzeCategoryTrends = (records: WorkoutRecord[]): Map<string, Cat
   });
 
   // Calcular tendencia para cada categoría
-  categoryTrends.forEach((data, category) => {
+  categoryTrends.forEach((data, _category) => {
     if (data.weights.length >= 3) {
       // Dividir en dos períodos para calcular tendencia
       const sortedWeights = [...data.weights].sort((a, b) => a - b);
@@ -60,7 +60,7 @@ export const analyzeCategoryTrends = (records: WorkoutRecord[]): Map<string, Cat
  */
 export const analyzeMaxWeightByCategory = (
   records: WorkoutRecord[],
-  daysWithData: Array<{ dayName: string; workouts: number; performanceScore: number }>
+  daysWithData: { dayName: string; workouts: number; performanceScore: number }[],
 ): CategoryAnalysisResult => {
   if (!records || records.length === 0) {
     return { day: 'N/A', category: 'N/A', maxWeight: 0, message: 'Sin datos suficientes', trend: 0 };
@@ -110,7 +110,7 @@ export const analyzeMaxWeightByCategory = (
       lowestCategory,
       highestCategory,
       totalWorkouts: day.workouts,
-      performanceScore: day.performanceScore
+      performanceScore: day.performanceScore,
     };
   });
 
@@ -135,7 +135,7 @@ export const analyzeMaxWeightByCategory = (
 
   const selectedCategory = dayWithWeakestCategory.lowestCategory.name;
   const categoryTrend = categoryTrends.get(selectedCategory)?.trend || 0;
-  const maxWeight = dayWithWeakestCategory.lowestCategory.maxWeight;
+  const { maxWeight } = dayWithWeakestCategory.lowestCategory;
 
   // Determinar el mensaje basado en la tendencia
   let message = '';
@@ -152,6 +152,6 @@ export const analyzeMaxWeightByCategory = (
     category: selectedCategory,
     maxWeight,
     message,
-    trend: categoryTrend
+    trend: categoryTrend,
   };
-}; 
+};

@@ -19,14 +19,6 @@ const UpperLowerBalanceContent: React.FC<UpperLowerBalanceContentProps> = ({
   // Validar datos de entrada y generar reporte de debugging
   const validationReport = generateValidationReport(upperLowerBalance, categoryAnalysis, muscleBalance);
 
-  if (!validationReport.isValid) {
-    console.error('Errores de validación en Balance Tren Superior vs Inferior:', validationReport.errors);
-  }
-
-  if (validationReport.warnings.length > 0) {
-    console.warn('Advertencias en Balance Tren Superior vs Inferior:', validationReport.warnings);
-  }
-
   const { metaCategoryData } = useUpperLowerBalance({
     upperLowerBalance,
     categoryAnalysis,

@@ -64,7 +64,7 @@ const findLeastTrainedCategory = (records: WorkoutRecord[]): string | null => {
  */
 export const calculateCategoryAnalysis = (
   records: WorkoutRecord[],
-  customVolumeDistribution?: Record<string, number>
+  customVolumeDistribution?: Record<string, number>,
 ): CategoryAnalysis => {
   const muscleBalance = analyzeMuscleBalance(records, customVolumeDistribution);
   const balanceScore = calculateBalanceScore(muscleBalance);

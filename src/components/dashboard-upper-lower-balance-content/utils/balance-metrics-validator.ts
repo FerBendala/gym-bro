@@ -12,10 +12,10 @@ export const validateUpperLowerBalanceData = (data: UpperLowerBalanceData): bool
   if (!upperBody || !lowerBody || !core) return false;
 
   // Validar tipos de datos
-  const isValidNumber = (value: any): boolean =>
+  const isValidNumber = (value: unknown): boolean =>
     typeof value === 'number' && !isNaN(value) && isFinite(value);
 
-  const isValidArray = (value: any): boolean =>
+  const isValidArray = (value: unknown): boolean =>
     Array.isArray(value) && value.every(item => typeof item === 'string');
 
   return (
@@ -44,7 +44,7 @@ export const validateCategoryAnalysisData = (data: CategoryAnalysis): boolean =>
     typeof metric.category === 'string' &&
     typeof metric.percentage === 'number' &&
     // Nota: totalVolume puede no estar presente en todos los tipos de CategoryMetric
-    (!('totalVolume' in metric) || (typeof metric.totalVolume === 'number' && !isNaN(metric.totalVolume)))
+    (!('totalVolume' in metric) || (typeof metric.totalVolume === 'number' && !isNaN(metric.totalVolume))),
   );
 };
 
@@ -61,7 +61,7 @@ export const validateMuscleBalanceData = (data: MuscleBalanceItem[]): boolean =>
       item.balanceHistory &&
       typeof item.balanceHistory.trend === 'string' &&
       ['improving', 'stable', 'declining'].includes(item.balanceHistory.trend)
-    ))
+    )),
   );
 };
 
@@ -95,7 +95,7 @@ export const calculateTotalPercentage = (data: UpperLowerBalanceData): number =>
 /**
  * Valida que los porcentajes sumen aproximadamente 100% (con tolerancia)
  */
-export const validatePercentageSum = (data: UpperLowerBalanceData, tolerance: number = 5): boolean => {
+export const validatePercentageSum = (data: UpperLowerBalanceData, tolerance = 5): boolean => {
   const total = calculateTotalPercentage(data);
   return Math.abs(total - 100) <= tolerance;
 };
@@ -114,8 +114,6 @@ export const validateVolumeConsistency = (data: UpperLowerBalanceData): boolean 
 
   // Si todos los volúmenes son idénticos y no son 0, es sospechoso
   if (uniqueVolumes.size === 1 && volumes[0] !== 0) {
-    console.warn('Todos los volúmenes son idénticos:', volumes[0]);
-    console.warn('Esto indica un error en el cálculo de volúmenes');
     return false;
   }
 
@@ -125,12 +123,10 @@ export const validateVolumeConsistency = (data: UpperLowerBalanceData): boolean 
 
   // Verificar volúmenes individuales
   if (volumes.some(v => v > maxReasonableVolume)) {
-    console.warn('Volúmenes excesivamente altos detectados:', volumes);
     return false;
   }
 
   if (volumes.some(v => v < minReasonableVolume && v !== 0)) {
-    console.warn('Volúmenes excesivamente bajos detectados:', volumes);
     return false;
   }
 
@@ -140,12 +136,10 @@ export const validateVolumeConsistency = (data: UpperLowerBalanceData): boolean 
   const minTotalVolume = 1000; // 1 tonelada como mínimo total
 
   if (totalVolume > maxTotalVolume) {
-    console.warn('Volumen total excesivamente alto:', totalVolume);
     return false;
   }
 
   if (totalVolume < minTotalVolume) {
-    console.warn('Volumen total excesivamente bajo:', totalVolume);
     return false;
   }
 
@@ -160,11 +154,6 @@ export const validateVolumeConsistency = (data: UpperLowerBalanceData): boolean 
   const coreDeviation = Math.abs(core.volume - expectedCoreVolume) / expectedCoreVolume;
 
   if (upperDeviation > tolerance || lowerDeviation > tolerance || coreDeviation > tolerance) {
-    console.warn('Volúmenes inconsistentes con porcentajes:', {
-      upperBody: { actual: upperBody.volume, expected: expectedUpperVolume, deviation: upperDeviation },
-      lowerBody: { actual: lowerBody.volume, expected: expectedLowerVolume, deviation: lowerDeviation },
-      core: { actual: core.volume, expected: expectedCoreVolume, deviation: coreDeviation }
-    });
     return false;
   }
 
@@ -177,7 +166,7 @@ export const validateVolumeConsistency = (data: UpperLowerBalanceData): boolean 
 export const generateValidationReport = (
   upperLowerBalance: UpperLowerBalanceData,
   categoryAnalysis: CategoryAnalysis,
-  muscleBalance: MuscleBalanceItem[]
+  muscleBalance: MuscleBalanceItem[],
 ): {
   isValid: boolean;
   errors: string[];
@@ -214,4 +203,4 @@ export const generateValidationReport = (
     errors,
     warnings,
   };
-}; 
+};

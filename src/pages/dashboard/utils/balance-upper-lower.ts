@@ -9,7 +9,7 @@ import { META_CATEGORIES } from './balance-types';
  */
 export const calculateUpperLowerBalance = (
   categoryMetrics: { category: string; percentage: number; totalVolume: number }[],
-  userVolumeDistribution: Record<string, number>
+  userVolumeDistribution: Record<string, number>,
 ) => {
   const upperBodyCategories = META_CATEGORIES.UPPER_BODY.categories;
   const lowerBodyCategories = META_CATEGORIES.LOWER_BODY.categories;

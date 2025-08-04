@@ -102,7 +102,7 @@ export const useSelect = ({
           validationMessage: '',
           checkValidity: () => true,
           reportValidity: () => true,
-          setCustomValidity: () => { },
+          setCustomValidity: () => { /* Intentionally empty for event simulation */ },
         },
         currentTarget: {
           value: optionValue,
@@ -120,7 +120,7 @@ export const useSelect = ({
           validationMessage: '',
           checkValidity: () => true,
           reportValidity: () => true,
-          setCustomValidity: () => { },
+          setCustomValidity: () => { /* Intentionally empty for event simulation */ },
         },
         type: 'change',
         bubbles: true,
@@ -129,15 +129,15 @@ export const useSelect = ({
         eventPhase: 2,
         isTrusted: false,
         timeStamp: Date.now(),
-        preventDefault: () => { },
-        stopPropagation: () => { },
-        stopImmediatePropagation: () => { },
+        preventDefault: () => { /* Intentionally empty for event simulation */ },
+        stopPropagation: () => { /* Intentionally empty for event simulation */ },
+        stopImmediatePropagation: () => { /* Intentionally empty for event simulation */ },
         composedPath: () => [],
-        initEvent: () => { },
+        initEvent: () => { /* Intentionally empty for event simulation */ },
         nativeEvent: new Event('change'),
         isDefaultPrevented: () => false,
         isPropagationStopped: () => false,
-        persist: () => { },
+        persist: () => { /* Intentionally empty for event simulation */ },
       } as unknown as React.ChangeEvent<HTMLSelectElement>;
       onChange(event);
     }

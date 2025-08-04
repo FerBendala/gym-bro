@@ -14,12 +14,10 @@ export const useUpperLowerBalance = ({
   const metaCategoryData = useMemo(() => {
     // Validar datos de entrada
     if (!upperLowerBalance) {
-      console.warn('upperLowerBalance es null o undefined');
       return [];
     }
 
     if (!userVolumeDistribution) {
-      console.warn('userVolumeDistribution es null o undefined');
       return [];
     }
 
@@ -30,7 +28,6 @@ export const useUpperLowerBalance = ({
     return (meta: MetaCategoryData) => {
       // Validar datos de entrada
       if (!categoryAnalysis || !muscleBalance) {
-        console.warn('categoryAnalysis o muscleBalance son null o undefined');
         return {
           volume: 0,
           idealVolume: 0,

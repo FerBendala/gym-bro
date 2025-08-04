@@ -34,7 +34,7 @@ export const useSettingsSync = () => {
           ...prev,
           syncing: false,
           lastSync: Date.now(),
-          error: null
+          error: null,
         }));
         return true;
       } else {
@@ -45,7 +45,7 @@ export const useSettingsSync = () => {
       setState(prev => ({
         ...prev,
         syncing: false,
-        error: errorMessage
+        error: errorMessage,
       }));
       logger.error('Error sincronizando configuración:', error as Error);
       showNotification('Error sincronizando configuración', 'error');
@@ -82,14 +82,14 @@ export const useSettingsSync = () => {
           ...prev,
           syncing: false,
           lastSync: Date.now(),
-          error: null
+          error: null,
         }));
         return firebaseResult.data;
       } else {
         setState(prev => ({
           ...prev,
           syncing: false,
-          error: null
+          error: null,
         }));
         return null;
       }
@@ -98,7 +98,7 @@ export const useSettingsSync = () => {
       setState(prev => ({
         ...prev,
         syncing: false,
-        error: errorMessage
+        error: errorMessage,
       }));
       logger.error('Error cargando configuración desde Firebase:', error as Error);
       showNotification('Error cargando configuración desde Firebase', 'error');
@@ -142,7 +142,7 @@ export const useSettingsSync = () => {
           ...prev,
           syncing: false,
           lastSync: Date.now(),
-          error: null
+          error: null,
         }));
         return mergedSettings;
       } else {
@@ -154,7 +154,7 @@ export const useSettingsSync = () => {
             ...prev,
             syncing: false,
             lastSync: Date.now(),
-            error: null
+            error: null,
           }));
           return localSettings;
         } else {
@@ -166,7 +166,7 @@ export const useSettingsSync = () => {
       setState(prev => ({
         ...prev,
         syncing: false,
-        error: errorMessage
+        error: errorMessage,
       }));
       logger.error('Error sincronizando bidireccionalmente:', error as Error);
       showNotification('Error sincronizando configuración', 'error');
@@ -180,4 +180,4 @@ export const useSettingsSync = () => {
     loadFromFirebase,
     syncBidirectional,
   };
-}; 
+};

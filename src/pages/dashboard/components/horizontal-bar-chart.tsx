@@ -46,7 +46,7 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({
   const validData = data.filter(item =>
     typeof item.value === 'number' &&
     !isNaN(item.value) &&
-    item.value >= 0
+    item.value >= 0,
   );
 
   if (validData.length === 0) {

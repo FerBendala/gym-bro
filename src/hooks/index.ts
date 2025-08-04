@@ -9,5 +9,6 @@ export { useOfflineSync } from './use-offline-sync';
 export { useOfflineWorkoutRecords } from './use-offline-workout-records';
 export { useSettingsSync } from './use-settings-sync';
 export { useVolumeConfig } from './use-volume-config';
-export { useAppVolumeConfig, VolumeConfigProvider } from './use-volume-provider.tsx';
-
+export { useAppVolumeConfig } from './use-volume-provider-hook';
+export { VolumeConfigProvider } from './use-volume-provider.tsx';
+export { VolumeConfigContext } from './volume-config-context';

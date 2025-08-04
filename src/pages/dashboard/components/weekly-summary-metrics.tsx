@@ -15,6 +15,9 @@ export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
   dailyTrends,
   records,
 }) => {
+  // Usar el hook para análisis de categorías (debe estar antes de cualquier return)
+  const { categoryAnalysis } = useCategoryTrends({ records, dailyTrends });
+
   if (dailyTrends.length === 0) {
     return (
       <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
@@ -42,9 +45,6 @@ export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
     );
   }
 
-  // Usar el hook para análisis de categorías
-  const { categoryAnalysis } = useCategoryTrends({ records, dailyTrends });
-
   // Calcular métricas de resumen (solo días con datos)
   const totalWorkouts = daysWithData.reduce((sum, day) => sum + day.workouts, 0);
   const totalVolume = daysWithData.reduce((sum, day) => sum + day.totalVolume, 0);
@@ -53,7 +53,7 @@ export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
 
   // Encontrar el mejor y peor día por rendimiento (solo entre días con datos)
   const bestDay = daysWithData.reduce((best, current) =>
-    current.performanceScore > best.performanceScore ? current : best
+    current.performanceScore > best.performanceScore ? current : best,
   );
 
   // Calcular tendencia general (solo días con datos)
@@ -162,4 +162,4 @@ export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
       </div>
     </div>
   );
-}; 
+};

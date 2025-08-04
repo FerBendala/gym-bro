@@ -42,7 +42,7 @@ export const CategoryPercentagesInput: React.FC<CategoryPercentagesInputProps> =
       isInitialized.current = true;
       onPercentagesChange(newPercentages);
     }
-  }, [selectedCategories]); // Removido 'percentages' de las dependencias
+  }, [selectedCategories, percentages, onPercentagesChange]); // Incluir todas las dependencias
 
   // Actualizar porcentajes locales cuando cambian los percentages externos (solo en edición)
   useEffect(() => {
@@ -56,14 +56,14 @@ export const CategoryPercentagesInput: React.FC<CategoryPercentagesInputProps> =
         setLocalPercentages(percentages);
       }
     }
-  }, [percentages, localPercentages]);
+  }, [percentages, localPercentages, onPercentagesChange]);
 
   const handlePercentageChange = (category: string, value: string) => {
     const numValue = parseFloat(value) || 0;
 
     const updatedPercentages = {
       ...localPercentages,
-      [category]: numValue
+      [category]: numValue,
     };
 
     setLocalPercentages(updatedPercentages);
@@ -72,7 +72,7 @@ export const CategoryPercentagesInput: React.FC<CategoryPercentagesInputProps> =
     if (numValue < 0 || numValue > 100) {
       setErrors(prev => ({
         ...prev,
-        [category]: 'El porcentaje debe estar entre 0 y 100'
+        [category]: 'El porcentaje debe estar entre 0 y 100',
       }));
     } else {
       setErrors(prev => {
@@ -168,4 +168,4 @@ export const CategoryPercentagesInput: React.FC<CategoryPercentagesInputProps> =
       </CardContent>
     </Card>
   );
-}; 
+};

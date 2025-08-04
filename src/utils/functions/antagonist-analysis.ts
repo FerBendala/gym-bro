@@ -58,7 +58,7 @@ export const getAntagonistGroup = (category: string): string | null => {
  */
 export const calculateIdealAntagonistRatio = (
   category: string,
-  customVolumeDistribution?: Record<string, number>
+  customVolumeDistribution?: Record<string, number>,
 ): number => {
   const antagonist = ANTAGONIST_PAIRS[category];
   if (!antagonist) return 1;
@@ -75,7 +75,7 @@ export const calculateIdealAntagonistRatio = (
 export const analyzeAntagonistImbalance = (
   category: string,
   actualRatio: number,
-  customVolumeDistribution?: Record<string, number>
+  customVolumeDistribution?: Record<string, number>,
 ): {
   hasImbalance: boolean;
   type: 'too_much' | 'too_little' | 'balanced';

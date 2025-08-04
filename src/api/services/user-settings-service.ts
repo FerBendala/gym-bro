@@ -125,4 +125,4 @@ export class UserSettingsService {
       return { success: false, error: 'Error sincronizando configuración' };
     }
   }
-} 
+}

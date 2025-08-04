@@ -15,7 +15,7 @@ import { calculateUpperLowerBalance } from './balance-upper-lower';
  */
 export const calculateBalanceAnalysis = (
   records: WorkoutRecord[],
-  customVolumeDistribution?: Record<string, number>
+  customVolumeDistribution?: Record<string, number>,
 ): BalanceAnalysisResult => {
   try {
     if (records.length === 0) {
@@ -39,7 +39,7 @@ export const calculateBalanceAnalysis = (
     // Calcular balance superior/inferior usando la configuración del usuario
     const upperLowerBalance = calculateUpperLowerBalance(
       categoryAnalysis.categoryMetrics,
-      customVolumeDistribution || {}
+      customVolumeDistribution || {},
     );
 
     // Calcular métricas globales optimizadas

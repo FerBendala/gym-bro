@@ -14,7 +14,7 @@ export const analyzeBalanceHistory = (
   categoryRecords: WorkoutRecord[],
   allRecords?: WorkoutRecord[],
   allAssignments?: ExerciseAssignment[],
-  customVolumeDistribution?: Record<string, number>
+  customVolumeDistribution?: Record<string, number>,
 ): {
   trend: 'improving' | 'stable' | 'declining';
   consistency: number;

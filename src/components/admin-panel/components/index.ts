@@ -9,4 +9,3 @@ export { ExerciseCategoryTabs } from './exercise-category-tabs';
 export { ExerciseForm } from './exercise-form';
 export { ExerciseItem } from './exercise-item';
 export { ExerciseList } from './exercise-list';
-

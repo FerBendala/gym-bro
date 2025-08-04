@@ -33,9 +33,9 @@ export const ExercisesCategoryFilters: React.FC<ExercisesCategoryFiltersProps> =
               className={`
                 flex-shrink-0 flex items-center justify-center space-x-2 px-4 py-3 rounded-md text-sm font-medium transition-all duration-200 min-w-max
                 ${isActive
-                  ? 'bg-blue-600 text-white shadow-lg'
-                  : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
-                }
+              ? 'bg-blue-600 text-white shadow-lg'
+              : 'text-gray-400 hover:text-gray-200 hover:bg-gray-700'
+            }
               `}
             >
               <Icon className="w-4 h-4 flex-shrink-0" />
@@ -43,7 +43,7 @@ export const ExercisesCategoryFilters: React.FC<ExercisesCategoryFiltersProps> =
               <span className={`text-xs px-1.5 py-0.5 rounded-full flex-shrink-0 ${isActive
                 ? 'bg-white/20 text-white'
                 : 'bg-gray-600/50 text-gray-300'
-                }`}>
+              }`}>
                 {category.count}
               </span>
             </button>

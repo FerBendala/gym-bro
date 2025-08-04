@@ -38,7 +38,6 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
       {/* Gráfico de evolución temporal */}
       <HistoryEvolutionChart historyData={historyData} />
 
-
     </div>
   );
 };

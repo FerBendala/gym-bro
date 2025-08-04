@@ -1,3 +1,2 @@
 export { calculateTotalPercentage, generateValidationReport, normalizePercentage, normalizeVolume, validateCategoryAnalysisData, validateMuscleBalanceData, validatePercentageSum, validateUpperLowerBalanceData, validateVolumeConsistency } from './balance-metrics-validator';
 export { calculateAggregatedMetrics, calculateChartData, calculateTrendFromMuscleBalance, createMetaCategoryData, determineTrend } from './upper-lower-utils';
-

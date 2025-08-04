@@ -31,7 +31,7 @@ export const useCategoryTrends = ({ records, dailyTrends }: UseCategoryTrendsPro
         category: 'N/A',
         maxWeight: 0,
         message: 'Sin datos suficientes',
-        trend: 0
+        trend: 0,
       };
     }
 
@@ -44,7 +44,7 @@ export const useCategoryTrends = ({ records, dailyTrends }: UseCategoryTrendsPro
         category: 'N/A',
         maxWeight: 0,
         message: 'No hay días con entrenamientos registrados',
-        trend: 0
+        trend: 0,
       };
     }
 
@@ -55,6 +55,6 @@ export const useCategoryTrends = ({ records, dailyTrends }: UseCategoryTrendsPro
 
   return {
     categoryAnalysis,
-    isLoading
+    isLoading,
   };
-}; 
+};

@@ -34,7 +34,7 @@ export const ExercisesDetailedAnalysis: React.FC<ExercisesDetailedAnalysisProps>
       // Encontrar la categoría con mayor porcentaje
       const dominantCategory = Object.entries(distribution).reduce((max, [category, percentage]) =>
         percentage > max.percentage ? { category, percentage } : max,
-        { category: 'Sin categoría', percentage: 0 }
+      { category: 'Sin categoría', percentage: 0 },
       );
       return dominantCategory.category;
     }
@@ -65,7 +65,7 @@ export const ExercisesDetailedAnalysis: React.FC<ExercisesDetailedAnalysisProps>
 
           // Obtener los registros reales de este ejercicio
           const exerciseRecords = records.filter(record =>
-            record.exercise?.name === exercise.name
+            record.exercise?.name === exercise.name,
           ).sort((a, b) => a.date.getTime() - b.date.getTime());
 
           // Eliminar duplicados por fecha y usar solo el peso más alto de cada día

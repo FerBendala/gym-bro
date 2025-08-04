@@ -67,13 +67,13 @@ export const MetaCategoryCard: React.FC<MetaCategoryCardProps> = ({
             <span className={`text-xs px-2 py-1 rounded-full ${meta.isBalanced
               ? 'bg-green-500/20 text-green-400'
               : 'bg-yellow-500/20 text-yellow-400'
-              }`}>
+            }`}>
               {meta.isBalanced ? 'Equilibrado' : 'Desequilibrado'}
             </span>
             <span className={`text-xs px-2 py-1 rounded-full ${trend === 'improving' ? 'bg-blue-500/20 text-blue-400' :
               trend === 'declining' ? 'bg-red-500/20 text-red-400' :
                 'bg-gray-500/20 text-gray-400'
-              }`}>
+            }`}>
               {trend === 'improving' ? 'Mejorando' :
                 trend === 'declining' ? 'Declinando' :
                   'Estable'}

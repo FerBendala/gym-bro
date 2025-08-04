@@ -234,7 +234,7 @@ export const calculateCategoryMetrics = (
     const exercisePRs = new Map<string, number>();
 
     categorySpecificRecords.forEach(record => {
-      const exerciseId = record.exerciseId;
+      const { exerciseId } = record;
       const currentMax = exercisePRs.get(exerciseId) || 0;
       if (record.weight > currentMax) {
         exercisePRs.set(exerciseId, record.weight);

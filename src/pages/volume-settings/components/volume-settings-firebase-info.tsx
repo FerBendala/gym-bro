@@ -35,4 +35,4 @@ export const VolumeSettingsFirebaseInfo: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};

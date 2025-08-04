@@ -43,7 +43,7 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
       // Encontrar la categoría con mayor porcentaje
       const dominantCategory = Object.entries(distribution).reduce((max, [category, percentage]) =>
         percentage > max.percentage ? { category, percentage } : max,
-        { category: 'Sin categoría', percentage: 0 }
+      { category: 'Sin categoría', percentage: 0 },
       );
       return dominantCategory.category;
     }
