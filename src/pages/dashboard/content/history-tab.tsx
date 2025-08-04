@@ -4,7 +4,6 @@ import React from 'react';
 import {
   HistoryEvolutionChart,
   HistoryMetrics,
-  HistoryWeeklyDetails,
 } from '../components';
 import { useHistoryData } from '../hooks/use-history-data';
 import { EmptyState } from '../shared/empty-state';
@@ -39,8 +38,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ records }) => {
       {/* Gráfico de evolución temporal */}
       <HistoryEvolutionChart historyData={historyData} />
 
-      {/* Datos semanales detallados */}
-      <HistoryWeeklyDetails historyData={historyData} />
+
     </div>
   );
 };

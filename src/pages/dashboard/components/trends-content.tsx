@@ -5,7 +5,6 @@ import { useTrendsContent } from '../hooks/use-trends-content';
 import { EmptyState } from '../shared';
 
 import { Card, CardContent, CardHeader } from '@/components/card';
-import { InfoTooltip } from '@/components/tooltip';
 import type { WorkoutRecord } from '@/interfaces';
 import { WeeklyAnalysisChart, WeeklySummaryMetrics } from '.';
 
@@ -16,7 +15,6 @@ interface TrendsContentProps {
 export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
   const { trendsData } = useTrendsContent(records);
 
-  // Calcular indicador de experiencia basado en registros
   const experienceLevel = useMemo(() => {
     if (records.length < 10) return 'Principiante';
     if (records.length < 30) return 'Intermedio';
@@ -36,7 +34,7 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
 
   return (
     <div className="space-y-6">
-      {/* Header informativo */}
+      {/* Header informativo para principiantes */}
       {records.length < 20 && (
         <Card className="bg-gradient-to-r from-purple-900/20 to-indigo-900/20 border-purple-500/30">
           <CardContent>
@@ -48,7 +46,6 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
                 </h4>
                 <p className="text-xs text-gray-400">
                   Las tendencias se analizan según tu historial de entrenamiento.
-                  Con más datos, el análisis será más preciso.
                 </p>
               </div>
             </div>
@@ -62,22 +59,11 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
           <h3 className="text-lg font-semibold text-white flex items-center">
             <Calendar className="w-5 h-5 mr-2" />
             Análisis por Día de la Semana
-            <InfoTooltip
-              content="Análisis completo de tus patrones de entrenamiento por día, incluyendo rendimiento, tendencias y recomendaciones personalizadas."
-              position="top"
-              className="ml-2 flex-shrink-0"
-            />
           </h3>
         </CardHeader>
         <CardContent>
           <div className="space-y-6">
-            {/* Gráfico único de análisis semanal */}
-            <div className="mb-6">
-              <h4 className="text-sm font-medium text-gray-300 mb-4">Vista General Semanal</h4>
-              <WeeklyAnalysisChart dailyTrends={trendsData.dailyTrends} />
-            </div>
-
-            {/* Métricas de resumen semanal */}
+            <WeeklyAnalysisChart dailyTrends={trendsData.dailyTrends} />
             <WeeklySummaryMetrics dailyTrends={trendsData.dailyTrends} records={records} />
           </div>
         </CardContent>

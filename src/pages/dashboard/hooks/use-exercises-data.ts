@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 
+import { KNOWN_EXERCISE_DISTRIBUTIONS } from '@/constants/exercise.constants';
 import type { WorkoutRecord } from '@/interfaces';
 import { calculateExerciseProgress } from '@/utils';
 
@@ -12,6 +13,7 @@ interface ExerciseAnalysis {
   progress: number;
   progressPercent: number;
   frequency: number;
+  intensity: number;
   firstWeight: number;
   lastWeight: number;
   lastDate: Date;
@@ -33,6 +35,21 @@ interface GlobalMetrics {
 
 export const useExercisesData = (records: WorkoutRecord[]) => {
   const [selectedCategory, setSelectedCategory] = useState('all');
+
+  // Función para obtener la categoría dominante de un ejercicio
+  const getDominantCategory = (exerciseName: string): string => {
+    const distribution = KNOWN_EXERCISE_DISTRIBUTIONS[exerciseName];
+    if (distribution) {
+      // Encontrar la categoría con mayor porcentaje
+      const dominantCategory = Object.entries(distribution).reduce((max, [category, percentage]) =>
+        percentage > max.percentage ? { category, percentage } : max,
+        { category: 'Sin categoría', percentage: 0 }
+      );
+      return dominantCategory.category;
+    }
+    // Si no hay distribución conocida, usar la primera categoría
+    return 'Sin categoría';
+  };
 
   const exerciseAnalysis = useMemo((): ExerciseAnalysis[] => {
     if (records.length === 0) return [];
@@ -56,10 +73,17 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
       const maxWeight = Math.max(...exerciseRecords.map(r => r.weight));
       const avgWeight = exerciseRecords.reduce((sum, r) => sum + r.weight, 0) / exerciseRecords.length;
 
+      // Calcular frecuencia como sesiones únicas por fecha
+      const uniqueSessions = new Set(exerciseRecords.map(r => r.date.toDateString()));
+      const frequency = uniqueSessions.size;
+
+      // Calcular intensidad correctamente (maxWeight / avgWeight * 100, pero limitado a 100%)
+      const intensity = Math.min((maxWeight / avgWeight) * 100, 100);
+
       const { absoluteProgress: progress, percentProgress: progressPercent } = calculateExerciseProgress(exerciseRecords);
 
-      const frequency = exerciseRecords.length;
-      const categories = exerciseRecords[0].exercise?.categories || ['Sin categoría'];
+      const dominantCategory = getDominantCategory(exerciseName);
+      const categories = [dominantCategory];
 
       return {
         name: exerciseName,
@@ -70,6 +94,7 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
         progress,
         progressPercent,
         frequency,
+        intensity,
         firstWeight: exerciseRecords[0].weight,
         lastWeight: exerciseRecords[exerciseRecords.length - 1].weight,
         lastDate: new Date(Math.max(...exerciseRecords.map(r => r.date.getTime()))),

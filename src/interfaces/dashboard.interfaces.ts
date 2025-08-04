@@ -16,6 +16,7 @@ export interface ExerciseAnalysis {
   progress: number;
   progressPercent: number;
   frequency: number;
+  intensity: number;
   firstWeight: number;
   lastWeight: number;
   lastDate: Date;

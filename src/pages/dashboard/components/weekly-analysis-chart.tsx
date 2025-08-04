@@ -32,62 +32,31 @@ export const WeeklyAnalysisChart: React.FC<WeeklyAnalysisChartProps> = ({
         <div className="text-center">
           <div className="text-gray-400 text-sm mb-2">📊</div>
           <p className="text-gray-400 text-sm">No hay días con entrenamientos registrados</p>
-          <p className="text-gray-500 text-xs mt-1">Registra algunos entrenamientos para ver el análisis</p>
         </div>
       </div>
     );
   }
 
-  // Preparar datos para el gráfico (solo días con datos)
-  const categories = daysWithData.map(day => day.dayName);
-
-  // Serie 1: Volumen total (barras)
-  const volumeData = daysWithData.map(day => day.totalVolume);
-
-  // Serie 2: Número de entrenamientos (línea)
-  const workoutsData = daysWithData.map(day => day.workouts);
-
-  // Serie 3: Peso máximo (línea)
-  const maxWeightData = daysWithData.map(day => day.maxWeight);
-
-  // Serie 4: Score de rendimiento (línea)
-  const performanceData = daysWithData.map(day => day.performanceScore);
-
   const options: ApexOptions = {
     chart: {
       type: 'line',
-      height: 400,
+      height: 300,
       background: 'transparent',
-      toolbar: {
-        show: false,
-      },
-      animations: {
-        enabled: true,
-        speed: 800,
-        animateGradually: {
-          enabled: true,
-          delay: 150,
-        },
-        dynamicAnimation: {
-          enabled: true,
-          speed: 350,
-        },
-      },
+      toolbar: { show: false },
+      animations: { enabled: false },
     },
-    colors: ['#3b82f6', '#10b981', '#f59e0b', '#8b5cf6'],
+    colors: ['#3b82f6', '#10b981', '#f59e0b'],
     stroke: {
-      width: [0, 3, 3, 3], // Barras sin stroke, líneas con stroke
+      width: [0, 3, 3],
       curve: 'smooth',
-      dashArray: [0, 0, 5, 0], // Línea punteada para peso máximo
     },
     fill: {
-      type: ['gradient', 'gradient', 'gradient', 'gradient'],
+      type: ['gradient', 'gradient', 'gradient'],
       gradient: {
         shade: 'dark',
         type: 'vertical',
         shadeIntensity: 0.3,
-        gradientToColors: ['#1d4ed8', '#059669', '#d97706', '#7c3aed'],
-        inverseColors: false,
+        gradientToColors: ['#1d4ed8', '#059669', '#d97706'],
         opacityFrom: 1,
         opacityTo: 0.4,
         stops: [0, 50, 100],
@@ -97,219 +66,99 @@ export const WeeklyAnalysisChart: React.FC<WeeklyAnalysisChartProps> = ({
       bar: {
         borderRadius: 6,
         columnWidth: '70%',
-        dataLabels: {
-          position: 'top',
-        },
-        distributed: false,
-        colors: {
-          ranges: [
-            {
-              from: 0,
-              to: 100000,
-              color: '#3b82f6'
-            }
-          ]
-        }
       },
     },
-    dataLabels: {
-      enabled: false,
-    },
+    dataLabels: { enabled: false },
     xaxis: {
-      categories,
+      categories: daysWithData.map(day => day.dayName),
       labels: {
-        style: {
-          colors: '#9ca3af',
-          fontSize: '12px',
-          fontWeight: 500,
-        },
+        style: { colors: '#9ca3af', fontSize: '12px' },
       },
-      axisBorder: {
-        show: true,
-        color: '#374151',
-      },
-      axisTicks: {
-        show: true,
-        color: '#374151',
-      },
+      axisBorder: { show: true, color: '#374151' },
+      axisTicks: { show: true, color: '#374151' },
     },
     yaxis: [
       {
-        title: {
-          text: 'Volumen (kg)',
-          style: {
-            color: '#9ca3af',
-            fontSize: '12px',
-          },
-        },
+        title: { text: 'Volumen (kg)', style: { color: '#9ca3af', fontSize: '12px' } },
         labels: {
-          style: {
-            colors: '#9ca3af',
-            fontSize: '11px',
-          },
+          style: { colors: '#9ca3af', fontSize: '11px' },
           formatter: (value: number) => formatNumberToString(value, 0),
         },
-        axisBorder: {
-          show: true,
-          color: '#374151',
-        },
+        axisBorder: { show: true, color: '#374151' },
       },
       {
         opposite: true,
-        title: {
-          text: 'Entrenamientos',
-          style: {
-            color: '#9ca3af',
-            fontSize: '12px',
-          },
-        },
+        title: { text: 'Entrenamientos', style: { color: '#9ca3af', fontSize: '12px' } },
         labels: {
-          style: {
-            colors: '#9ca3af',
-            fontSize: '11px',
-          },
+          style: { colors: '#9ca3af', fontSize: '11px' },
           formatter: (value: number) => formatNumberToString(value, 0),
         },
-        axisBorder: {
-          show: true,
-          color: '#374151',
-        },
+        axisBorder: { show: true, color: '#374151' },
       },
       {
         opposite: true,
-        title: {
-          text: 'Peso Máx (kg)',
-          style: {
-            color: '#9ca3af',
-            fontSize: '12px',
-          },
-        },
+        title: { text: 'Peso Máx (kg)', style: { color: '#9ca3af', fontSize: '12px' } },
         labels: {
-          style: {
-            colors: '#9ca3af',
-            fontSize: '11px',
-          },
+          style: { colors: '#9ca3af', fontSize: '11px' },
           formatter: (value: number) => formatNumberToString(value, 0),
         },
-        axisBorder: {
-          show: true,
-          color: '#374151',
-        },
-      },
-      {
-        opposite: true,
-        title: {
-          text: 'Rendimiento (%)',
-          style: {
-            color: '#9ca3af',
-            fontSize: '12px',
-          },
-        },
-        labels: {
-          style: {
-            colors: '#9ca3af',
-            fontSize: '11px',
-          },
-          formatter: (value: number) => `${formatNumberToString(value, 0)}%`,
-        },
-        axisBorder: {
-          show: true,
-          color: '#374151',
-        },
+        axisBorder: { show: true, color: '#374151' },
       },
     ],
     tooltip: {
       theme: 'dark',
       shared: true,
       intersect: false,
-      x: {
-        show: true,
-        format: 'dddd',
-      },
       y: [
         {
-          title: {
-            formatter: () => 'Volumen Total',
-          },
+          title: { formatter: () => 'Volumen Total' },
           formatter: (value: number) => `${formatNumberToString(value, 0)} kg`,
         },
         {
-          title: {
-            formatter: () => 'Entrenamientos',
-          },
+          title: { formatter: () => 'Entrenamientos' },
           formatter: (value: number) => `${formatNumberToString(value, 0)} sesiones`,
         },
         {
-          title: {
-            formatter: () => 'Peso Máximo',
-          },
+          title: { formatter: () => 'Peso Máximo' },
           formatter: (value: number) => `${formatNumberToString(value, 0)} kg`,
-        },
-        {
-          title: {
-            formatter: () => 'Rendimiento',
-          },
-          formatter: (value: number) => `${formatNumberToString(value, 1)}%`,
         },
       ],
     },
     legend: {
       position: 'top',
       horizontalAlign: 'center',
-      labels: {
-        colors: '#9ca3af',
-      },
+      labels: { colors: '#9ca3af' },
     },
     grid: {
       borderColor: '#374151',
       strokeDashArray: 4,
-      xaxis: {
-        lines: {
-          show: true,
-        },
-      },
-      yaxis: {
-        lines: {
-          show: true,
-        },
-      },
+      xaxis: { lines: { show: true } },
+      yaxis: { lines: { show: true } },
     },
-    theme: {
-      mode: 'dark',
-    },
+    theme: { mode: 'dark' },
   };
 
   const series = [
     {
       name: 'Volumen Total',
       type: 'column',
-      data: volumeData,
+      data: daysWithData.map(day => day.totalVolume),
     },
     {
       name: 'Entrenamientos',
       type: 'line',
-      data: workoutsData,
+      data: daysWithData.map(day => day.workouts),
     },
     {
       name: 'Peso Máximo',
       type: 'line',
-      data: maxWeightData,
-    },
-    {
-      name: 'Rendimiento',
-      type: 'line',
-      data: performanceData,
+      data: daysWithData.map(day => day.maxWeight),
     },
   ];
 
   return (
     <div className="w-full">
-      <Chart
-        options={options}
-        series={series}
-        type="line"
-        height={400}
-      />
+      <Chart options={options} series={series} type="line" height={300} />
     </div>
   );
 }; 

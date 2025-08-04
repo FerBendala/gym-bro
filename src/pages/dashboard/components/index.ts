@@ -23,7 +23,7 @@ export * from './fatigue-analysis';
 export * from './general-content';
 export * from './history-evolution-chart';
 export * from './history-metrics';
-export * from './history-weekly-details';
+
 export * from './horizontal-bar-chart';
 export * from './metric-cards';
 export * from './muscle-groups-summary';

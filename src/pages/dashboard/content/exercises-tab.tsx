@@ -4,7 +4,6 @@ import React from 'react';
 import {
   ExercisesCategoryFilters,
   ExercisesDetailedAnalysis,
-  ExercisesMetrics,
   ExercisesUnknownWarning,
 } from '../components';
 import { useExercisesData } from '../hooks/use-exercises-data';
@@ -24,7 +23,6 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
     setSelectedCategory,
     allExercises,
     unknownRecords,
-    globalMetrics,
   } = useExercisesData(records);
 
   if (records.length === 0) {
@@ -44,10 +42,6 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
   return (
     <div className="space-y-6">
       <ExercisesUnknownWarning unknownRecordsCount={unknownRecords.length} />
-      <ExercisesMetrics
-        globalMetrics={globalMetrics}
-        allExercisesCount={allExercises.length}
-      />
       <ExercisesCategoryFilters
         categories={categoriesWithCount}
         selectedCategory={selectedCategory}
@@ -57,6 +51,7 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
         exercises={allExercises}
         selectedCategory={selectedCategory}
         categoriesWithCount={categoriesWithCount}
+        records={records}
       />
     </div>
   );

@@ -7,6 +7,8 @@ import type { WorkoutRecord } from '@/interfaces';
 /**
  * Calcula el crecimiento total basado en datos de timeline
  * Refactorizado para usar funciones centralizadas
+ * MEJORADO: Ahora calcula crecimiento basado en volumen promedio por sesión
+ * ROBUSTO: Usa períodos para evitar sesgos por semanas atípicas
  */
 export const calculateTotalGrowth = (timelineData: { value: number; totalWorkouts: number }[]): {
   absoluteGrowth: number;
@@ -16,15 +18,50 @@ export const calculateTotalGrowth = (timelineData: { value: number; totalWorkout
     return { absoluteGrowth: 0, percentGrowth: 0 };
   }
 
-  const firstValue = timelineData[0].value;
-  const lastValue = timelineData[timelineData.length - 1].value;
+  // Para pocas semanas (≤3), usar primera vs última
+  if (timelineData.length <= 3) {
+    const firstWeek = timelineData[0];
+    const lastWeek = timelineData[timelineData.length - 1];
 
-  const absoluteGrowth = lastValue - firstValue;
-  const percentGrowth = firstValue > 0 ? (absoluteGrowth / firstValue) * 100 : 0;
+    const firstAvgVolumePerSession = firstWeek.totalWorkouts > 0 ? firstWeek.value / firstWeek.totalWorkouts : 0;
+    const lastAvgVolumePerSession = lastWeek.totalWorkouts > 0 ? lastWeek.value / lastWeek.totalWorkouts : 0;
+
+    const absoluteGrowth = lastAvgVolumePerSession - firstAvgVolumePerSession;
+    const percentGrowth = firstAvgVolumePerSession > 0 ? (absoluteGrowth / firstAvgVolumePerSession) * 100 : 0;
+
+    return {
+      absoluteGrowth: roundToDecimals(absoluteGrowth),
+      percentGrowth: roundToDecimals(percentGrowth),
+    };
+  }
+
+  // Para más semanas, usar períodos para mayor robustez
+  const firstPeriodSize = Math.min(2, Math.floor(timelineData.length / 3));
+  const lastPeriodSize = Math.min(2, Math.floor(timelineData.length / 3));
+
+  const firstPeriod = timelineData.slice(0, firstPeriodSize);
+  const lastPeriod = timelineData.slice(-lastPeriodSize);
+
+  // Calcular promedio de volumen por sesión para cada período
+  const firstPeriodAvgVolumePerSession = firstPeriod.reduce((sum, week) => {
+    const weekAvg = week.totalWorkouts > 0 ? week.value / week.totalWorkouts : 0;
+    return sum + weekAvg;
+  }, 0) / firstPeriod.length;
+
+  const lastPeriodAvgVolumePerSession = lastPeriod.reduce((sum, week) => {
+    const weekAvg = week.totalWorkouts > 0 ? week.value / week.totalWorkouts : 0;
+    return sum + weekAvg;
+  }, 0) / lastPeriod.length;
+
+  const absoluteGrowth = lastPeriodAvgVolumePerSession - firstPeriodAvgVolumePerSession;
+  const percentGrowth = firstPeriodAvgVolumePerSession > 0 ? (absoluteGrowth / firstPeriodAvgVolumePerSession) * 100 : 0;
+
+  // Limitar el crecimiento a un rango razonable para evitar valores extremos
+  const clampedPercentGrowth = clamp(percentGrowth, -100, 200);
 
   return {
-    absoluteGrowth: roundToDecimals(absoluteGrowth * 100) / 100,
-    percentGrowth: roundToDecimals(percentGrowth * 100) / 100,
+    absoluteGrowth: roundToDecimals(absoluteGrowth),
+    percentGrowth: roundToDecimals(clampedPercentGrowth),
   };
 };
 

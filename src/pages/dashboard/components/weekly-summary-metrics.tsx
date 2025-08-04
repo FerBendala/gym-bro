@@ -56,10 +56,6 @@ export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
     current.performanceScore > best.performanceScore ? current : best
   );
 
-  const worstDay = daysWithData.reduce((worst, current) =>
-    current.performanceScore < worst.performanceScore ? current : worst
-  );
-
   // Calcular tendencia general (solo días con datos)
   const avgTrend = daysWithData.reduce((sum, day) => sum + day.trend, 0) / daysWithData.length;
 
