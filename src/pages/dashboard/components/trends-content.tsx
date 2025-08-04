@@ -75,7 +75,7 @@ export const TrendsContent: React.FC<TrendsContentProps> = ({ records }) => {
             </div>
 
             {/* Métricas de resumen semanal */}
-            <WeeklySummaryMetrics dailyTrends={trendsData.dailyTrends} />
+            <WeeklySummaryMetrics dailyTrends={trendsData.dailyTrends} records={records} />
           </div>
         </CardContent>
       </Card>

@@ -3,16 +3,27 @@ import React from 'react';
 
 import { formatNumberToString } from '@/utils';
 import type { DayMetrics } from '@/utils/functions/trends-interfaces';
+import type { WorkoutRecord } from '@/interfaces';
 
 interface WeeklySummaryMetricsProps {
   dailyTrends: DayMetrics[];
+  records: WorkoutRecord[]; // Agregar records para análisis por categoría
 }
 
 export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
   dailyTrends,
+  records,
 }) => {
   if (dailyTrends.length === 0) {
-    return null;
+    return (
+      <div className="bg-gray-800/50 rounded-lg p-6 border border-gray-700">
+        <div className="text-center">
+          <div className="text-gray-400 text-sm mb-2">📊</div>
+          <p className="text-gray-400 text-sm">No hay días con entrenamientos registrados</p>
+          <p className="text-gray-500 text-xs mt-1">Registra algunos entrenamientos para ver las métricas</p>
+        </div>
+      </div>
+    );
   }
 
   // Filtrar solo días que tengan entrenamientos
@@ -45,12 +56,77 @@ export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
     current.performanceScore < worst.performanceScore ? current : worst
   );
 
-  // Encontrar el día con peso máximo más bajo
-  const dayWithLowestMaxWeight = daysWithData.reduce((lowest, current) =>
-    current.maxWeight < lowest.maxWeight ? current : lowest
-  );
+  // NUEVA LÓGICA: Analizar peso máximo por categoría de ejercicio
+  const analyzeMaxWeightByCategory = () => {
+    if (!records || records.length === 0) {
+      return { day: 'N/A', category: 'N/A', maxWeight: 0, message: 'Sin datos suficientes' };
+    }
 
+    // Agrupar registros por día de la semana
+    const dayGroups = new Map<string, WorkoutRecord[]>();
+    records.forEach(record => {
+      const dayName = new Date(record.date).toLocaleDateString('es-ES', { weekday: 'long' });
+      const capitalizedDay = dayName.charAt(0).toUpperCase() + dayName.slice(1);
+      if (!dayGroups.has(capitalizedDay)) {
+        dayGroups.set(capitalizedDay, []);
+      }
+      dayGroups.get(capitalizedDay)!.push(record);
+    });
 
+    // Analizar cada día con datos
+    const dayAnalysis = daysWithData.map(day => {
+      const dayRecords = dayGroups.get(day.dayName) || [];
+      
+      // Agrupar por categoría de ejercicio
+      const categoryGroups = new Map<string, WorkoutRecord[]>();
+      dayRecords.forEach(record => {
+        // Usar la primera categoría del ejercicio o 'Sin categoría' si no hay
+        const category = record.exercise?.categories?.[0] || 'Sin categoría';
+        if (!categoryGroups.has(category)) {
+          categoryGroups.set(category, []);
+        }
+        categoryGroups.get(category)!.push(record);
+      });
+
+      // Encontrar la categoría con peso máximo más bajo
+      let lowestCategory = { name: 'N/A', maxWeight: 0 };
+      let highestCategory = { name: 'N/A', maxWeight: 0 };
+
+      categoryGroups.forEach((records, category) => {
+        const maxWeight = Math.max(...records.map(r => r.weight));
+        if (lowestCategory.name === 'N/A' || maxWeight < lowestCategory.maxWeight) {
+          lowestCategory = { name: category, maxWeight };
+        }
+        if (highestCategory.name === 'N/A' || maxWeight > highestCategory.maxWeight) {
+          highestCategory = { name: category, maxWeight };
+        }
+      });
+
+      return {
+        day: day.dayName,
+        lowestCategory,
+        highestCategory,
+        totalWorkouts: day.workouts,
+        performanceScore: day.performanceScore
+      };
+    });
+
+    // Encontrar el día con la categoría más débil (peso máximo más bajo)
+    const dayWithWeakestCategory = dayAnalysis.reduce((weakest, current) => {
+      if (weakest.lowestCategory.name === 'N/A') return current;
+      if (current.lowestCategory.name === 'N/A') return weakest;
+      return current.lowestCategory.maxWeight < weakest.lowestCategory.maxWeight ? current : weakest;
+    });
+
+    return {
+      day: dayWithWeakestCategory.day,
+      category: dayWithWeakestCategory.lowestCategory.name,
+      maxWeight: dayWithWeakestCategory.lowestCategory.maxWeight,
+      message: `${dayWithWeakestCategory.day} - ${dayWithWeakestCategory.lowestCategory.name} (${dayWithWeakestCategory.lowestCategory.maxWeight} kg) necesita mejora`
+    };
+  };
+
+  const categoryAnalysis = analyzeMaxWeightByCategory();
 
   // Calcular tendencia general (solo días con datos)
   const avgTrend = daysWithData.reduce((sum, day) => sum + day.trend, 0) / daysWithData.length;
@@ -136,14 +212,14 @@ export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
         </div>
       </div>
 
-      {/* Peso Máximo */}
+      {/* Peso Máximo por Categoría */}
       <div className="bg-gradient-to-br from-orange-900/20 to-orange-800/20 border border-orange-500/30 rounded-lg p-4">
         <div className="flex items-center justify-between mb-2">
           <div className="p-2 bg-orange-600/20 rounded-lg">
             <TrendingUp className="w-5 h-5 text-orange-400" />
           </div>
           <div className="text-orange-400 text-xs font-medium">
-            Máximo
+            Por Categoría
           </div>
         </div>
         <div className="mb-1">
@@ -153,7 +229,7 @@ export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
           <div className="text-sm text-gray-400">Peso Máximo</div>
         </div>
         <div className="text-xs text-gray-400">
-          {dayWithLowestMaxWeight.dayName} ({dayWithLowestMaxWeight.maxWeight} kg) necesita mejora
+          {categoryAnalysis.message}
         </div>
       </div>
     </div>
