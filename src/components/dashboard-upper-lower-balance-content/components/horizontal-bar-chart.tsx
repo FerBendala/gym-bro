@@ -59,10 +59,11 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({ data, on
             <div className="w-full h-4 bg-gray-700 rounded-full overflow-hidden">
               {/* Zona ideal */}
               <div
-                className="absolute h-full bg-white/10 border-x border-white/20"
+                className="absolute h-full border-x border-white/20"
                 style={{
                   left: `${Math.max(0, (item.ideal - 2) / maxValue * 100)}%`,
                   width: `${4 / maxValue * 100}%`,
+                  background: 'linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0.05) 100%)',
                 }}
               />
 
@@ -71,14 +72,18 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({ data, on
                 className="h-full transition-all duration-1000 ease-out"
                 style={{
                   width: `${Math.min(100, (item.value / maxValue) * 100)}%`,
-                  backgroundColor: item.color,
+                  background: `linear-gradient(90deg, ${item.color} 0%, ${item.color}80 50%, ${item.color}40 100%)`,
                 }}
               />
 
               {/* Indicador ideal */}
               <div
-                className="absolute top-0 w-0.5 h-full bg-white"
-                style={{ left: `${(item.ideal / maxValue) * 100}%` }}
+                className="absolute top-0 w-0.5 h-full"
+                style={{ 
+                  left: `${(item.ideal / maxValue) * 100}%`,
+                  background: 'linear-gradient(180deg, rgba(255,255,255,0.8) 0%, rgba(255,255,255,1) 50%, rgba(255,255,255,0.8) 100%)',
+                  boxShadow: '0 0 4px rgba(255,255,255,0.6)',
+                }}
               />
             </div>
           </div>
