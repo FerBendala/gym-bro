@@ -1,8 +1,9 @@
 import { useMemo, useState } from 'react';
 
-import { useAppVolumeConfig } from '@/hooks/use-volume-provider.tsx';
+
 import { calculateBalanceAnalysis } from '../utils/balance-utils';
 
+import { useAppVolumeConfig } from '@/hooks';
 import type { WorkoutRecord } from '@/interfaces';
 
 export type BalanceSubTab = 'general' | 'balanceByGroup' | 'upperLower' | 'trends';
