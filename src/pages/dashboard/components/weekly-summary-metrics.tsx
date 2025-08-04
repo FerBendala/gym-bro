@@ -36,13 +36,18 @@ export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
   const avgPerformance = daysWithData.reduce((sum, day) => sum + day.performanceScore, 0) / daysWithData.length;
   const maxWeight = Math.max(...daysWithData.map(day => day.maxWeight));
 
-  // Encontrar el mejor y peor día (solo entre días con datos)
+  // Encontrar el mejor y peor día por rendimiento (solo entre días con datos)
   const bestDay = daysWithData.reduce((best, current) =>
     current.performanceScore > best.performanceScore ? current : best
   );
 
   const worstDay = daysWithData.reduce((worst, current) =>
     current.performanceScore < worst.performanceScore ? current : worst
+  );
+
+  // Encontrar el día con peso máximo más bajo
+  const dayWithLowestMaxWeight = daysWithData.reduce((lowest, current) =>
+    current.maxWeight < lowest.maxWeight ? current : lowest
   );
 
   // Calcular tendencia general (solo días con datos)
@@ -146,7 +151,7 @@ export const WeeklySummaryMetrics: React.FC<WeeklySummaryMetricsProps> = ({
           <div className="text-sm text-gray-400">Peso Máximo</div>
         </div>
         <div className="text-xs text-gray-400">
-          {worstDay.dayName} necesita mejora
+          {dayWithLowestMaxWeight.dayName} necesita mejora
         </div>
       </div>
     </div>
