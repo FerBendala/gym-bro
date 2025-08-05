@@ -20,6 +20,8 @@ export * from './exercises-metrics';
 export * from './exercises-unknown-warning';
 export * from './factors-chart';
 export * from './fatigue-analysis';
+export * from './fatigue-chart';
+export * from './fatigue-visual-chart';
 export * from './general-content';
 export * from './history-evolution-chart';
 export * from './history-metrics';
@@ -35,5 +37,7 @@ export * from './radar-chart-card';
 export * from './trend-analysis-chart';
 export * from './trend-analysis-section';
 export * from './trends-content';
+export * from './verification-banner';
 export * from './weekly-analysis-chart';
 export * from './weekly-summary-metrics';
+

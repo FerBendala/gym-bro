@@ -1,5 +1,5 @@
 import type { WorkoutRecord } from '@/interfaces';
-import { calculateTrainingConsistency, calculateTrainingFrequency } from '@/utils/functions';
+import { calculateTrainingConsistency, calculateTrainingFrequency } from './analysis-helpers.utils';
 
 /**
  * Genera indicadores de rendimiento pico mejorados
@@ -37,7 +37,18 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
 
   // Análisis de consistencia
   const consistency = calculateTrainingConsistency(records, 30);
-  if (consistency >= 80) {
+
+  if (consistency >= 95) {
+    indicators.push({
+      type: 'excellent',
+      icon: 'calendar-check',
+      title: 'Consistencia Excepcional',
+      description: 'Patrón de entrenamiento perfectamente regular - nivel elite',
+      value: `${consistency.toFixed(0)}%`,
+      progress: consistency,
+      category: 'consistency',
+    });
+  } else if (consistency >= 85) {
     indicators.push({
       type: 'excellent',
       icon: 'calendar-check',
@@ -47,7 +58,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       progress: consistency,
       category: 'consistency',
     });
-  } else if (consistency >= 60) {
+  } else if (consistency >= 70) {
     indicators.push({
       type: 'good',
       icon: 'calendar',
@@ -71,24 +82,35 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
 
   // Análisis de frecuencia
   const frequency = calculateTrainingFrequency(records, 30);
-  if (frequency >= 4) {
+
+  if (frequency >= 5.5) {
+    indicators.push({
+      type: 'excellent',
+      icon: 'trending-up',
+      title: 'Frecuencia Elite',
+      description: 'Frecuencia de entrenamiento de alto rendimiento',
+      value: `${frequency.toFixed(1)} días/semana`,
+      progress: Math.min(100, frequency * 18),
+      category: 'progress',
+    });
+  } else if (frequency >= 4.5) {
     indicators.push({
       type: 'excellent',
       icon: 'trending-up',
       title: 'Frecuencia Excelente',
       description: 'Entrenas con la frecuencia ideal para progreso',
       value: `${frequency.toFixed(1)} días/semana`,
-      progress: Math.min(100, frequency * 20),
+      progress: Math.min(100, frequency * 18),
       category: 'progress',
     });
-  } else if (frequency >= 3) {
+  } else if (frequency >= 3.5) {
     indicators.push({
       type: 'good',
       icon: 'trending-up',
       title: 'Frecuencia Buena',
       description: 'Tu frecuencia de entrenamiento es adecuada',
       value: `${frequency.toFixed(1)} días/semana`,
-      progress: Math.min(100, frequency * 20),
+      progress: Math.min(100, frequency * 18),
       category: 'progress',
     });
   } else {
@@ -98,17 +120,61 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       title: 'Frecuencia Baja',
       description: 'Considera aumentar la frecuencia de entrenamiento',
       value: `${frequency.toFixed(1)} días/semana`,
-      progress: Math.min(100, frequency * 20),
+      progress: Math.min(100, frequency * 18),
       category: 'progress',
     });
   }
 
   // Análisis de volumen
-  const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-  const avgVolumePerSession = totalVolume / records.length;
-  const volumeScore = Math.min(100, (avgVolumePerSession / 2000) * 100);
+  // Usar solo los últimos 30 días para el cálculo
+  const thirtyDaysAgo = new Date();
+  thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
 
-  if (volumeScore >= 80) {
+  const recentRecords = records.filter(r => new Date(r.date) >= thirtyDaysAgo);
+
+  // Identificar la semana actual
+  const today = new Date();
+  const currentMonday = new Date(today);
+  currentMonday.setDate(today.getDate() - today.getDay() + 1);
+  const currentWeekKey = currentMonday.toISOString().split('T')[0];
+
+  // Separar registros de semanas completadas vs semana actual
+  const completedRecords: WorkoutRecord[] = [];
+  const currentWeekRecords: WorkoutRecord[] = [];
+
+  recentRecords.forEach(record => {
+    const date = new Date(record.date);
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (weekKey === currentWeekKey) {
+      currentWeekRecords.push(record);
+    } else {
+      completedRecords.push(record);
+    }
+  });
+
+  // Usar solo semanas completadas para el cálculo de volumen
+  const recordsForVolume = completedRecords.length > 0 ? completedRecords : recentRecords;
+  const totalVolume = recordsForVolume.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const avgVolumePerSession = totalVolume / recordsForVolume.length;
+
+  // Calcular objetivo dinámico
+  const dynamicTarget = calculateDynamicVolumeTarget(records);
+  const volumeScore = Math.min(100, (avgVolumePerSession / dynamicTarget) * 100);
+
+  if (volumeScore >= 95) {
+    indicators.push({
+      type: 'excellent',
+      icon: 'layers',
+      title: 'Volumen Elite',
+      description: 'Volumen de entrenamiento excepcional - nivel avanzado',
+      value: `${volumeScore.toFixed(0)}%`,
+      progress: volumeScore,
+      category: 'volume',
+    });
+  } else if (volumeScore >= 85) {
     indicators.push({
       type: 'excellent',
       icon: 'layers',
@@ -118,7 +184,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       progress: volumeScore,
       category: 'volume',
     });
-  } else if (volumeScore >= 60) {
+  } else if (volumeScore >= 70) {
     indicators.push({
       type: 'good',
       icon: 'layers',
@@ -140,12 +206,54 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
     });
   }
 
-  // Análisis de intensidad (simplificado)
-  const avgWeight = records.reduce((sum, r) => sum + r.weight, 0) / records.length;
-  const maxWeight = Math.max(...records.map(r => r.weight));
-  const intensityScore = (avgWeight / maxWeight) * 100;
+  // Análisis de intensidad (mejorado)
+  // Calcular intensidad por ejercicio y luego promediar
+  const exerciseGroups = recentRecords.reduce((groups, record) => {
+    const exerciseName = record.exercise?.name || 'unknown';
+    if (!groups[exerciseName]) {
+      groups[exerciseName] = [];
+    }
+    groups[exerciseName].push(record);
+    return groups;
+  }, {} as Record<string, WorkoutRecord[]>);
 
-  if (intensityScore >= 80) {
+  // Calcular intensidad por ejercicio
+  const exerciseIntensities = Object.entries(exerciseGroups).map(([_, exerciseRecords]) => {
+    if (exerciseRecords.length === 0) return 0;
+
+    const maxWeight = Math.max(...exerciseRecords.map(r => r.weight));
+    const avgWeight = exerciseRecords.reduce((sum, r) => sum + r.weight, 0) / exerciseRecords.length;
+
+    // Intensidad relativa al máximo del ejercicio
+    const relativeIntensity = (avgWeight / maxWeight) * 100;
+
+    // Bonus por progresión (si el peso más reciente es mayor al promedio)
+    const recentWeight = exerciseRecords[exerciseRecords.length - 1]?.weight || 0;
+    const progressionBonus = recentWeight > avgWeight ? 10 : 0;
+
+    const finalIntensity = Math.min(100, relativeIntensity + progressionBonus);
+
+    return finalIntensity;
+  });
+
+  // Intensidad promedio ponderada por volumen
+  const intensityScore = exerciseIntensities.length > 0 ?
+    Math.min(100, exerciseIntensities.reduce((sum, intensity, index) => {
+      const exerciseVolume = Object.values(exerciseGroups)[index].reduce((vol, r) => vol + (r.weight * r.reps * r.sets), 0);
+      return sum + (intensity * (exerciseVolume / totalVolume));
+    }, 0)) : 0;
+
+  if (intensityScore >= 95) {
+    indicators.push({
+      type: 'excellent',
+      icon: 'zap',
+      title: 'Intensidad Elite',
+      description: 'Intensidad de entrenamiento excepcional - nivel avanzado',
+      value: `${intensityScore.toFixed(0)}%`,
+      progress: intensityScore,
+      category: 'intensity',
+    });
+  } else if (intensityScore >= 85) {
     indicators.push({
       type: 'excellent',
       icon: 'zap',
@@ -155,7 +263,7 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
       progress: intensityScore,
       category: 'intensity',
     });
-  } else if (intensityScore >= 60) {
+  } else if (intensityScore >= 70) {
     indicators.push({
       type: 'good',
       icon: 'zap',
@@ -178,4 +286,64 @@ export const generateEnhancedPerformanceIndicators = (records: WorkoutRecord[]):
   }
 
   return indicators;
+};
+
+// Función para calcular objetivo de volumen dinámico
+const calculateDynamicVolumeTarget = (records: WorkoutRecord[]): number => {
+  if (records.length === 0) return 2000; // Valor por defecto
+
+  // Usar solo los últimos 60 días para calcular el objetivo
+  const sixtyDaysAgo = new Date();
+  sixtyDaysAgo.setDate(sixtyDaysAgo.getDate() - 60);
+  const recentRecords = records.filter(r => new Date(r.date) >= sixtyDaysAgo);
+
+  if (recentRecords.length === 0) return 2000;
+
+  // Calcular volumen promedio por sesión
+  const totalVolume = recentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const avgVolumePerSession = totalVolume / recentRecords.length;
+
+  // Calcular tendencia de volumen
+  const sortedRecords = [...recentRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const midPoint = Math.floor(sortedRecords.length / 2);
+  const firstHalf = sortedRecords.slice(0, midPoint);
+  const secondHalf = sortedRecords.slice(midPoint);
+
+  const firstHalfVolume = firstHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / firstHalf.length;
+  const secondHalfVolume = secondHalf.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / secondHalf.length;
+
+  // Determinar nivel de experiencia basado en volumen promedio
+  let experienceLevel: 'beginner' | 'intermediate' | 'advanced';
+  if (avgVolumePerSession > 2000) experienceLevel = 'advanced';
+  else if (avgVolumePerSession > 1000) experienceLevel = 'intermediate';
+  else experienceLevel = 'beginner';
+
+  // Calcular objetivo dinámico
+  let targetVolume = avgVolumePerSession;
+
+  // Ajustar objetivo basado en nivel de experiencia y tendencia
+  switch (experienceLevel) {
+    case 'beginner':
+      // Objetivo: 20% más que el promedio actual
+      targetVolume = avgVolumePerSession * 1.2;
+      break;
+    case 'intermediate':
+      // Objetivo: 15% más que el promedio actual
+      targetVolume = avgVolumePerSession * 1.15;
+      break;
+    case 'advanced':
+      // Objetivo: 10% más que el promedio actual
+      targetVolume = avgVolumePerSession * 1.1;
+      break;
+  }
+
+  // Bonus por tendencia positiva
+  if (secondHalfVolume > firstHalfVolume) {
+    targetVolume *= 1.05; // 5% extra si está mejorando
+  }
+
+  // Asegurar límites razonables
+  targetVolume = Math.max(500, Math.min(5000, targetVolume));
+
+  return targetVolume;
 };

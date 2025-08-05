@@ -45,19 +45,76 @@ export const useAdvancedTab = (records: WorkoutRecord[]) => {
   const categorizedSuggestions = useMemo(() => {
     const suggestions = generateAdvancedOptimizationSuggestions(records);
 
+    // Función para generar título específico basado en el contenido
+    const generateSpecificTitle = (suggestion: string): string => {
+      if (suggestion.includes('Frecuencia baja')) return 'Optimizar Frecuencia';
+      if (suggestion.includes('Frecuencia muy alta')) return 'Gestionar Frecuencia';
+      if (suggestion.includes('Frecuencia excelente')) return 'Periodización de Frecuencia';
+      if (suggestion.includes('Baja consistencia')) return 'Mejorar Consistencia';
+      if (suggestion.includes('Consistencia excepcional')) return 'Técnicas Avanzadas';
+      if (suggestion.includes('Baja variedad')) return 'Añadir Variedad';
+      if (suggestion.includes('Alta variedad')) return 'Especialización';
+      if (suggestion.includes('Dominio de bajas repeticiones')) return 'Optimizar Hipertrofia';
+      if (suggestion.includes('Dominio de altas repeticiones')) return 'Optimizar Fuerza';
+      if (suggestion.includes('Balance de repeticiones')) return 'Periodización de Repeticiones';
+      if (suggestion.includes('Volumen bajo')) return 'Aumentar Volumen';
+      if (suggestion.includes('Volumen muy alto')) return 'Gestionar Volumen';
+      if (suggestion.includes('Volumen bien balanceado')) return 'Periodización de Volumen';
+      if (suggestion.includes('Progresión de peso lenta')) return 'Mejorar Progresión';
+      if (suggestion.includes('Progresión excelente')) return 'Periodización de Intensidad';
+      if (suggestion.includes('Rendimiento excepcional')) return 'Técnicas Elite';
+      if (suggestion.includes('deload weeks')) return 'Recuperación Avanzada';
+      if (suggestion.includes('Concentración en')) return 'Distribuir Carga';
+      if (suggestion.includes('Sigue entrenando')) return 'Continuar Entrenamiento';
+      if (suggestion.includes('Registra todos')) return 'Mejorar Registro';
+      if (suggestion.includes('Mantén un patrón')) return 'Establecer Rutina';
+
+      // Títulos por defecto basados en palabras clave
+      if (suggestion.includes('frecuencia')) return 'Optimizar Frecuencia';
+      if (suggestion.includes('consistencia')) return 'Mejorar Consistencia';
+      if (suggestion.includes('variedad')) return 'Optimizar Variedad';
+      if (suggestion.includes('repeticiones')) return 'Optimizar Repeticiones';
+      if (suggestion.includes('volumen')) return 'Optimizar Volumen';
+      if (suggestion.includes('intensidad')) return 'Ajustar Intensidad';
+      if (suggestion.includes('recuperación')) return 'Mejorar Recuperación';
+      if (suggestion.includes('progresión')) return 'Optimizar Progresión';
+
+      return 'Optimización General';
+    };
+
     // Mapear strings a objetos OptimizationSuggestion
     return suggestions.map((suggestion, index) => {
       // Determinar categoría y prioridad basado en el contenido
       let category = 'general';
       let priority: 'high' | 'medium' | 'low' = 'medium';
 
-      if (suggestion.includes('CRÍTICO') || suggestion.includes('riesgo')) {
+      // Lógica mejorada de prioridades
+      if (suggestion.includes('CRÍTICO') || suggestion.includes('riesgo') || suggestion.includes('muy alto')) {
         category = 'safety';
         priority = 'high';
-      } else if (suggestion.includes('aumentar') || suggestion.includes('mejorar')) {
+      } else if (suggestion.includes('Frecuencia baja') || suggestion.includes('Baja consistencia') ||
+        suggestion.includes('Volumen bajo') || suggestion.includes('Progresión de peso lenta')) {
+        category = 'performance';
+        priority = 'high';
+      } else if (suggestion.includes('Frecuencia muy alta') || suggestion.includes('Volumen muy alto') ||
+        suggestion.includes('deload weeks') || suggestion.includes('Rendimiento excepcional')) {
         category = 'performance';
         priority = 'medium';
-      } else if (suggestion.includes('consistencia') || suggestion.includes('mantén')) {
+      } else if (suggestion.includes('Frecuencia excelente') || suggestion.includes('Consistencia excepcional') ||
+        suggestion.includes('Periodización') || suggestion.includes('Técnicas') || suggestion.includes('excelente') ||
+        suggestion.includes('bien balanceado') || suggestion.includes('bueno') || suggestion.includes('variedad es alta')) {
+        category = 'performance';
+        priority = 'low';
+      } else if (suggestion.includes('aumentar') || suggestion.includes('mejorar') ||
+        suggestion.includes('añadir') || suggestion.includes('optimizar')) {
+        category = 'performance';
+        priority = 'medium';
+      } else if (suggestion.includes('consistencia') || suggestion.includes('mantén') ||
+        suggestion.includes('balance') || suggestion.includes('variedad')) {
+        category = 'consistency';
+        priority = 'low';
+      } else if (suggestion.includes('Sigue entrenando') || suggestion.includes('Registra todos') ||
+        suggestion.includes('Mantén un patrón')) {
         category = 'consistency';
         priority = 'low';
       }
@@ -72,7 +129,7 @@ export const useAdvancedTab = (records: WorkoutRecord[]) => {
       return {
         category,
         priority,
-        title: `Sugerencia ${index + 1}`,
+        title: generateSpecificTitle(suggestion),
         description: suggestion,
         action: 'Implementar gradualmente',
         icon: Icon,

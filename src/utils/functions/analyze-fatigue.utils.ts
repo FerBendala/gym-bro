@@ -1,5 +1,4 @@
-import { differenceInDays, endOfWeek, startOfWeek, subWeeks } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { differenceInDays } from 'date-fns';
 
 import { clamp, roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
@@ -69,21 +68,35 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   // OPCIÓN A: Usar semanas completas (excluyendo semana actual) para consistencia temporal
   const now = new Date();
 
-  // Semana anterior completa (base de referencia)
-  const lastWeekStart = startOfWeek(subWeeks(now, 1), { locale: es });
-  const lastWeekEnd = endOfWeek(subWeeks(now, 1), { locale: es });
-  const recentRecords = records.filter(r => {
-    const recordDate = new Date(r.date);
-    return recordDate >= lastWeekStart && recordDate <= lastWeekEnd;
+  // Identificar la semana actual
+  const currentMonday = new Date(now);
+  currentMonday.setDate(now.getDate() - now.getDay() + 1);
+  const currentWeekKey = currentMonday.toISOString().split('T')[0];
+
+  // Separar registros de semanas completadas vs semana actual
+  const completedRecords: WorkoutRecord[] = [];
+  const currentWeekRecords: WorkoutRecord[] = [];
+
+  records.forEach(record => {
+    const date = new Date(record.date);
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (weekKey === currentWeekKey) {
+      currentWeekRecords.push(record);
+    } else {
+      completedRecords.push(record);
+    }
   });
 
-  // Semana anterior a la anterior (para comparación)
-  const previousWeekStart = startOfWeek(subWeeks(now, 2), { locale: es });
-  const previousWeekEnd = endOfWeek(subWeeks(now, 2), { locale: es });
-  const olderRecords = records.filter(r => {
-    const recordDate = new Date(r.date);
-    return recordDate >= previousWeekStart && recordDate <= previousWeekEnd;
-  });
+  // Usar solo semanas completadas para el análisis
+  const recordsToAnalyze = completedRecords.length > 0 ? completedRecords : records;
+
+  // Dividir en períodos reciente y anterior
+  const midPoint = Math.floor(recordsToAnalyze.length / 2);
+  const recentRecords = recordsToAnalyze.slice(midPoint);
+  const olderRecords = recordsToAnalyze.slice(0, midPoint);
 
   // **CORRECCIÓN CLAVE**: Calcular tanto volumen total (para stress) como promedio por sesión (para comparación justa)
   // Usar función centralizada para calcular volumen
@@ -120,7 +133,30 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
 
   // OPCIÓN A: Índice de fatiga basado en semana anterior completa (no semana actual)
   // Usar recentRecords (semana anterior) en lugar de semana actual
-  const weeklyFrequency = new Set(recentRecords.map(r => r.date.toDateString())).size;
+  // Calcular frecuencia usando la nueva lógica por semanas
+  // Agrupar por semanas para calcular frecuencia semanal
+  const weeklyData = new Map<string, Set<string>>();
+
+  records.forEach(record => {
+    const date = new Date(record.date);
+    // Obtener el lunes de la semana (día 1 = lunes)
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (!weeklyData.has(weekKey)) {
+      weeklyData.set(weekKey, new Set());
+    }
+    // Usar la fecha como string para contar días únicos
+    weeklyData.get(weekKey)!.add(record.date.toDateString());
+  });
+
+  // Calcular frecuencia semanal promedio usando días únicos
+  const totalUniqueDays = Array.from(weeklyData.values()).reduce((sum, daysSet) => sum + daysSet.size, 0);
+  const weeklyFrequency = totalUniqueDays > 0 && weeklyData.size > 0
+    ? totalUniqueDays / weeklyData.size
+    : 0;
+
   const frequencyFactor = weeklyFrequency > 5 ? 30 : weeklyFrequency > 3 ? 15 : 0;
   const volumeFactor = volumeDropIndicators ? 25 : 0;
   const recoveryFactor = recoveryDays === 0 ? 20 : recoveryDays > 3 ? -10 : 0;
