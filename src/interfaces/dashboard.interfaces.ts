@@ -151,13 +151,7 @@ export interface TrendAnalysisData {
   trendAnalysis: string;
 }
 
-export interface PredictionTimelineData {
-  currentWeight: number;
-  nextWeekWeight: number;
-  predictedPR: number;
-  monthlyGrowthRate: number;
-  strengthTrend: number;
-}
+
 
 export interface PRProgressData {
   currentWeight: number;

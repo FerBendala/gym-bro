@@ -16,7 +16,6 @@ export const STRENGTH_PROGRESS_CONSTANTS = {
   },
   SECTIONS: {
     GENERAL_PROGRESS: 'Progreso General',
-    PREDICTIONS: 'Predicciones',
     CONSISTENCY_ANALYSIS: 'Análisis de Consistencia',
     TRAINING_RECOMMENDATIONS: 'Recomendaciones de Entrenamiento',
     REP_RANGE_ANALYSIS: 'Análisis por Rangos de Repeticiones',

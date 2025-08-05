@@ -25,14 +25,11 @@ export * from './fatigue-visual-chart';
 export * from './general-content';
 export * from './history-evolution-chart';
 export * from './history-metrics';
-
 export * from './horizontal-bar-chart';
 export * from './metric-cards';
 export * from './muscle-groups-summary';
 export * from './optimization-suggestions';
 export * from './performance-indicators';
-export * from './pr-progress-chart';
-export * from './prediction-timeline';
 export * from './radar-chart-card';
 export * from './trend-analysis-chart';
 export * from './trend-analysis-section';

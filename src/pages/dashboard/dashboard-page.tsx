@@ -10,7 +10,6 @@ import {
   AdvancedTab,
   ExercisesTab,
   HistoryTab,
-  PredictionsTab,
 } from './content';
 import { useDashboardData } from './hooks';
 import { DashboardTab } from './types';
@@ -56,8 +55,6 @@ export const DashboardPage: React.FC = () => {
         return <ExercisesTab records={workoutRecords} />;
       case 'advanced':
         return <AdvancedTab records={workoutRecords} />;
-      case 'predictions':
-        return <PredictionsTab records={workoutRecords} />;
       default:
         return <BalanceTab records={workoutRecords} />;
     }

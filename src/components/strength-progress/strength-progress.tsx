@@ -6,7 +6,6 @@ import {
   GeneralProgress,
   Header,
   MainMetrics,
-  Predictions,
   QualityMetrics,
   RepRangeAnalysis,
   TrainingRecommendations,
@@ -31,7 +30,6 @@ export const StrengthProgress: React.FC<StrengthProgressProps> = ({ records }) =
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <GeneralProgress analysis={analysis} />
-        <Predictions analysis={analysis} />
       </div>
 
       <ConsistencyAnalysis analysis={analysis} />

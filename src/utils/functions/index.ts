@@ -79,7 +79,7 @@ export * from './performance-periods';
 
 // Funciones de predicción y progreso
 export * from './predict-progress.utils';
-export * from './prediction-metrics.utils';
+
 export * from './progress-stats-utils';
 export * from './progression-utils';
 
@@ -91,11 +91,11 @@ export * from './strength-standards';
 export * from './string.utils';
 
 // Funciones de análisis temporal y tendencias
+export * from './category-trends';
 export * from './temporal-evolution';
 export * from './temporal-trends';
 export * from './trends-analysis';
 export * from './trends-interfaces';
-export * from './category-trends';
 
 // Funciones de volumen y entrenamiento
 export * from './volume-calculations';
@@ -105,3 +105,4 @@ export * from './week-records.utils';
 export * from './workout-habits';
 export * from './workout-streaks';
 export * from './workout-utils';
+

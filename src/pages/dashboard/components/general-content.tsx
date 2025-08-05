@@ -1,6 +1,7 @@
 import React from 'react';
 
-import { AdvancedMetricsCard, BalanceStatusCard, MetricCards, MuscleGroupsSummary, RadarChartCard } from '.';
+import { AdvancedMetricsCard, BalanceStatusCard, MetricCards, MuscleGroupsSummary } from '.';
+import { RadarChartCard } from './radar-chart-card';
 
 interface GeneralContentProps {
   balanceScore: number;

@@ -2,6 +2,7 @@ import { startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 import { calculateBasicMetrics } from './calculate-basic-metrics';
+import { calculateWeightProgression } from './calculate-weight-progression';
 import { isValidRecord } from './is-valid-record.utils';
 import { clamp, roundToDecimals } from './math-utils';
 import { calculateVolume } from './volume-calculations';
@@ -112,7 +113,7 @@ const calculateOverallProgress = (validRecords: WorkoutRecord[]) => {
 };
 
 /**
- * Calcula tendencias de volumen y fuerza
+ * Calcula tendencias usando utils mejorados
  */
 const calculateTrends = (validRecords: WorkoutRecord[]): { volumeTrend: number; strengthTrend: number; weeklyDataLength: number } => {
   const weeklyData = groupRecordsByWeekForAnalysis(validRecords);
@@ -127,10 +128,11 @@ const calculateTrends = (validRecords: WorkoutRecord[]): { volumeTrend: number; 
   }
 
   const volumes = weeklyData.map(w => w.volume);
-  const weights = weeklyData.map(w => w.weight);
+
+  // ✅ MEJORADO: Usar calculateWeightProgression que considera configuración de días
+  const strengthTrend = calculateWeightProgression(validRecords);
 
   const volumeTrend = calculateLinearTrend(volumes);
-  const strengthTrend = calculateLinearTrend(weights);
 
   return {
     volumeTrend,
@@ -186,12 +188,12 @@ const calculateConfidenceLevel = (
       break;
   }
 
-  // Factor por cantidad de datos
-  const dataFactor = Math.min(0.2, (validRecords.length / 50) * 0.2);
+  // ✅ MEJORADO: Factor por cantidad de datos - permitir confianza más alta
+  const dataFactor = Math.min(0.3, (validRecords.length / 50) * 0.3); // Aumentado de 0.2 a 0.3
   baseConfidence += dataFactor;
 
-  // Factor por consistencia temporal
-  const consistencyFactor = Math.min(0.1, (weeklyDataLength / 12) * 0.1);
+  // ✅ MEJORADO: Factor por consistencia temporal - permitir confianza más alta
+  const consistencyFactor = Math.min(0.15, (weeklyDataLength / 12) * 0.15); // Aumentado de 0.1 a 0.15
   baseConfidence += consistencyFactor;
 
   // Factor por calidad de datos (menos variabilidad = más confianza)
@@ -200,11 +202,13 @@ const calculateConfidenceLevel = (
   const variance = weights.reduce((sum, w) => sum + Math.pow(w - meanWeight, 2), 0) / weights.length;
   const stdDev = Math.sqrt(variance);
   const cv = meanWeight > 0 ? stdDev / meanWeight : 0;
-  const qualityFactor = Math.min(0.1, Math.max(0, 0.1 - cv * 0.1));
+  const qualityFactor = Math.min(0.15, Math.max(0, 0.15 - cv * 0.15)); // Aumentado de 0.1 a 0.15
   baseConfidence += qualityFactor;
 
-  // Usar función centralizada para validar rango
-  return clamp(baseConfidence, 0.3, 0.9);
+  // ✅ MEJORADO: Permitir confianza más alta con muchos datos
+  const finalConfidence = clamp(baseConfidence, 0.3, 0.98); // Aumentado de 0.9 a 0.98
+
+  return finalConfidence;
 };
 
 /**
@@ -236,7 +240,27 @@ const calculatePRPrediction = (
   // Predicción conservadora de PR
   const predictedWeight = roundToDecimals(current1RMMax * (1 + strengthTrend / 100));
   const confidence = clamp(confidenceLevel * 0.8, 0.3, 0.9);
-  const timeToNextPR = strengthTrend > 0 ? clamp(8 - strengthTrend * 2, 2, 12) : 12;
+
+  // ✅ CORRECCIÓN: Cálculo más realista del tiempo hasta PR
+  let timeToNextPR: number;
+
+  if (strengthTrend > 0) {
+    // Calcular diferencia de peso
+    const weightDifference = predictedWeight - current1RMMax;
+
+    if (weightDifference <= 0) {
+      timeToNextPR = 0; // Ya superado
+    } else {
+      // Calcular semanas basado en progreso semanal realista
+      const weeklyProgress = current1RMMax * (strengthTrend / 100);
+      timeToNextPR = Math.max(1, Math.ceil(weightDifference / weeklyProgress));
+
+      // Limitar a rango realista (1-52 semanas)
+      timeToNextPR = clamp(timeToNextPR, 1, 52);
+    }
+  } else {
+    timeToNextPR = 12; // Sin progreso = tiempo largo
+  }
 
   return {
     weight: predictedWeight,

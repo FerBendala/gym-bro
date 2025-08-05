@@ -1,6 +1,6 @@
 import React from 'react';
 
-import { AdvancedTab, ExercisesTab, HistoryTab, PredictionsTab } from '../content';
+import { AdvancedTab, ExercisesTab, HistoryTab } from '../content';
 import type { DashboardTab } from '../types';
 
 import { BalanceTab } from './balance-tab';
@@ -32,8 +32,7 @@ export const DashboardContent: React.FC<DashboardContentProps> = ({
       return <ExercisesTab records={records} />;
     case 'advanced':
       return <AdvancedTab records={records} />;
-    case 'predictions':
-      return <PredictionsTab records={records} />;
+
     default:
       return <BalanceTab records={records} />;
   }

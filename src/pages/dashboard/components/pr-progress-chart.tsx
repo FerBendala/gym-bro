@@ -12,6 +12,8 @@ export interface PRProgressChartProps {
   confidence: number;
   timeToNextPR: number;
   improvement: number;
+  exerciseCategory?: string; // ✅ NUEVO: Categoría del ejercicio
+  strengthTrend?: number; // ✅ NUEVO: Tendencia de fuerza para progreso dinámico
 }
 
 export const PRProgressChart: React.FC<PRProgressChartProps> = ({
@@ -20,16 +22,57 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
   baseline1RM,
   confidence,
   timeToNextPR,
+  exerciseCategory,
+  strengthTrend = 0, // ✅ NUEVO: Tendencia de fuerza
 }) => {
-  // Validar datos de entrada
+  // ✅ MEJORADO: Validación más robusta de datos de entrada
   const validCurrentWeight = Math.max(0, currentWeight || 0);
   const validPredictedPR = Math.max(validCurrentWeight, predictedPR || validCurrentWeight * 1.05);
-  const validBaseline1RM = Math.max(validCurrentWeight, baseline1RM || validCurrentWeight);
+  // ✅ CORRECCIÓN: Usar baseline calculado, no forzar mínimo artificial
+  const validBaseline1RM = Math.max(0, baseline1RM || validCurrentWeight * 0.7);
 
-  // Calcular progreso hacia el PR
-  const progressPercentage = validBaseline1RM > 0 && validPredictedPR > validBaseline1RM
-    ? clamp(((validCurrentWeight - validBaseline1RM) / (validPredictedPR - validBaseline1RM)) * 100, 0, 100)
-    : 0;
+  // ✅ MEJORADO: Cálculo más seguro del progreso hacia el PR
+  let progressPercentage = 0;
+
+  if (validBaseline1RM > 0 && validPredictedPR > validBaseline1RM) {
+    const totalProgress = validPredictedPR - validBaseline1RM;
+
+    // ✅ DINÁMICO: Calcular progreso basado en tendencia real
+    let currentProgress: number;
+
+    // Calcular progreso dinámico basado en la relación actual vs baseline
+    const progressRatio = validCurrentWeight / validBaseline1RM;
+
+    // ✅ MEJORADO: Usar tendencia de fuerza para progreso dinámico
+    const trendMultiplier = Math.max(0.5, Math.min(2.0, 1 + (strengthTrend / 100)));
+
+    if (progressRatio >= 1.0) {
+      // Si ya superó el baseline, progreso normal con tendencia
+      currentProgress = (validCurrentWeight - validBaseline1RM) * trendMultiplier;
+    } else if (progressRatio >= 0.8) {
+      // Si está cerca del baseline (80-100%), considerar tendencia
+      const baseProgress = totalProgress * 0.4;
+      currentProgress = baseProgress * trendMultiplier;
+    } else if (progressRatio >= 0.6) {
+      // Si está a media distancia (60-80%), considerar tendencia
+      const baseProgress = totalProgress * 0.25;
+      currentProgress = baseProgress * trendMultiplier;
+    } else {
+      // Si está lejos del baseline (<60%), considerar tendencia
+      const baseProgress = totalProgress * 0.1;
+      currentProgress = baseProgress * trendMultiplier;
+    }
+
+    if (totalProgress > 0) {
+      if (currentProgress >= totalProgress) {
+        // Si ya alcanzó o superó el PR objetivo
+        progressPercentage = 95; // 95% para mostrar casi completo
+      } else {
+        // Calcular progreso normal
+        progressPercentage = clamp((currentProgress / totalProgress) * 100, 5, 95);
+      }
+    }
+  }
 
   const getProgressColor = (progress: number): string => {
     if (progress >= 90) return '#10b981'; // green
@@ -112,7 +155,9 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
       {/* Métricas adicionales debajo del gauge */}
       <div className="grid grid-cols-3 gap-4 pt-4 border-t border-purple-500/20">
         <div className="text-center">
-          <div className="text-xs text-gray-400">Baseline</div>
+          <div className="text-xs text-gray-400">
+            {exerciseCategory ? `Baseline (${exerciseCategory})` : 'Baseline'}
+          </div>
           <div className="text-sm font-medium text-white">{formatNumberToString(validBaseline1RM, 1)}kg</div>
         </div>
         <div className="text-center">
@@ -129,13 +174,13 @@ export const PRProgressChart: React.FC<PRProgressChartProps> = ({
       <div>
         <div className="flex justify-between text-xs text-gray-400 mb-2">
           <span>Confianza de Predicción</span>
-          <span>{clamp(confidence || 50, 5, 95)}%</span>
+          <span>{clamp((confidence || 0.5) * 100, 5, 95)}%</span>
         </div>
         <div className="relative h-2 bg-gray-800 rounded-full overflow-hidden">
           <div
-            className={`h-full transition-all duration-300 ${(confidence || 50) >= 70 ? 'bg-green-500' :
-              (confidence || 50) >= 50 ? 'bg-yellow-500' : 'bg-red-500'}`}
-            style={{ width: `${clamp(confidence || 50, 5, 95)}%` }}
+            className={`h-full transition-all duration-300 ${(confidence || 0.5) >= 0.7 ? 'bg-green-500' :
+              (confidence || 0.5) >= 0.5 ? 'bg-yellow-500' : 'bg-red-500'}`}
+            style={{ width: `${clamp((confidence || 0.5) * 100, 5, 95)}%` }}
           />
         </div>
       </div>
