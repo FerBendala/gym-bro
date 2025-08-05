@@ -151,8 +151,6 @@ export interface TrendAnalysisData {
   trendAnalysis: string;
 }
 
-
-
 export interface PRProgressData {
   currentWeight: number;
   predictedPR: number;

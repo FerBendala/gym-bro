@@ -37,7 +37,7 @@ export const AdvancedTab: React.FC<AdvancedTabProps> = ({ records }) => {
     fatigueIndex: roundToDecimals(analysis.fatigueAnalysis.fatigueIndex, 1),
     recoveryRate: roundToDecimals(analysis.fatigueAnalysis.recoveryRate, 1),
     recoveryScore: roundToDecimals(analysis.fatigueAnalysis.recoveryScore, 1),
-    consistency: consistency, // ✅ Ahora usa cálculo real
+    consistency, // ✅ Ahora usa cálculo real
     frequency: actualFrequency, // ✅ Ahora usa cálculo real
     volumeScore: roundToDecimals(enhancedPerformanceIndicators.find(i => i.category === 'volume')?.progress || 0, 1),
     intensityScore: roundToDecimals(enhancedPerformanceIndicators.find(i => i.category === 'intensity')?.progress || 0, 1),

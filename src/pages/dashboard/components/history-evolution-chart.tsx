@@ -112,10 +112,10 @@ export const HistoryEvolutionChart: React.FC<HistoryEvolutionChartProps> = ({ hi
             <div class="bg-gray-800 border border-gray-600 rounded-lg p-3 shadow-lg">
               <div class="font-semibold text-white mb-1">Semana ${point.weekNumber}</div>
               <div class="text-gray-300 text-sm mb-2">${point.date.toLocaleDateString('es-ES', {
-            day: 'numeric',
-            month: 'short',
-            year: 'numeric',
-          })}</div>
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  })}</div>
               <div class="space-y-1">
                 <div class="text-blue-400 font-medium">${formatNumberToString(point.value)} kg</div>
                 <div class="text-gray-400 text-xs">${point.totalWorkouts} entrenamientos</div>

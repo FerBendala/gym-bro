@@ -6,4 +6,3 @@ export { MainMetrics } from './main-metrics';
 export { QualityMetrics } from './quality-metrics';
 export { RepRangeAnalysis } from './rep-range-analysis';
 export { TrainingRecommendations } from './training-recommendations';
-

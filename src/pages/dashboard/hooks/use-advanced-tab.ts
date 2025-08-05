@@ -83,7 +83,7 @@ export const useAdvancedTab = (records: WorkoutRecord[]) => {
     };
 
     // Mapear strings a objetos OptimizationSuggestion
-    return suggestions.map((suggestion, index) => {
+    return suggestions.map((suggestion) => {
       // Determinar categoría y prioridad basado en el contenido
       let category = 'general';
       let priority: 'high' | 'medium' | 'low' = 'medium';

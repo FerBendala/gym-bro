@@ -19,17 +19,15 @@ export interface FatigueVisualChartProps {
 export const FatigueVisualChart: React.FC<FatigueVisualChartProps> = ({
   fatigueIndex,
   recoveryRate,
-  recoveryScore,
   consistency,
   frequency,
   volumeScore,
   intensityScore,
-  plateauRisk
+  plateauRisk,
 }) => {
   // Normalizar valores para el gráfico
   const normalizedFatigue = 100 - fatigueIndex;
   const normalizedFrequency = frequency * 20; // Convertir días/semana a porcentaje
-  const normalizedPlateau = 100 - plateauRisk;
 
   // Configuración del gráfico radar
   const radarOptions: ApexOptions = {
@@ -97,7 +95,7 @@ export const FatigueVisualChart: React.FC<FatigueVisualChartProps> = ({
       style: {
         fontSize: '12px',
       },
-      custom: ({ series, seriesIndex, dataPointIndex, w }) => {
+      custom: ({ series, seriesIndex, dataPointIndex }) => {
         const categories = [
           'Recuperación',
           'Consistencia',
@@ -116,22 +114,22 @@ export const FatigueVisualChart: React.FC<FatigueVisualChartProps> = ({
             description = `Capacidad de tu cuerpo para recuperarse entre sesiones. Basado en tu índice de fatiga (${fatigueIndex}%) y tiempo de descanso.`;
             break;
           case 'Consistencia':
-            description = `Regularidad en tu entrenamiento. Mide qué tan constante eres con tu rutina semanal y si mantienes la frecuencia esperada.`;
+            description = 'Regularidad en tu entrenamiento. Mide qué tan constante eres con tu rutina semanal y si mantienes la frecuencia esperada.';
             break;
           case 'Frecuencia':
-            description = `Promedio de días que entrenas por semana. Calculado usando solo semanas completadas para mayor precisión.`;
+            description = 'Promedio de días que entrenas por semana. Calculado usando solo semanas completadas para mayor precisión.';
             break;
           case 'Volumen':
-            description = `Cantidad total de trabajo (peso × repeticiones × series) por sesión. Comparado con un objetivo dinámico basado en tu nivel y progreso.`;
+            description = 'Cantidad total de trabajo (peso × repeticiones × series) por sesión. Comparado con un objetivo dinámico basado en tu nivel y progreso.';
             break;
           case 'Intensidad':
-            description = `Qué tan cerca entrenas de tu máximo actual. Considera el peso promedio vs tu máximo reciente y bonifica la progresión.`;
+            description = 'Qué tan cerca entrenas de tu máximo actual. Considera el peso promedio vs tu máximo reciente y bonifica la progresión.';
             break;
           case 'Estabilidad':
-            description = `Consistencia en tu rendimiento. Mide qué tan estable es tu progreso sin grandes fluctuaciones.`;
+            description = 'Consistencia en tu rendimiento. Mide qué tan estable es tu progreso sin grandes fluctuaciones.';
             break;
           case 'Gestión Fatiga':
-            description = `Qué tan bien manejas la fatiga acumulada. Combina frecuencia, volumen y recuperación para evaluar tu gestión del estrés.`;
+            description = 'Qué tan bien manejas la fatiga acumulada. Combina frecuencia, volumen y recuperación para evaluar tu gestión del estrés.';
             break;
           default:
             description = `Valor: ${value}%`;
@@ -229,4 +227,4 @@ export const FatigueVisualChart: React.FC<FatigueVisualChartProps> = ({
       </CardContent>
     </Card>
   );
-}; 
+};

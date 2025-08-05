@@ -205,4 +205,4 @@ export const FatigueChart: React.FC<FatigueChartProps> = ({
       </CardContent>
     </Card>
   );
-}; 
+};

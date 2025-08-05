@@ -37,4 +37,3 @@ export * from './trends-content';
 export * from './verification-banner';
 export * from './weekly-analysis-chart';
 export * from './weekly-summary-metrics';
-

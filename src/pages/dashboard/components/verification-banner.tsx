@@ -16,7 +16,7 @@ export const VerificationBanner: React.FC<VerificationBannerProps> = ({
   const expectedValues = {
     frequency: 4.7,
     consistency: 85,
-    intensityScore: 89.3
+    intensityScore: 89.3,
   };
 
   const frequencyOk = Math.abs(frequency - expectedValues.frequency) <= 0.5;
@@ -59,4 +59,4 @@ export const VerificationBanner: React.FC<VerificationBannerProps> = ({
       </CardContent>
     </Card>
   );
-}; 
+};
