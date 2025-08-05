@@ -48,7 +48,7 @@ export const PreviewFull: React.FC<PreviewFullProps> = ({ url, previewData, onCl
       className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[9999] p-4"
       onClick={handleBackdropClick}
     >
-      <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden transform transition-all duration-300">
+      <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-hidden transform transition-all duration-300">
         {/* Header mejorado con gradiente */}
         <div className="relative bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20 border-b border-gray-700/50">
           <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-purple-500/10" />

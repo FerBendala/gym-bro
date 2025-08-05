@@ -59,7 +59,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 
   const modalContent = (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[80] p-4" onClick={handleBackdropClick}>
-      <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
         {/* Header del modal */}
         <FilterModalHeader onClose={onClose} />
 

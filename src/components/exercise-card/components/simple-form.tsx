@@ -1,3 +1,4 @@
+import { Calendar, Dumbbell } from 'lucide-react';
 import React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 
@@ -22,7 +23,7 @@ interface SimpleFormProps {
 }
 
 /**
- * Formulario simple para entrenamiento con peso/reps/sets fijos
+ * Formulario simple compacto para entrenamiento con peso/reps/sets fijos
  */
 export const SimpleForm: React.FC<SimpleFormProps> = ({
   loading,
@@ -34,14 +35,17 @@ export const SimpleForm: React.FC<SimpleFormProps> = ({
   const { register, handleSubmit, formState: { errors }, watch, setValue } = formMethods;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Datos del entrenamiento */}
-      <div className="bg-gray-800/30 rounded-xl border border-gray-700/30 p-5">
-        <h4 className="text-lg font-medium text-white mb-4 flex items-center">🏃 Datos del entrenamiento</h4>
+      <div className="bg-gray-800/30 rounded-lg border border-gray-700/30 p-3">
+        <h4 className="text-sm font-medium text-white mb-3 flex items-center">
+          <Dumbbell className="w-4 h-4 mr-2" />
+          Datos del entrenamiento
+        </h4>
 
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div>
-            <label className="text-sm text-gray-400 mb-2 block">Peso (kg)</label>
+            <label className="text-xs text-gray-400 mb-1 block">Peso (kg)</label>
             <Input
               type="number" step="0.5" min="0" placeholder="0"
               {...register('weight', {
@@ -55,7 +59,7 @@ export const SimpleForm: React.FC<SimpleFormProps> = ({
           </div>
 
           <div>
-            <label className="text-sm text-gray-400 mb-2 block">Repeticiones</label>
+            <label className="text-xs text-gray-400 mb-1 block">Repeticiones</label>
             <Input
               type="number" min="1" placeholder="1"
               {...register('reps', {
@@ -69,7 +73,7 @@ export const SimpleForm: React.FC<SimpleFormProps> = ({
           </div>
 
           <div>
-            <label className="text-sm text-gray-400 mb-2 block">Series</label>
+            <label className="text-xs text-gray-400 mb-1 block">Series</label>
             <Input
               type="number" min="1" placeholder="1"
               {...register('sets', {
@@ -85,17 +89,17 @@ export const SimpleForm: React.FC<SimpleFormProps> = ({
 
         {/* Estadísticas en tiempo real */}
         {stats.totalVolume > 0 && (
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="bg-blue-600/10 rounded-lg p-3 text-center border border-blue-500/20">
-              <p className="text-lg font-bold text-blue-400">{stats.sets}</p>
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="bg-blue-600/10 rounded-lg p-2 text-center border border-blue-500/20">
+              <p className="text-sm font-bold text-blue-400">{stats.sets}</p>
               <p className="text-xs text-blue-300">Series</p>
             </div>
-            <div className="bg-green-600/10 rounded-lg p-3 text-center border border-green-500/20">
-              <p className="text-lg font-bold text-green-400">{stats.totalReps}</p>
+            <div className="bg-green-600/10 rounded-lg p-2 text-center border border-green-500/20">
+              <p className="text-sm font-bold text-green-400">{stats.totalReps}</p>
               <p className="text-xs text-green-300">Reps totales</p>
             </div>
-            <div className="bg-purple-600/10 rounded-lg p-3 text-center border border-purple-500/20">
-              <p className="text-lg font-bold text-purple-400">{formatNumberToString(stats.totalVolume)} {EXERCISE_CARD_CONSTANTS.STATS.volumeUnit}</p>
+            <div className="bg-purple-600/10 rounded-lg p-2 text-center border border-purple-500/20">
+              <p className="text-sm font-bold text-purple-400">{formatNumberToString(stats.totalVolume)} {EXERCISE_CARD_CONSTANTS.STATS.volumeUnit}</p>
               <p className="text-xs text-purple-300">Volumen</p>
             </div>
           </div>
@@ -103,8 +107,11 @@ export const SimpleForm: React.FC<SimpleFormProps> = ({
       </div>
 
       {/* Fecha del entrenamiento */}
-      <div className="bg-gray-800/30 rounded-xl border border-gray-700/30 p-5">
-        <h4 className="text-lg font-medium text-white mb-4 flex items-center">📅 Fecha del entrenamiento</h4>
+      <div className="bg-gray-800/30 rounded-lg border border-gray-700/30 p-3">
+        <h4 className="text-sm font-medium text-white mb-3 flex items-center">
+          <Calendar className="w-4 h-4 mr-2" />
+          Fecha del entrenamiento
+        </h4>
         <DatePicker
           label="Selecciona la fecha"
           value={watch('date')}
@@ -114,7 +121,7 @@ export const SimpleForm: React.FC<SimpleFormProps> = ({
       </div>
 
       {/* Botones de acción */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-2">
         <Button
           type="submit"
           loading={loading}

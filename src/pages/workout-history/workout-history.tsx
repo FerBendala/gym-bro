@@ -102,8 +102,8 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
             onClick={() => setShowFilterModal(true)}
             variant="secondary"
             className="bg-blue-600/20 hover:bg-blue-600/30 border-blue-500/30"
+            leftIcon={<Filter className="w-4 h-4 mr-2" />}
           >
-            <Filter className="w-4 h-4 mr-2" />
             Filtros
             {hasActiveFilters && (
               <span className="ml-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">

@@ -27,10 +27,10 @@ export const WorkoutRecordCard: React.FC<WorkoutRecordCardProps> = ({
 
   return (
     <div
-      className={'relative p-6 rounded-xl bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/30 hover:border-gray-600/50 transition-all duration-200 hover:shadow-xl'}
+      className={'relative p-6 rounded-xl overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700/30 hover:border-gray-600/50 transition-all duration-200 hover:shadow-xl'}
     >
       {/* Indicador visual de categoría */}
-      <div className={`absolute top-0 left-0 w-full h-1 bg-gradient-to-r ${colorGradient}`} />
+      <div className={`absolute top-0 left-0 w-full h-4 bg-gradient-to-r ${colorGradient}`} />
 
       {/* Header con icono y información del ejercicio */}
       <WorkoutRecordHeader

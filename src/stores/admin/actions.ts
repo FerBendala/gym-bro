@@ -13,7 +13,7 @@ export const createUIActions = (set: (fn: (state: AdminStore) => Partial<AdminSt
     adminPanel: { ...state.adminPanel, isOpen: false },
   })),
 
-  setTab: (activeTab: 'exercises' | 'assignments') => set((state: AdminStore) => ({
+  setTab: (activeTab: 'exercises' | 'assignments' | 'create-exercise') => set((state: AdminStore) => ({
     adminPanel: { ...state.adminPanel, activeTab },
   })),
 

@@ -73,7 +73,7 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
   const simpleStats = exerciseCardUtils.calculateFormStats(simpleData[0] || 0, simpleData[1] || 0, simpleData[2] || 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <ModeSelector
         isAdvancedMode={isAdvancedMode}
         onModeChange={handleModeChange}

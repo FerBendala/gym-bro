@@ -19,8 +19,8 @@ export const FilterModalFooter: React.FC<FilterModalFooterProps> = ({
           onClick={onClearFilters}
           variant="secondary"
           className="bg-red-600/20 hover:bg-red-600/30 border-red-500/30 text-red-300"
+          leftIcon={<Filter className="w-4 h-4 mr-2" />}
         >
-          <Filter className="w-4 h-4 mr-2" />
           Limpiar todos los filtros
         </Button>
         <div className="flex space-x-3">

@@ -1,4 +1,4 @@
-import { Plus, Trash2 } from 'lucide-react';
+import { Calendar, Plus, Trash2, Zap } from 'lucide-react';
 import React from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { FieldArrayWithId } from 'react-hook-form';
@@ -27,7 +27,7 @@ interface AdvancedFormProps {
 }
 
 /**
- * Formulario avanzado para series individuales
+ * Formulario avanzado compacto para series individuales
  */
 export const AdvancedForm: React.FC<AdvancedFormProps> = ({
   loading,
@@ -42,30 +42,33 @@ export const AdvancedForm: React.FC<AdvancedFormProps> = ({
   const { register, handleSubmit, formState: { errors }, watch, setValue } = formMethods;
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Gestión de series */}
-      <div className="bg-gray-800/30 rounded-xl border border-gray-700/30 p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h4 className="text-lg font-medium text-white flex items-center">⚡ Series individuales</h4>
-          <button type="button" onClick={addSet} className="px-3 py-2 bg-green-600/20 text-green-300 rounded-lg text-sm hover:bg-green-600/30 transition-colors border border-green-500/30 flex items-center space-x-2">
-            <Plus className="w-4 h-4" />
+      <div className="bg-gray-800/30 rounded-lg border border-gray-700/30 p-3">
+        <div className="flex items-center justify-between mb-3">
+          <h4 className="text-sm font-medium text-white flex items-center">
+            <Zap className="w-4 h-4 mr-2" />
+            Series individuales
+          </h4>
+          <button type="button" onClick={addSet} className="px-2 py-1.5 bg-green-600/20 text-green-300 rounded-lg text-xs hover:bg-green-600/30 transition-colors border border-green-500/30 flex items-center space-x-1">
+            <Plus className="w-3 h-3" />
             <span>Añadir serie</span>
           </button>
         </div>
 
-        <div className="space-y-3">
+        <div className="space-y-2">
           {fields.map((field, index) => (
-            <div key={field.id} className="bg-gray-700/30 rounded-lg p-4 border border-gray-600/30">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-sm font-medium text-blue-300">Serie {index + 1}</span>
+            <div key={field.id} className="bg-gray-700/30 rounded-lg p-3 border border-gray-600/30">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-xs font-medium text-blue-300">Serie {index + 1}</span>
                 {fields.length > EXERCISE_CARD_CONSTANTS.INDIVIDUAL_SETS.minSets && (
-                  <button type="button" onClick={() => removeSet(index)} className="p-1.5 text-gray-400 hover:text-red-400 hover:bg-red-500/20 rounded-lg transition-colors" title="Eliminar serie">
-                    <Trash2 className="w-4 h-4" />
+                  <button type="button" onClick={() => removeSet(index)} className="p-1 text-gray-400 hover:text-red-400 hover:bg-red-500/20 rounded-lg transition-colors" title="Eliminar serie">
+                    <Trash2 className="w-3 h-3" />
                   </button>
                 )}
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                 <div>
                   <label className="text-xs text-gray-400 mb-1 block">Peso (kg)</label>
                   <Input
@@ -99,17 +102,17 @@ export const AdvancedForm: React.FC<AdvancedFormProps> = ({
 
         {/* Estadísticas en tiempo real */}
         {stats.totalSets > 0 && (
-          <div className="mt-4 grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="bg-blue-600/10 rounded-lg p-3 text-center border border-blue-500/20">
-              <p className="text-lg font-bold text-blue-400">{stats.totalSets}</p>
+          <div className="mt-3 grid grid-cols-1 sm:grid-cols-3 gap-2">
+            <div className="bg-blue-600/10 rounded-lg p-2 text-center border border-blue-500/20">
+              <p className="text-sm font-bold text-blue-400">{stats.totalSets}</p>
               <p className="text-xs text-blue-300">Series</p>
             </div>
-            <div className="bg-green-600/10 rounded-lg p-3 text-center border border-green-500/20">
-              <p className="text-lg font-bold text-green-400">{stats.totalReps}</p>
+            <div className="bg-green-600/10 rounded-lg p-2 text-center border border-green-500/20">
+              <p className="text-sm font-bold text-green-400">{stats.totalReps}</p>
               <p className="text-xs text-green-300">Reps totales</p>
             </div>
-            <div className="bg-purple-600/10 rounded-lg p-3 text-center border border-purple-500/20">
-              <p className="text-lg font-bold text-purple-400">{formatNumberToString(stats.totalVolume)} {EXERCISE_CARD_CONSTANTS.STATS.volumeUnit}</p>
+            <div className="bg-purple-600/10 rounded-lg p-2 text-center border border-purple-500/20">
+              <p className="text-sm font-bold text-purple-400">{formatNumberToString(stats.totalVolume)} {EXERCISE_CARD_CONSTANTS.STATS.volumeUnit}</p>
               <p className="text-xs text-purple-300">Volumen</p>
             </div>
           </div>
@@ -117,8 +120,11 @@ export const AdvancedForm: React.FC<AdvancedFormProps> = ({
       </div>
 
       {/* Fecha del entrenamiento */}
-      <div className="bg-gray-800/30 rounded-xl border border-gray-700/30 p-5">
-        <h4 className="text-lg font-medium text-white mb-4 flex items-center">📅 Fecha del entrenamiento</h4>
+      <div className="bg-gray-800/30 rounded-lg border border-gray-700/30 p-3">
+        <h4 className="text-sm font-medium text-white mb-3 flex items-center">
+          <Calendar className="w-4 h-4 mr-2" />
+          Fecha del entrenamiento
+        </h4>
         <DatePicker
           label="Selecciona la fecha"
           value={watch('date')}
@@ -128,7 +134,7 @@ export const AdvancedForm: React.FC<AdvancedFormProps> = ({
       </div>
 
       {/* Botones de acción */}
-      <div className="flex flex-col sm:flex-row gap-3">
+      <div className="flex flex-col sm:flex-row gap-2">
         <Button
           type="submit"
           loading={loading}

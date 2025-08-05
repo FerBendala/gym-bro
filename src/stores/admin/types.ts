@@ -38,7 +38,7 @@ export interface AdminActions {
   // Acciones de UI
   openPanel: () => void;
   closePanel: () => void;
-  setTab: (tab: 'exercises' | 'assignments') => void;
+  setTab: (tab: 'exercises' | 'assignments' | 'create-exercise') => void;
   setSelectedDay: (day: DayOfWeek) => void;
   setEditingExercise: (exercise: Exercise | null) => void;
   setPreviewUrl: (url: string | null) => void;

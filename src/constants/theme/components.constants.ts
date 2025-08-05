@@ -67,7 +67,7 @@ export const COMPONENTS = {
 
   modal: {
     overlay: 'fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[70]',
-    container: 'bg-gray-900/95 backdrop-blur-md rounded-2xl border border-gray-700/50 shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden',
+    container: 'bg-gray-900/95 backdrop-blur-md rounded-2xl border border-gray-700/50 shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden',
     header: 'flex items-center justify-between p-6 border-b border-gray-700/50',
     content: 'overflow-y-auto',
     footer: 'flex items-center justify-end gap-3 p-6 border-t border-gray-700/50',
@@ -202,7 +202,7 @@ export const THEME_URL_PREVIEW = {
   },
   full: {
     overlay: 'fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]',
-    container: 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden transform transition-all duration-300',
+    container: 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-hidden transform transition-all duration-300',
     header: 'relative bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20 border-b border-gray-700/50 p-6',
     title: 'text-2xl font-bold text-white mb-1 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent',
     content: 'overflow-y-auto max-h-[calc(95vh-180px)] p-6',

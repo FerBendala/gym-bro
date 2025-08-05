@@ -21,11 +21,11 @@ export const DateActions: React.FC<DateActionsProps> = ({
       <Button
         type="button"
         variant="secondary"
-        size="sm"
+        size="md"
         onClick={onTodayClick}
         disabled={disabled}
+        leftIcon={<CalendarDays className="w-3 h-3 mr-2" />}
       >
-        <CalendarDays className="w-3 h-3 mr-2" />
         Hoy ({new Date().toLocaleDateString('es-ES')})
       </Button>
 
@@ -33,7 +33,7 @@ export const DateActions: React.FC<DateActionsProps> = ({
         <Button
           type="button"
           variant="danger"
-          size="sm"
+          size="md"
           onClick={onClearClick}
           className="text-xs px-2 py-1"
           disabled={disabled}
