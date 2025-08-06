@@ -21,6 +21,11 @@ export const usePageInfo = (activeTab: string, activeDay: DayOfWeek): PageInfo =
           title: PAGE_TITLES.calendar,
           subtitle: PAGE_SUBTITLES.calendar,
         };
+      case 'chat':
+        return {
+          title: PAGE_TITLES.chat,
+          subtitle: PAGE_SUBTITLES.chat,
+        };
       case 'settings':
         return {
           title: PAGE_TITLES.settings,

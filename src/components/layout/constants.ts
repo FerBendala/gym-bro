@@ -1,4 +1,4 @@
-import { Calendar, ClipboardList, Home, MoreHorizontal, Settings, TrendingUp } from 'lucide-react';
+import { Calendar, ClipboardList, Home, MessageSquare, MoreHorizontal, Settings, TrendingUp } from 'lucide-react';
 
 import { NavigationItem } from './types';
 
@@ -18,6 +18,11 @@ export const navigationItems: NavigationItem[] = [
     id: 'calendar',
     label: 'Calendario',
     icon: Calendar,
+  },
+  {
+    id: 'chat',
+    label: 'IA Chat',
+    icon: MessageSquare,
   },
   {
     id: 'history',
@@ -44,9 +49,9 @@ export const compactNavigationItems: NavigationItem[] = [
     icon: TrendingUp,
   },
   {
-    id: 'calendar',
-    label: 'Calendario',
-    icon: Calendar,
+    id: 'chat',
+    label: 'IA Chat',
+    icon: MessageSquare,
   },
   {
     id: 'more',
@@ -57,6 +62,11 @@ export const compactNavigationItems: NavigationItem[] = [
 
 // Elementos del menú "más"
 export const moreMenuItems: NavigationItem[] = [
+  {
+    id: 'calendar',
+    label: 'Calendario',
+    icon: Calendar,
+  },
   {
     id: 'history',
     label: 'Historial',

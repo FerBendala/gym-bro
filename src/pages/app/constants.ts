@@ -12,6 +12,7 @@ export const PAGE_TITLES = {
   home: 'Entrenamientos',
   progress: 'Mi Progreso',
   calendar: 'Calendario',
+  chat: 'IA Chat',
   settings: 'Configuración',
   history: 'Historial de Entrenamientos',
   default: 'Gym Tracker',
@@ -20,6 +21,7 @@ export const PAGE_TITLES = {
 export const PAGE_SUBTITLES = {
   progress: 'Análisis de rendimiento y mejoras',
   calendar: 'Vista mensual de entrenamientos',
+  chat: 'Asistente IA de entrenamiento',
   settings: 'Ejercicios y preferencias',
   history: 'Resumen de tus entrenamientos',
 } as const;

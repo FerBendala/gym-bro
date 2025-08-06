@@ -9,6 +9,7 @@ import { Layout, useModernNavigation } from '@/components/layout';
 import { Notification } from '@/components/notification';
 import type { DayOfWeek } from '@/interfaces';
 import { ModernCalendar } from '@/pages/calendar';
+import { ChatPage } from '@/pages/chat';
 import { DashboardPage } from '@/pages/dashboard';
 import { ModernHome } from '@/pages/home';
 import { ModernSettings } from '@/pages/settings';
@@ -45,6 +46,8 @@ export const AppContent = () => {
         return <DashboardPage />;
       case 'calendar':
         return <ModernCalendar />;
+      case 'chat':
+        return <ChatPage />;
       case 'settings':
         return <ModernSettings />;
       case 'history':

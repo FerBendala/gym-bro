@@ -1,0 +1,59 @@
+[build]
+  # Directorio de construcción
+  publish = "dist"
+  
+  # Comando de construcción
+  command = "pnpm build"
+  
+  # Variables de entorno para el build
+  [build.environment]
+    NODE_VERSION = "18"
+    NPM_VERSION = "9"
+
+# Configuración de funciones serverless (para el chat)
+[functions]
+  # Directorio de funciones
+  directory = "netlify/functions"
+  
+  # Variables de entorno para las funciones
+  [functions.environment]
+    PYTHON_VERSION = "3.9"
+
+# Configuración de redirecciones
+[[redirects]]
+  # Redirigir API calls a las funciones serverless
+  from = "/api/chat"
+  to = "/.netlify/functions/chat"
+  status = 200
+  force = true
+
+[[redirects]]
+  # Redirigir health check a las funciones serverless
+  from = "/api/health"
+  to = "/.netlify/functions/health"
+  status = 200
+  force = true
+
+[[redirects]]
+  # SPA fallback - todas las rutas van al index.html
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Configuración de headers
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+
+# Configuración de headers para API
+[[headers]]
+  for = "/api/*"
+  [headers.values]
+    Access-Control-Allow-Origin = "*"
+    Access-Control-Allow-Methods = "GET, POST, PUT, DELETE, OPTIONS"
+    Access-Control-Allow-Headers = "Content-Type, Authorization"
+    Content-Type = "application/json" 
