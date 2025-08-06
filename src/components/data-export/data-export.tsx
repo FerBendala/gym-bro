@@ -1,11 +1,11 @@
 import {
-  DataStatsCard,
   ExportInfoCard,
   ExportOptionButton,
   OfflineWarning,
-  PrivacyNote,
+  PrivacyNote
 } from './components';
-import { EXPORT_INFO, EXPORT_OPTIONS } from './constants';
+import { DataIntegrityWarning } from './components/data-integrity-warning';
+import { EXPORT_OPTIONS } from './constants';
 import { useDataExport } from './hooks';
 import type { DataExportProps } from './types';
 
@@ -20,14 +20,9 @@ export const DataExport: React.FC<DataExportProps> = ({ className }) => {
 
   return (
     <div className={cn('space-y-6', className)}>
-      {/* Header */}
-      <div className="mb-6">
-        <h3 className="text-xl font-bold text-white mb-2">{EXPORT_INFO.title}</h3>
-        <p className="text-gray-400">{EXPORT_INFO.description}</p>
 
-        {/* Estadísticas de datos */}
-        {dataStats && <DataStatsCard dataStats={dataStats} />}
-      </div>
+      {/* Advertencia de integridad de datos */}
+      <DataIntegrityWarning />
 
       {/* Estado sin conexión */}
       {!isOnline && <OfflineWarning />}

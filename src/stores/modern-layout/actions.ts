@@ -11,7 +11,7 @@ export const createModernLayoutNavigationActions = (
     set(() => ({ activeTab: tab }));
   },
 
-  navigateTo: (tab: ModernNavItem) => {
+  navigateTo: (tab: ModernNavItem, params?: Record<string, any>) => {
     const { navigationHistory } = get();
     const newHistory = [...navigationHistory, tab];
 
@@ -19,6 +19,7 @@ export const createModernLayoutNavigationActions = (
       activeTab: tab,
       navigationHistory: newHistory,
       canGoBack: newHistory.length > 1,
+      navigationParams: params || {},
     }));
   },
 
@@ -33,6 +34,7 @@ export const createModernLayoutNavigationActions = (
         activeTab: previousTab,
         navigationHistory: newHistory,
         canGoBack: newHistory.length > 1,
+        navigationParams: {},
       }));
 
       return true;
@@ -46,6 +48,7 @@ export const createModernLayoutNavigationActions = (
     set(() => ({
       navigationHistory: [activeTab],
       canGoBack: false,
+      navigationParams: {},
     }));
   },
 });
@@ -92,6 +95,14 @@ export const createModernLayoutConfigActions = (
 export const createModernLayoutUtilityActions = (
   set: (fn: (state: ModernLayoutStore) => Partial<ModernLayoutStore>) => void,
 ) => ({
+  setNavigationParams: (params: Record<string, any>) => {
+    set(() => ({ navigationParams: params }));
+  },
+
+  clearNavigationParams: () => {
+    set(() => ({ navigationParams: {} }));
+  },
+
   reset: () => {
     set(() => ({
       activeTab: 'home',
@@ -103,6 +114,7 @@ export const createModernLayoutUtilityActions = (
       subtitle: undefined,
       showBackButton: false,
       canGoBack: false,
+      navigationParams: {},
     }));
   },
 });

@@ -42,10 +42,10 @@ export const EXPORT_INFO = {
 };
 
 export const EXPORT_INCLUDES = [
-  'Todos tus ejercicios y categorías',
-  'Registros completos de entrenamientos',
-  'Análisis de volumen por ejercicio y categoría',
-  'Estadísticas semanales y mensuales',
-  'Métricas de progreso y tendencias',
-  'Récords personales y recomendaciones',
+  'Días de la semana que se entrenan con sus ejercicios y volúmenes',
+  'Ejercicios con peso por sesión (evolución) y volumen total',
+  'Porcentajes por grupo muscular definidos y realmente hechos',
+  'Balance General de Rendimiento',
+  'Análisis de consistencia y progreso',
+  'Recomendaciones personalizadas de mejora',
 ];

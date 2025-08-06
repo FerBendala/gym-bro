@@ -23,7 +23,7 @@ export const AdminContent: React.FC<AdminContentProps> = ({
   const setPreviewUrl = useAdminStore((state) => state.setPreviewUrl);
 
   const content = (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4 min-w-0 overflow-hidden">
       {/* Tab: Ejercicios Existentes */}
       {activeTab === 'exercises' && (
         <ExerciseList />
@@ -46,7 +46,7 @@ export const AdminContent: React.FC<AdminContentProps> = ({
 
   if (isModal) {
     return (
-      <div className="overflow-y-auto max-h-[calc(95vh-200px)] p-4 space-y-4">
+      <div className="overflow-y-auto max-h-[calc(95vh-200px)] p-3 sm:p-4 space-y-3 sm:space-y-4 min-w-0 overflow-hidden">
         {content}
       </div>
     );
@@ -54,7 +54,7 @@ export const AdminContent: React.FC<AdminContentProps> = ({
 
   // Para modo página completa, envolver en un contenedor apropiado
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-3 sm:p-4 space-y-3 sm:space-y-4 min-w-0 overflow-hidden">
       {content}
     </div>
   );

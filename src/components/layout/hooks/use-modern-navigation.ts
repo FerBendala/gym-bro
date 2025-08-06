@@ -1,4 +1,4 @@
-import { useActiveTab, useCanGoBack, useClearHistory, useGoBack, useNavigateTo, useSetActiveTab } from '@/stores/modern-layout';
+import { useActiveTab, useCanGoBack, useClearHistory, useClearNavigationParams, useGoBack, useNavigateTo, useSetActiveTab } from '@/stores/modern-layout';
 
 export const useModernNavigation = () => {
   const activeTab = useActiveTab();
@@ -7,6 +7,7 @@ export const useModernNavigation = () => {
   const navigateTo = useNavigateTo();
   const goBack = useGoBack();
   const clearHistory = useClearHistory();
+  const clearNavigationParams = useClearNavigationParams();
 
   return {
     activeTab,
@@ -15,5 +16,6 @@ export const useModernNavigation = () => {
     canGoBack,
     setActiveTab,
     clearHistory,
+    clearNavigationParams,
   };
 };

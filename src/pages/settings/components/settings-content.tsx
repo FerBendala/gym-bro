@@ -7,7 +7,6 @@ import { ComingSoonCard } from './coming-soon-card';
 import { SectionHeader } from './section-header';
 
 import { DataExport } from '@/components/data-export';
-import { AdminPanel } from '@/pages/admin-panel';
 import { VolumeSettings } from '@/pages/volume-settings';
 
 interface SettingsContentProps {
@@ -17,14 +16,6 @@ interface SettingsContentProps {
 
 export const SettingsContent: React.FC<SettingsContentProps> = ({ activeSection, onBack }) => {
   switch (activeSection) {
-    case 'admin':
-      return (
-        <div>
-          <SectionHeader title="Administración de Ejercicios" onBack={onBack} />
-          <AdminPanel isModal={false} onClose={onBack} />
-        </div>
-      );
-
     case 'volume':
       return <VolumeSettings onBack={onBack} />;
 

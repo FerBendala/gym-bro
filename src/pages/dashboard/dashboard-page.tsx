@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import {
   BalanceTab,
@@ -17,6 +17,7 @@ import { DashboardTab } from './types';
 import { Page } from '@/components/layout';
 import { LoadingSpinner } from '@/components/loading-spinner';
 import { OfflineWarning } from '@/components/offline-warning';
+import { useNavigationParams } from '@/stores/modern-layout';
 
 /**
  * Dashboard como página completa sin modal
@@ -24,7 +25,21 @@ import { OfflineWarning } from '@/components/offline-warning';
  */
 export const DashboardPage: React.FC = () => {
   const { workoutRecords, loading, isOnline } = useDashboardData();
-  const [activeTab, setActiveTab] = useState<DashboardTab>(DEFAULT_DASHBOARD_TAB);
+  const navigationParams = useNavigationParams();
+
+  // Determinar el tab inicial basado en los parámetros de navegación
+  const initialTab = useMemo<DashboardTab>(() => {
+    return navigationParams.filteredExercise ? 'exercises' : DEFAULT_DASHBOARD_TAB;
+  }, [navigationParams.filteredExercise]);
+
+  const [activeTab, setActiveTab] = useState<DashboardTab>(initialTab);
+
+  // Actualizar el tab activo cuando cambien los parámetros de navegación
+  useEffect(() => {
+    if (navigationParams.filteredExercise) {
+      setActiveTab('exercises');
+    }
+  }, [navigationParams.filteredExercise]);
 
   if (loading) {
     return (

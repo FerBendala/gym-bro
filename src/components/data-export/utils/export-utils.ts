@@ -46,7 +46,22 @@ export const getExportData = async (): Promise<{
       return null;
     }
 
-    return { exercises, workoutRecords };
+    // Crear un mapa de ejercicios por ID para búsqueda eficiente
+    const exercisesMap = new Map<string, Exercise>();
+    exercises.forEach(exercise => {
+      exercisesMap.set(exercise.id, exercise);
+    });
+
+    // Poblar el campo exercise en cada WorkoutRecord
+    const workoutRecordsWithExercises = workoutRecords.map(record => ({
+      ...record,
+      exercise: exercisesMap.get(record.exerciseId) || undefined,
+    }));
+
+    return {
+      exercises,
+      workoutRecords: workoutRecordsWithExercises
+    };
   } catch (error) {
     logger.error('Error obteniendo datos para exportación:', error as Error);
     return null;

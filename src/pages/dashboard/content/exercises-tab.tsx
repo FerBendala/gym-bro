@@ -21,6 +21,8 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
     categoriesWithCount,
     selectedCategory,
     setSelectedCategory,
+    searchTerm,
+    setSearchTerm,
     allExercises,
     unknownRecords,
   } = useExercisesData(records);
@@ -52,6 +54,8 @@ export const ExercisesTab: React.FC<ExercisesTabProps> = ({ records }) => {
         selectedCategory={selectedCategory}
         categoriesWithCount={categoriesWithCount}
         records={records}
+        searchTerm={searchTerm}
+        onSearchChange={setSearchTerm}
       />
     </div>
   );

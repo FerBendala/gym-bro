@@ -1,14 +1,8 @@
-import { Bell, Database, Download, Info, User } from 'lucide-react';
+import { Bell, Download, Info, User } from 'lucide-react';
 
 import { SettingsItem } from './types';
 
 export const SETTINGS_ITEMS: SettingsItem[] = [
-  {
-    id: 'admin',
-    label: 'Administración de Ejercicios',
-    icon: Database,
-    description: 'Gestionar ejercicios y asignaciones por día',
-  },
   {
     id: 'volume',
     label: 'Configuración de Volumen',

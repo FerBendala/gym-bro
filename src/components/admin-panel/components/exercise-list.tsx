@@ -19,7 +19,7 @@ const QuickSearch: React.FC<{
   resultsCount: number;
 }> = ({ searchTerm, onSearchChange, resultsCount }) => {
   return (
-    <div className="relative">
+    <div className="relative w-full">
       <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
         <Search className="h-4 w-4 text-gray-400" />
       </div>
@@ -82,14 +82,14 @@ export const ExerciseList: React.FC = () => {
   }, [categoryFilteredExercises, searchTerm]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4 min-w-0">
       {/* Header compacto con categorías y búsqueda */}
-      <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
-        <div className="flex items-center space-x-3">
-          <h3 className="text-lg font-semibold text-white">Ejercicios</h3>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-gray-800/50 rounded-lg p-3 gap-3 sm:gap-0">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+          <h3 className="text-base sm:text-lg font-semibold text-white">Ejercicios</h3>
 
           {/* Tabs de categorías compactos */}
-          <div className="flex bg-gray-700/50 rounded-lg p-1">
+          <div className="flex bg-gray-700/50 rounded-lg p-1 overflow-x-auto">
             {categoriesWithCount.map((category) => {
               const isActive = selectedCategory === category.id;
               return (
@@ -97,7 +97,7 @@ export const ExerciseList: React.FC = () => {
                   key={category.id}
                   onClick={() => setSelectedCategory(category.id)}
                   disabled={!isOnline}
-                  className={`px-2 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap flex items-center space-x-1 ${isActive
+                  className={`px-2 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap flex items-center space-x-1 flex-shrink-0 ${isActive
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-gray-600'
                     }`}
@@ -116,7 +116,7 @@ export const ExerciseList: React.FC = () => {
         </div>
 
         {/* Contador de resultados */}
-        <div className="text-xs text-gray-500">
+        <div className="text-xs text-gray-500 self-end sm:self-auto">
           {filteredExercises.length} de {exercises.length}
         </div>
       </div>
@@ -131,9 +131,9 @@ export const ExerciseList: React.FC = () => {
       )}
 
       {/* Lista de ejercicios */}
-      <div className="space-y-2">
+      <div className="space-y-2 min-w-0 overflow-hidden">
         {exercises.length === 0 ? (
-          <div className="bg-gray-800/30 rounded-lg p-6 text-center border border-gray-700/30">
+          <div className="bg-gray-800/30 rounded-lg p-4 sm:p-6 text-center border border-gray-700/30">
             <div className="text-gray-400 text-sm">
               {isOnline
                 ? 'No hay ejercicios creados aún'
@@ -142,7 +142,7 @@ export const ExerciseList: React.FC = () => {
             </div>
           </div>
         ) : filteredExercises.length === 0 ? (
-          <div className="bg-gray-800/30 rounded-lg p-6 text-center border border-gray-700/30">
+          <div className="bg-gray-800/30 rounded-lg p-4 sm:p-6 text-center border border-gray-700/30">
             <div className="text-gray-400 text-sm">
               {searchTerm ? (
                 <>
@@ -158,7 +158,7 @@ export const ExerciseList: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="grid gap-2">
+          <div className="grid gap-2 min-w-0 overflow-hidden">
             {filteredExercises.map((exercise) => (
               <ExerciseItem
                 key={exercise.id}

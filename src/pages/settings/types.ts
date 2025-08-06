@@ -1,4 +1,4 @@
-export type SettingsSection = 'main' | 'admin' | 'export' | 'profile' | 'notifications' | 'about' | 'volume';
+export type SettingsSection = 'main' | 'export' | 'profile' | 'notifications' | 'about' | 'volume';
 
 export interface SettingsItem {
   id: SettingsSection;

@@ -56,11 +56,13 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
   };
 
   return (
-    <div className="bg-gray-800/50 hover:bg-gray-800/70 transition-colors rounded-lg p-3 border border-gray-700/30">
-      <div className="flex items-center justify-between">
+    <div className="bg-gray-800/50 hover:bg-gray-800/70 transition-colors rounded-lg p-2.5 sm:p-3 border border-gray-700/30 min-w-0">
+      <div className="flex items-center justify-between min-w-0">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2">
-            <h4 className="text-sm font-medium text-white truncate">{exercise.name}</h4>
+          <div className="flex items-center space-x-2 min-w-0">
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <h4 className="text-sm font-medium text-white truncate">{exercise.name}</h4>
+            </div>
             {exercise.url && (
               <button
                 onClick={() => onPreviewUrl(exercise.url!)}
@@ -74,8 +76,8 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
 
           {/* Mostrar porcentajes de categorías si están disponibles */}
           {exercise.categoryPercentages && Object.keys(exercise.categoryPercentages).length > 0 && (
-            <div className="mt-1 flex items-center gap-1">
-              <div className="flex flex-wrap gap-1">
+            <div className="mt-1 flex items-center gap-1 min-w-0">
+              <div className="flex flex-wrap gap-1 min-w-0">
                 {Object.entries(exercise.categoryPercentages)
                   .sort(([, a], [, b]) => b - a) // Ordenar de mayor a menor
                   .slice(0, 2)
@@ -84,12 +86,14 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
                       key={category}
                       className="text-xs text-green-300 bg-green-500/15 px-1 py-0.5 rounded-full font-medium border border-green-500/20 flex items-center gap-1"
                     >
-                      {category}: {percentage}
-                      <Percent className="w-3 h-3 text-green-400" />
+                      <span className="hidden sm:inline">{category}:</span>
+                      <span className="sm:hidden">{category}</span>
+                      {percentage}
+                      <Percent className="w-3 h-3 text-green-400 flex-shrink-0" />
                     </span>
                   ))}
                 {Object.keys(exercise.categoryPercentages).length > 2 && (
-                  <span className="text-xs text-gray-500">
+                  <span className="text-xs text-gray-500 flex-shrink-0">
                     +{Object.keys(exercise.categoryPercentages).length - 2} más
                   </span>
                 )}
@@ -98,7 +102,7 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
           )}
 
           {exercise.description && (
-            <p className="text-xs text-gray-500 mt-1 line-clamp-1">{exercise.description}</p>
+            <p className="text-xs text-gray-500 mt-1 line-clamp-1 hidden sm:block">{exercise.description}</p>
           )}
         </div>
 

@@ -26,11 +26,11 @@ const AssignmentStats: React.FC = () => {
   const daysWithAssignments = stats.filter(stat => stat.count > 0).length;
 
   return (
-    <div className="bg-gray-800/30 rounded-lg p-3 border border-gray-700/30">
+    <div className="bg-gray-800/30 rounded-lg p-2.5 sm:p-3 border border-gray-700/30">
       <div className="flex items-center justify-between text-xs">
-        <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
           <span className="text-gray-400">Total: <span className="text-white font-medium">{totalAssignments}</span></span>
-          <span className="text-gray-400">Días: <span className="text-white font-medium">{daysWithAssignments}</span></span>
+          <span className="text-gray-400 hidden sm:inline">Días: <span className="text-white font-medium">{daysWithAssignments}</span></span>
         </div>
 
         {/* Mini indicadores por día */}
@@ -115,17 +115,17 @@ export const ExerciseAssignments: React.FC = () => {
   }, [allAssignments, searchTerm]);
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3 sm:space-y-4">
       {/* Estadísticas compactas */}
       <AssignmentStats />
 
       {/* Header compacto con selector de días y botón de agregar */}
-      <div className="flex items-center justify-between bg-gray-800/50 rounded-lg p-3">
-        <div className="flex items-center space-x-3">
-          <h3 className="text-lg font-semibold text-white">Asignaciones</h3>
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between bg-gray-800/50 rounded-lg p-3 gap-3 sm:gap-0">
+        <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-3">
+          <h3 className="text-base sm:text-lg font-semibold text-white">Asignaciones</h3>
 
           {/* Selector de días compacto */}
-          <div className="flex bg-gray-700/50 rounded-lg p-1">
+          <div className="flex bg-gray-700/50 rounded-lg p-1 overflow-x-auto">
             {DAYS.map((day) => {
               const isActive = selectedDay === day;
               return (
@@ -133,7 +133,7 @@ export const ExerciseAssignments: React.FC = () => {
                   key={day}
                   onClick={() => setSelectedDay(day)}
                   disabled={!isOnline}
-                  className={`px-2 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap ${isActive
+                  className={`px-2 py-1 text-xs font-medium rounded transition-colors whitespace-nowrap flex-shrink-0 ${isActive
                     ? 'bg-blue-600 text-white'
                     : 'text-gray-400 hover:text-white hover:bg-gray-600'
                     }`}
@@ -149,7 +149,7 @@ export const ExerciseAssignments: React.FC = () => {
         <button
           onClick={() => setShowForm(!showForm)}
           disabled={!isOnline}
-          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all ${showForm
+          className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all self-end sm:self-auto ${showForm
             ? 'bg-gray-600 text-gray-300'
             : 'bg-blue-600 text-white hover:bg-blue-700'
             }`}
@@ -160,7 +160,7 @@ export const ExerciseAssignments: React.FC = () => {
 
       {/* Formulario colapsable */}
       {showForm && (
-        <div className="bg-gray-800/30 rounded-lg p-4 border border-gray-700/50">
+        <div className="bg-gray-800/30 rounded-lg p-3 sm:p-4 border border-gray-700/50">
           <AssignmentForm
             selectedDay={selectedDay}
             onSuccess={() => setShowForm(false)}
@@ -191,7 +191,7 @@ export const ExerciseAssignments: React.FC = () => {
         </div>
 
         {filteredAssignments.length === 0 ? (
-          <div className="bg-gray-800/30 rounded-lg p-6 text-center border border-gray-700/30">
+          <div className="bg-gray-800/30 rounded-lg p-4 sm:p-6 text-center border border-gray-700/30">
             <div className="text-gray-400 text-sm">
               {searchTerm ? (
                 <>

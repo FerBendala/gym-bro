@@ -1,5 +1,5 @@
 /**
- * Interfaz para los datos de exportación completos
+ * Interfaz para los datos de exportación enfocados en análisis específico
  */
 export interface ExportData {
   metadata: {
@@ -13,124 +13,135 @@ export interface ExportData {
     };
     appVersion: string;
   };
-  exercises: ExerciseExportData[];
-  workoutRecords: WorkoutRecordExportData[];
-  exercisesByDay: ExercisesByDayData[];
-  volumeAnalysis: VolumeAnalysisData;
-  weeklyData: WeeklyVolumeData[];
-  categoryMetrics: CategoryMetricsExportData[];
-  monthlyStats: MonthlyStatsData[];
-  progressSummary: ProgressSummaryData;
+  // 1. Días de la semana que se entrenan con sus ejercicios y volúmenes
+  trainingDays: TrainingDayData[];
+  // 2. Ejercicios con peso por sesión (evolución) y volumen total
+  exercisesEvolution: ExerciseEvolutionData[];
+  // 3. Porcentajes por grupo muscular definidos y realmente hechos
+  muscleGroupAnalysis: MuscleGroupAnalysisData;
+  // 4. Balance General de Rendimiento
+  performanceBalance: PerformanceBalanceData;
 }
 
-export interface ExerciseExportData {
-  id: string;
-  name: string;
-  categories: string[];
-  description?: string;
-  url?: string;
+/**
+ * 1. Días de la semana que se entrenan con sus ejercicios y volúmenes
+ */
+export interface TrainingDayData {
+  dayOfWeek: string;
+  dayName: string; // Nombre en español
   totalWorkouts: number;
   totalVolume: number;
-  averageWeight: number;
-  maxWeight: number;
-  lastWorkout: string;
-  progressPercentage: number;
-}
-
-export interface WorkoutRecordExportData {
-  id: string;
-  exerciseName: string;
-  exerciseCategories: string[];
-  weight: number;
-  reps: number;
-  sets: number;
-  volume: number;
-  date: string;
-  dayOfWeek: string;
-  estimated1RM: number;
-  individualSets?: { weight: number; reps: number; volume: number }[];
-}
-
-export interface ExercisesByDayData {
-  dayOfWeek: string;
   exercises: {
     exerciseName: string;
     categories: string[];
-    frequency: number;
-    averageVolume: number;
     totalVolume: number;
+    workoutCount: number;
+    averageWeight: number;
+    maxWeight: number;
+    lastWorkout: string;
   }[];
-  totalVolume: number;
-  averageVolume: number;
-  workoutCount: number;
-}
-
-export interface VolumeAnalysisData {
-  totalVolume: number;
-  volumeByCategory: {
-    category: string;
-    volume: number;
-    percentage: number;
-    averagePerWorkout: number;
-  }[];
-  volumeByExercise: {
-    exerciseName: string;
-    volume: number;
-    percentage: number;
-    averagePerWorkout: number;
-    categories: string[];
-  }[];
-}
-
-export interface WeeklyVolumeData {
-  weekStart: string;
-  weekEnd: string;
-  totalVolume: number;
-  workoutCount: number;
-  averageVolumePerWorkout: number;
-  uniqueExercises: number;
-  categoryBreakdown: {
-    category: string;
+  muscleGroups: {
+    group: string;
     volume: number;
     percentage: number;
   }[];
 }
 
-export interface CategoryMetricsExportData {
-  category: string;
+/**
+ * 2. Ejercicios con peso por sesión (evolución) y volumen total
+ */
+export interface ExerciseEvolutionData {
+  exerciseName: string;
+  categories: string[];
   totalVolume: number;
-  percentage: number;
-  workouts: number;
-  averageWeight: number;
-  maxWeight: number;
-  weeklyFrequency: number;
-  trend: string;
-  progressPercentage: number;
-  recommendations: string[];
-}
-
-export interface MonthlyStatsData {
-  month: string;
-  year: number;
-  totalVolume: number;
-  workoutCount: number;
-  uniqueExercises: number;
-  averageVolumePerWorkout: number;
-  strongestCategory: string;
-  improvementAreas: string[];
-}
-
-export interface ProgressSummaryData {
-  overallProgress: number;
-  strengthGains: number;
-  volumeIncrease: number;
-  consistencyScore: number;
-  topPerformingCategories: string[];
-  areasForImprovement: string[];
-  personalRecords: {
-    exerciseName: string;
-    weight: number;
+  totalWorkouts: number;
+  sessions: {
     date: string;
+    weight: number;
+    reps: number;
+    sets: number;
+    volume: number;
     estimated1RM: number;
+    weekNumber: number;
   }[];
+  evolution: {
+    firstWeight: number;
+    lastWeight: number;
+    maxWeight: number;
+    progressPercentage: number;
+    averageWeight: number;
+    weightProgression: {
+      week: number;
+      averageWeight: number;
+      maxWeight: number;
+    }[];
+  };
+}
+
+/**
+ * 3. Porcentajes por grupo muscular definidos y realmente hechos
+ */
+export interface MuscleGroupAnalysisData {
+  totalVolume: number;
+  definedPercentages: {
+    group: string;
+    targetPercentage: number;
+  }[];
+  actualPercentages: {
+    group: string;
+    actualVolume: number;
+    actualPercentage: number;
+    workoutCount: number;
+  }[];
+  comparison: {
+    group: string;
+    targetPercentage: number;
+    actualPercentage: number;
+    difference: number;
+    status: 'above' | 'below' | 'balanced';
+  }[];
+  recommendations: {
+    group: string;
+    message: string;
+    priority: 'high' | 'medium' | 'low';
+  }[];
+}
+
+/**
+ * 4. Balance General de Rendimiento
+ */
+export interface PerformanceBalanceData {
+  overall: {
+    totalVolume: number;
+    totalWorkouts: number;
+    averageVolumePerWorkout: number;
+    consistencyScore: number;
+    strengthProgress: number;
+    volumeProgress: number;
+  };
+  strengthMetrics: {
+    totalExercises: number;
+    exercisesWithProgress: number;
+    averageProgressPercentage: number;
+    topImprovements: {
+      exerciseName: string;
+      progressPercentage: number;
+      weightGain: number;
+    }[];
+  };
+  volumeMetrics: {
+    weeklyAverage: number;
+    monthlyTrend: 'increasing' | 'decreasing' | 'stable';
+    volumeDistribution: {
+      category: string;
+      volume: number;
+      percentage: number;
+    }[];
+  };
+  balanceScore: {
+    score: number; // 0-100
+    level: 'excellent' | 'good' | 'fair' | 'needs_improvement';
+    description: string;
+    recommendations: string[];
+  };
 }

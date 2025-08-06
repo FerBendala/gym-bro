@@ -105,3 +105,9 @@ export * from './week-records.utils';
 export * from './workout-habits';
 export * from './workout-streaks';
 export * from './workout-utils';
+
+// Cleanup utilities
+export * from './clean-orphaned-records';
+
+// Test utilities
+export * from './test-category-mapping';

@@ -1,7 +1,8 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import { KNOWN_EXERCISE_DISTRIBUTIONS } from '@/constants/exercise.constants';
 import type { WorkoutRecord } from '@/interfaces';
+import { useNavigationParams } from '@/stores/modern-layout';
 import { calculateExerciseProgress } from '@/utils';
 
 interface ExerciseAnalysis {
@@ -34,7 +35,16 @@ interface GlobalMetrics {
 }
 
 export const useExercisesData = (records: WorkoutRecord[]) => {
+  const navigationParams = useNavigationParams();
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Actualizar searchTerm cuando cambien los parámetros de navegación
+  useEffect(() => {
+    if (navigationParams.filteredExercise) {
+      setSearchTerm(navigationParams.filteredExercise);
+    }
+  }, [navigationParams.filteredExercise]);
 
   // Función para obtener la categoría dominante de un ejercicio
   const getDominantCategory = (exerciseName: string): string => {
@@ -43,7 +53,7 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
       // Encontrar la categoría con mayor porcentaje
       const dominantCategory = Object.entries(distribution).reduce((max, [category, percentage]) =>
         percentage > max.percentage ? { category, percentage } : max,
-      { category: 'Sin categoría', percentage: 0 },
+        { category: 'Sin categoría', percentage: 0 },
       );
       return dominantCategory.category;
     }
@@ -152,6 +162,8 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
     categoriesWithCount,
     selectedCategory,
     setSelectedCategory,
+    searchTerm,
+    setSearchTerm,
     allExercises,
     unknownRecords,
     globalMetrics,

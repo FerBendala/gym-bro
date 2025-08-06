@@ -23,6 +23,7 @@ export const useModernLayoutStore = create<ModernLayoutStore>()(
       subtitle: undefined,
       showBackButton: false,
       canGoBack: false,
+      navigationParams: {},
 
       // Combinar todas las acciones
       ...createModernLayoutNavigationActions(set, get),

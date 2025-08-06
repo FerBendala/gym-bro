@@ -108,8 +108,8 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
 
   return (
     <Card>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <form onSubmit={handleSubmit} className="space-y-3 sm:space-y-4">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-3 sm:gap-4">
           <Input
             label="Nombre del ejercicio"
             disabled={!isOnline}
@@ -207,7 +207,7 @@ export const ExerciseForm: React.FC<ExerciseFormProps> = ({
           </div>
         )}
 
-        <div className="flex space-x-2">
+        <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
           <Button type="submit" loading={false} disabled={!isOnline} leftIcon={isEditing ? <Save className="w-4 h-4 mr-2" /> : <Plus className="w-4 h-4 mr-2" />}>
             {isOnline ? 'Crear Ejercicio' : 'Sin conexión'}
           </Button>
