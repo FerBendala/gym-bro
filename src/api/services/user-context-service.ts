@@ -26,6 +26,7 @@ export class UserContextService {
       totalExercises: number;
       totalWorkouts: number;
       recentWorkouts: WorkoutRecord[];
+      todayWorkouts: WorkoutRecord[];
       exerciseCategories: string[];
       averageWeight: number;
       mostTrainedExercise: string | null;
@@ -107,6 +108,7 @@ export class UserContextService {
     totalExercises: number;
     totalWorkouts: number;
     recentWorkouts: WorkoutRecord[];
+    todayWorkouts: WorkoutRecord[];
     exerciseCategories: string[];
     averageWeight: number;
     mostTrainedExercise: string | null;
@@ -117,6 +119,14 @@ export class UserContextService {
     // Obtener entrenamientos recientes (últimos 30 días)
     const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
     const recentWorkouts = workoutRecords.filter(record => record.date >= thirtyDaysAgo);
+
+    // Obtener entrenamientos de hoy
+    const today = new Date();
+    const todayStart = new Date(today.getFullYear(), today.getMonth(), today.getDate()).getTime();
+    const todayEnd = todayStart + (24 * 60 * 60 * 1000);
+    const todayWorkouts = workoutRecords.filter(record => 
+      record.date >= todayStart && record.date < todayEnd
+    );
 
     // Categorías únicas de ejercicios
     const exerciseCategories = [...new Set(exercises.map(ex => ex.category))];
@@ -143,6 +153,7 @@ export class UserContextService {
       totalExercises,
       totalWorkouts,
       recentWorkouts,
+      todayWorkouts,
       exerciseCategories,
       averageWeight,
       mostTrainedExercise,
@@ -164,6 +175,7 @@ CONTEXTO DEL USUARIO:
 - Total de ejercicios: ${statistics.totalExercises}
 - Total de entrenamientos: ${statistics.totalWorkouts}
 - Entrenamientos recientes (30 días): ${statistics.recentWorkouts.length}
+- Entrenamientos de HOY: ${statistics.todayWorkouts.length}
 - Peso promedio: ${statistics.averageWeight.toFixed(1)} kg
 - Ejercicio más entrenado: ${statistics.mostTrainedExercise || 'N/A'}
 
@@ -183,7 +195,16 @@ ${Object.entries(assignments.reduce((acc, assignment) => {
 🎯 CATEGORÍAS DE EJERCICIOS:
 ${statistics.exerciseCategories.join(', ')}
 
-📈 ÚLTIMOS ENTRENAMIENTOS:
+✅ ENTRENAMIENTOS DE HOY (${statistics.todayWorkouts.length}):
+${statistics.todayWorkouts.length > 0 
+  ? statistics.todayWorkouts.map(record => {
+      const exercise = exercises.find(ex => ex.id === record.exerciseId);
+      return `- ${exercise?.name || 'Ejercicio desconocido'}: ${record.weight}kg x ${record.reps} reps (${record.sets} sets)`;
+    }).join('\n')
+  : 'No hay entrenamientos registrados hoy'
+}
+
+📈 ÚLTIMOS ENTRENAMIENTOS (últimos 5):
 ${statistics.recentWorkouts.slice(-5).map(record => {
       const exercise = exercises.find(ex => ex.id === record.exerciseId);
       return `- ${exercise?.name || 'Ejercicio desconocido'}: ${record.weight}kg x ${record.reps} reps (${record.sets} sets)`;
