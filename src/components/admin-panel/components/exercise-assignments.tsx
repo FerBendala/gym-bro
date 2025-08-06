@@ -209,7 +209,7 @@ export const ExerciseAssignments: React.FC = () => {
             </div>
           </div>
         ) : (
-          <div className="grid gap-2">
+          <div className="flex flex-col gap-2">
             {filteredAssignments.map((assignment) => (
               <AssignmentItem
                 key={assignment.id}

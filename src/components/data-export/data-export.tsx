@@ -16,7 +16,7 @@ import { cn } from '@/utils';
  * Soporta exportación en formato JSON, CSV y Excel
  */
 export const DataExport: React.FC<DataExportProps> = ({ className }) => {
-  const { loading, exportingFormat, dataStats, isOnline, handleExport } = useDataExport();
+  const { loading, exportingFormat, isOnline, handleExport } = useDataExport();
 
   return (
     <div className={cn('space-y-6', className)}>

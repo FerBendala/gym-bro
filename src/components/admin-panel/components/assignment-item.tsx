@@ -50,16 +50,16 @@ export const AssignmentItem: React.FC<AssignmentItemProps> = ({
 
   return (
     <div className="bg-gray-800/50 hover:bg-gray-800/70 transition-colors rounded-lg p-3 border border-gray-700/30">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center space-x-2">
-            <h4 className="text-sm font-medium text-white truncate">
+          <div className="flex items-center gap-2 min-w-0">
+            <h4 className="text-sm font-medium text-white truncate flex-1 min-w-0">
               {assignment.exercise?.name || 'Ejercicio no encontrado'}
             </h4>
             {assignment.exercise?.url && (
               <button
                 onClick={() => onPreviewUrl(assignment.exercise!.url!)}
-                className="text-blue-400 hover:text-blue-300 transition-colors"
+                className="text-blue-400 hover:text-blue-300 transition-colors flex-shrink-0"
                 title="Ver URL"
               >
                 <ExternalLink className="w-3 h-3" />
