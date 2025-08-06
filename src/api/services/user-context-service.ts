@@ -1,4 +1,5 @@
 import { collection, getDocs, query, where } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
 
 import { db } from '@/api/firebase';
 import { handleFirebaseError } from './error-handler';
@@ -32,12 +33,27 @@ export class UserContextService {
     };
   }> {
     try {
+      console.log('🔍 Obteniendo contexto del usuario...');
+      
+      // Verificar autenticación
+      const auth = getAuth();
+      const currentUser = auth.currentUser;
+      
+      if (!currentUser) {
+        console.log('⚠️ Usuario no autenticado, usando datos de ejemplo');
+        return this.getDefaultContext();
+      }
+      
+      console.log('✅ Usuario autenticado:', currentUser.uid);
+      
       // Obtener todos los datos en paralelo
       const [exercises, assignments, workoutRecords] = await Promise.all([
         this.getExercises(),
         this.getAssignments(),
         this.getWorkoutRecords(),
       ]);
+
+      console.log(`📊 Datos obtenidos: ${exercises.length} ejercicios, ${assignments.length} asignaciones, ${workoutRecords.length} entrenamientos`);
 
       // Calcular estadísticas
       const statistics = this.calculateStatistics(exercises, workoutRecords);
@@ -142,6 +158,26 @@ export class UserContextService {
       exerciseCategories,
       averageWeight,
       mostTrainedExercise,
+    };
+  }
+
+  /**
+   * Obtiene contexto por defecto cuando el usuario no está autenticado
+   */
+  private static getDefaultContext(): Awaited<ReturnType<typeof this.getUserContext>> {
+    console.log('📋 Generando contexto por defecto');
+    return {
+      exercises: [],
+      assignments: [],
+      workoutRecords: [],
+      statistics: {
+        totalExercises: 0,
+        totalWorkouts: 0,
+        recentWorkouts: [],
+        exerciseCategories: [],
+        averageWeight: 0,
+        mostTrainedExercise: null,
+      },
     };
   }
 

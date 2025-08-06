@@ -71,6 +71,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
 
     try {
       console.log('💬 Enviando mensaje:', message);
+      console.log('📊 Contexto del usuario:', userContext);
 
       // Determinar la URL del API según el entorno
       const isDevelopment = import.meta.env.DEV;

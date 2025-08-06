@@ -97,6 +97,7 @@ async def chat(request: ChatRequest):
     """Endpoint principal para chat con el modelo optimizado"""
     try:
         logger.info(f"Procesando mensaje: {request.message}")
+        logger.info(f"Contexto recibido: {request.context[:200] if request.context else 'Sin contexto'}...")
         
         # Prompt optimizado para respuestas completas y en español
         if request.context:
