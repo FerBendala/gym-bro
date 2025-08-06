@@ -1,10 +1,10 @@
-import { collection, getDocs, query, where } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
+import { collection, getDocs } from 'firebase/firestore';
 
 import { db } from '@/api/firebase';
-import { handleFirebaseError } from './error-handler';
 import type { Exercise, ExerciseAssignment, WorkoutRecord } from '@/interfaces';
 import { logger } from '@/utils';
+import { handleFirebaseError } from './error-handler';
 
 /**
  * Servicio para obtener el contexto completo del usuario
@@ -34,18 +34,18 @@ export class UserContextService {
   }> {
     try {
       console.log('🔍 Obteniendo contexto del usuario...');
-      
+
       // Verificar autenticación
       const auth = getAuth();
       const currentUser = auth.currentUser;
-      
+
       if (!currentUser) {
         console.log('⚠️ Usuario no autenticado, usando datos de ejemplo');
         return this.getDefaultContext();
       }
-      
+
       console.log('✅ Usuario autenticado:', currentUser.uid);
-      
+
       // Obtener todos los datos en paralelo
       const [exercises, assignments, workoutRecords] = await Promise.all([
         this.getExercises(),
@@ -147,7 +147,7 @@ export class UserContextService {
       return count > (max?.count || 0) ? { id, count } : max;
     }, null as { id: string; count: number } | null);
 
-    const mostTrainedExercise = mostTrainedExerciseId 
+    const mostTrainedExercise = mostTrainedExerciseId
       ? exercises.find(ex => ex.id === mostTrainedExerciseId.id)?.name || null
       : null;
 
@@ -201,23 +201,23 @@ CONTEXTO DEL USUARIO:
 ${exercises.map(ex => `- ${ex.name} (${ex.category})`).join('\n')}
 
 📅 ASIGNACIONES POR DÍA (${assignments.length}):
-${assignments.reduce((acc, assignment) => {
-  const day = assignment.dayOfWeek;
-  if (!acc[day]) acc[day] = [];
-  acc[day].push(assignment.exerciseId);
-  return acc;
-}, {} as Record<string, string[]>).map(([day, exerciseIds]) => 
-  `${day}: ${exerciseIds.length} ejercicios`
-).join('\n')}
+${Object.entries(assignments.reduce((acc, assignment) => {
+      const day = assignment.dayOfWeek;
+      if (!acc[day]) acc[day] = [];
+      acc[day].push(assignment.exerciseId);
+      return acc;
+    }, {} as Record<string, string[]>)).map(([day, exerciseIds]) =>
+      `${day}: ${exerciseIds.length} ejercicios`
+    ).join('\n')}
 
 🎯 CATEGORÍAS DE EJERCICIOS:
 ${statistics.exerciseCategories.join(', ')}
 
 📈 ÚLTIMOS ENTRENAMIENTOS:
 ${statistics.recentWorkouts.slice(-5).map(record => {
-  const exercise = exercises.find(ex => ex.id === record.exerciseId);
-  return `- ${exercise?.name || 'Ejercicio desconocido'}: ${record.weight}kg x ${record.reps} reps (${record.sets} sets)`;
-}).join('\n')}
+      const exercise = exercises.find(ex => ex.id === record.exerciseId);
+      return `- ${exercise?.name || 'Ejercicio desconocido'}: ${record.weight}kg x ${record.reps} reps (${record.sets} sets)`;
+    }).join('\n')}
 `;
 
     return summary;
