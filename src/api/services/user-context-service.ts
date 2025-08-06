@@ -1,4 +1,3 @@
-import { getAuth } from 'firebase/auth';
 import { collection, getDocs } from 'firebase/firestore';
 
 import { db } from '@/api/firebase';
@@ -33,18 +32,7 @@ export class UserContextService {
     };
   }> {
     try {
-      console.log('🔍 Obteniendo contexto del usuario...');
-
-      // Verificar autenticación
-      const auth = getAuth();
-      const currentUser = auth.currentUser;
-
-      if (!currentUser) {
-        console.log('⚠️ Usuario no autenticado, usando datos de ejemplo');
-        return this.getDefaultContext();
-      }
-
-      console.log('✅ Usuario autenticado:', currentUser.uid);
+      console.log('🔍 Obteniendo contexto de la aplicación...');
 
       // Obtener todos los datos en paralelo
       const [exercises, assignments, workoutRecords] = await Promise.all([
@@ -65,7 +53,7 @@ export class UserContextService {
         statistics,
       };
     } catch (error) {
-      logger.error('Error obteniendo contexto del usuario:', error as Error, undefined, 'USER_CONTEXT');
+      logger.error('Error obteniendo contexto de la aplicación:', error as Error, undefined, 'USER_CONTEXT');
       throw error;
     }
   }
@@ -161,25 +149,7 @@ export class UserContextService {
     };
   }
 
-  /**
-   * Obtiene contexto por defecto cuando el usuario no está autenticado
-   */
-  private static getDefaultContext(): Awaited<ReturnType<typeof this.getUserContext>> {
-    console.log('📋 Generando contexto por defecto');
-    return {
-      exercises: [],
-      assignments: [],
-      workoutRecords: [],
-      statistics: {
-        totalExercises: 0,
-        totalWorkouts: 0,
-        recentWorkouts: [],
-        exerciseCategories: [],
-        averageWeight: 0,
-        mostTrainedExercise: null,
-      },
-    };
-  }
+
 
   /**
    * Genera un resumen de contexto para el chatbot
