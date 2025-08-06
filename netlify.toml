@@ -19,6 +19,10 @@
   [functions.environment]
     PYTHON_VERSION = "3.9"
 
+# Plugin para instalar dependencias de funciones serverless
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"
+
 # Configuración de redirecciones
 [[redirects]]
   # Redirigir API calls a las funciones serverless
