@@ -1,5 +1,6 @@
-import { analyzeURL, type URLPreviewData } from '@/utils';
 import { useEffect, useState } from 'react';
+
+import { analyzeURL, logger, type URLPreviewData } from '@/utils';
 
 /**
  * Hook para manejar la lógica de URL preview
@@ -28,11 +29,11 @@ export const useURLPreview = (url: string) => {
         setPreviewData(data);
         setError(null);
       } catch (err) {
-        console.error('Error al analizar URL:', err);
+        logger.error('Error al analizar URL:', err as Error);
         setError('Error al analizar la URL');
         setPreviewData({
           type: 'default',
-          title: 'Error en la URL'
+          title: 'Error en la URL',
         });
       } finally {
         setIsLoading(false);
@@ -46,6 +47,6 @@ export const useURLPreview = (url: string) => {
     previewData,
     isLoading,
     error,
-    hasData: !!previewData && !isLoading && !error
+    hasData: !!previewData && !isLoading && !error,
   };
-}; 
+};

@@ -1,7 +1,9 @@
+import { addDoc, collection, deleteDoc, deleteField, doc, FieldValue, getDocs, updateDoc } from 'firebase/firestore';
+
 import { db } from '@/api/firebase';
 import { handleFirebaseError } from '@/api/services/error-handler';
 import type { Exercise } from '@/interfaces';
-import { addDoc, collection, deleteDoc, deleteField, doc, FieldValue, getDocs, updateDoc } from 'firebase/firestore';
+import { logger } from '@/utils';
 
 /**
  * Tipo para objetos que pueden tener campos undefined/null/empty
@@ -54,9 +56,8 @@ export class ExerciseService {
       const exercises = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Exercise));
       return exercises;
     } catch (error) {
-      console.error('🔥 ExerciseService.getAll - Error:', error);
-      handleFirebaseError(error, 'obtener ejercicios');
-      return []; // Fallback para evitar crashes
+      logger.error('ExerciseService.getAll - Error:', error as Error, { operation: 'getAll' }, 'API');
+      throw error;
     }
   }
 
@@ -104,4 +105,4 @@ export class ExerciseService {
 export const createExercise = ExerciseService.create;
 export const getExercises = ExerciseService.getAll;
 export const updateExercise = ExerciseService.update;
-export const deleteExercise = ExerciseService.delete; 
+export const deleteExercise = ExerciseService.delete;

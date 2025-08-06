@@ -1,7 +1,8 @@
+import type { AdminPanelHookState } from '../types';
+
 import { useAdminDataLoader } from '@/components/admin-panel/hooks';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
-import type { AdminPanelHookState } from '../types';
 
 /**
  * Hook principal para el panel de administración
@@ -24,6 +25,6 @@ export const useAdminPanel = (): AdminPanelHookState => {
     activeTab,
     previewUrl,
     setTab,
-    setPreviewUrl
+    setPreviewUrl,
   };
-}; 
+};

@@ -1,12 +1,15 @@
-import {
-  calculateWorkoutVolume,
-  formatRelativeTime,
-  formatVolumeToKg,
-  getVolumeColor
-} from '@/utils';
 import { Clock, Dumbbell, Target, Trash2, TrendingUp, Zap } from 'lucide-react';
 import React, { useState } from 'react';
+
 import type { WorkoutItemProps } from '../types';
+
+import {
+  calculateVolume,
+  formatRelativeTime,
+  formatVolumeToKg,
+  getVolumeAdjustmentColor,
+  logger,
+} from '@/utils';
 
 /**
  * Item individual de entrenamiento con diseño mejorado y atractivo
@@ -17,8 +20,8 @@ import type { WorkoutItemProps } from '../types';
 export const WorkoutItem: React.FC<WorkoutItemProps> = ({ record, onDelete }) => {
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const volume = calculateWorkoutVolume(record);
-  const volumeColor = getVolumeColor(volume);
+  const volume = calculateVolume(record);
+  const volumeColor = getVolumeAdjustmentColor(volume);
   const formattedVolume = formatVolumeToKg(volume);
   const relativeTime = formatRelativeTime(record.date);
 
@@ -34,7 +37,7 @@ export const WorkoutItem: React.FC<WorkoutItemProps> = ({ record, onDelete }) =>
     try {
       await onDelete(record.id);
     } catch (error) {
-      console.error('Error eliminando entrenamiento:', error);
+      logger.error('Error eliminando entrenamiento:', error as Error, { recordId: record.id }, 'WORKOUT_ITEM');
     } finally {
       setIsDeleting(false);
     }
@@ -67,7 +70,7 @@ export const WorkoutItem: React.FC<WorkoutItemProps> = ({ record, onDelete }) =>
 
         baseSets.push({
           weight: Math.max(0, record.weight + weightVariation),
-          reps: Math.max(1, record.reps + repsVariation)
+          reps: Math.max(1, record.reps + repsVariation),
         });
       }
       return baseSets;
@@ -96,9 +99,9 @@ export const WorkoutItem: React.FC<WorkoutItemProps> = ({ record, onDelete }) =>
                 <span className="hidden sm:inline">{relativeTime}</span>
                 <span className="sm:hidden">{relativeTime.replace('Hace ', '').replace(' minutos', 'min').replace(' horas', 'h')}</span>
               </span>
-              {record.exercise?.category && (
+              {record.exercise?.categories && (
                 <span className="text-xs text-blue-300 bg-blue-500/15 px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full font-medium border border-blue-500/20 shrink-0">
-                  {record.exercise.category}
+                  {record.exercise.categories.join(', ')}
                 </span>
               )}
               <span className="text-xs text-gray-500 capitalize font-medium shrink-0">
@@ -252,4 +255,4 @@ export const WorkoutItem: React.FC<WorkoutItemProps> = ({ record, onDelete }) =>
       </div>
     </div>
   );
-}; 
+};

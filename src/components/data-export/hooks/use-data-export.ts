@@ -1,3 +1,9 @@
+import { useEffect, useState } from 'react';
+
+import { EXPORT_INFO } from '../constants';
+import type { DataStats, ExportFormat } from '../types';
+import { getExportData, loadDataStats } from '../utils';
+
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
 import {
@@ -6,12 +12,9 @@ import {
   exportToExcel,
   exportToJSON,
   generateExportData,
-  generateFilename
+  generateFilename,
+  logger,
 } from '@/utils';
-import { useEffect, useState } from 'react';
-import { EXPORT_INFO } from '../constants';
-import type { DataStats, ExportFormat } from '../types';
-import { getExportData, loadDataStats } from '../utils';
 
 export const useDataExport = () => {
   const { showNotification } = useNotification();
@@ -90,7 +93,7 @@ export const useDataExport = () => {
           downloadFile(
             excelContent,
             filename,
-            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
           );
           showNotification(`Datos exportados como ${filename}`, 'success');
           break;
@@ -98,10 +101,10 @@ export const useDataExport = () => {
       }
 
     } catch (error: unknown) {
-      console.error('Error durante la exportación:', error);
+      logger.error('Error durante la exportación:', error as Error);
       showNotification(
-        error.message || 'Error al exportar los datos. Inténtalo de nuevo.',
-        'error'
+        (error as Error).message || 'Error al exportar los datos. Inténtalo de nuevo.',
+        'error',
       );
     } finally {
       setLoading(false);
@@ -114,6 +117,6 @@ export const useDataExport = () => {
     exportingFormat,
     dataStats,
     isOnline,
-    handleExport
+    handleExport,
   };
-}; 
+};

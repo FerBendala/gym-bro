@@ -1,7 +1,9 @@
+import React from 'react';
+
+import { PageProps } from '../types';
+
 import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils';
-import React from 'react';
-import { PageProps } from '../types';
 
 export const Page: React.FC<PageProps> = ({
   title,
@@ -10,7 +12,7 @@ export const Page: React.FC<PageProps> = ({
   headerActions,
   className,
   showBackButton = false,
-  onBackClick
+  onBackClick,
 }) => {
   return (
     <div className={cn('space-y-6', className)}>
@@ -24,7 +26,7 @@ export const Page: React.FC<PageProps> = ({
                 MODERN_THEME.components.button.base,
                 MODERN_THEME.components.button.variants.ghost,
                 MODERN_THEME.components.button.sizes.sm,
-                MODERN_THEME.touch.minTarget
+                MODERN_THEME.touch.minTarget,
               )}
             >
               <svg
@@ -61,10 +63,10 @@ export const Page: React.FC<PageProps> = ({
       {/* Page Content */}
       <div className={cn(
         MODERN_THEME.animations.fade.in,
-        MODERN_THEME.animations.slide.up
+        MODERN_THEME.animations.slide.up,
       )}>
         {children}
       </div>
     </div>
   );
-}; 
+};

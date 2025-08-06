@@ -1,9 +1,11 @@
+import React from 'react';
+
+import { compactNavigationItems, moreMenuItems } from '../constants';
+import { ModernNavItem } from '../types';
+
 import { MODERN_THEME } from '@/constants/theme';
 import { useActiveTab, useCloseMoreMenu, useNavigateTo, useShowMoreMenu, useToggleMoreMenu } from '@/stores/modern-layout';
 import { cn } from '@/utils';
-import React from 'react';
-import { compactNavigationItems, moreMenuItems } from '../constants';
-import { ModernNavItem } from '../types';
 
 interface BottomNavigationProps {
   activeTab?: ModernNavItem;
@@ -28,7 +30,7 @@ const NavItemCompact: React.FC<{
         MODERN_THEME.navigation.bottomNavCompact.item,
         isActive ? MODERN_THEME.navigation.bottomNavCompact.active : MODERN_THEME.navigation.bottomNavCompact.inactive,
         MODERN_THEME.touch.tap,
-        MODERN_THEME.accessibility.focusRing
+        MODERN_THEME.accessibility.focusRing,
       )}
       aria-label={`Ir a ${item.label}`}
       title={item.label}
@@ -36,7 +38,7 @@ const NavItemCompact: React.FC<{
       <div className="relative">
         <Icon className={cn(
           'w-6 h-6',
-          isActive ? 'text-blue-400' : 'text-gray-400'
+          isActive ? 'text-blue-400' : 'text-gray-400',
         )} />
         {item.badge && item.badge > 0 && (
           <span className="absolute -top-2 -right-2 w-5 h-5 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
@@ -65,14 +67,14 @@ const NavItemMore: React.FC<{
         'flex items-center gap-3 w-full py-3 px-4 rounded-full transition-all duration-200 min-h-[48px]',
         isActive ? 'bg-blue-600/20 text-blue-400' : 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50',
         MODERN_THEME.touch.tap,
-        MODERN_THEME.accessibility.focusRing
+        MODERN_THEME.accessibility.focusRing,
       )}
       aria-label={`Ir a ${item.label}`}
     >
       <div className="relative">
         <Icon className={cn(
           'w-5 h-5',
-          isActive ? 'text-blue-400' : 'text-gray-400'
+          isActive ? 'text-blue-400' : 'text-gray-400',
         )} />
         {item.badge && item.badge > 0 && (
           <span className="absolute -top-1 -right-1 w-4 h-4 text-xs bg-red-500 text-white rounded-full flex items-center justify-center">
@@ -82,7 +84,7 @@ const NavItemMore: React.FC<{
       </div>
       <span className={cn(
         'text-sm font-medium',
-        isActive ? 'text-blue-400' : 'text-gray-300'
+        isActive ? 'text-blue-400' : 'text-gray-300',
       )}>
         {item.label}
       </span>
@@ -93,7 +95,7 @@ const NavItemMore: React.FC<{
 export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   activeTab: propActiveTab,
   onTabChange: propOnTabChange,
-  isNavigationVisible: propIsNavigationVisible
+  isNavigationVisible: propIsNavigationVisible,
 }) => {
   // Usar selectores individuales del store de Zustand
   const storeActiveTab = useActiveTab();
@@ -124,7 +126,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
     <nav className={cn(
       MODERN_THEME.navigation.bottomNavCompact.container,
       isNavigationVisible ? 'translate-y-0' : 'translate-y-full',
-      MODERN_THEME.animations.transition.normal
+      MODERN_THEME.animations.transition.normal,
     )}>
       <div className="relative">
         <div className={MODERN_THEME.navigation.bottomNavCompact.grid}>
@@ -142,7 +144,7 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
         {showMoreMenu && (
           <div className={cn(
             'absolute bottom-full mb-2 left-0 right-0 bg-gray-900/95 backdrop-blur-md border border-gray-700/50 rounded-4xl shadow-2xl p-4 px-3 z-50',
-            MODERN_THEME.animations.dropDown.in
+            MODERN_THEME.animations.dropDown.in,
           )}>
             <div className="flex flex-col gap-1">
               {moreMenuItems.map((item) => (
@@ -159,4 +161,4 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
       </div>
     </nav>
   );
-}; 
+};

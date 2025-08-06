@@ -10,4 +10,4 @@ export interface DatePickerProps {
 export interface DatePickerState {
   showPicker: boolean;
   inputValue: string;
-} 
+}

@@ -32,4 +32,4 @@ export interface PreviewLoadingProps {
 export interface PreviewContentProps {
   url: string;
   previewData: URLPreviewData;
-} 
+}

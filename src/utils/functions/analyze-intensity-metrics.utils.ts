@@ -1,6 +1,8 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { calculateIntensityScore } from './calculate-intensity-score';
-import { getThisWeekRecords } from './week-records.utils';
+import { clamp } from './math-utils';
+import { calculateVolume } from './volume-calculations';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Interfaz para métricas de intensidad
@@ -15,6 +17,7 @@ export interface IntensityMetrics {
 
 /**
  * Analiza métricas de intensidad de entrenamiento
+ * MEJORADO: Considera solo semanas completadas para un cálculo más preciso
  */
 export const analyzeIntensityMetrics = (records: WorkoutRecord[]): IntensityMetrics => {
   if (records.length === 0) {
@@ -23,7 +26,7 @@ export const analyzeIntensityMetrics = (records: WorkoutRecord[]): IntensityMetr
       volumeIntensity: 0,
       frequencyIntensity: 0,
       overallIntensity: 'Baja',
-      recommendations: ['Sin datos para análisis']
+      recommendations: ['Sin datos para análisis'],
     };
   }
 
@@ -31,17 +34,72 @@ export const analyzeIntensityMetrics = (records: WorkoutRecord[]): IntensityMetr
   const averageIntensity = calculateIntensityScore(records);
 
   // Calcular intensidad de volumen basada en métricas más realistas
-  const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-  const avgVolumePerWorkout = totalVolume / records.length;
+  // Usar solo semanas completadas para el cálculo
+  const today = new Date();
+  const currentMonday = new Date(today);
+  currentMonday.setDate(today.getDate() - today.getDay() + 1);
+  const currentWeekKey = currentMonday.toISOString().split('T')[0];
 
-  // Clasificar volumen por sesión de forma más realista
-  // Basado en estándares típicos de entrenamiento
-  const volumeIntensity = Math.min(100, Math.max(0, (avgVolumePerWorkout / 800) * 100));
+  // Separar registros de semanas completadas vs semana actual
+  const completedRecords: WorkoutRecord[] = [];
+  const currentWeekRecords: WorkoutRecord[] = [];
 
-  // Calcular intensidad de frecuencia de forma más equilibrada
-  const thisWeekRecords = getThisWeekRecords(records);
-  // Calcular días únicos en lugar de registros individuales
-  const weeklyFrequency = new Set(thisWeekRecords.map(r => r.date.toDateString())).size;
+  records.forEach(record => {
+    const date = new Date(record.date);
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (weekKey === currentWeekKey) {
+      currentWeekRecords.push(record);
+    } else {
+      completedRecords.push(record);
+    }
+  });
+
+  // Usar solo semanas completadas para el cálculo de volumen
+  const recordsForVolume = completedRecords.length > 0 ? completedRecords : records;
+  const totalVolume = recordsForVolume.reduce((sum, r) => sum + calculateVolume(r), 0);
+  const avgVolumePerWorkout = totalVolume / recordsForVolume.length;
+  const volumeIntensity = clamp((avgVolumePerWorkout / 800) * 100, 0, 100);
+
+  // Calcular intensidad de frecuencia usando la nueva lógica por semanas
+  const weeklyData = new Map<string, number>();
+
+  records.forEach(record => {
+    const date = new Date(record.date);
+    // Obtener el lunes de la semana (día 1 = lunes)
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (!weeklyData.has(weekKey)) {
+      weeklyData.set(weekKey, 0);
+    }
+    weeklyData.set(weekKey, weeklyData.get(weekKey)! + 1);
+  });
+
+  // Calcular frecuencia semanal promedio (solo semanas completadas)
+  let totalWorkouts = 0;
+  let completedWeeks = 0;
+
+  weeklyData.forEach((workouts, week) => {
+    if (week !== currentWeekKey) {
+      // Solo contar semanas completadas (no la semana actual)
+      totalWorkouts += workouts;
+      completedWeeks++;
+    }
+  });
+
+  // Si no hay semanas completadas, usar todas las semanas
+  if (completedWeeks === 0) {
+    totalWorkouts = Array.from(weeklyData.values()).reduce((sum, workouts) => sum + workouts, 0);
+    completedWeeks = weeklyData.size;
+  }
+
+  const weeklyFrequency = totalWorkouts > 0 && completedWeeks > 0
+    ? totalWorkouts / completedWeeks
+    : 0;
 
   // Escala más realista: 3-5 sesiones por semana es óptimo
   let frequencyIntensity = 0;
@@ -110,6 +168,6 @@ export const analyzeIntensityMetrics = (records: WorkoutRecord[]): IntensityMetr
     volumeIntensity: Math.round(volumeIntensity),
     frequencyIntensity: Math.round(frequencyIntensity),
     overallIntensity,
-    recommendations
+    recommendations,
   };
-}; 
+};

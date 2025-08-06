@@ -16,6 +16,7 @@ export interface ExerciseAnalysis {
   progress: number;
   progressPercent: number;
   frequency: number;
+  intensity: number;
   firstWeight: number;
   lastWeight: number;
   lastDate: Date;
@@ -150,14 +151,6 @@ export interface TrendAnalysisData {
   trendAnalysis: string;
 }
 
-export interface PredictionTimelineData {
-  currentWeight: number;
-  nextWeekWeight: number;
-  predictedPR: number;
-  monthlyGrowthRate: number;
-  strengthTrend: number;
-}
-
 export interface PRProgressData {
   currentWeight: number;
   predictedPR: number;
@@ -219,4 +212,4 @@ export interface PredictionMetrics {
 export interface ConfidenceInfo {
   level: string;
   color: string;
-} 
+}

@@ -1,7 +1,8 @@
+import React from 'react';
+
 import { ExerciseList } from '@/components/exercise-list';
 import { Section } from '@/components/layout';
 import type { DayOfWeek } from '@/interfaces';
-import React from 'react';
 
 interface ExerciseListSectionProps {
   activeDay: DayOfWeek;
@@ -15,7 +16,7 @@ interface ExerciseListSectionProps {
 export const ExerciseListSection: React.FC<ExerciseListSectionProps> = ({
   activeDay,
   onOpenAdmin,
-  onGoToHistory
+  onGoToHistory,
 }) => {
   return (
     <Section>
@@ -26,4 +27,4 @@ export const ExerciseListSection: React.FC<ExerciseListSectionProps> = ({
       />
     </Section>
   );
-}; 
+};

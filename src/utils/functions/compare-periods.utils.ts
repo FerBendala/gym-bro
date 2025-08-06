@@ -1,8 +1,11 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { endOfWeek, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { calculateOptimal1RM } from './calculate-1rm-optimal.utils';
+
+import { calculateOptimal1RM } from './calculate-1rm.utils';
+import { calculateVolume } from './volume-calculations';
 import { getLastWeekRecords, getThisWeekRecords } from './week-records.utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Interfaz para comparación de períodos
@@ -35,7 +38,7 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
       name: 'Esta semana',
       getRecords: () => getThisWeekRecords(records),
       getPrevRecords: () => getLastWeekRecords(records),
-      minDaysRequired: 14 // Necesita al menos 2 semanas de datos
+      minDaysRequired: 14, // Necesita al menos 2 semanas de datos
     },
     {
       name: 'Últimas 2 semanas',
@@ -55,7 +58,7 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
           return recordDate >= prevTwoWeeksStart && recordDate <= prevTwoWeeksEnd;
         });
       },
-      minDaysRequired: 28 // Necesita al menos 4 semanas de datos
+      minDaysRequired: 28, // Necesita al menos 4 semanas de datos
     },
     {
       name: 'Último mes',
@@ -75,7 +78,7 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
           return recordDate >= prevMonthStart && recordDate <= prevMonthEnd;
         });
       },
-      minDaysRequired: 56 // Necesita al menos 8 semanas de datos
+      minDaysRequired: 56, // Necesita al menos 8 semanas de datos
     },
     {
       name: 'Últimos 3 meses',
@@ -95,8 +98,8 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
           return recordDate >= prevThreeMonthsStart && recordDate <= prevThreeMonthsEnd;
         });
       },
-      minDaysRequired: 168 // Necesita al menos 24 semanas de datos
-    }
+      minDaysRequired: 168, // Necesita al menos 24 semanas de datos
+    },
   ];
 
   return periods.map(period => {
@@ -118,7 +121,7 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
     const hasValidComparison = currentRecords.length >= 2 && prevRecords.length >= 2;
 
     if (currentRecords.length > 0) {
-      totalVolume = currentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+      totalVolume = currentRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
       avgWeight = currentRecords.reduce((sum, r) => {
         const oneRM = calculateOptimal1RM(r.weight, r.reps);
         return sum + oneRM;
@@ -128,7 +131,7 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
       if (hasEnoughData && hasValidComparison) {
         const currentAvgVolumePerSession = totalVolume / currentRecords.length;
 
-        const prevVolume = prevRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+        const prevVolume = prevRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
         const prevAvgVolumePerSession = prevVolume / prevRecords.length;
 
         const prevAvg1RM = prevRecords.reduce((sum, r) => {
@@ -156,7 +159,7 @@ export const comparePeriods = (records: WorkoutRecord[]): PeriodComparison[] => 
       avgWeight,
       improvement,
       volumeChange,
-      strengthChange
+      strengthChange,
     };
   });
-}; 
+};

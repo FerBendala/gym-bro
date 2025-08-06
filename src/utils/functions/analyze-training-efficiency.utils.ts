@@ -1,3 +1,5 @@
+import { calculateVolume } from './volume-calculations';
+
 import type { WorkoutRecord } from '@/interfaces';
 
 /**
@@ -21,12 +23,12 @@ export const analyzeTrainingEfficiency = (records: WorkoutRecord[]): TrainingEff
       setsToVolumeRatio: 0,
       timeEfficiencyScore: 0,
       optimalLoadRange: { min: 0, max: 0 },
-      recommendedAdjustments: ['Sin datos suficientes para análisis']
+      recommendedAdjustments: ['Sin datos suficientes para análisis'],
     };
   }
 
   // Ratio volumen/peso promedio
-  const totalVolume = records.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const totalVolume = records.reduce((sum, r) => sum + calculateVolume(r), 0);
   const avgWeight = records.reduce((sum, r) => sum + r.weight, 0) / records.length;
   const volumeToWeightRatio = totalVolume / avgWeight;
 
@@ -42,7 +44,7 @@ export const analyzeTrainingEfficiency = (records: WorkoutRecord[]): TrainingEff
   const weights = records.map(r => r.weight).sort((a, b) => a - b);
   const optimalLoadRange = {
     min: Math.round(weights[Math.floor(weights.length * 0.2)]),
-    max: Math.round(weights[Math.floor(weights.length * 0.8)])
+    max: Math.round(weights[Math.floor(weights.length * 0.8)]),
   };
 
   // Recomendaciones basadas en análisis mejorado
@@ -82,6 +84,6 @@ export const analyzeTrainingEfficiency = (records: WorkoutRecord[]): TrainingEff
     setsToVolumeRatio: Math.round(setsToVolumeRatio),
     timeEfficiencyScore: Math.round(timeEfficiencyScore),
     optimalLoadRange,
-    recommendedAdjustments: recommendations
+    recommendedAdjustments: recommendations,
   };
-}; 
+};

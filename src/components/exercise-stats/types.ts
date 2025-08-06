@@ -50,4 +50,4 @@ export interface StatConfig extends Omit<StatCardProps, 'className'> {
 export interface UseExerciseStatsReturn {
   stats: CalculatedStats;
   isEmpty: boolean;
-} 
+}

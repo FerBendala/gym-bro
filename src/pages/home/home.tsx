@@ -1,9 +1,10 @@
-import { Page } from '@/components/layout';
 import React from 'react';
-import { DaySelector, ExerciseListSection, QuickDayNavigation } from './components';
-import { useDaySelector } from './hooks';
+
+import { ExerciseListSection, QuickDayNavigation } from './components';
 import type { ModernHomeProps } from './types';
-import { formatDayName, getCurrentDayInfo } from './utils';
+import { formatDayName, getSelectedDayInfo } from './utils';
+
+import { Page } from '@/components/layout';
 
 /**
  * Página de inicio moderna con navegación de días y lista de ejercicios
@@ -13,26 +14,14 @@ export const ModernHome: React.FC<ModernHomeProps> = ({
   activeDay,
   onDayChange,
   onOpenAdmin,
-  onGoToHistory
+  onGoToHistory,
 }) => {
-  const { showDaySelector, toggleDaySelector, closeDaySelector } = useDaySelector();
-  const dayInfo = getCurrentDayInfo(activeDay);
+  const selectedDayInfo = getSelectedDayInfo(activeDay);
 
   return (
     <Page
       title="Entrenamientos"
-      subtitle={`${formatDayName(activeDay)} • ${dayInfo.formattedDate}`}
-      headerActions={
-        <div className="flex items-center space-x-2">
-          <DaySelector
-            activeDay={activeDay}
-            onDayChange={onDayChange}
-            showDaySelector={showDaySelector}
-            onToggle={toggleDaySelector}
-            onClose={closeDaySelector}
-          />
-        </div>
-      }
+      subtitle={`${formatDayName(activeDay)} • ${selectedDayInfo.formattedDate}`}
     >
       <QuickDayNavigation
         activeDay={activeDay}
@@ -46,4 +35,4 @@ export const ModernHome: React.FC<ModernHomeProps> = ({
       />
     </Page>
   );
-}; 
+};

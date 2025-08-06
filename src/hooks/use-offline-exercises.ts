@@ -1,3 +1,5 @@
+import { useCallback } from 'react';
+
 import type { Exercise } from '@/interfaces';
 import { useOnlineStatus } from '@/stores/connection';
 import {
@@ -10,9 +12,8 @@ import {
   getAllItems,
   getItemsByIndex,
   queueSyncOperation,
-  updateItem
+  updateItem,
 } from '@/utils';
-import { useCallback } from 'react';
 
 // Función helper para generar IDs únicos
 const generateId = () => `${Date.now()}-${Math.random().toString(36).substring(2, 11)}`;
@@ -36,7 +37,7 @@ export const useOfflineExercises = (isInitialized: boolean) => {
       createdAt: now,
       updatedAt: now,
       _needsSync: true,
-      _isLocalOnly: !isOnline
+      _isLocalOnly: !isOnline,
     };
 
     try {
@@ -51,7 +52,7 @@ export const useOfflineExercises = (isInitialized: boolean) => {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Error desconocido',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
     }
   }, [isInitialized, isOnline]);
@@ -64,7 +65,7 @@ export const useOfflineExercises = (isInitialized: boolean) => {
     const updatedExercise: IndexedDBExercise = {
       ...exercise,
       updatedAt: Date.now(),
-      _needsSync: true
+      _needsSync: true,
     };
 
     try {
@@ -79,7 +80,7 @@ export const useOfflineExercises = (isInitialized: boolean) => {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Error desconocido',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
     }
   }, [isInitialized]);
@@ -101,7 +102,7 @@ export const useOfflineExercises = (isInitialized: boolean) => {
       return {
         success: false,
         error: error instanceof Error ? error.message : 'Error desconocido',
-        timestamp: Date.now()
+        timestamp: Date.now(),
       };
     }
   }, [isInitialized]);
@@ -127,6 +128,6 @@ export const useOfflineExercises = (isInitialized: boolean) => {
     updateExercise,
     deleteExercise,
     getExercises,
-    getExercisesByCategory
+    getExercisesByCategory,
   };
-}; 
+};

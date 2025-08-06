@@ -16,6 +16,9 @@ export interface ModernLayoutState {
   subtitle?: string;
   showBackButton: boolean;
 
+  // Parámetros de navegación
+  navigationParams: Record<string, any>;
+
   // Computed values
   canGoBack: boolean;
 }
@@ -24,7 +27,7 @@ export interface ModernLayoutState {
 export interface ModernLayoutActions {
   // Navegación
   setActiveTab: (tab: ModernNavItem) => void;
-  navigateTo: (tab: ModernNavItem) => void;
+  navigateTo: (tab: ModernNavItem, params?: Record<string, any>) => void;
   goBack: () => boolean;
   clearHistory: () => void;
 
@@ -39,9 +42,13 @@ export interface ModernLayoutActions {
   setSubtitle: (subtitle?: string) => void;
   setShowBackButton: (show: boolean) => void;
 
+  // Parámetros de navegación
+  setNavigationParams: (params: Record<string, any>) => void;
+  clearNavigationParams: () => void;
+
   // Utilidades
   reset: () => void;
 }
 
 // Store completo
-export interface ModernLayoutStore extends ModernLayoutState, ModernLayoutActions { } 
+export interface ModernLayoutStore extends ModernLayoutState, ModernLayoutActions { }

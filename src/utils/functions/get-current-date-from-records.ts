@@ -15,4 +15,4 @@ export const getCurrentDateFromRecords = (records: WorkoutRecord[]): Date => {
   // En lugar de verificar si es "muy antigua", simplemente usar la fecha más reciente
   // esto maneja tanto datos pasados como futuros correctamente
   return latestDate;
-}; 
+};

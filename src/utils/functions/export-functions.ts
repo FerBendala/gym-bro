@@ -1,4 +1,5 @@
 import * as XLSX from 'xlsx';
+
 import type { ExportData } from './export-interfaces';
 
 /**
@@ -11,7 +12,7 @@ export const exportToJSON = (data: ExportData): string => {
 /**
  * Convierte un objeto a formato CSV
  */
-export const objectToCSV = (data: Array<Record<string, unknown>>): string => {
+export const objectToCSV = (data: Record<string, unknown>[]): string => {
   if (data.length === 0) return '';
 
   const headers = Object.keys(data[0]);
@@ -36,31 +37,100 @@ export const objectToCSV = (data: Array<Record<string, unknown>>): string => {
 /**
  * Exporta los datos en formato CSV (múltiples hojas como archivos separados)
  */
-export const exportToCSV = (data: ExportData): { [filename: string]: string } => {
+export const exportToCSV = (data: ExportData): Record<string, string> => {
+  // 1. Días de entrenamiento
+  const trainingDaysFlat = data.trainingDays.flatMap(day =>
+    day.exercises.map(exercise => ({
+      dayOfWeek: day.dayOfWeek,
+      dayName: day.dayName,
+      totalWorkouts: day.totalWorkouts,
+      totalVolume: day.totalVolume,
+      exerciseName: exercise.exerciseName,
+      categories: exercise.categories.join('; '),
+      exerciseTotalVolume: exercise.totalVolume,
+      exerciseWorkoutCount: exercise.workoutCount,
+      exerciseAverageWeight: exercise.averageWeight,
+      exerciseMaxWeight: exercise.maxWeight,
+      exerciseLastWorkout: exercise.lastWorkout,
+    }))
+  );
+
+  // 2. Evolución de ejercicios
+  const exercisesEvolutionFlat = data.exercisesEvolution.flatMap(exercise =>
+    exercise.sessions.map(session => ({
+      exerciseName: exercise.exerciseName,
+      categories: exercise.categories.join('; '),
+      totalVolume: exercise.totalVolume,
+      totalWorkouts: exercise.totalWorkouts,
+      sessionDate: session.date,
+      sessionWeight: session.weight,
+      sessionReps: session.reps,
+      sessionSets: session.sets,
+      sessionVolume: session.volume,
+      sessionEstimated1RM: session.estimated1RM,
+      sessionWeekNumber: session.weekNumber,
+      evolutionFirstWeight: exercise.evolution.firstWeight,
+      evolutionLastWeight: exercise.evolution.lastWeight,
+      evolutionMaxWeight: exercise.evolution.maxWeight,
+      evolutionProgressPercentage: exercise.evolution.progressPercentage,
+      evolutionAverageWeight: exercise.evolution.averageWeight,
+    }))
+  );
+
+  // 3. Análisis de grupos musculares
+  const muscleGroupComparison = data.muscleGroupAnalysis.comparison.map(comp => ({
+    group: comp.group,
+    targetPercentage: comp.targetPercentage,
+    actualPercentage: comp.actualPercentage,
+    difference: comp.difference,
+    status: comp.status,
+  }));
+
+  const muscleGroupRecommendations = data.muscleGroupAnalysis.recommendations.map(rec => ({
+    group: rec.group,
+    message: rec.message,
+    priority: rec.priority,
+  }));
+
+  // 4. Balance de rendimiento
+  const performanceBalanceOverall = [{
+    totalVolume: data.performanceBalance.overall.totalVolume,
+    totalWorkouts: data.performanceBalance.overall.totalWorkouts,
+    averageVolumePerWorkout: data.performanceBalance.overall.averageVolumePerWorkout,
+    consistencyScore: data.performanceBalance.overall.consistencyScore,
+    strengthProgress: data.performanceBalance.overall.strengthProgress,
+    volumeProgress: data.performanceBalance.overall.volumeProgress,
+  }];
+
+  const performanceBalanceScore = [{
+    score: data.performanceBalance.balanceScore.score,
+    level: data.performanceBalance.balanceScore.level,
+    description: data.performanceBalance.balanceScore.description,
+    recommendations: data.performanceBalance.balanceScore.recommendations.join('; '),
+  }];
+
+  const topImprovements = data.performanceBalance.strengthMetrics.topImprovements.map(improvement => ({
+    exerciseName: improvement.exerciseName,
+    progressPercentage: improvement.progressPercentage,
+    weightGain: improvement.weightGain,
+  }));
+
+  const volumeDistribution = data.performanceBalance.volumeMetrics.volumeDistribution.map(dist => ({
+    category: dist.category,
+    volume: dist.volume,
+    percentage: dist.percentage,
+  }));
+
   return {
     'metadata.csv': objectToCSV([data.metadata] as unknown as Record<string, unknown>[]),
-    'exercises.csv': objectToCSV(data.exercises as unknown as Record<string, unknown>[]),
-    'workout_records.csv': objectToCSV(data.workoutRecords as unknown as Record<string, unknown>[]),
-    'exercises_by_day.csv': objectToCSV(data.exercisesByDay.map(day => ({
-      dayOfWeek: day.dayOfWeek,
-      totalVolume: day.totalVolume,
-      averageVolume: day.averageVolume,
-      workoutCount: day.workoutCount,
-      exercisesCount: day.exercises.length
-    })) as unknown as Record<string, unknown>[]),
-    'volume_by_category.csv': objectToCSV(data.volumeAnalysis.volumeByCategory as unknown as Record<string, unknown>[]),
-    'volume_by_exercise.csv': objectToCSV(data.volumeAnalysis.volumeByExercise as unknown as Record<string, unknown>[]),
-    'weekly_data.csv': objectToCSV(data.weeklyData.map(week => ({
-      weekStart: week.weekStart,
-      weekEnd: week.weekEnd,
-      totalVolume: week.totalVolume,
-      workoutCount: week.workoutCount,
-      averageVolumePerWorkout: week.averageVolumePerWorkout,
-      uniqueExercises: week.uniqueExercises
-    })) as unknown as Record<string, unknown>[]),
-    'category_metrics.csv': objectToCSV(data.categoryMetrics as unknown as Record<string, unknown>[]),
-    'monthly_stats.csv': objectToCSV(data.monthlyStats as unknown as Record<string, unknown>[]),
-    'personal_records.csv': objectToCSV(data.progressSummary.personalRecords as unknown as Record<string, unknown>[])
+    'training_days.csv': objectToCSV(trainingDaysFlat as unknown as Record<string, unknown>[]),
+    'exercises_evolution.csv': objectToCSV(exercisesEvolutionFlat as unknown as Record<string, unknown>[]),
+    'muscle_group_comparison.csv': objectToCSV(muscleGroupComparison as unknown as Record<string, unknown>[]),
+    'muscle_group_recommendations.csv': objectToCSV(muscleGroupRecommendations as unknown as Record<string, unknown>[]),
+    'performance_balance_overall.csv': objectToCSV(performanceBalanceOverall as unknown as Record<string, unknown>[]),
+    'performance_balance_score.csv': objectToCSV(performanceBalanceScore as unknown as Record<string, unknown>[]),
+    'top_improvements.csv': objectToCSV(topImprovements as unknown as Record<string, unknown>[]),
+    'volume_distribution.csv': objectToCSV(volumeDistribution as unknown as Record<string, unknown>[]),
   };
 };
 
@@ -74,86 +144,73 @@ export const exportToExcel = (data: ExportData): ArrayBuffer => {
   const metadataWS = XLSX.utils.json_to_sheet([data.metadata]);
   XLSX.utils.book_append_sheet(workbook, metadataWS, 'Metadata');
 
-  // Hoja de ejercicios
-  const exercisesWS = XLSX.utils.json_to_sheet(data.exercises);
-  XLSX.utils.book_append_sheet(workbook, exercisesWS, 'Ejercicios');
-
-  // Hoja de registros de entrenamientos
-  const workoutRecordsWS = XLSX.utils.json_to_sheet(data.workoutRecords);
-  XLSX.utils.book_append_sheet(workbook, workoutRecordsWS, 'Entrenamientos');
-
-  // Hoja de ejercicios por día
-  const exercisesByDayFlat = data.exercisesByDay.flatMap(day =>
+  // 1. Hoja de días de entrenamiento
+  const trainingDaysFlat = data.trainingDays.flatMap(day =>
     day.exercises.map(exercise => ({
       dayOfWeek: day.dayOfWeek,
+      dayName: day.dayName,
+      totalWorkouts: day.totalWorkouts,
+      totalVolume: day.totalVolume,
       exerciseName: exercise.exerciseName,
-      categories: exercise.categories.join(', '),
-      frequency: exercise.frequency,
-      averageVolume: exercise.averageVolume,
+      categories: exercise.categories.join('; '),
+      exerciseTotalVolume: exercise.totalVolume,
+      exerciseWorkoutCount: exercise.workoutCount,
+      exerciseAverageWeight: exercise.averageWeight,
+      exerciseMaxWeight: exercise.maxWeight,
+      exerciseLastWorkout: exercise.lastWorkout,
+    }))
+  );
+  const trainingDaysWS = XLSX.utils.json_to_sheet(trainingDaysFlat);
+  XLSX.utils.book_append_sheet(workbook, trainingDaysWS, 'Días de Entrenamiento');
+
+  // 2. Hoja de evolución de ejercicios
+  const exercisesEvolutionFlat = data.exercisesEvolution.flatMap(exercise =>
+    exercise.sessions.map(session => ({
+      exerciseName: exercise.exerciseName,
+      categories: exercise.categories.join('; '),
       totalVolume: exercise.totalVolume,
-      dayTotalVolume: day.totalVolume,
-      dayWorkoutCount: day.workoutCount
+      totalWorkouts: exercise.totalWorkouts,
+      sessionDate: session.date,
+      sessionWeight: session.weight,
+      sessionReps: session.reps,
+      sessionSets: session.sets,
+      sessionVolume: session.volume,
+      sessionEstimated1RM: session.estimated1RM,
+      sessionWeekNumber: session.weekNumber,
+      evolutionFirstWeight: exercise.evolution.firstWeight,
+      evolutionLastWeight: exercise.evolution.lastWeight,
+      evolutionMaxWeight: exercise.evolution.maxWeight,
+      evolutionProgressPercentage: exercise.evolution.progressPercentage,
+      evolutionAverageWeight: exercise.evolution.averageWeight,
     }))
   );
-  const exercisesByDayWS = XLSX.utils.json_to_sheet(exercisesByDayFlat);
-  XLSX.utils.book_append_sheet(workbook, exercisesByDayWS, 'Ejercicios por Día');
+  const exercisesEvolutionWS = XLSX.utils.json_to_sheet(exercisesEvolutionFlat);
+  XLSX.utils.book_append_sheet(workbook, exercisesEvolutionWS, 'Evolución de Ejercicios');
 
-  // Hoja de análisis de volumen por categoría
-  const volumeByCategoryWS = XLSX.utils.json_to_sheet(data.volumeAnalysis.volumeByCategory);
-  XLSX.utils.book_append_sheet(workbook, volumeByCategoryWS, 'Volumen por Categoría');
+  // 3. Hoja de análisis de grupos musculares
+  const muscleGroupComparisonWS = XLSX.utils.json_to_sheet(data.muscleGroupAnalysis.comparison);
+  XLSX.utils.book_append_sheet(workbook, muscleGroupComparisonWS, 'Comparación Grupos Musculares');
 
-  // Hoja de análisis de volumen por ejercicio
-  const volumeByExerciseWS = XLSX.utils.json_to_sheet(data.volumeAnalysis.volumeByExercise.map(ex => ({
-    ...ex,
-    categories: ex.categories.join(', ')
-  })));
-  XLSX.utils.book_append_sheet(workbook, volumeByExerciseWS, 'Volumen por Ejercicio');
+  const muscleGroupRecommendationsWS = XLSX.utils.json_to_sheet(data.muscleGroupAnalysis.recommendations);
+  XLSX.utils.book_append_sheet(workbook, muscleGroupRecommendationsWS, 'Recomendaciones Grupos');
 
-  // Hoja de datos semanales
-  const weeklyDataFlat = data.weeklyData.flatMap(week =>
-    week.categoryBreakdown.map(category => ({
-      weekStart: week.weekStart,
-      weekEnd: week.weekEnd,
-      weekTotalVolume: week.totalVolume,
-      weekWorkoutCount: week.workoutCount,
-      weekAverageVolume: week.averageVolumePerWorkout,
-      weekUniqueExercises: week.uniqueExercises,
-      category: category.category,
-      categoryVolume: category.volume,
-      categoryPercentage: category.percentage
-    }))
-  );
-  const weeklyDataWS = XLSX.utils.json_to_sheet(weeklyDataFlat);
-  XLSX.utils.book_append_sheet(workbook, weeklyDataWS, 'Datos Semanales');
+  // 4. Hoja de balance de rendimiento
+  const performanceBalanceOverallWS = XLSX.utils.json_to_sheet([data.performanceBalance.overall]);
+  XLSX.utils.book_append_sheet(workbook, performanceBalanceOverallWS, 'Balance General');
 
-  // Hoja de métricas por categoría
-  const categoryMetricsWS = XLSX.utils.json_to_sheet(data.categoryMetrics.map(metric => ({
-    ...metric,
-    recommendations: metric.recommendations.join('; ')
-  })));
-  XLSX.utils.book_append_sheet(workbook, categoryMetricsWS, 'Métricas Categorías');
-
-  // Hoja de estadísticas mensuales
-  const monthlyStatsWS = XLSX.utils.json_to_sheet(data.monthlyStats.map(stat => ({
-    ...stat,
-    improvementAreas: stat.improvementAreas.join('; ')
-  })));
-  XLSX.utils.book_append_sheet(workbook, monthlyStatsWS, 'Estadísticas Mensuales');
-
-  // Hoja de resumen de progreso
-  const progressSummaryWS = XLSX.utils.json_to_sheet([{
-    overallProgress: data.progressSummary.overallProgress,
-    strengthGains: data.progressSummary.strengthGains,
-    volumeIncrease: data.progressSummary.volumeIncrease,
-    consistencyScore: data.progressSummary.consistencyScore,
-    topPerformingCategories: data.progressSummary.topPerformingCategories.join(', '),
-    areasForImprovement: data.progressSummary.areasForImprovement.join(', ')
+  const performanceBalanceScoreWS = XLSX.utils.json_to_sheet([{
+    score: data.performanceBalance.balanceScore.score,
+    level: data.performanceBalance.balanceScore.level,
+    description: data.performanceBalance.balanceScore.description,
+    recommendations: data.performanceBalance.balanceScore.recommendations.join('; '),
   }]);
-  XLSX.utils.book_append_sheet(workbook, progressSummaryWS, 'Resumen Progreso');
+  XLSX.utils.book_append_sheet(workbook, performanceBalanceScoreWS, 'Score de Balance');
 
-  // Hoja de récords personales
-  const personalRecordsWS = XLSX.utils.json_to_sheet(data.progressSummary.personalRecords);
-  XLSX.utils.book_append_sheet(workbook, personalRecordsWS, 'Récords Personales');
+  const topImprovementsWS = XLSX.utils.json_to_sheet(data.performanceBalance.strengthMetrics.topImprovements);
+  XLSX.utils.book_append_sheet(workbook, topImprovementsWS, 'Top Mejoras');
+
+  const volumeDistributionWS = XLSX.utils.json_to_sheet(data.performanceBalance.volumeMetrics.volumeDistribution);
+  XLSX.utils.book_append_sheet(workbook, volumeDistributionWS, 'Distribución Volumen');
 
   return XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
-}; 
+};

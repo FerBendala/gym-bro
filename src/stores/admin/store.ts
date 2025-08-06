@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+
 import {
   createCRUDActions,
   createDataActions,
@@ -39,10 +40,10 @@ export const useAdminStore = create<AdminStore>()(
 
         return store;
       },
-      persistenceConfig
+      persistenceConfig,
     ),
     {
       name: 'admin-store',
-    }
-  )
-); 
+    },
+  ),
+);

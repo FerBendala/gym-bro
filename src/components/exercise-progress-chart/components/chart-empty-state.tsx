@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { CHART_EMPTY_STATE } from '../constants';
 import type { ChartEmptyStateProps } from '../types';
 
@@ -7,11 +8,11 @@ import type { ChartEmptyStateProps } from '../types';
  */
 export const ChartEmptyState: React.FC<ChartEmptyStateProps> = ({
   height = CHART_EMPTY_STATE.defaultHeight,
-  message = CHART_EMPTY_STATE.defaultMessage
+  message = CHART_EMPTY_STATE.defaultMessage,
 }) => {
   return (
     <div className={`h-${height} flex items-center justify-center text-gray-400`}>
       <p>{message}</p>
     </div>
   );
-}; 
+};

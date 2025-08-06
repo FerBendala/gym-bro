@@ -1,13 +1,15 @@
-import { ChartLegend } from '@/components/chart-legend';
-import { InfoTooltip } from '@/components/tooltip';
-import { THEME_CHART } from '@/constants/theme';
-import type { ChartDimensions } from '@/utils';
 import { BarChart3, TrendingUp } from 'lucide-react';
 import React, { useState } from 'react';
+
 import { ChartEmptyState, ChartGrid, ChartStatistics, EnhancedChartLines } from './components';
 import { CHART_DIMENSIONS, CHART_EMPTY_STATE, CHART_INFO_ITEMS } from './constants';
 import { useChartData, useChartStatistics } from './hooks';
 import type { ExerciseProgressChartProps } from './types';
+
+import { ChartLegend } from '@/components/chart-legend';
+import { InfoTooltip } from '@/components/tooltip';
+import { THEME_CHART } from '@/constants/theme';
+import type { ChartDimensions } from '@/utils';
 
 /**
  * Componente principal del ExerciseProgressChart mejorado
@@ -89,7 +91,7 @@ export const ExerciseProgressChart: React.FC<ExerciseProgressChartProps> = ({ re
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-gray-400">
           {CHART_INFO_ITEMS.map((item, index) => (
             <div key={index} className="flex items-center space-x-2">
-              <div className={`w-2 h-2 ${item.color} rounded-full`}></div>
+              <div className={`w-2 h-2 ${item.color} rounded-full`} />
               <span>{item.text}</span>
             </div>
           ))}

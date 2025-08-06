@@ -1,13 +1,17 @@
+import { calculateOptimal1RM } from './calculate-1rm.utils';
+import { calculateVolume } from './volume-calculations';
+import { getLastCompleteWeekRecords } from './week-records.utils';
+import { getMaxWeight } from './workout-utils';
+
 import type { WorkoutRecord } from '@/interfaces';
-import { calculateOptimal1RM, getLastCompleteWeekRecords } from '.';
 
 /**
  * Calcula métricas básicas de los registros
  */
 export const calculateBasicMetrics = (validRecords: WorkoutRecord[]) => {
-  const totalVolume = validRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  const totalVolume = validRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
+  const maxWeight = getMaxWeight(validRecords);
   const avgWeight = validRecords.reduce((sum, r) => sum + r.weight, 0) / validRecords.length;
-  const maxWeight = Math.max(...validRecords.map(r => r.weight));
   const avgVolume = totalVolume / validRecords.length;
 
   // OPCIÓN A: Usar última semana completa (excluyendo semana actual)
@@ -32,6 +36,6 @@ export const calculateBasicMetrics = (validRecords: WorkoutRecord[]) => {
     avgWeight,
     maxWeight,
     avgVolume,
-    current1RMMax
+    current1RMMax,
   };
-}; 
+};

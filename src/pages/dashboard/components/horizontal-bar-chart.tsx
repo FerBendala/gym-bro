@@ -1,21 +1,63 @@
-import { formatNumberToString } from '@/utils';
 import React from 'react';
 
+import { formatNumberToString } from '@/utils';
+
+// Función para obtener un color más oscuro para el gradiente
+const getDarkerColor = (color: string): string => {
+  // Mapeo de colores a versiones más oscuras
+  const colorMap: Record<string, string> = {
+    '#3B82F6': '#1D4ED8', // Azul
+    '#10B981': '#059669', // Verde
+    '#F59E0B': '#D97706', // Naranja
+    '#EF4444': '#DC2626', // Rojo
+    '#8B5CF6': '#7C3AED', // Púrpura
+    '#F97316': '#EA580C', // Naranja oscuro
+    '#06B6D4': '#0891B2', // Cian
+    '#84CC16': '#65A30D', // Verde lima
+  };
+
+  return colorMap[color] || color;
+};
+
 interface HorizontalBarChartProps {
-  data: Array<{
+  data: {
     name: string;
     value: number;
     ideal?: number;
     color?: string;
-  }>;
+  }[];
   onItemClick?: (itemName: string) => void;
 }
 
 export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({
   data,
-  onItemClick
+  onItemClick,
 }) => {
-  const maxValue = Math.max(...data.map(item => Math.max(item.value, item.ideal || 0))) * 1.1;
+  // Validación de datos
+  if (!data || data.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-8 text-gray-400">
+        <span>No hay datos disponibles para mostrar</span>
+      </div>
+    );
+  }
+
+  // Validar que todos los valores sean números válidos
+  const validData = data.filter(item =>
+    typeof item.value === 'number' &&
+    !isNaN(item.value) &&
+    item.value >= 0,
+  );
+
+  if (validData.length === 0) {
+    return (
+      <div className="flex items-center justify-center p-8 text-gray-400">
+        <span>Datos inválidos para mostrar</span>
+      </div>
+    );
+  }
+
+  const maxValue = Math.max(...validData.map(item => Math.max(item.value, item.ideal || 0))) * 1.1;
 
   const handleItemClick = (itemName: string) => {
     if (onItemClick) {
@@ -25,7 +67,7 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({
 
   return (
     <div className="space-y-4">
-      {data.map((item, index) => (
+      {validData.map((item, index) => (
         <div
           key={index}
           className="space-y-2 cursor-pointer hover:bg-gray-800/50 p-2 rounded-lg transition-colors duration-200"
@@ -50,7 +92,7 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({
                   className="absolute h-full bg-white/10 border-x border-white/20"
                   style={{
                     left: `${Math.max(0, (item.ideal - 2) / maxValue * 100)}%`,
-                    width: `${4 / maxValue * 100}%`
+                    width: `${4 / maxValue * 100}%`,
                   }}
                 />
               )}
@@ -60,7 +102,7 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({
                 className="h-full transition-all duration-1000 ease-out"
                 style={{
                   width: `${Math.min(100, (item.value / maxValue) * 100)}%`,
-                  backgroundColor: item.color || '#3B82F6'
+                  background: `linear-gradient(90deg, ${item.color || '#3B82F6'} 0%, ${getDarkerColor(item.color || '#3B82F6')} 100%)`,
                 }}
               />
 
@@ -77,4 +119,4 @@ export const HorizontalBarChart: React.FC<HorizontalBarChartProps> = ({
       ))}
     </div>
   );
-}; 
+};

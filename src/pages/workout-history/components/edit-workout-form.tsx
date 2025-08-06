@@ -1,10 +1,13 @@
-import { Button } from '@/components/button';
 import { Edit } from 'lucide-react';
 import React from 'react';
+
 import type { EditMode, WorkoutRecordWithExercise } from '../types';
+
 import { AdvancedForm } from './advanced-form';
 import { ModeSelector } from './mode-selector';
 import { SimpleForm } from './simple-form';
+
+import { Button } from '@/components/button';
 
 interface EditWorkoutFormProps {
   record: WorkoutRecordWithExercise;
@@ -27,7 +30,7 @@ export const EditWorkoutForm: React.FC<EditWorkoutFormProps> = ({
   onIndividualSetRemove,
   onIndividualSetUpdate,
   onSave,
-  onCancel
+  onCancel,
 }) => {
   return (
     <div className="p-6 bg-gradient-to-br from-gray-800 to-gray-900 rounded-xl border border-blue-500/30 shadow-lg">
@@ -67,4 +70,4 @@ export const EditWorkoutForm: React.FC<EditWorkoutFormProps> = ({
       </div>
     </div>
   );
-}; 
+};

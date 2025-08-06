@@ -14,4 +14,4 @@ export const InputLabel: React.FC<InputLabelProps> = ({ label, className }) => {
       {label}
     </label>
   );
-}; 
+};

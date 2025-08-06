@@ -1,4 +1,5 @@
 import { TrendingUp } from 'lucide-react';
+
 import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
 
 export const Header: React.FC = () => {
@@ -17,4 +18,4 @@ export const Header: React.FC = () => {
       </div>
     </div>
   );
-}; 
+};

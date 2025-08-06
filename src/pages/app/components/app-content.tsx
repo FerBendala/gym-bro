@@ -1,3 +1,10 @@
+import { useState } from 'react';
+
+import { useHistoryFilter, usePageInfo } from '../hooks';
+import { getCurrentDayInfo } from '../utils';
+
+import { AdminModal } from './admin-modal';
+
 import { Layout, useModernNavigation } from '@/components/layout';
 import { Notification } from '@/components/notification';
 import type { DayOfWeek } from '@/interfaces';
@@ -6,19 +13,22 @@ import { DashboardPage } from '@/pages/dashboard';
 import { ModernHome } from '@/pages/home';
 import { ModernSettings } from '@/pages/settings';
 import { WorkoutHistory } from '@/pages/workout-history';
-import { useState } from 'react';
-import { useHistoryFilter, usePageInfo } from '../hooks';
-import { getCurrentDayInfo } from '../utils';
-import { AdminModal } from './admin-modal';
-
 
 export const AppContent = () => {
-  const { activeTab, navigateTo, goBack, canGoBack } = useModernNavigation();
+  const { activeTab, navigateTo, goBack, canGoBack, clearNavigationParams } = useModernNavigation();
   const [showAdmin, setShowAdmin] = useState(false);
   const [activeDay, setActiveDay] = useState<DayOfWeek>(() => getCurrentDayInfo());
 
   const { historyFilter, handleGoToHistory } = useHistoryFilter(activeTab);
   const pageInfo = usePageInfo(activeTab, activeDay);
+
+  const handleTabChange = (tab: string) => {
+    // Solo limpiar parámetros si se navega a una página diferente (no al dashboard)
+    if (tab !== activeTab && tab !== 'progress') {
+      clearNavigationParams();
+    }
+    navigateTo(tab as any);
+  };
 
   const renderContent = () => {
     switch (activeTab) {
@@ -54,7 +64,7 @@ export const AppContent = () => {
   return (
     <Layout
       activeTab={activeTab}
-      onTabChange={navigateTo}
+      onTabChange={handleTabChange}
       title={pageInfo.title}
       subtitle={pageInfo.subtitle}
       showBackButton={canGoBack}
@@ -67,4 +77,4 @@ export const AppContent = () => {
       <Notification />
     </Layout>
   );
-}; 
+};

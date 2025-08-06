@@ -1,8 +1,10 @@
-import { db } from '@/api/firebase';
-import type { DayOfWeek, ExerciseAssignment } from '@/interfaces';
 import { addDoc, collection, deleteDoc, doc, getDocs, query, updateDoc, where, writeBatch } from 'firebase/firestore';
+
 import { handleFirebaseError } from './error-handler';
 
+import { db } from '@/api/firebase';
+import type { DayOfWeek, ExerciseAssignment } from '@/interfaces';
+import { logger } from '@/utils';
 
 /**
  * Servicio para operaciones CRUD de asignaciones de ejercicios
@@ -35,22 +37,28 @@ export class ExerciseAssignmentService {
     try {
       // Validar que dayOfWeek no sea undefined o null
       if (!dayOfWeek) {
-        console.warn('⚠️ dayOfWeek es undefined o null, usando valor por defecto');
-        return [];
+        logger.warn('dayOfWeek es undefined o null, usando valor por defecto', { dayOfWeek }, 'API');
+        dayOfWeek = 'Lunes';
       }
 
       const q = query(
         collection(db, ExerciseAssignmentService.COLLECTION),
-        where('dayOfWeek', '==', dayOfWeek)
+        where('dayOfWeek', '==', dayOfWeek),
       );
       const querySnapshot = await getDocs(q);
-      const assignments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as ExerciseAssignment));
+      const assignments: ExerciseAssignment[] = [];
+
+      querySnapshot.forEach((doc) => {
+        assignments.push({
+          id: doc.id,
+          ...doc.data(),
+        } as ExerciseAssignment);
+      });
 
       return assignments;
     } catch (error) {
-      console.error('❌ Error obteniendo asignaciones:', error);
-      handleFirebaseError(error, 'obtener asignaciones de ejercicios');
-      return []; // Fallback para evitar crashes
+      logger.error('Error obteniendo asignaciones:', error as Error, { dayOfWeek }, 'API');
+      throw error;
     }
   }
 
@@ -67,9 +75,8 @@ export class ExerciseAssignmentService {
 
       return assignments;
     } catch (error) {
-      console.error('❌ Error obteniendo todas las asignaciones:', error);
-      handleFirebaseError(error, 'obtener todas las asignaciones de ejercicios');
-      return []; // Fallback para evitar crashes
+      logger.error('Error obteniendo todas las asignaciones:', error as Error, undefined, 'API');
+      throw error;
     }
   }
 
@@ -130,4 +137,4 @@ export const getAssignmentsByDay = ExerciseAssignmentService.getByDay;
 export const getAllAssignments = ExerciseAssignmentService.getAll;
 export const updateExerciseAssignment = ExerciseAssignmentService.update;
 export const deleteExerciseAssignment = ExerciseAssignmentService.delete;
-export const updateAssignmentsOrder = ExerciseAssignmentService.updateOrder; 
+export const updateAssignmentsOrder = ExerciseAssignmentService.updateOrder;

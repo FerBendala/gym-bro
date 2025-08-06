@@ -1,6 +1,3 @@
-import { ExerciseCard } from '@/components/exercise-card';
-import { useDragAndDrop } from '@/hooks';
-import type { ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
 import { DndContext } from '@dnd-kit/core';
 import {
   SortableContext,
@@ -10,7 +7,12 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical } from 'lucide-react';
 import React from 'react';
+
 import type { ExerciseListContentProps } from '../types';
+
+import { ExerciseCard } from '@/components/exercise-card';
+import { useDragAndDrop } from '@/hooks';
+import type { ExerciseAssignment, WorkoutFormData, WorkoutFormDataAdvanced, WorkoutRecord } from '@/interfaces';
 
 /**
  * Componente envolvente para hacer cada ExerciseCard draggable
@@ -32,7 +34,7 @@ const SortableExerciseCard: React.FC<SortableExerciseCardProps> = ({
   isTrainedToday = false,
   workoutRecords,
   isDragModeActive = false,
-  onGoToHistory
+  onGoToHistory,
 }) => {
   const {
     attributes,
@@ -99,7 +101,7 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
   exercisesTrainedToday,
   workoutRecords,
   isDragModeActive = false,
-  onGoToHistory
+  onGoToHistory,
 }) => {
   // Ordenar assignments por el campo order (si existe)
   const sortedAssignments = [...assignments].sort((a, b) => {
@@ -114,7 +116,7 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
     isDragging,
     handleDragStart,
     handleDragEnd,
-    collisionDetection
+    collisionDetection,
   } = useDragAndDrop({
     items: sortedAssignments,
     getItemId: (item) => item.id,
@@ -123,12 +125,12 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
       // Actualizar los números de order
       const updatedAssignments = reorderedItems.map((assignment, index) => ({
         ...assignment,
-        order: index
+        order: index,
       }));
 
       // Llamar al callback de reordenamiento
       onReorder?.(updatedAssignments);
-    }
+    },
   });
 
   return (
@@ -175,4 +177,4 @@ export const ExerciseListContent: React.FC<ExerciseListContentProps> = ({
       </DndContext>
     </div>
   );
-}; 
+};

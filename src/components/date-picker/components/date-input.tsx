@@ -1,7 +1,9 @@
-import { Input } from '@/components/input';
 import React from 'react';
+
 import { DATE_PICKER_DEFAULTS } from '../constants';
 import { getTodayFormatted } from '../utils';
+
+import { Input } from '@/components/input';
 
 interface DateInputProps {
   value: string;
@@ -18,7 +20,7 @@ export const DateInput: React.FC<DateInputProps> = ({
   label = DATE_PICKER_DEFAULTS.LABEL,
   placeholder = DATE_PICKER_DEFAULTS.PLACEHOLDER,
   className = DATE_PICKER_DEFAULTS.CLASS_NAME,
-  disabled = DATE_PICKER_DEFAULTS.DISABLED
+  disabled = DATE_PICKER_DEFAULTS.DISABLED,
 }) => {
   const todayStr = getTodayFormatted();
 
@@ -34,4 +36,4 @@ export const DateInput: React.FC<DateInputProps> = ({
       max={todayStr}
     />
   );
-}; 
+};

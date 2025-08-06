@@ -14,5 +14,5 @@ export { createAssignmentActions, createExerciseActions } from './actions';
 export {
   useAssignments, useAssignmentsError, useAssignmentsItems,
   useAssignmentsLoading, useExercises, useExercisesError, useExercisesItems,
-  useExercisesLoading
+  useExercisesLoading,
 } from './selectors';

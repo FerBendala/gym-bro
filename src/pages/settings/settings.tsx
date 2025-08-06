@@ -1,9 +1,10 @@
 import React from 'react';
+
 import { MainSettings, SettingsContent } from './components';
 import { useSettingsNavigation } from './hooks';
 
 /**
- * Página de configuración con administración de ejercicios y exportación de datos
+ * Página de configuración con exportación de datos y configuraciones de volumen
  * Incluye navegación a diferentes secciones de configuración
  */
 export const ModernSettings: React.FC = () => {
@@ -22,4 +23,4 @@ export const ModernSettings: React.FC = () => {
       {renderContent()}
     </div>
   );
-}; 
+};

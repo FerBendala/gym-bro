@@ -1,3 +1,5 @@
+import { useMemo, useState } from 'react';
+
 import type { WorkoutRecord } from '@/interfaces';
 import {
   formatCalendarHeader,
@@ -10,9 +12,8 @@ import {
   groupWorkoutsByDay,
   navigateToNextMonth,
   navigateToPreviousMonth,
-  type CalendarDayData
+  type CalendarDayData,
 } from '@/utils';
-import { useMemo, useState } from 'react';
 
 /**
  * Hook para manejar la lógica del calendario de entrenamientos
@@ -32,7 +33,7 @@ export const useWorkoutCalendar = (records: WorkoutRecord[]) => {
 
   const calendarDays = useMemo(() => {
     return calendarData.days.map(day =>
-      getDayData(day, currentDate, workoutsByDay)
+      getDayData(day, currentDate, workoutsByDay),
     );
   }, [calendarData.days, currentDate, workoutsByDay]);
 
@@ -91,6 +92,6 @@ export const useWorkoutCalendar = (records: WorkoutRecord[]) => {
 
     // Datos raw para casos especiales
     workoutsByDay,
-    calendarData
+    calendarData,
   };
-}; 
+};

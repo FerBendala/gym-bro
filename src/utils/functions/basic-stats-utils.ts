@@ -76,6 +76,6 @@ export const findMostRecent = <T extends { date: Date }>(records: T[]): T | null
   if (records.length === 0) return null;
 
   return records.reduce((most, current) =>
-    current.date.getTime() > most.date.getTime() ? current : most
+    current.date.getTime() > most.date.getTime() ? current : most,
   );
 };

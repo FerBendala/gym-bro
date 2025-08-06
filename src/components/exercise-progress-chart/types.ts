@@ -43,10 +43,10 @@ export interface ProcessedChartData {
   exerciseData: Record<string, WorkoutRecord[]>;
   weightRange: DataRange;
   dateRange: DataRange;
-  legendItems: Array<{
+  legendItems: {
     label: string;
     color: string;
-  }>;
+  }[];
 }
 
 /**
@@ -71,4 +71,4 @@ export interface ChartStatistics {
 
 export interface ChartStatisticsProps {
   statistics: ChartStatistics;
-} 
+}

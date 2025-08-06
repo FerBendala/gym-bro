@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
+
 import { createNotificationActions } from './actions';
 import type { NotificationStore } from './types';
 import { getInitialState, persistenceConfig } from './utils';
@@ -14,10 +15,10 @@ export const useNotificationStore = create<NotificationStore>()(
         // Combinar todas las acciones
         ...createNotificationActions(set),
       }),
-      persistenceConfig
+      persistenceConfig,
     ),
     {
       name: 'notification-store',
-    }
-  )
-); 
+    },
+  ),
+);

@@ -1,12 +1,16 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { endOfWeek, format, getDay, startOfWeek, subWeeks } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+import { roundToDecimals } from './math-utils';
 import type { TemporalTrend } from './trends-interfaces';
+import { getMaxWeight } from './workout-utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula tendencias temporales mejoradas por semana
  */
-export const calculateTemporalTrends = (records: WorkoutRecord[], weeksCount: number = 12): TemporalTrend[] => {
+export const calculateTemporalTrends = (records: WorkoutRecord[], weeksCount = 12): TemporalTrend[] => {
   if (records.length === 0) return [];
 
   const now = new Date();
@@ -23,12 +27,12 @@ export const calculateTemporalTrends = (records: WorkoutRecord[], weeksCount: nu
 
     if (weekRecords.length > 0) {
       const totalVolume = weekRecords.reduce((sum, record) =>
-        sum + (record.weight * record.reps * record.sets), 0
+        sum + (record.weight * record.reps * record.sets), 0,
       );
 
       const weights = weekRecords.map(record => record.weight);
-      const avgWeight = weights.reduce((sum, weight) => sum + weight, 0) / weights.length;
-      const maxWeight = Math.max(...weights);
+      const avgWeight = weights.length > 0 ? weights.reduce((sum, w) => sum + w, 0) / weights.length : 0;
+      const maxWeight = getMaxWeight(records);
 
       // Calcular métricas adicionales
       const uniqueExercises = new Set(weekRecords.map(r => r.exerciseId)).size;
@@ -47,15 +51,15 @@ export const calculateTemporalTrends = (records: WorkoutRecord[], weeksCount: nu
       const consistency = Math.round((workoutDays / 7) * 100);
 
       // Calcular fuerza promedio (peso promedio ponderado por volumen)
-      const weeklyStrength = weekRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0) / totalVolume;
+      const weeklyStrength = avgWeight > 0 ? avgWeight * (1 + Math.min(avgReps, 20) / 30) : 0;
 
       const trend: TemporalTrend = {
         period: format(weekStart, 'dd/MM', { locale: es }),
         fullDate: format(weekStart, 'yyyy-MM-dd', { locale: es }),
         workouts: weekRecords.length,
         volume: Math.round(totalVolume),
-        avgWeight: Math.round(avgWeight * 100) / 100,
-        maxWeight: Math.round(maxWeight * 100) / 100,
+        avgWeight: roundToDecimals(avgWeight),
+        maxWeight: roundToDecimals(maxWeight),
         weekNumber: weeksCount - i,
         volumeChange: 0, // Se calculará después
         volumeChangePercent: 0, // Se calculará después
@@ -64,10 +68,10 @@ export const calculateTemporalTrends = (records: WorkoutRecord[], weeksCount: nu
         momentum: 'Estable', // Se calculará después
         performanceScore: 0, // Se calculará después
         uniqueExercises,
-        avgReps: Math.round(avgReps * 100) / 100,
-        avgSets: Math.round(avgSets * 100) / 100,
+        avgReps: roundToDecimals(avgReps),
+        avgSets: roundToDecimals(avgSets),
         totalSets,
-        weeklyStrength: Math.round(weeklyStrength * 100) / 100
+        weeklyStrength: roundToDecimals(weeklyStrength),
       };
 
       trends.push(trend);
@@ -121,4 +125,4 @@ export const calculateTemporalTrends = (records: WorkoutRecord[], weeksCount: nu
   }
 
   return trends.slice(-8); // Últimas 8 semanas con datos
-}; 
+};

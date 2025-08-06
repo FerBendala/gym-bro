@@ -1,7 +1,8 @@
-import { StatCard } from '@/components/stat-card';
-import { formatNumberToString } from '@/utils';
 import { Calendar, Target, TrendingUp, Trophy, Zap } from 'lucide-react';
 import React from 'react';
+
+import { StatCard } from '@/components/stat-card';
+import { formatNumberToString } from '@/utils';
 
 interface ExercisesMetricsProps {
   globalMetrics: {
@@ -15,7 +16,7 @@ interface ExercisesMetricsProps {
 
 export const ExercisesMetrics: React.FC<ExercisesMetricsProps> = ({
   globalMetrics,
-  allExercisesCount
+  allExercisesCount,
 }) => {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-4">
@@ -65,4 +66,4 @@ export const ExercisesMetrics: React.FC<ExercisesMetricsProps> = ({
       />
     </div>
   );
-}; 
+};

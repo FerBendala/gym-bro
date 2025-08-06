@@ -5,4 +5,3 @@
 
 export { ExerciseCard } from './exercise-card';
 export type { ExerciseCardProps } from './types';
-

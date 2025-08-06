@@ -8,4 +8,4 @@ export const getAlertStyles = (variant: ThemeAlertVariant, className: string): s
 
 export const getIconClassName = (defaultClassName: string, customClassName: string): string => {
   return `${defaultClassName} ${customClassName}`.trim();
-}; 
+};

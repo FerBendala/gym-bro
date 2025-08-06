@@ -20,4 +20,4 @@ export interface TabButtonProps {
 export interface TabContainerProps {
   children: React.ReactNode;
   isMobile?: boolean;
-} 
+}

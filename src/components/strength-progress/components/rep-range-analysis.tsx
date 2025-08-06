@@ -1,9 +1,11 @@
+import { BarChart3 } from 'lucide-react';
+
+import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
+import type { StrengthProgressAnalysis } from '../types';
+
 import { Card, CardContent, CardHeader } from '@/components/card';
 import { InfoTooltip } from '@/components/tooltip';
 import { formatNumberToString } from '@/utils';
-import { BarChart3 } from 'lucide-react';
-import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
-import type { StrengthProgressAnalysis } from '../types';
 
 interface RepRangeAnalysisProps {
   analysis: StrengthProgressAnalysis;
@@ -54,4 +56,4 @@ export const RepRangeAnalysis: React.FC<RepRangeAnalysisProps> = ({ analysis }) 
       </CardContent>
     </Card>
   );
-}; 
+};

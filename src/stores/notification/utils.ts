@@ -5,7 +5,7 @@ export const getInitialState = (): NotificationStoreState => ({
   current: {
     show: false,
     message: '',
-    type: 'info'
+    type: 'info',
   },
   items: [],
 });
@@ -17,4 +17,4 @@ export const persistenceConfig = {
     // Solo persistir la lista de notificaciones, no la actual
     items: state.items,
   }),
-}; 
+};

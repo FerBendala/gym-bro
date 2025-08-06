@@ -15,12 +15,12 @@ export {
 
 // Exportar selectores individuales
 export {
-  useActiveTab, useCanGoBack, useClearHistory, useCloseMoreMenu, useConfigActions, useConfigState, useGoBack, useIsNavigationVisible, useNavigateTo,
+  useActiveTab, useCanGoBack, useClearHistory, useClearNavigationParams, useCloseMoreMenu, useConfigActions, useConfigState, useGoBack, useIsNavigationVisible, useNavigateTo,
   // Acciones agrupadas
-  useNavigationActions, useNavigationHistory,
+  useNavigationActions, useNavigationHistory, useNavigationParams,
   // Selectores compuestos
   useNavigationState, useNavigationType,
   // Acciones individuales
-  useSetActiveTab, useSetNavigationType, useSetNavigationVisible, useSetShowBackButton, useSetSubtitle, useSetTitle, useShowBackButton, useShowMoreMenu, useSubtitle, useTitle, useToggleMoreMenu, useUIActions, useUIState
+  useSetActiveTab, useSetNavigationParams, useSetNavigationType, useSetNavigationVisible, useSetShowBackButton, useSetSubtitle, useSetTitle, useShowBackButton, useShowMoreMenu, useSubtitle, useTitle, useToggleMoreMenu, useUIActions, useUIState
 } from './selectors';
 

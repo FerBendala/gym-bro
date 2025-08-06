@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { devtools } from 'zustand/middleware';
+
 import {
   createModernLayoutConfigActions,
   createModernLayoutNavigationActions,
@@ -22,6 +23,7 @@ export const useModernLayoutStore = create<ModernLayoutStore>()(
       subtitle: undefined,
       showBackButton: false,
       canGoBack: false,
+      navigationParams: {},
 
       // Combinar todas las acciones
       ...createModernLayoutNavigationActions(set, get),
@@ -31,6 +33,6 @@ export const useModernLayoutStore = create<ModernLayoutStore>()(
     }),
     {
       name: 'modern-layout-store',
-    }
-  )
-); 
+    },
+  ),
+);

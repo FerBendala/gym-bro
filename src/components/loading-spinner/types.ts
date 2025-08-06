@@ -9,4 +9,4 @@ export interface LoadingSpinnerProps {
 
 export interface SpinnerSVGProps {
   className: string;
-} 
+}

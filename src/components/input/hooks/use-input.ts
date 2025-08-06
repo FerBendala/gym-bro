@@ -1,4 +1,5 @@
 import { useMemo } from 'react';
+
 import type { InputProps } from '../types';
 import { buildInputClassesObject } from '../utils';
 
@@ -49,4 +50,4 @@ export const useInput = (props: InputProps) => {
     error,
     helperText,
   };
-}; 
+};

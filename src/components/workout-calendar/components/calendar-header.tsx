@@ -1,13 +1,15 @@
-import { Button } from '@/components/button';
-import { THEME_CALENDAR } from '@/constants/theme';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React from 'react';
+
 import type { CalendarHeaderProps } from '../types';
+
+import { Button } from '@/components/button';
+import { THEME_CALENDAR } from '@/constants/theme';
 
 export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
   title,
   onPreviousMonth,
-  onNextMonth
+  onNextMonth,
 }) => {
   return (
     <div className={THEME_CALENDAR.header.container}>
@@ -24,4 +26,4 @@ export const CalendarHeader: React.FC<CalendarHeaderProps> = ({
       </div>
     </div>
   );
-}; 
+};

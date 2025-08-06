@@ -1,6 +1,7 @@
+import React from 'react';
+
 import type { WorkoutStats } from '@/utils';
 import { formatNumberToString } from '@/utils';
-import React from 'react';
 
 interface WorkoutMetricsProps {
   stats: WorkoutStats;
@@ -9,7 +10,7 @@ interface WorkoutMetricsProps {
 
 export const WorkoutMetrics: React.FC<WorkoutMetricsProps> = ({
   stats,
-  hasIndividualSets
+  hasIndividualSets,
 }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
@@ -47,4 +48,4 @@ export const WorkoutMetrics: React.FC<WorkoutMetricsProps> = ({
       </div>
     </div>
   );
-}; 
+};

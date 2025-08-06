@@ -1,11 +1,13 @@
-import { Button } from '@/components/button';
-import { Page, Section } from '@/components/layout';
-import { LoadingSpinner } from '@/components/loading-spinner';
 import { Filter } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
+
 import { FilterIndicator, FilterModal, WorkoutList } from './components';
 import { useEditMode, useFilters, useWorkoutHistory } from './hooks';
 import type { WorkoutHistoryProps } from './types';
+
+import { Button } from '@/components/button';
+import { Page, Section } from '@/components/layout';
+import { LoadingSpinner } from '@/components/loading-spinner';
 
 export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter }) => {
   const [showFilterModal, setShowFilterModal] = useState(false);
@@ -21,7 +23,7 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
     updateEditField,
     addIndividualSet,
     removeIndividualSet,
-    updateIndividualSet
+    updateIndividualSet,
   } = useEditMode();
 
   // Actualizar filtros cuando cambie initialFilter
@@ -55,7 +57,7 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
         reps: avgReps,
         sets: totalSets,
         date: editMode.date,
-        individualSets: editMode.individualSets
+        individualSets: editMode.individualSets,
       };
     } else {
       // Modo simple: usar datos agregados
@@ -64,7 +66,7 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
         weight: editMode.weight,
         reps: editMode.reps,
         sets: editMode.sets,
-        date: editMode.date
+        date: editMode.date,
       };
       // Omitir individualSets completamente en lugar de undefined para Firebase
       delete updatedRecord.individualSets;
@@ -100,8 +102,8 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
             onClick={() => setShowFilterModal(true)}
             variant="secondary"
             className="bg-blue-600/20 hover:bg-blue-600/30 border-blue-500/30"
+            leftIcon={<Filter className="w-4 h-4 mr-2" />}
           >
-            <Filter className="w-4 h-4 mr-2" />
             Filtros
             {hasActiveFilters && (
               <span className="ml-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
@@ -165,4 +167,4 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
       />
     </Page>
   );
-}; 
+};

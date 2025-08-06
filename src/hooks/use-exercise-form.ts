@@ -1,8 +1,9 @@
+import { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+
 import type { ExerciseFormData } from '@/components/admin-panel/types';
 import type { Exercise } from '@/interfaces';
 import { validateURL } from '@/utils';
-import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
 
 interface UseExerciseFormProps {
   exercise?: Exercise;
@@ -16,19 +17,21 @@ export const useExerciseForm = ({ exercise, onSubmit }: UseExerciseFormProps) =>
     reset,
     watch,
     setValue,
-    formState: { errors }
+    formState: { errors },
   } = useForm<ExerciseFormData>({
     mode: 'onChange',
     defaultValues: {
       name: '',
       categories: [],
       description: '',
-      url: ''
-    }
+      url: '',
+      categoryPercentages: {},
+    },
   });
 
   const watchedUrl = watch('url');
   const watchedCategories = watch('categories');
+  const watchedPercentages = watch('categoryPercentages');
   const isEditing = !!exercise;
 
   // Reset del formulario cuando cambia el ejercicio a editar
@@ -38,7 +41,8 @@ export const useExerciseForm = ({ exercise, onSubmit }: UseExerciseFormProps) =>
         name: exercise.name || '',
         categories: exercise.categories || [],
         description: exercise.description || '',
-        url: exercise.url || ''
+        url: exercise.url || '',
+        categoryPercentages: exercise.categoryPercentages || {},
       });
     } else {
       // Reset a valores vacíos cuando no hay ejercicio (modo crear)
@@ -46,7 +50,8 @@ export const useExerciseForm = ({ exercise, onSubmit }: UseExerciseFormProps) =>
         name: '',
         categories: [],
         description: '',
-        url: ''
+        url: '',
+        categoryPercentages: {},
       });
     }
   }, [exercise, reset]);
@@ -68,8 +73,9 @@ export const useExerciseForm = ({ exercise, onSubmit }: UseExerciseFormProps) =>
     errors,
     watchedUrl,
     watchedCategories,
+    watchedPercentages,
     isEditing,
     validateURL,
-    setValue
+    setValue,
   };
-}; 
+};

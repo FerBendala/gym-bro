@@ -9,6 +9,7 @@ export interface Exercise {
   categories: string[];
   description?: string;
   url?: string;
+  categoryPercentages?: Record<string, number>;
 }
 
 export interface ExerciseAssignment {
@@ -48,4 +49,4 @@ export interface WorkoutFormData {
   reps: number;
   sets: number;
   date?: Date;
-} 
+}

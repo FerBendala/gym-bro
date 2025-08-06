@@ -1,6 +1,6 @@
-import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
-import { calculateCategoryEffortDistribution } from './exercise-patterns';
 import { normalizeByWeekday } from './normalize-by-weekday';
+
+import type { ExerciseAssignment, WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula la progresión de peso para una categoría
@@ -47,34 +47,24 @@ export const calculateWeightProgression = (categoryRecords: WorkoutRecord[], tar
   // Si hay pocos ejercicios comunes, usar análisis más conservador
   const hasSignificantExerciseChange = commonExercises.length < Math.min(firstHalfExercises.size, secondHalfExercises.size) * 0.5;
 
-  // **CORRECCIÓN CRÍTICA**: Usar 1RM ponderado por esfuerzo de categoría
-  const firstHalfAvg1RM = firstHalf.reduce((sum, r) => {
-    const categories = r.exercise?.categories || [];
-    const effortDistribution = calculateCategoryEffortDistribution(categories, r.exercise?.name);
-    const categoryEffort = effortDistribution[categoryName] || 0;
-    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-    const weightedOneRM = oneRM * categoryEffort;
-    return sum + weightedOneRM;
+  // **CORRECCIÓN CRÍTICA**: Los registros ya están filtrados por categoría, no aplicar porcentajes adicionales
+  const firstHalfAvgWeight = firstHalf.reduce((sum, r) => {
+    return sum + r.weight; // ✅ Usar peso completo ya que está filtrado por categoría
   }, 0) / firstHalf.length;
 
-  const secondHalfAvg1RM = secondHalf.reduce((sum, r) => {
-    const categories = r.exercise?.categories || [];
-    const effortDistribution = calculateCategoryEffortDistribution(categories, r.exercise?.name);
-    const categoryEffort = effortDistribution[categoryName] || 0;
-    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-    const weightedOneRM = oneRM * categoryEffort;
-    return sum + weightedOneRM;
+  const secondHalfAvgWeight = secondHalf.reduce((sum, r) => {
+    return sum + r.weight; // ✅ Usar peso completo ya que está filtrado por categoría
   }, 0) / secondHalf.length;
 
-  if (firstHalfAvg1RM === 0) return 0;
+  if (firstHalfAvgWeight === 0) return 0;
 
   // **MEJORA CRÍTICA**: Normalizar por día de la semana para comparaciones justas
   const currentDate = new Date();
   const { normalizedCurrent: normalizedSecondHalf, normalizedComparison: normalizedFirstHalf } = normalizeByWeekday(
-    secondHalfAvg1RM,
-    firstHalfAvg1RM,
+    secondHalfAvgWeight,
+    firstHalfAvgWeight,
     currentDate,
-    allAssignments // Pasar asignaciones para detectar patrón
+    allAssignments, // Pasar asignaciones para detectar patrón
   );
 
   const densityProgression = normalizedFirstHalf > 0 ? ((normalizedSecondHalf - normalizedFirstHalf) / normalizedFirstHalf) * 100 : 0;
@@ -141,4 +131,4 @@ export const calculateWeightProgression = (categoryRecords: WorkoutRecord[], tar
   }
 
   return Math.round(progression);
-}; 
+};

@@ -49,4 +49,4 @@ export interface FilterState {
   dateTo: Date | undefined;
   sortBy: 'date' | 'exercise' | 'weight' | 'volume';
   sortOrder: 'asc' | 'desc';
-} 
+}

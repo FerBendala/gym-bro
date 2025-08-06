@@ -1,13 +1,15 @@
+import { useCallback, useState } from 'react';
+
+import type { ExerciseDataChangeEventDetail, ExerciseFormData } from '../types';
+
 import {
   createExercise,
   deleteExercise,
   getExercises,
-  updateExercise
+  updateExercise,
 } from '@/api/services';
 import type { Exercise } from '@/interfaces';
 import { useNotification } from '@/stores/notification';
-import { useCallback, useState } from 'react';
-import type { ExerciseDataChangeEventDetail, ExerciseFormData } from '../types';
 
 // Evento personalizado para notificar cambios en datos
 const DATA_CHANGE_EVENT = 'followgym-data-change';
@@ -21,11 +23,11 @@ const emitDataChange = (type: 'exercises', data?: Exercise | Partial<Exercise> |
   const eventDetail: ExerciseDataChangeEventDetail = {
     type,
     data,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
 
   window.dispatchEvent(new CustomEvent(DATA_CHANGE_EVENT, {
-    detail: eventDetail
+    detail: eventDetail,
   }));
 };
 
@@ -66,7 +68,7 @@ export const useExercises = (isOnline: boolean) => {
         name: data.name,
         categories: data.categories,
         description: data.description || undefined,
-        url: data.url || undefined
+        url: data.url || undefined,
       };
 
       const newExerciseId = await createExercise(exerciseData);
@@ -77,7 +79,7 @@ export const useExercises = (isOnline: boolean) => {
         name: data.name,
         categories: data.categories,
         description: data.description,
-        url: data.url
+        url: data.url,
       };
 
       showNotification(`Ejercicio "${data.name}" creado exitosamente`, 'success');
@@ -108,7 +110,7 @@ export const useExercises = (isOnline: boolean) => {
         name: data.name,
         categories: data.categories,
         description: data.description || undefined,
-        url: data.url || undefined
+        url: data.url || undefined,
       };
 
       await updateExercise(exerciseId, exerciseData);
@@ -160,6 +162,6 @@ export const useExercises = (isOnline: boolean) => {
     loadExercises,
     handleCreateExercise,
     handleUpdateExercise,
-    handleDeleteExercise
+    handleDeleteExercise,
   };
-}; 
+};

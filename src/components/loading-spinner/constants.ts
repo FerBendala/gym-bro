@@ -9,5 +9,5 @@ export const SPINNER_VARIANTS = ['default', 'light', 'subtle'] as const;
 export const DEFAULT_SPINNER_PROPS = {
   size: 'md',
   color: 'default',
-  variant: 'default'
-} as const; 
+  variant: 'default',
+} as const;

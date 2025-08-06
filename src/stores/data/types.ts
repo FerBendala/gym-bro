@@ -39,4 +39,4 @@ export interface DataActions {
 }
 
 // Store completo
-export type DataStore = DataState & DataActions; 
+export type DataStore = DataState & DataActions;

@@ -1,6 +1,7 @@
-import { Card, CardContent, CardHeader } from '@/components/card';
 import { AlertTriangle } from 'lucide-react';
 import React from 'react';
+
+import { Card, CardContent, CardHeader } from '@/components/card';
 
 interface FatigueAnalysisProps {
   analysis: {
@@ -40,7 +41,7 @@ export const FatigueAnalysis: React.FC<FatigueAnalysisProps> = ({ analysis }) =>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${analysis.fatigueAnalysis.fatigueIndex <= 30 ? 'bg-green-500 text-white' :
                       analysis.fatigueAnalysis.fatigueIndex <= 70 ? 'bg-yellow-500 text-black' :
                         'bg-red-500 text-white'
-                      }`}>
+                    }`}>
                       {analysis.fatigueAnalysis.fatigueIndex <= 30 ? 'Baja' :
                         analysis.fatigueAnalysis.fatigueIndex <= 70 ? 'Moderada' : 'Alta'}
                     </span>
@@ -115,4 +116,4 @@ export const FatigueAnalysis: React.FC<FatigueAnalysisProps> = ({ analysis }) =>
       </CardContent>
     </Card>
   );
-}; 
+};

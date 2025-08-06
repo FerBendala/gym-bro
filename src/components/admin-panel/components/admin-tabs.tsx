@@ -1,4 +1,5 @@
 import React from 'react';
+
 import type { AdminPanelTab } from '../types';
 
 interface AdminTabsProps {
@@ -10,22 +11,23 @@ interface AdminTabsProps {
 export const AdminTabs: React.FC<AdminTabsProps> = ({
   activeTab,
   onTabChange,
-  isModal = false
+  isModal = false,
 }) => {
   const tabs: { id: AdminPanelTab; label: string; }[] = [
+    { id: 'assignments', label: 'Asignaciones' },
     { id: 'exercises', label: 'Ejercicios' },
-    { id: 'assignments', label: 'Asignaciones' }
+    { id: 'create-exercise', label: 'Crear Ejercicio' },
   ];
 
   if (isModal) {
     return (
       <div className="border-b border-gray-700/50 bg-gray-800/30">
-        <div className="flex space-x-1 px-6 py-3">
+        <div className="flex space-x-1 px-3 sm:px-6 py-2 sm:py-3 overflow-x-auto">
           {tabs.map((tab) => (
             <button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              className={`flex items-center px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${activeTab === tab.id
+              className={`flex items-center px-2 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 whitespace-nowrap flex-shrink-0 ${activeTab === tab.id
                 ? 'bg-blue-600 text-white shadow-lg'
                 : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
                 }`}
@@ -40,12 +42,12 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
 
   return (
     <div className="bg-gray-800/30 backdrop-blur-sm rounded-xl p-1">
-      <div className="flex space-x-1">
+      <div className="flex space-x-1 overflow-x-auto">
         {tabs.map((tab) => (
           <button
             key={tab.id}
             onClick={() => onTabChange(tab.id)}
-            className={`flex-1 px-4 py-2.5 rounded-lg font-medium text-sm transition-all duration-200 ${activeTab === tab.id
+            className={`flex-1 px-2 sm:px-4 py-2 sm:py-2.5 rounded-lg font-medium text-xs sm:text-sm transition-all duration-200 whitespace-nowrap flex-shrink-0 ${activeTab === tab.id
               ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
               : 'text-gray-400 hover:text-gray-300 hover:bg-gray-800/50'
               }`}
@@ -56,4 +58,4 @@ export const AdminTabs: React.FC<AdminTabsProps> = ({
       </div>
     </div>
   );
-}; 
+};

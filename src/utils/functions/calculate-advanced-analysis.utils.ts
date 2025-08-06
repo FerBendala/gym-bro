@@ -1,13 +1,7 @@
+import type { FatigueAnalysis, IntensityMetrics, PeriodComparison, ProgressPrediction, TrainingDensity, TrainingEfficiency } from './';
+import { analyzeFatigue, analyzeIntensityMetrics, analyzeTrainingEfficiency, calculateTrainingDensity, comparePeriods, generateAdvancedOptimizationSuggestions, generateEnhancedPerformanceIndicators, predictProgress } from './';
+
 import type { WorkoutRecord } from '@/interfaces';
-import { generateAdvancedOptimizationSuggestions } from './advanced-analysis/optimization-suggestions.utils';
-import { generateEnhancedPerformanceIndicators } from './advanced-analysis/performance-indicators.utils';
-import type { FatigueAnalysis } from './analyze-fatigue.utils';
-import type { IntensityMetrics } from './analyze-intensity-metrics.utils';
-import type { TrainingEfficiency } from './analyze-training-efficiency.utils';
-import type { TrainingDensity } from './calculate-training-density.utils';
-import type { PeriodComparison } from './compare-periods.utils';
-import { analyzeFatigue, analyzeIntensityMetrics, analyzeTrainingEfficiency, calculateTrainingDensity, comparePeriods, predictProgress } from './index';
-import type { ProgressPrediction } from './predict-progress.utils';
 
 /**
  * Interfaz para análisis avanzado
@@ -19,7 +13,7 @@ export interface AdvancedAnalysis {
   periodComparisons: PeriodComparison[];
   progressPrediction: ProgressPrediction;
   intensityMetrics: IntensityMetrics;
-  peakPerformanceIndicators: Array<{
+  peakPerformanceIndicators: {
     type: 'excellent' | 'good' | 'warning' | 'critical';
     icon: string;
     title: string;
@@ -27,7 +21,7 @@ export interface AdvancedAnalysis {
     value?: string;
     progress?: number;
     category: 'consistency' | 'progress' | 'intensity' | 'recovery' | 'volume' | 'prediction' | 'plateau' | 'safety';
-  }>;
+  }[];
   optimizationSuggestions: string[];
 }
 
@@ -94,6 +88,6 @@ export const calculateAdvancedAnalysis = (records: WorkoutRecord[]): AdvancedAna
     progressPrediction: prediction,
     intensityMetrics,
     peakPerformanceIndicators,
-    optimizationSuggestions: Array.from(new Set(optimizationSuggestions)).slice(0, 6) // Eliminar duplicados y limitar a 6
+    optimizationSuggestions: Array.from(new Set(optimizationSuggestions)).slice(0, 6), // Eliminar duplicados y limitar a 6
   };
-}; 
+};

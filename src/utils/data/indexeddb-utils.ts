@@ -2,13 +2,15 @@ import {
   DB_NAME,
   DB_VERSION,
   STORE_CONFIG,
-  type StoreName
+  type StoreName,
 } from './indexeddb-config';
 import type {
   DatabaseResult,
   QueryFilter,
-  QueryOptions
+  QueryOptions,
 } from './indexeddb-types';
+
+import { logger } from '@/utils';
 
 /**
  * Utilidades genéricas para IndexedDB
@@ -47,7 +49,7 @@ export const initializeDB = (): Promise<IDBDatabase> => {
 
       // Manejar cierres inesperados
       dbInstance.onclose = () => {
-        console.warn('Base de datos cerrada inesperadamente');
+        logger.warn('Base de datos cerrada inesperadamente', undefined, 'INDEXEDDB');
         dbInstance = null;
         dbPromise = null;
       };
@@ -76,7 +78,7 @@ const createStores = (db: IDBDatabase) => {
 
     const store = db.createObjectStore(storeName, {
       keyPath: config.keyPath,
-      autoIncrement: config.autoIncrement
+      autoIncrement: config.autoIncrement,
     });
 
     // Crear índices
@@ -102,7 +104,7 @@ export const getDB = async (): Promise<IDBDatabase> => {
 export const executeTransaction = async <T>(
   storeNames: StoreName | StoreName[],
   mode: IDBTransactionMode,
-  operation: (stores: IDBObjectStore | IDBObjectStore[]) => Promise<T> | T
+  operation: (stores: IDBObjectStore | IDBObjectStore[]) => Promise<T> | T,
 ): Promise<DatabaseResult<T>> => {
   try {
     const db = await getDB();
@@ -121,7 +123,7 @@ export const executeTransaction = async <T>(
           success: true,
           data: result,
           fromCache: true,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       };
 
@@ -129,7 +131,7 @@ export const executeTransaction = async <T>(
         reject({
           success: false,
           error: `Error en transacción: ${transaction.error?.message}`,
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       };
 
@@ -137,7 +139,7 @@ export const executeTransaction = async <T>(
         reject({
           success: false,
           error: 'Transacción abortada',
-          timestamp: Date.now()
+          timestamp: Date.now(),
         });
       };
     });
@@ -145,7 +147,7 @@ export const executeTransaction = async <T>(
     return {
       success: false,
       error: `Error ejecutando transacción: ${error instanceof Error ? error.message : 'Error desconocido'}`,
-      timestamp: Date.now()
+      timestamp: Date.now(),
     };
   }
 };
@@ -155,7 +157,7 @@ export const executeTransaction = async <T>(
  */
 export const addItem = async <T>(
   storeName: StoreName,
-  data: T
+  data: T,
 ): Promise<DatabaseResult<T>> => {
   return executeTransaction(storeName, 'readwrite', async (store) => {
     const request = (store as IDBObjectStore).add(data);
@@ -171,7 +173,7 @@ export const addItem = async <T>(
  */
 export const updateItem = async <T>(
   storeName: StoreName,
-  data: T
+  data: T,
 ): Promise<DatabaseResult<T>> => {
   return executeTransaction(storeName, 'readwrite', async (store) => {
     const request = (store as IDBObjectStore).put(data);
@@ -187,7 +189,7 @@ export const updateItem = async <T>(
  */
 export const getItem = async <T>(
   storeName: StoreName,
-  id: string
+  id: string,
 ): Promise<DatabaseResult<T>> => {
   return executeTransaction(storeName, 'readonly', async (store) => {
     const request = (store as IDBObjectStore).get(id);
@@ -203,7 +205,7 @@ export const getItem = async <T>(
  */
 export const deleteItem = async (
   storeName: StoreName,
-  id: string
+  id: string,
 ): Promise<DatabaseResult<boolean>> => {
   return executeTransaction(storeName, 'readwrite', async (store) => {
     const request = (store as IDBObjectStore).delete(id);
@@ -219,7 +221,7 @@ export const deleteItem = async (
  */
 export const getAllItems = async <T>(
   storeName: StoreName,
-  options?: QueryOptions
+  options?: QueryOptions,
 ): Promise<DatabaseResult<T[]>> => {
   return executeTransaction(storeName, 'readonly', async (store) => {
     const request = (store as IDBObjectStore).getAll();
@@ -258,7 +260,7 @@ export const getItemsByIndex = async <T>(
   storeName: StoreName,
   indexName: string,
   value: unknown,
-  options?: QueryOptions
+  options?: QueryOptions,
 ): Promise<DatabaseResult<T[]>> => {
   return executeTransaction(storeName, 'readonly', async (store) => {
     const index = (store as IDBObjectStore).index(indexName);
@@ -293,7 +295,7 @@ export const getItemsByIndex = async <T>(
  * Cuenta elementos en un store
  */
 export const countItems = async (
-  storeName: StoreName
+  storeName: StoreName,
 ): Promise<DatabaseResult<number>> => {
   return executeTransaction(storeName, 'readonly', async (store) => {
     const request = (store as IDBObjectStore).count();
@@ -404,4 +406,4 @@ export const closeDB = (): void => {
     dbInstance = null;
     dbPromise = null;
   }
-}; 
+};

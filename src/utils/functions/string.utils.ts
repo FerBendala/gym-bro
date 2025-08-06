@@ -3,9 +3,9 @@
  * Funciones puras para operaciones con texto
  */
 
+import { clsx, type ClassValue } from 'clsx';
+
 import type { WorkoutRecord } from '@/interfaces';
-import type { ClassValue } from 'clsx';
-import { clsx } from 'clsx';
 
 /**
  * Combina clases CSS de forma segura
@@ -29,7 +29,7 @@ export const combineStyles = (
   base: string,
   variants: Record<string, string> = {},
   modifiers: Record<string, boolean> = {},
-  className?: string
+  className?: string,
 ): string => {
   const variantClasses = Object.entries(variants)
     .filter(([value]) => value)
@@ -48,7 +48,7 @@ export const combineStyles = (
  * Aplica clases condicionales
  */
 export const conditionalClasses = (
-  conditions: Record<string, boolean | undefined>
+  conditions: Record<string, boolean | undefined>,
 ): string => {
   return Object.entries(conditions)
     .filter(([condition]) => condition)
@@ -62,7 +62,7 @@ export const conditionalClasses = (
 export const validateSize = <T extends string>(
   size: T | undefined,
   allowedSizes: readonly T[],
-  defaultSize: T
+  defaultSize: T,
 ): T => {
   if (!size || !allowedSizes.includes(size)) {
     return defaultSize;
@@ -76,7 +76,7 @@ export const validateSize = <T extends string>(
 export const validateVariant = <T extends string>(
   variant: T | undefined,
   allowedVariants: readonly T[],
-  defaultVariant: T
+  defaultVariant: T,
 ): T => {
   if (!variant || !allowedVariants.includes(variant)) {
     return defaultVariant;
@@ -87,7 +87,7 @@ export const validateVariant = <T extends string>(
 /**
  * Formatea un número con decimales específicos
  */
-export const formatNumberToString = (num: number, maxDecimals: number = 1): string => {
+export const formatNumberToString = (num: number, maxDecimals = 1): string => {
   if (isNaN(num)) return '0';
 
   const rounded = Math.round(num * Math.pow(10, maxDecimals)) / Math.pow(10, maxDecimals);
@@ -166,7 +166,7 @@ export const normalizeURL = (url: string): string => {
 
   // Asegurar que tenga protocolo
   if (!url.startsWith('http://') && !url.startsWith('https://')) {
-    url = 'https://' + url;
+    url = `https://${url}`;
   }
 
   try {
@@ -231,7 +231,7 @@ export const getFileInfoFromString = (url: string): {
 } => {
   try {
     const urlObj = new URL(normalizeURL(url));
-    const pathname = urlObj.pathname;
+    const { pathname } = urlObj;
     const fileName = pathname.split('/').pop() || '';
     const extension = fileName.split('.').pop()?.toLowerCase() || '';
 
@@ -241,13 +241,13 @@ export const getFileInfoFromString = (url: string): {
     return {
       extension,
       fileName,
-      isMedia
+      isMedia,
     };
   } catch {
     return {
       extension: '',
       fileName: '',
-      isMedia: false
+      isMedia: false,
     };
   }
 };
@@ -256,27 +256,27 @@ export const getFileInfoFromString = (url: string): {
  * Filtra opciones de select por texto de búsqueda
  */
 export const filterSelectOptions = (
-  options: Array<{ value: string; label: string }>,
-  searchText: string
-): Array<{ value: string; label: string }> => {
+  options: { value: string; label: string }[],
+  searchText: string,
+): { value: string; label: string }[] => {
   if (!searchText) return options;
 
   const normalizedSearch = searchText.toLowerCase().trim();
 
   return options.filter(option =>
     option.label.toLowerCase().includes(normalizedSearch) ||
-    option.value.toLowerCase().includes(normalizedSearch)
+    option.value.toLowerCase().includes(normalizedSearch),
   );
 };
 
 /**
  * Agrupa ejercicios por categoría para usar en componentes Select
  */
-export const groupExercisesByCategory = (exercises: Array<{ id: string; name: string; categories: string[] }>): Array<{
+export const groupExercisesByCategory = (exercises: { id: string; name: string; categories: string[] }[]): {
   label: string;
-  options: Array<{ value: string; label: string }>;
-}> => {
-  const grouped: Record<string, Array<{ value: string; label: string }>> = {};
+  options: { value: string; label: string }[];
+}[] => {
+  const grouped: Record<string, { value: string; label: string }[]> = {};
 
   exercises.forEach(exercise => {
     exercise.categories.forEach(category => {
@@ -285,14 +285,14 @@ export const groupExercisesByCategory = (exercises: Array<{ id: string; name: st
       }
       grouped[category].push({
         value: exercise.id,
-        label: exercise.name
+        label: exercise.name,
       });
     });
   });
 
   return Object.entries(grouped).map(([category, options]) => ({
     label: category,
-    options: options.sort((a, b) => a.label.localeCompare(b.label))
+    options: options.sort((a, b) => a.label.localeCompare(b.label)),
   })).sort((a, b) => a.label.localeCompare(b.label));
 };
 
@@ -300,8 +300,8 @@ export const groupExercisesByCategory = (exercises: Array<{ id: string; name: st
  * Encuentra una opción por valor
  */
 export const findOptionByValue = (
-  options: Array<{ value: string; label: string }>,
-  value: string
+  options: { value: string; label: string }[],
+  value: string,
 ): { value: string; label: string } | undefined => {
   return options.find(option => option.value === value);
 };
@@ -310,9 +310,9 @@ export const findOptionByValue = (
  * Obtiene la etiqueta de una opción por valor
  */
 export const getOptionLabel = (
-  options: Array<{ value: string; label: string }>,
+  options: { value: string; label: string }[],
   value: string,
-  fallback = value
+  fallback = value,
 ): string => {
   const option = findOptionByValue(options, value);
   return option?.label || fallback;
@@ -322,8 +322,18 @@ export const getOptionLabel = (
  * Valida si un valor es válido para un select
  */
 export const isValidSelectValue = (
-  options: Array<{ value: string; label: string }>,
-  value: string
+  options: { value: string; label: string }[],
+  value: string,
 ): boolean => {
   return options.some(option => option.value === value);
-}; 
+};
+
+/**
+ * Obtiene el color de ajuste de volumen basado en el valor
+ * Función genérica para colores de volumen en toda la aplicación
+ */
+export const getVolumeAdjustmentColor = (adjustment: number): string => {
+  if (adjustment > 0) return 'text-green-400';
+  if (adjustment < 0) return 'text-red-400';
+  return 'text-gray-400';
+};

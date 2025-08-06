@@ -8,7 +8,7 @@ export const determinePriorityLevel = (
   deviation: number,
   weeklyFrequency: number,
   progressTrend: 'improving' | 'stable' | 'declining',
-  isBalanced: boolean
+  isBalanced: boolean,
 ): 'low' | 'medium' | 'high' | 'critical' => {
   // Si está balanceado, prioridad máxima es 'medium' (solo por factores secundarios)
   if (isBalanced) {
@@ -36,7 +36,7 @@ export const determinePriorityLevel = (
 export const determineDevelopmentStage = (
   strengthIndex: number,
   weeklyFrequency: number,
-  volume: number
+  volume: number,
 ): 'beginner' | 'intermediate' | 'advanced' | 'neglected' => {
   // Si no hay volumen o frecuencia muy baja, está descuidado
   if (volume === 0 || weeklyFrequency < 0.5) return 'neglected';
@@ -54,4 +54,4 @@ export const determineDevelopmentStage = (
     default:
       return 'beginner';
   }
-}; 
+};

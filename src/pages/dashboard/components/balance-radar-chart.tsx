@@ -1,7 +1,8 @@
-import { formatNumberToString } from '@/utils';
 import type { ApexOptions } from 'apexcharts';
 import React from 'react';
 import Chart from 'react-apexcharts';
+
+import { formatNumberToString } from '@/utils';
 
 interface BalanceRadarChartProps {
   balanceScore: number;
@@ -18,7 +19,7 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
   intensity,
   frequency,
   progress,
-  balanceLevel
+  balanceLevel,
 }) => {
   const getRadarColor = (): string => {
     if (balanceLevel === 'excellent') return '#10b981'; // green
@@ -30,9 +31,12 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
   const options: ApexOptions = {
     chart: {
       type: 'radar',
-      height: 350,
+      height: '100%',
       background: 'transparent',
-      toolbar: { show: false }
+      toolbar: { show: false },
+      // Mejorar el responsive
+      redrawOnWindowResize: true,
+      redrawOnParentResize: true,
     },
     plotOptions: {
       radar: {
@@ -40,25 +44,25 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
         polygons: {
           strokeColors: '#374151',
           fill: {
-            colors: ['transparent']
-          }
-        }
-      }
+            colors: ['transparent'],
+          },
+        },
+      },
     },
     colors: [getRadarColor()],
     fill: {
       opacity: 0.3,
-      colors: [getRadarColor()]
+      colors: [getRadarColor()],
     },
     stroke: {
       width: 3,
-      colors: [getRadarColor()]
+      colors: [getRadarColor()],
     },
     markers: {
       size: 6,
       colors: ['#ffffff'],
       strokeColors: getRadarColor(),
-      strokeWidth: 2
+      strokeWidth: 2,
     },
     xaxis: {
       categories: [
@@ -66,22 +70,27 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
         'Consistencia',
         'Intensidad',
         'Frecuencia',
-        'Progreso'
+        'Progreso',
       ],
       labels: {
         style: {
           colors: '#9ca3af',
-          fontSize: '12px'
-        }
-      }
+          fontSize: '11px',
+          fontWeight: 500,
+        },
+        // Mejorar el responsive de las etiquetas
+        maxHeight: 60,
+        trim: false,
+        hideOverlappingLabels: false,
+      },
     },
     yaxis: {
       show: false,
       min: 0,
-      max: 100
+      max: 100,
     },
     theme: {
-      mode: 'dark'
+      mode: 'dark',
     },
     tooltip: {
       theme: 'dark',
@@ -104,12 +113,49 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
             default:
               return `${formatNumberToString(val, 1)}%`;
           }
-        }
-      }
+        },
+      },
     },
     legend: {
-      show: false
-    }
+      show: false,
+    },
+    // Mejorar el responsive
+    responsive: [
+      {
+        breakpoint: 768,
+        options: {
+          plotOptions: {
+            radar: {
+              size: 120,
+            },
+          },
+          xaxis: {
+            labels: {
+              style: {
+                fontSize: '10px',
+              },
+            },
+          },
+        },
+      },
+      {
+        breakpoint: 480,
+        options: {
+          plotOptions: {
+            radar: {
+              size: 100,
+            },
+          },
+          xaxis: {
+            labels: {
+              style: {
+                fontSize: '9px',
+              },
+            },
+          },
+        },
+      },
+    ],
   };
 
   const series = [{
@@ -119,13 +165,13 @@ export const BalanceRadarChart: React.FC<BalanceRadarChartProps> = ({
       consistency,
       intensity,
       frequency,
-      progress
-    ]
+      progress,
+    ],
   }];
 
   return (
-    <div className="w-full h-96">
+    <div className="w-full h-full min-h-[280px] sm:min-h-[320px] lg:min-h-[350px]">
       <Chart options={options} series={series} type="radar" height="100%" />
     </div>
   );
-}; 
+};

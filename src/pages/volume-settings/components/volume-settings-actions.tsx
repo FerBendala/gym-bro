@@ -1,8 +1,10 @@
-import { Button } from '@/components/button';
 import { RotateCcw, Save } from 'lucide-react';
 import React from 'react';
+
 import { VOLUME_SETTINGS_MESSAGES } from '../constants';
 import { isTotalValid } from '../utils';
+
+import { Button } from '@/components/button';
 
 interface VolumeSettingsActionsProps {
   saving: boolean;
@@ -38,4 +40,4 @@ export const VolumeSettingsActions: React.FC<VolumeSettingsActionsProps> = ({
       </Button>
     </div>
   );
-}; 
+};

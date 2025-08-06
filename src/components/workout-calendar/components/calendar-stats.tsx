@@ -1,6 +1,8 @@
-import { THEME_CALENDAR } from '@/constants/theme';
 import React from 'react';
+
 import type { CalendarStatsProps } from '../types';
+
+import { THEME_CALENDAR } from '@/constants/theme';
 
 export const CalendarStats: React.FC<CalendarStatsProps> = ({ stats }) => {
   return (
@@ -25,4 +27,4 @@ export const CalendarStats: React.FC<CalendarStatsProps> = ({ stats }) => {
       </div>
     </div>
   );
-}; 
+};

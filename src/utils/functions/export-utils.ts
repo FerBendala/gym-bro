@@ -21,4 +21,4 @@ export const downloadFile = (content: string | ArrayBuffer, filename: string, mi
 export const generateFilename = (baseName: string, extension: string): string => {
   const timestamp = format(new Date(), 'yyyy-MM-dd_HH-mm');
   return `${baseName}_${timestamp}.${extension}`;
-}; 
+};

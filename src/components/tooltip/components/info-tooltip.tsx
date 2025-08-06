@@ -1,12 +1,14 @@
-import { Tooltip } from '@/components/tooltip';
 import { Info } from 'lucide-react';
 import React from 'react';
+
 import { InfoTooltipProps } from '../types';
+
+import { Tooltip } from '@/components/tooltip';
 
 export const InfoTooltip: React.FC<InfoTooltipProps> = ({
   content,
   position = 'top',
-  className
+  className,
 }) => {
   return (
     <Tooltip
@@ -18,4 +20,4 @@ export const InfoTooltip: React.FC<InfoTooltipProps> = ({
       <Info className="w-4 h-4 text-gray-400 hover:text-blue-400 transition-colors cursor-help" />
     </Tooltip>
   );
-}; 
+};

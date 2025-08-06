@@ -1,10 +1,11 @@
+import { Dumbbell, Search, Target } from 'lucide-react';
+import React from 'react';
+
 import { Card, CardContent } from '@/components/card';
 import { Input } from '@/components/input';
 import { Select } from '@/components/select';
 import { EXERCISE_CATEGORIES } from '@/constants/exercise.constants';
 import type { Exercise } from '@/interfaces';
-import { Dumbbell, Search, Target } from 'lucide-react';
-import React from 'react';
 
 interface SearchFiltersProps {
   exercises: Exercise[];
@@ -23,7 +24,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
   selectedCategory,
   onSearchTermChange,
   onSelectedExerciseChange,
-  onSelectedCategoryChange
+  onSelectedCategoryChange,
 }) => {
   return (
     <Card className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 border-gray-700/30">
@@ -61,7 +62,7 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
               onChange={(e) => onSelectedExerciseChange(e.target.value)}
               options={[
                 { value: 'all', label: 'Todos los ejercicios' },
-                ...exercises.map(ex => ({ value: ex.id, label: ex.name }))
+                ...exercises.map(ex => ({ value: ex.id, label: ex.name })),
               ]}
               className="border-gray-600/50 focus:border-purple-500"
             />
@@ -80,8 +81,8 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
                 { value: 'all', label: 'Todas las categorías' },
                 ...EXERCISE_CATEGORIES.map(cat => ({
                   value: cat,
-                  label: cat
-                }))
+                  label: cat,
+                })),
               ]}
               className="border-gray-600/50 focus:border-green-500"
             />
@@ -90,4 +91,4 @@ export const SearchFilters: React.FC<SearchFiltersProps> = ({
       </CardContent>
     </Card>
   );
-}; 
+};

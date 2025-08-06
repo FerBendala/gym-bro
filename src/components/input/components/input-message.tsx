@@ -15,4 +15,4 @@ export const InputMessage: React.FC<InputMessageProps> = ({ message, className }
       {message}
     </p>
   );
-}; 
+};

@@ -14,7 +14,7 @@ export const EXERCISE_CATEGORIES = [
   'Piernas',
   'Hombros',
   'Brazos',
-  'Core'
+  'Core',
 ] as const;
 
 export type ExerciseCategory = typeof EXERCISE_CATEGORIES[number];
@@ -30,7 +30,7 @@ export const CATEGORY_ICONS: Record<string, React.FC<React.SVGProps<SVGSVGElemen
   'Hombros': Triangle,     // Triángulo representa la forma de los deltoides
   'Brazos': Dumbbell,      // Mancuerna es el icono más representativo para brazos
   'Core': RotateCcw,       // Rotación representa los movimientos de core/abdominales
-  'Sin categoría': Activity // Icono genérico para ejercicios sin categoría
+  'Sin categoría': Activity, // Icono genérico para ejercicios sin categoría
 };
 
 /**
@@ -44,7 +44,7 @@ export const CATEGORY_COLORS: Record<string, string> = {
   'Hombros': 'from-purple-500/80 to-violet-500/80',
   'Brazos': 'from-orange-500/80 to-amber-500/80',
   'Core': 'from-indigo-500/80 to-blue-500/80',
-  'Sin categoría': 'from-gray-500/80 to-gray-600/80'
+  'Sin categoría': 'from-gray-500/80 to-gray-600/80',
 };
 
 /**
@@ -53,11 +53,11 @@ export const CATEGORY_COLORS: Record<string, string> = {
  */
 export const IDEAL_VOLUME_DISTRIBUTION: Record<string, number> = {
   'Pecho': 20,        // Aumentado por redistribución
-  'Espalda': 25,      // Aumentado por balance postural y redistribución  
+  'Espalda': 25,      // Aumentado por balance postural y redistribución
   'Piernas': 30,      // Reducido ligeramente por redistribución
   'Hombros': 10,      // Mantenido
   'Brazos': 10,       // Reducido ligeramente
-  'Core': 5           // Reducido ligeramente
+  'Core': 5,           // Reducido ligeramente
 };
 
 /**
@@ -102,7 +102,7 @@ export const KNOWN_EXERCISE_DISTRIBUTIONS: Record<string, Record<string, number>
   // === CORE ===
   'Plancha abdominal': { 'Core': 1.0 },
   'Elevaciones de piernas colgado': { 'Core': 0.8, 'Brazos': 0.2 },
-  'Rueda abdominal de rodillas': { 'Core': 0.9, 'Brazos': 0.1 }
+  'Rueda abdominal de rodillas': { 'Core': 0.9, 'Brazos': 0.1 },
 };
 
 /**
@@ -113,31 +113,31 @@ export const CATEGORY_EFFORT_WEIGHTS: Record<string, Record<string, number>> = {
   // Ejercicios comunes de pecho + hombros
   'Pecho-Hombros': {
     'Pecho': 0.7,
-    'Hombros': 0.3
+    'Hombros': 0.3,
   },
   // Ejercicios comunes de espalda + brazos
   'Espalda-Brazos': {
     'Espalda': 0.7,
-    'Brazos': 0.3
+    'Brazos': 0.3,
   },
   // Ejercicios comunes de piernas + core
   'Piernas-Core': {
     'Piernas': 0.8,
-    'Core': 0.2
+    'Core': 0.2,
   },
   // Ejercicios comunes de hombros + brazos
   'Hombros-Brazos': {
     'Hombros': 0.6,
-    'Brazos': 0.4
+    'Brazos': 0.4,
   },
   // Ejercicios comunes de pecho + brazos
   'Pecho-Brazos': {
     'Pecho': 0.6,
-    'Brazos': 0.4
+    'Brazos': 0.4,
   },
   // Ejercicios comunes de espalda + hombros
   'Espalda-Hombros': {
     'Espalda': 0.7,
-    'Hombros': 0.3
-  }
-}; 
+    'Hombros': 0.3,
+  },
+};

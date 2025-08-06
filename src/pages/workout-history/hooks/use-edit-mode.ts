@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import type { EditMode, WorkoutRecordWithExercise } from '../types';
 
 export const useEditMode = () => {
@@ -9,7 +10,7 @@ export const useEditMode = () => {
     reps: 0,
     sets: 0,
     date: new Date(),
-    individualSets: []
+    individualSets: [],
   });
 
   const startEditing = (record: WorkoutRecordWithExercise) => {
@@ -27,8 +28,8 @@ export const useEditMode = () => {
         date: record.date,
         individualSets: record.individualSets!.map(set => ({
           weight: set.weight,
-          reps: set.reps
-        }))
+          reps: set.reps,
+        })),
       });
     } else {
       setEditMode({
@@ -37,7 +38,7 @@ export const useEditMode = () => {
         reps: record.reps,
         sets: record.sets,
         date: record.date,
-        individualSets: []
+        individualSets: [],
       });
     }
   };
@@ -50,7 +51,7 @@ export const useEditMode = () => {
       reps: 0,
       sets: 0,
       date: new Date(),
-      individualSets: []
+      individualSets: [],
     });
   };
 
@@ -75,7 +76,7 @@ export const useEditMode = () => {
           mode,
           weight: avgWeight,
           reps: avgReps,
-          sets: totalSets
+          sets: totalSets,
         };
       }
       return { ...prev, mode };
@@ -89,14 +90,14 @@ export const useEditMode = () => {
   const addIndividualSet = () => {
     setEditMode(prev => ({
       ...prev,
-      individualSets: [...prev.individualSets, { weight: 0, reps: 0 }]
+      individualSets: [...prev.individualSets, { weight: 0, reps: 0 }],
     }));
   };
 
   const removeIndividualSet = (index: number) => {
     setEditMode(prev => ({
       ...prev,
-      individualSets: prev.individualSets.filter((_, i) => i !== index)
+      individualSets: prev.individualSets.filter((_, i) => i !== index),
     }));
   };
 
@@ -104,8 +105,8 @@ export const useEditMode = () => {
     setEditMode(prev => ({
       ...prev,
       individualSets: prev.individualSets.map((set, i) =>
-        i === index ? { ...set, [field]: value } : set
-      )
+        i === index ? { ...set, [field]: value } : set,
+      ),
     }));
   };
 
@@ -118,6 +119,6 @@ export const useEditMode = () => {
     updateEditField,
     addIndividualSet,
     removeIndividualSet,
-    updateIndividualSet
+    updateIndividualSet,
   };
-}; 
+};

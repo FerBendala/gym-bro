@@ -13,8 +13,6 @@ export interface ExerciseListProps {
  * Props para el header del ExerciseList
  */
 export interface ExerciseListHeaderProps {
-  dayOfWeek: DayOfWeek;
-  isOnline: boolean;
   onOpenAdmin: () => void;
   hasExercises?: boolean;
   isDragModeActive?: boolean;
@@ -61,4 +59,4 @@ export interface UseExerciseListReturn extends ExerciseListState {
   handleReorderAssignments: (assignments: ExerciseAssignment[]) => Promise<void>;
   exercisesTrainedToday: string[];
   workoutRecords: WorkoutRecord[];
-} 
+}

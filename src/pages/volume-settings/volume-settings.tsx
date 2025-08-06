@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   TotalPercentageCard,
   VolumeCategoriesList,
@@ -59,4 +60,4 @@ export const VolumeSettings: React.FC<VolumeSettingsProps> = ({ onBack }) => {
       <VolumeSettingsTips />
     </div>
   );
-}; 
+};

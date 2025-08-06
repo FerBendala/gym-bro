@@ -47,4 +47,4 @@ export interface MultiSelectOptionProps {
 export interface MultiSelectErrorProps {
   error: string;
   size: 'sm' | 'md' | 'lg';
-} 
+}

@@ -19,4 +19,4 @@ export const MULTI_SELECT_CLASSES = {
   buttonDisabled: 'opacity-50 cursor-not-allowed',
   buttonOpen: 'ring-2 ring-blue-500 border-transparent',
   placeholder: 'text-gray-400',
-} as const; 
+} as const;

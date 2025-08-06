@@ -12,4 +12,4 @@ export interface ConnectionActions {
 }
 
 // Store completo
-export type ConnectionStore = ConnectionState & ConnectionActions; 
+export type ConnectionStore = ConnectionState & ConnectionActions;

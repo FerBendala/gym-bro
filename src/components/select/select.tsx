@@ -1,15 +1,18 @@
-import { THEME_SELECT } from '@/constants/theme';
 import { forwardRef } from 'react';
-import { SelectFeedback, SelectGroups, SelectLabel, SelectOptions } from './components';
+
+import { SelectButton, SelectDropdown, SelectFeedback, SelectLabel } from './components';
 import { useSelect } from './hooks';
 import { SelectProps } from './types';
 
+import { THEME_SELECT } from '@/constants/theme';
+import { cn } from '@/utils';
+
 /**
- * Componente Select usando sistema de tema genérico
- * Integrado completamente con THEME_SELECT, THEME_FORM y utilidades genéricas
- * Soporta tanto opciones simples como grupos de opciones (optgroups)
+ * Componente Select moderno con diseño similar al DaySelector
+ * Integrado completamente con THEME_SELECT, soporta opciones simples y grupos
+ * Diseño moderno con dropdown, backdrop blur y animaciones
  */
-export const Select = forwardRef<HTMLSelectElement, SelectProps>(({
+export const Select = forwardRef<HTMLDivElement, SelectProps>(({
   label,
   error,
   helperText,
@@ -20,19 +23,33 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(({
   variant = 'default',
   validation,
   className,
-  ...props
+  value,
+  onChange,
+  disabled = false,
 }, ref) => {
-  const { useGroups, selectClasses, hasError } = useSelect({
+  const {
+    hasError,
+    isOpen,
+    dropdownRef,
+    displayText,
+    handleToggle,
+    handleOptionSelect,
+  } = useSelect({
     error,
     groups,
     size,
     variant,
     validation,
     className,
+    value,
+    onChange,
+    disabled,
+    options,
+    placeholder,
   });
 
   return (
-    <div className={THEME_SELECT.container}>
+    <div className={cn(THEME_SELECT.container, 'relative z-[999999]')} ref={ref}>
       {label && (
         <SelectLabel
           label={label}
@@ -41,23 +58,27 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(({
         />
       )}
 
-      <select
-        ref={ref}
-        className={selectClasses}
-        {...props}
-      >
-        {placeholder && (
-          <option value="" disabled className={THEME_SELECT.placeholder.base}>
-            {placeholder}
-          </option>
-        )}
+      <div className="relative z-[999999]" ref={dropdownRef}>
+        <SelectButton
+          isOpen={isOpen}
+          disabled={disabled}
+          hasError={hasError}
+          displayText={displayText}
+          placeholder={placeholder}
+          onToggle={handleToggle}
+        />
 
-        {useGroups ? (
-          <SelectGroups groups={groups} />
-        ) : (
-          <SelectOptions options={options} />
-        )}
-      </select>
+        <SelectDropdown
+          isOpen={isOpen}
+          disabled={disabled}
+          options={options}
+          groups={groups}
+          selectedValue={String(value)}
+          onOptionSelect={handleOptionSelect}
+          placeholder={placeholder}
+          dropdownRef={dropdownRef}
+        />
+      </div>
 
       <SelectFeedback
         error={error}
@@ -68,4 +89,4 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(({
   );
 });
 
-Select.displayName = 'Select'; 
+Select.displayName = 'Select';

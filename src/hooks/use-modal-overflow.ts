@@ -19,4 +19,4 @@ export const useModalOverflow = (isOpen: boolean) => {
       };
     }
   }, [isOpen]);
-}; 
+};

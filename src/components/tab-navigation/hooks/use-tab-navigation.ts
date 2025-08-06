@@ -1,6 +1,8 @@
-import type { ThemeTabSize, ThemeTabVariant } from '@/constants/theme';
 import { useMemo } from 'react';
+
 import { getTabStyles } from '../utils';
+
+import type { ThemeTabSize, ThemeTabVariant } from '@/constants/theme';
 
 export const useTabNavigation = (size: ThemeTabSize, variant: ThemeTabVariant) => {
   const { variantStyles, sizeStyles } = useMemo(() => {
@@ -11,4 +13,4 @@ export const useTabNavigation = (size: ThemeTabSize, variant: ThemeTabVariant) =
     variantStyles,
     sizeStyles,
   };
-}; 
+};

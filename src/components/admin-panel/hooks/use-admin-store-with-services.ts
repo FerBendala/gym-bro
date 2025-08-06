@@ -1,3 +1,5 @@
+import { useCallback, useEffect } from 'react';
+
 import {
   createExercise,
   createExerciseAssignment,
@@ -5,14 +7,14 @@ import {
   deleteExerciseAssignment,
   getAssignmentsByDay,
   getExercises,
-  updateExercise
+  updateExercise,
 } from '@/api/services';
 import type { ExerciseFormData } from '@/components/admin-panel/types';
 import type { DayOfWeek, Exercise, ExerciseAssignment } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
-import { useCallback, useEffect } from 'react';
+import { logger } from '@/utils';
 
 /**
  * Hook personalizado que integra Zustand con los servicios existentes
@@ -56,7 +58,7 @@ export const useAdminStoreWithServices = () => {
     // Utilidades
     getFilteredExercises,
     getAssignmentsByDay: getAssignmentsByDayFromStore,
-    resetState
+    resetState,
   } = useAdminStore();
 
   // Cargar ejercicios
@@ -91,7 +93,7 @@ export const useAdminStoreWithServices = () => {
     try {
       const targetDay = day || selectedDay;
       if (!targetDay) {
-        console.warn('⚠️ No hay día seleccionado para cargar asignaciones');
+        logger.warn('⚠️ No hay día seleccionado para cargar asignaciones');
         return;
       }
 
@@ -100,7 +102,7 @@ export const useAdminStoreWithServices = () => {
       // Enriquecer con datos de ejercicios
       const assignmentsWithExercises: ExerciseAssignment[] = assignmentsData.map((assignment) => ({
         ...assignment,
-        exercise: exercises.find((exercise: Exercise) => exercise.id === assignment.exerciseId)
+        exercise: exercises.find((exercise: Exercise) => exercise.id === assignment.exerciseId),
       }));
 
       setAssignments(assignmentsWithExercises);
@@ -128,7 +130,7 @@ export const useAdminStoreWithServices = () => {
         name: data.name,
         categories: data.categories,
         description: data.description || undefined,
-        url: data.url || undefined
+        url: data.url || undefined,
       };
 
       const newExerciseId = await createExercise(exerciseData);
@@ -139,7 +141,7 @@ export const useAdminStoreWithServices = () => {
         name: data.name,
         categories: data.categories,
         description: data.description,
-        url: data.url
+        url: data.url,
       };
 
       addExercise(newExercise);
@@ -173,7 +175,7 @@ export const useAdminStoreWithServices = () => {
         name: data.name,
         categories: data.categories,
         description: data.description || undefined,
-        url: data.url || undefined
+        url: data.url || undefined,
       };
 
       await updateExercise(exerciseId, exerciseData);
@@ -236,7 +238,7 @@ export const useAdminStoreWithServices = () => {
       const exercise = exercises.find(ex => ex.id === exerciseId);
       const newAssignmentId = await createExerciseAssignment({
         exerciseId,
-        dayOfWeek
+        dayOfWeek,
       });
 
       // Crear el objeto ExerciseAssignment completo para agregar al store
@@ -244,7 +246,7 @@ export const useAdminStoreWithServices = () => {
         id: newAssignmentId,
         exerciseId,
         dayOfWeek,
-        exercise
+        exercise,
       };
 
       addAssignment(assignmentWithExercise);
@@ -329,6 +331,6 @@ export const useAdminStoreWithServices = () => {
     // Utilidades
     getFilteredExercises,
     getAssignmentsByDay: getAssignmentsByDayFromStore,
-    resetState
+    resetState,
   };
-}; 
+};

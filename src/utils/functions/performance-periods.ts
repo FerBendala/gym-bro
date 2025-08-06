@@ -1,5 +1,6 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { calculateTemporalTrends } from './temporal-trends';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Encuentra el mejor período de rendimiento
@@ -11,8 +12,8 @@ export const findBestPerformancePeriod = (records: WorkoutRecord[]): string => {
   if (trends.length === 0) return 'N/A';
 
   const bestWeek = trends.reduce((best, current) =>
-    current.volume > best.volume ? current : best
+    current.volume > best.volume ? current : best,
   );
 
   return `Semana del ${bestWeek.period}`;
-}; 
+};

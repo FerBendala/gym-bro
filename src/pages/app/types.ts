@@ -7,4 +7,4 @@ export interface HistoryFilter {
 export interface PageInfo {
   title: string;
   subtitle?: string;
-} 
+}

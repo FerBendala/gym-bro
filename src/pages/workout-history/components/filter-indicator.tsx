@@ -1,5 +1,6 @@
-import { Button } from '@/components/button';
 import React from 'react';
+
+import { Button } from '@/components/button';
 
 interface FilterIndicatorProps {
   hasActiveFilters: boolean;
@@ -12,7 +13,7 @@ export const FilterIndicator: React.FC<FilterIndicatorProps> = ({
   hasActiveFilters,
   displayCount,
   totalCount,
-  onClearFilters
+  onClearFilters,
 }) => {
   if (!hasActiveFilters) return null;
 
@@ -20,7 +21,7 @@ export const FilterIndicator: React.FC<FilterIndicatorProps> = ({
     <div className="p-3 bg-gradient-to-r from-blue-900/20 to-indigo-900/20 border border-blue-700/30 rounded-lg mb-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-3">
-          <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse"></div>
+          <div className="w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
           <span className="text-sm text-blue-300">
             Filtros activos - Mostrando {displayCount} de {totalCount} entrenamientos
           </span>
@@ -36,4 +37,4 @@ export const FilterIndicator: React.FC<FilterIndicatorProps> = ({
       </div>
     </div>
   );
-}; 
+};

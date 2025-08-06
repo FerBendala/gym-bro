@@ -123,4 +123,4 @@ export interface TrendsAnalysis {
   workoutHabits: WorkoutHabits;
   volumeTrendByDay: { day: string; trend: number }[];
   bestPerformancePeriod: string;
-} 
+}

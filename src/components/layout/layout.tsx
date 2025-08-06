@@ -1,10 +1,12 @@
-import { MODERN_THEME } from '@/constants/theme';
-import { useSubtitle, useTitle } from '@/stores/modern-layout';
-import { cn } from '@/utils';
 import React from 'react';
+
 import { BottomNavigation } from './components/bottom-navigation';
 import { TopNavigation } from './components/top-navigation';
 import { LayoutProps } from './types';
+
+import { MODERN_THEME } from '@/constants/theme';
+import { useSubtitle, useTitle } from '@/stores/modern-layout';
+import { cn } from '@/utils';
 
 /**
  * Layout moderno con navegación bottom-sheet
@@ -20,7 +22,7 @@ export const Layout: React.FC<LayoutProps> = ({
   headerActions,
   showBackButton = false,
   onBackClick,
-  isNavigationVisible = true
+  isNavigationVisible = true,
 }) => {
   const storeTitle = useTitle();
   const storeSubtitle = useSubtitle();
@@ -40,11 +42,11 @@ export const Layout: React.FC<LayoutProps> = ({
       <main className={cn(
         'min-h-max py-8 grow', // Espaciado ajustado para menú sticky
         MODERN_THEME.layout.container.base,
-        MODERN_THEME.layout.section.padding.mobile
+        MODERN_THEME.layout.section.padding.mobile,
       )}>
         <div className={cn(
           MODERN_THEME.animations.fade.in,
-          MODERN_THEME.animations.slide.up
+          MODERN_THEME.animations.slide.up,
         )}>
           {children}
         </div>
@@ -61,4 +63,4 @@ export const Layout: React.FC<LayoutProps> = ({
       <div id="modal-root" />
     </div>
   );
-}; 
+};

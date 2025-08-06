@@ -3,15 +3,15 @@
  * Punto de entrada centralizado para todas las interfaces
  */
 
-// Interfaces de dominio del negocio
+// Interfaces principales
+export * from './dashboard.interfaces';
 export * from './domain.interfaces';
 
-// Interfaces de UI genéricas
+// Interfaces Props comunes
+export * from './common-props';
+
+// Interfaces de balance
+export * from './balance-types';
+
+// Interfaces de UI
 export * from './ui.interfaces';
-
-// Interfaces de estado de la aplicación
-export * from './state.interfaces';
-
-// Interfaces del Dashboard
-export * from './dashboard.interfaces';
-

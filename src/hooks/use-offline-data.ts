@@ -21,6 +21,6 @@ export const useOfflineData = () => {
     ...exercises,
 
     // Operaciones de registros de entrenamiento
-    ...workoutRecords
+    ...workoutRecords,
   };
-}; 
+};

@@ -1,7 +1,9 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { calculateDayMetrics } from './day-metrics';
+import { clamp, roundToDecimals } from './math-utils';
 import { calculateTemporalTrends } from './temporal-trends';
 import type { TemporalEvolution } from './trends-interfaces';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula análisis temporal completo con evolución avanzada
@@ -19,27 +21,27 @@ export const calculateTemporalEvolution = (records: WorkoutRecord[]): TemporalEv
         nextWeekVolume: 0,
         nextWeekWorkouts: 0,
         confidence: 0,
-        trend: 'Lateral'
+        trend: 'Lateral',
       },
       cycles: {
         hasWeeklyCycle: false,
         peakDay: 'N/A',
         lowDay: 'N/A',
-        cyclePeriod: 0
+        cyclePeriod: 0,
       },
       milestones: {
         bestWeek: null,
         worstWeek: null,
         mostConsistentWeek: null,
-        biggestImprovement: null
+        biggestImprovement: null,
       },
       periodComparisons: {
         last4Weeks: { volume: 0, workouts: 0, avgWeight: 0 },
         previous4Weeks: { volume: 0, workouts: 0, avgWeight: 0 },
-        improvement: { volume: 0, workouts: 0, avgWeight: 0 }
+        improvement: { volume: 0, workouts: 0, avgWeight: 0 },
       },
       insights: [],
-      warnings: []
+      warnings: [],
     };
   }
 
@@ -66,14 +68,13 @@ export const calculateTemporalEvolution = (records: WorkoutRecord[]): TemporalEv
   const recentTrends = trends.slice(-3);
   const avgRecentVolume = recentTrends.reduce((sum, t) => sum + t.volume, 0) / recentTrends.length;
   const avgRecentWorkouts = recentTrends.reduce((sum, t) => sum + t.workouts, 0) / recentTrends.length;
-  const recentGrowth = recentTrends.length > 1 ?
-    recentTrends[recentTrends.length - 1].volume - recentTrends[0].volume : 0;
 
+  // Calcular predicciones
   const predictions = {
-    nextWeekVolume: Math.round(avgRecentVolume + (recentGrowth / 2)),
-    nextWeekWorkouts: Math.round(avgRecentWorkouts),
-    confidence: Math.max(0.3, Math.min(0.9, 0.7 - volatility)),
-    trend: recentGrowth > 0 ? 'Alcista' as const : recentGrowth < 0 ? 'Bajista' as const : 'Lateral' as const
+    nextWeekVolume: Math.round(avgRecentVolume * (1 + growthRate / 100)),
+    nextWeekWorkouts: Math.round(avgRecentWorkouts * (1 + growthRate / 100)),
+    confidence: clamp(0.7 - volatility, 0.3, 0.9),
+    trend: (growthRate > 5 ? 'Alcista' : growthRate < -5 ? 'Bajista' : 'Lateral'),
   };
 
   // Análisis de ciclos (usando análisis de días existente)
@@ -83,21 +84,21 @@ export const calculateTemporalEvolution = (records: WorkoutRecord[]): TemporalEv
     hasWeeklyCycle: dayMetrics.some(d => d.workouts > 0),
     peakDay: sortedDays[0]?.dayName || 'N/A',
     lowDay: sortedDays[sortedDays.length - 1]?.dayName || 'N/A',
-    cyclePeriod: 7 // Ciclo semanal
+    cyclePeriod: 7, // Ciclo semanal
   };
 
   // Encontrar hitos
   const bestWeek = trends.reduce((best, current) =>
-    current.performanceScore > best.performanceScore ? current : best
+    current.performanceScore > best.performanceScore ? current : best,
   );
   const worstWeek = trends.reduce((worst, current) =>
-    current.performanceScore < worst.performanceScore ? current : worst
+    current.performanceScore < worst.performanceScore ? current : worst,
   );
   const mostConsistentWeek = trends.reduce((most, current) =>
-    current.consistency > most.consistency ? current : most
+    current.consistency > most.consistency ? current : most,
   );
   const biggestImprovement = trends.reduce((biggest, current) =>
-    current.volumeChangePercent > biggest.volumeChangePercent ? current : biggest
+    current.volumeChangePercent > biggest.volumeChangePercent ? current : biggest,
   );
 
   // Comparaciones por períodos
@@ -106,25 +107,21 @@ export const calculateTemporalEvolution = (records: WorkoutRecord[]): TemporalEv
 
   // **CORRECCIÓN CLAVE**: Calcular volumen promedio por sesión para comparación justa
   const last4WeeksStats = {
-    volume: last4Weeks.length > 0 ? Math.round(
-      last4Weeks.reduce((sum, t) => sum + (t.workouts > 0 ? t.volume / t.workouts : 0), 0) / last4Weeks.length
-    ) : 0,
-    workouts: Math.round(last4Weeks.reduce((sum, t) => sum + t.workouts, 0) / last4Weeks.length),
-    avgWeight: Math.round(last4Weeks.reduce((sum, t) => sum + t.avgWeight, 0) / last4Weeks.length * 100) / 100
+    volume: last4Weeks.reduce((sum, t) => sum + t.volume, 0),
+    workouts: last4Weeks.reduce((sum, t) => sum + t.workouts, 0),
+    avgWeight: roundToDecimals(last4Weeks.reduce((sum, t) => sum + t.avgWeight, 0) / last4Weeks.length),
   };
 
   const previous4WeeksStats = {
-    volume: previous4Weeks.length > 0 ? Math.round(
-      previous4Weeks.reduce((sum, t) => sum + (t.workouts > 0 ? t.volume / t.workouts : 0), 0) / previous4Weeks.length
-    ) : 0,
-    workouts: previous4Weeks.length > 0 ? Math.round(previous4Weeks.reduce((sum, t) => sum + t.workouts, 0) / previous4Weeks.length) : 0,
-    avgWeight: previous4Weeks.length > 0 ? Math.round(previous4Weeks.reduce((sum, t) => sum + t.avgWeight, 0) / previous4Weeks.length * 100) / 100 : 0
+    volume: previous4Weeks.reduce((sum, t) => sum + t.volume, 0),
+    workouts: previous4Weeks.reduce((sum, t) => sum + t.workouts, 0),
+    avgWeight: previous4Weeks.length > 0 ? roundToDecimals(previous4Weeks.reduce((sum, t) => sum + t.avgWeight, 0) / previous4Weeks.length) : 0,
   };
 
   const improvement = {
     volume: last4WeeksStats.volume - previous4WeeksStats.volume,
     workouts: last4WeeksStats.workouts - previous4WeeksStats.workouts,
-    avgWeight: Math.round((last4WeeksStats.avgWeight - previous4WeeksStats.avgWeight) * 100) / 100
+    avgWeight: roundToDecimals((last4WeeksStats.avgWeight - previous4WeeksStats.avgWeight)),
   };
 
   // Generar insights
@@ -163,22 +160,22 @@ export const calculateTemporalEvolution = (records: WorkoutRecord[]): TemporalEv
   return {
     trends,
     overallTrend,
-    growthRate: Math.round(growthRate * 100) / 100,
-    volatility: Math.round(volatility * 100) / 100,
+    growthRate: roundToDecimals(growthRate),
+    volatility: roundToDecimals(volatility),
     predictions,
     cycles,
     milestones: {
       bestWeek,
       worstWeek,
       mostConsistentWeek,
-      biggestImprovement
+      biggestImprovement,
     },
     periodComparisons: {
       last4Weeks: last4WeeksStats,
       previous4Weeks: previous4WeeksStats,
-      improvement
+      improvement,
     },
     insights,
-    warnings
+    warnings,
   };
-}; 
+};

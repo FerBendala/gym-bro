@@ -6,11 +6,10 @@ export { useStrengthProgress } from './hooks/use-strength-progress';
 
 export type {
   StrengthByCategory,
-  StrengthCategoryComparison
+  StrengthCategoryComparison,
 } from './hooks/use-strength-by-category';
 
 export type {
   PhaseType,
-  RateType, StrengthProgressAnalysis, StrengthProgressProps, ZoneType
+  RateType, StrengthProgressAnalysis, StrengthProgressProps, ZoneType,
 } from './types';
-

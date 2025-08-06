@@ -16,18 +16,18 @@ export const ConnectionIndicator: React.FC<ConnectionIndicatorProps> = ({
   isOnline,
   showLabel = true,
   size = 'sm',
-  className = ''
+  className = '',
 }) => {
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-5 h-5',
-    lg: 'w-6 h-6'
+    lg: 'w-6 h-6',
   };
 
   const textSizeClasses = {
     sm: 'text-xs',
     md: 'text-sm',
-    lg: 'text-base'
+    lg: 'text-base',
   };
 
   const iconSize = sizeClasses[size];
@@ -47,4 +47,4 @@ export const ConnectionIndicator: React.FC<ConnectionIndicatorProps> = ({
       )}
     </div>
   );
-}; 
+};

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { SettingsSection } from '../types';
 
 export const useSettingsNavigation = () => {
@@ -15,6 +16,6 @@ export const useSettingsNavigation = () => {
   return {
     activeSection,
     navigateToSection,
-    goBackToMain
+    goBackToMain,
   };
-}; 
+};

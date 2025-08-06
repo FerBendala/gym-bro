@@ -1,15 +1,17 @@
-import { THEME_RESPONSIVE } from '@/constants/theme';
-import type { DayOfWeek } from '@/interfaces';
-import { useOnlineStatus } from '@/stores/connection';
-import { cn } from '@/utils';
 import React, { useState } from 'react';
+
 import {
   ExerciseListContent,
   ExerciseListEmptyState,
   ExerciseListHeader,
-  ExerciseListLoadingState
+  ExerciseListLoadingState,
 } from './components';
 import { useExerciseList } from './hooks';
+
+import { THEME_RESPONSIVE } from '@/constants/theme';
+import type { DayOfWeek } from '@/interfaces';
+import { useOnlineStatus } from '@/stores/connection';
+import { cn } from '@/utils';
 
 export interface ExerciseListProps {
   dayOfWeek: DayOfWeek;
@@ -38,11 +40,9 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ dayOfWeek, onOpenAdm
     <div className={cn(
       THEME_RESPONSIVE.card.spacing,
       THEME_RESPONSIVE.spacing.section.mobile,
-      THEME_RESPONSIVE.spacing.section.tablet
+      THEME_RESPONSIVE.spacing.section.tablet,
     )}>
       <ExerciseListHeader
-        dayOfWeek={dayOfWeek}
-        isOnline={isOnline}
         onOpenAdmin={onOpenAdmin}
         hasExercises={assignments.length > 0}
         isDragModeActive={isDragModeActive}
@@ -58,7 +58,7 @@ export const ExerciseList: React.FC<ExerciseListProps> = ({ dayOfWeek, onOpenAdm
       ) : (
         <div className={cn(
           THEME_RESPONSIVE.grid.responsive[1],
-          THEME_RESPONSIVE.grid.gap
+          THEME_RESPONSIVE.grid.gap,
         )}>
           <ExerciseListContent
             assignments={assignments}

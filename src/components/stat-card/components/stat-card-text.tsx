@@ -1,12 +1,14 @@
+import React from 'react';
+
+import type { StatCardTextProps } from '../types';
+
 import { THEME_STAT_CARD } from '@/constants/theme';
 import { cn } from '@/utils';
-import React from 'react';
-import type { StatCardTextProps } from '../types';
 
 export const StatCardText: React.FC<StatCardTextProps> = ({
   title,
   value,
-  size
+  size,
 }) => {
   const titleSize = THEME_STAT_CARD.content.title.sizes[size];
   const valueSize = THEME_STAT_CARD.content.value.sizes[size];
@@ -15,14 +17,14 @@ export const StatCardText: React.FC<StatCardTextProps> = ({
     <div className={THEME_STAT_CARD.content.container}>
       <p className={cn(
         THEME_STAT_CARD.content.title.base,
-        titleSize
+        titleSize,
       )}>
         {title}
       </p>
       <p
         className={cn(
           THEME_STAT_CARD.content.value.base,
-          valueSize
+          valueSize,
         )}
         title={value}
       >
@@ -30,4 +32,4 @@ export const StatCardText: React.FC<StatCardTextProps> = ({
       </p>
     </div>
   );
-}; 
+};

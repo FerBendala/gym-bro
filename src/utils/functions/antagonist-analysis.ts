@@ -1,8 +1,10 @@
-import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
-import type { WorkoutRecord } from '@/interfaces';
 import type { CategoryMetrics } from './category-analysis-types';
 import { ANTAGONIST_PAIRS } from './category-analysis-types';
+import { roundToDecimals } from './math-utils';
 import { STRENGTH_STANDARDS } from './strength-standards';
+
+import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants';
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula el score de simetría para una categoría
@@ -33,17 +35,15 @@ export const calculateSymmetryScore = (_: string, categoryRecords: WorkoutRecord
  * Calcula el ratio antagonista para un grupo muscular
  */
 export const calculateAntagonistRatio = (category: string, categoryMetrics: CategoryMetrics[]): number => {
-  const antagonist = ANTAGONIST_PAIRS[category];
-  if (!antagonist) return 1; // No hay antagonista directo
-
   const currentMetric = categoryMetrics.find(m => m.category === category);
-  const antagonistMetric = categoryMetrics.find(m => m.category === antagonist);
+  const antagonistGroup = getAntagonistGroup(category);
+  const antagonistMetric = antagonistGroup ? categoryMetrics.find(m => m.category === antagonistGroup) : null;
 
   if (!currentMetric || !antagonistMetric || antagonistMetric.totalVolume === 0) {
-    return 0;
+    return 1; // Ratio neutro si no hay datos del antagonista
   }
 
-  return Math.round((currentMetric.totalVolume / antagonistMetric.totalVolume) * 100) / 100;
+  return roundToDecimals((currentMetric.totalVolume / antagonistMetric.totalVolume));
 };
 
 /**
@@ -56,12 +56,15 @@ export const getAntagonistGroup = (category: string): string | null => {
 /**
  * Calcula el ratio ideal entre un grupo muscular y su antagonista
  */
-export const calculateIdealAntagonistRatio = (category: string): number => {
+export const calculateIdealAntagonistRatio = (
+  category: string,
+  customVolumeDistribution?: Record<string, number>,
+): number => {
   const antagonist = ANTAGONIST_PAIRS[category];
   if (!antagonist) return 1;
 
-  const categoryIdeal = IDEAL_VOLUME_DISTRIBUTION[category] || 15;
-  const antagonistIdeal = IDEAL_VOLUME_DISTRIBUTION[antagonist] || 15;
+  const categoryIdeal = customVolumeDistribution?.[category] || IDEAL_VOLUME_DISTRIBUTION[category] || 15;
+  const antagonistIdeal = customVolumeDistribution?.[antagonist] || IDEAL_VOLUME_DISTRIBUTION[antagonist] || 15;
 
   return categoryIdeal / antagonistIdeal;
 };
@@ -69,13 +72,17 @@ export const calculateIdealAntagonistRatio = (category: string): number => {
 /**
  * Analiza el desequilibrio antagonista comparando con el ratio ideal
  */
-export const analyzeAntagonistImbalance = (category: string, actualRatio: number): {
+export const analyzeAntagonistImbalance = (
+  category: string,
+  actualRatio: number,
+  customVolumeDistribution?: Record<string, number>,
+): {
   hasImbalance: boolean;
   type: 'too_much' | 'too_little' | 'balanced';
   severity: 'mild' | 'moderate' | 'severe';
   deviation: number;
 } => {
-  const idealRatio = calculateIdealAntagonistRatio(category);
+  const idealRatio = calculateIdealAntagonistRatio(category, customVolumeDistribution);
   const deviation = ((actualRatio - idealRatio) / idealRatio) * 100;
 
   // Umbrales basados en porcentaje de desviación del ratio ideal
@@ -159,4 +166,4 @@ export const getStrengthLevelLabel = (strengthIndex: number): 'principiante' | '
   if (strengthIndex >= 70) return 'avanzado';
   if (strengthIndex >= 50) return 'intermedio';
   return 'principiante';
-}; 
+};

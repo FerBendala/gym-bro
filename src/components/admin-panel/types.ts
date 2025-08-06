@@ -1,7 +1,7 @@
 import type { DayOfWeek, Exercise, ExerciseAssignment } from '@/interfaces';
 
 export type ExerciseCategory = 'all' | string;
-export type AdminPanelTab = 'exercises' | 'assignments';
+export type AdminPanelTab = 'exercises' | 'assignments' | 'create-exercise';
 
 export interface AdminPanelProps {
   onClose: () => void;
@@ -13,6 +13,7 @@ export interface ExerciseFormData {
   categories: string[];
   description: string;
   url: string;
+  categoryPercentages: Record<string, number>;
 }
 
 export interface AssignmentFormData {

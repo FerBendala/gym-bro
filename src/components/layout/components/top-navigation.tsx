@@ -1,7 +1,8 @@
-import { MODERN_THEME } from '@/constants/theme';
-import { cn } from '@/utils';
 import { Dumbbell } from 'lucide-react';
 import React from 'react';
+
+import { MODERN_THEME } from '@/constants/theme';
+import { cn } from '@/utils';
 
 interface TopNavigationProps {
   title?: string;
@@ -16,13 +17,13 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
   subtitle,
   headerActions,
   showBackButton = false,
-  onBackClick
+  onBackClick,
 }) => {
   return (
     <header className={cn(
       MODERN_THEME.navigation.topNav.container,
       MODERN_THEME.animations.transition.normal,
-      "sticky top-0 z-50 !pt-0"
+      'sticky top-0 z-50 !pt-0',
     )}>
       <div className={MODERN_THEME.navigation.topNav.content}>
         <div className="flex items-center space-x-2">
@@ -33,7 +34,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
                 MODERN_THEME.components.button.base,
                 MODERN_THEME.components.button.variants.ghost,
                 MODERN_THEME.components.button.sizes.sm,
-                MODERN_THEME.touch.minTarget
+                MODERN_THEME.touch.minTarget,
               )}
             >
               <svg
@@ -59,7 +60,7 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
             <div>
               <h1 className={cn(
                 MODERN_THEME.navigation.topNav.title,
-                MODERN_THEME.animations.transition.normal
+                MODERN_THEME.animations.transition.normal,
               )}>
                 {title}
               </h1>
@@ -78,4 +79,4 @@ export const TopNavigation: React.FC<TopNavigationProps> = ({
       </div>
     </header>
   );
-}; 
+};

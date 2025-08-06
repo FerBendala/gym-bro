@@ -1,6 +1,8 @@
-import { useNavigateTo } from '@/stores/modern-layout';
 import { useEffect, useState } from 'react';
+
 import type { HistoryFilter } from '../types';
+
+import { useNavigateTo } from '@/stores/modern-layout';
 
 export const useHistoryFilter = (activeTab: string) => {
   const [historyFilter, setHistoryFilter] = useState<HistoryFilter | null>(null);
@@ -22,6 +24,6 @@ export const useHistoryFilter = (activeTab: string) => {
 
   return {
     historyFilter,
-    handleGoToHistory
+    handleGoToHistory,
   };
-}; 
+};

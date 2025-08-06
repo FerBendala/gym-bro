@@ -35,4 +35,4 @@ export interface NotificationStoreActions {
 }
 
 // Store completo
-export type NotificationStore = NotificationStoreState & NotificationStoreActions; 
+export type NotificationStore = NotificationStoreState & NotificationStoreActions;

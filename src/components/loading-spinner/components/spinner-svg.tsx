@@ -1,4 +1,5 @@
 import React from 'react';
+
 import type { SpinnerSVGProps } from '../types';
 
 /**
@@ -30,4 +31,4 @@ export const SpinnerSVG: React.FC<SpinnerSVGProps> = ({ className }) => {
       />
     </svg>
   );
-}; 
+};

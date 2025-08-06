@@ -11,7 +11,7 @@ export const UI_VARIANTS = {
   success: 'success',
   warning: 'warning',
   danger: 'danger',
-  ghost: 'ghost'
+  ghost: 'ghost',
 } as const;
 
 // Componentes base modernos
@@ -23,16 +23,16 @@ export const COMPONENTS = {
       sm: 'px-3 py-1.5 text-sm min-h-[36px]',
       md: 'px-4 py-2 text-sm min-h-[40px]',
       lg: 'px-6 py-3 text-base min-h-[44px]',
-      xl: 'px-8 py-4 text-lg min-h-[48px]'
+      xl: 'px-8 py-4 text-lg min-h-[48px]',
     },
 
     variants: {
-      primary: `bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl focus:ring-blue-500 active:scale-95`,
-      secondary: `bg-gray-800 hover:bg-gray-700 text-white border border-gray-700 hover:border-gray-600 focus:ring-gray-500 active:scale-95`,
-      ghost: `hover:bg-gray-800 text-gray-300 hover:text-white focus:ring-gray-500 active:scale-95`,
-      danger: `bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl focus:ring-red-500 active:scale-95`,
-      success: `bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl focus:ring-green-500 active:scale-95`
-    }
+      primary: 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white shadow-lg hover:shadow-xl focus:ring-blue-500 active:scale-95',
+      secondary: 'bg-gray-800 hover:bg-gray-700 text-white border border-gray-700 hover:border-gray-600 focus:ring-gray-500 active:scale-95',
+      ghost: 'hover:bg-gray-800 text-gray-300 hover:text-white focus:ring-gray-500 active:scale-95',
+      danger: 'bg-gradient-to-r from-red-600 to-red-700 hover:from-red-700 hover:to-red-800 text-white shadow-lg hover:shadow-xl focus:ring-red-500 active:scale-95',
+      success: 'bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white shadow-lg hover:shadow-xl focus:ring-green-500 active:scale-95',
+    },
   },
 
   card: {
@@ -40,15 +40,15 @@ export const COMPONENTS = {
     padding: {
       sm: 'p-4',
       md: 'p-6',
-      lg: 'p-8'
+      lg: 'p-8',
     },
     variants: {
       default: 'hover:border-gray-600/50',
       active: 'border-blue-500/50 bg-blue-900/10',
       success: 'border-green-500/50 bg-green-900/10',
       warning: 'border-yellow-500/50 bg-yellow-900/10',
-      danger: 'border-red-500/50 bg-red-900/10'
-    }
+      danger: 'border-red-500/50 bg-red-900/10',
+    },
   },
 
   input: {
@@ -56,21 +56,21 @@ export const COMPONENTS = {
     sizes: {
       sm: 'px-3 py-2 text-sm min-h-[36px]',
       md: 'px-4 py-2.5 text-sm min-h-[40px]',
-      lg: 'px-4 py-3 text-base min-h-[44px]'
+      lg: 'px-4 py-3 text-base min-h-[44px]',
     },
     variants: {
       default: 'border-gray-700/50 focus:border-blue-500 focus:ring-blue-500/20',
       error: 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20',
-      success: 'border-green-500/50 focus:border-green-500 focus:ring-green-500/20'
-    }
+      success: 'border-green-500/50 focus:border-green-500 focus:ring-green-500/20',
+    },
   },
 
   modal: {
     overlay: 'fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 z-[70]',
-    container: 'bg-gray-900/95 backdrop-blur-md rounded-2xl border border-gray-700/50 shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden',
+    container: 'bg-gray-900/95 backdrop-blur-md rounded-2xl border border-gray-700/50 shadow-2xl w-full max-w-6xl max-h-[90vh] overflow-hidden',
     header: 'flex items-center justify-between p-6 border-b border-gray-700/50',
     content: 'overflow-y-auto',
-    footer: 'flex items-center justify-end gap-3 p-6 border-t border-gray-700/50'
+    footer: 'flex items-center justify-end gap-3 p-6 border-t border-gray-700/50',
   },
 
   spinner: {
@@ -80,7 +80,7 @@ export const COMPONENTS = {
       sm: 'h-4 w-4',
       md: 'h-5 w-5',
       lg: 'h-6 w-6',
-      xl: 'h-8 w-8'
+      xl: 'h-8 w-8',
     },
     colors: {
       default: 'text-current',
@@ -89,27 +89,27 @@ export const COMPONENTS = {
       warning: 'text-yellow-500',
       danger: 'text-red-500',
       white: 'text-white',
-      gray: 'text-gray-400'
-    }
+      gray: 'text-gray-400',
+    },
   },
 
   tabs: {
     container: {
       base: 'bg-gray-800 border-b border-gray-700',
       scroll: 'overflow-x-auto',
-      inner: 'flex space-x-1 px-4 py-2 min-w-max max-w-7xl mx-auto'
+      inner: 'flex space-x-1 px-4 py-2 min-w-max max-w-7xl mx-auto',
     },
     tab: {
       base: 'px-4 py-2 text-sm font-medium rounded-lg transition-colors whitespace-nowrap',
       active: 'bg-blue-600 text-white',
-      inactive: 'text-gray-400 hover:text-white hover:bg-gray-700'
+      inactive: 'text-gray-400 hover:text-white hover:bg-gray-700',
     },
     sizes: {
       sm: 'px-2 py-1 text-xs',
       md: 'px-4 py-2 text-sm',
-      lg: 'px-6 py-3 text-base'
-    }
-  }
+      lg: 'px-6 py-3 text-base',
+    },
+  },
 } as const;
 
 // Tipos TypeScript
@@ -133,11 +133,11 @@ export const THEME_CALENDAR = {
     container: 'flex items-center justify-between',
     title: 'text-lg font-medium text-white',
     navigation: 'flex space-x-2',
-    navButton: 'w-4 h-4'
+    navButton: 'w-4 h-4',
   },
   weekdays: {
     container: 'grid grid-cols-7 gap-1 text-center',
-    day: 'p-2 text-xs font-medium text-gray-400'
+    day: 'p-2 text-xs font-medium text-gray-400',
   },
   grid: {
     container: 'grid grid-cols-7 gap-1',
@@ -149,37 +149,37 @@ export const THEME_CALENDAR = {
       hasData: 'cursor-pointer hover:opacity-80',
       content: 'relative z-10',
       indicator: 'absolute bottom-1 left-1/2 transform -translate-x-1/2',
-      dot: 'w-1 h-1 bg-white rounded-full'
-    }
+      dot: 'w-1 h-1 bg-white rounded-full',
+    },
   },
   intensity: {
     none: 'bg-gray-800',
     low: 'bg-blue-900/50',
     medium: 'bg-blue-700/70',
     high: 'bg-blue-600/80',
-    veryHigh: 'bg-blue-500'
+    veryHigh: 'bg-blue-500',
   },
   legend: {
     container: 'flex items-center justify-between text-xs text-gray-400',
     label: '',
     dots: 'flex space-x-1',
-    dot: 'w-3 h-3 rounded'
+    dot: 'w-3 h-3 rounded',
   },
   stats: {
     container: 'pt-4 border-t border-gray-700',
     grid: 'grid grid-cols-2 gap-4 text-center',
     item: {
       value: 'text-lg font-bold text-white',
-      label: 'text-xs text-gray-400'
-    }
+      label: 'text-xs text-gray-400',
+    },
   },
   weekdayLabels: ['L', 'M', 'X', 'J', 'V', 'S', 'D'],
   intensityLevels: [
     { threshold: 1, className: 'bg-blue-900/50' },
     { threshold: 2, className: 'bg-blue-700/70' },
     { threshold: 3, className: 'bg-blue-600/80' },
-    { threshold: Infinity, className: 'bg-blue-500' }
-  ]
+    { threshold: Infinity, className: 'bg-blue-500' },
+  ],
 } as const;
 
 export const THEME_URL_PREVIEW = {
@@ -193,51 +193,51 @@ export const THEME_URL_PREVIEW = {
     url: 'text-xs text-gray-400 truncate hidden sm:block',
     thumbnail: 'flex-shrink-0',
     thumbnailImg: 'w-10 h-10 object-cover rounded border border-gray-600',
-    externalIcon: 'flex-shrink-0 w-3.5 h-3.5 text-gray-400'
+    externalIcon: 'flex-shrink-0 w-3.5 h-3.5 text-gray-400',
   },
   loading: {
     container: 'flex items-center space-x-2 p-2 bg-gray-800 rounded-lg border border-gray-700',
     icon: 'w-4 h-4 text-gray-400',
-    message: 'text-sm text-gray-400 truncate flex-1'
+    message: 'text-sm text-gray-400 truncate flex-1',
   },
   full: {
     overlay: 'fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-[9999]',
-    container: 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl max-w-4xl w-full max-h-[95vh] overflow-hidden transform transition-all duration-300',
+    container: 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-hidden transform transition-all duration-300',
     header: 'relative bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-blue-600/20 border-b border-gray-700/50 p-6',
     title: 'text-2xl font-bold text-white mb-1 bg-gradient-to-r from-white to-blue-100 bg-clip-text text-transparent',
     content: 'overflow-y-auto max-h-[calc(95vh-180px)] p-6',
     footer: 'border-t border-gray-700/50 p-6 bg-gray-800/30',
     footerContent: 'flex items-center justify-between',
-    url: 'text-sm text-gray-400 bg-gray-800/30 px-3 py-1.5 rounded-full border border-gray-600/30 inline-block'
+    url: 'text-sm text-gray-400 bg-gray-800/30 px-3 py-1.5 rounded-full border border-gray-600/30 inline-block',
   },
   media: {
     iframe: 'w-full h-full rounded-lg',
     video: 'w-full h-full rounded-lg',
     image: 'max-w-full max-h-[60vh] object-contain rounded-lg',
     aspectVideo: 'aspect-video',
-    centeredImage: 'flex justify-center'
+    centeredImage: 'flex justify-center',
   },
   website: {
     container: 'text-center py-8',
     icon: 'w-16 h-16 text-gray-400 mx-auto mb-4',
     description: 'text-gray-300 mb-4',
-    button: 'inline-flex items-center'
+    button: 'inline-flex items-center',
   },
   types: {
     youtube: {
-      colors: 'border-red-700 bg-red-900/20 hover:bg-red-900/30'
+      colors: 'border-red-700 bg-red-900/20 hover:bg-red-900/30',
     },
     video: {
-      colors: 'border-purple-700 bg-purple-900/20 hover:bg-purple-900/30'
+      colors: 'border-purple-700 bg-purple-900/20 hover:bg-purple-900/30',
     },
     image: {
-      colors: 'border-green-700 bg-green-900/20 hover:bg-green-900/30'
+      colors: 'border-green-700 bg-green-900/20 hover:bg-green-900/30',
     },
     website: {
-      colors: 'border-blue-700 bg-blue-900/20 hover:bg-blue-900/30'
+      colors: 'border-blue-700 bg-blue-900/20 hover:bg-blue-900/30',
     },
     default: {
-      colors: 'border-gray-700 bg-gray-800 hover:bg-gray-750'
-    }
-  }
-} as const; 
+      colors: 'border-gray-700 bg-gray-800 hover:bg-gray-750',
+    },
+  },
+} as const;

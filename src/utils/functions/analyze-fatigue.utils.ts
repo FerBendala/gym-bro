@@ -1,6 +1,10 @@
+import { differenceInDays } from 'date-fns';
+
+import { clamp, roundToDecimals } from './math-utils';
+import { calculateVolume } from './volume-calculations';
+import { getLatestDate, getRecordsByDayRange } from './workout-utils';
+
 import type { WorkoutRecord } from '@/interfaces';
-import { differenceInDays, endOfWeek, startOfWeek, subWeeks } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 /**
  * Interfaz para análisis de fatiga y recuperación
@@ -32,6 +36,7 @@ export interface FatigueAnalysis {
 
 /**
  * Analiza fatiga y recuperación
+ * Refactorizado para usar funciones centralizadas
  */
 export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   if (records.length < 7) {
@@ -49,61 +54,70 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
         volumeStress: 0,
         frequencyStress: 0,
         intensityStress: 0,
-        recoveryStress: 0
+        recoveryStress: 0,
       },
       recoveryRecommendations: [],
       predictedRecoveryTime: 0,
       fatigueHistory: {
         trend: 'Estable',
-        consistency: 0
-      }
+        consistency: 0,
+      },
     };
   }
 
   // OPCIÓN A: Usar semanas completas (excluyendo semana actual) para consistencia temporal
   const now = new Date();
 
-  // Semana anterior completa (base de referencia)
-  const lastWeekStart = startOfWeek(subWeeks(now, 1), { locale: es });
-  const lastWeekEnd = endOfWeek(subWeeks(now, 1), { locale: es });
-  const recentRecords = records.filter(r => {
-    const recordDate = new Date(r.date);
-    return recordDate >= lastWeekStart && recordDate <= lastWeekEnd;
+  // Identificar la semana actual
+  const currentMonday = new Date(now);
+  currentMonday.setDate(now.getDate() - now.getDay() + 1);
+  const currentWeekKey = currentMonday.toISOString().split('T')[0];
+
+  // Separar registros de semanas completadas vs semana actual
+  const completedRecords: WorkoutRecord[] = [];
+  const currentWeekRecords: WorkoutRecord[] = [];
+
+  records.forEach(record => {
+    const date = new Date(record.date);
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (weekKey === currentWeekKey) {
+      currentWeekRecords.push(record);
+    } else {
+      completedRecords.push(record);
+    }
   });
 
-  // Semana anterior a la anterior (para comparación)
-  const previousWeekStart = startOfWeek(subWeeks(now, 2), { locale: es });
-  const previousWeekEnd = endOfWeek(subWeeks(now, 2), { locale: es });
-  const olderRecords = records.filter(r => {
-    const recordDate = new Date(r.date);
-    return recordDate >= previousWeekStart && recordDate <= previousWeekEnd;
-  });
+  // Usar solo semanas completadas para el análisis
+  const recordsToAnalyze = completedRecords.length > 0 ? completedRecords : records;
+
+  // Dividir en períodos reciente y anterior
+  const midPoint = Math.floor(recordsToAnalyze.length / 2);
+  const recentRecords = recordsToAnalyze.slice(midPoint);
+  const olderRecords = recordsToAnalyze.slice(0, midPoint);
 
   // **CORRECCIÓN CLAVE**: Calcular tanto volumen total (para stress) como promedio por sesión (para comparación justa)
-  let recentVolume = recentRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
-  let olderVolume = olderRecords.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+  // Usar función centralizada para calcular volumen
+  let recentVolume = recentRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
+  let olderVolume = olderRecords.reduce((sum, r) => sum + calculateVolume(r), 0);
 
   // OPCIÓN A: Fallback si no hay datos en semanas anteriores completas
   if (recentRecords.length === 0 || olderRecords.length === 0) {
     // Usar últimos 7-14 días como fallback
-    const recent7Days = records.filter(r => {
-      const daysDiff = differenceInDays(now, new Date(r.date));
-      return daysDiff >= 0 && daysDiff <= 7;
-    });
-    const older7Days = records.filter(r => {
-      const daysDiff = differenceInDays(now, new Date(r.date));
-      return daysDiff >= 7 && daysDiff <= 14;
-    });
+    const recent7Days = getRecordsByDayRange(records, 0, 7);
+    const older7Days = getRecordsByDayRange(records, 7, 14);
 
     if (recentRecords.length === 0 && recent7Days.length > 0) {
-      recentVolume = recent7Days.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+      recentVolume = recent7Days.reduce((sum, r) => sum + calculateVolume(r), 0);
       // Actualizar recentRecords para cálculos posteriores
       recentRecords.length = 0;
       recentRecords.push(...recent7Days);
     }
 
     if (olderRecords.length === 0 && older7Days.length > 0) {
-      olderVolume = older7Days.reduce((sum, r) => sum + (r.weight * r.reps * r.sets), 0);
+      olderVolume = older7Days.reduce((sum, r) => sum + calculateVolume(r), 0);
     }
   }
 
@@ -113,18 +127,42 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   const volumeChange = olderAvgVolume > 0 ? ((recentAvgVolume - olderAvgVolume) / olderAvgVolume) * 100 : 0;
   const volumeDropIndicators = volumeChange < -15; // Caída > 15%
 
-  // Calcular días desde último entrenamiento
-  const lastWorkout = new Date(Math.max(...records.map(r => new Date(r.date).getTime())));
+  // Calcular días desde último entrenamiento usando función centralizada
+  const lastWorkout = getLatestDate(records);
   const recoveryDays = differenceInDays(new Date(), lastWorkout);
 
   // OPCIÓN A: Índice de fatiga basado en semana anterior completa (no semana actual)
   // Usar recentRecords (semana anterior) en lugar de semana actual
-  const weeklyFrequency = new Set(recentRecords.map(r => r.date.toDateString())).size;
+  // Calcular frecuencia usando la nueva lógica por semanas
+  // Agrupar por semanas para calcular frecuencia semanal
+  const weeklyData = new Map<string, Set<string>>();
+
+  records.forEach(record => {
+    const date = new Date(record.date);
+    // Obtener el lunes de la semana (día 1 = lunes)
+    const monday = new Date(date);
+    monday.setDate(date.getDate() - date.getDay() + 1);
+    const weekKey = monday.toISOString().split('T')[0];
+
+    if (!weeklyData.has(weekKey)) {
+      weeklyData.set(weekKey, new Set());
+    }
+    // Usar la fecha como string para contar días únicos
+    weeklyData.get(weekKey)!.add(record.date.toDateString());
+  });
+
+  // Calcular frecuencia semanal promedio usando días únicos
+  const totalUniqueDays = Array.from(weeklyData.values()).reduce((sum, daysSet) => sum + daysSet.size, 0);
+  const weeklyFrequency = totalUniqueDays > 0 && weeklyData.size > 0
+    ? totalUniqueDays / weeklyData.size
+    : 0;
+
   const frequencyFactor = weeklyFrequency > 5 ? 30 : weeklyFrequency > 3 ? 15 : 0;
   const volumeFactor = volumeDropIndicators ? 25 : 0;
   const recoveryFactor = recoveryDays === 0 ? 20 : recoveryDays > 3 ? -10 : 0;
 
-  const fatigueIndex = Math.min(100, Math.max(0, frequencyFactor + volumeFactor + recoveryFactor));
+  // Usar función centralizada para validar rango
+  const fatigueIndex = clamp(frequencyFactor + volumeFactor + recoveryFactor, 0, 100);
 
   // Riesgo de sobreentrenamiento
   let overreachingRisk: FatigueAnalysis['overreachingRisk'];
@@ -147,7 +185,8 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   else if (fatigueIndex < 80) fatigueLevel = 'Alta';
   else fatigueLevel = 'Muy Alta';
 
-  const recoveryRate = Math.min(100, Math.max(0, 100 - (fatigueIndex * 0.8)));
+  // Usar función centralizada para validar rango
+  const recoveryRate = clamp(100 - (fatigueIndex * 0.8), 0, 100);
 
   // Calcular workload trend
   let workloadTrend: FatigueAnalysis['workloadTrend'];
@@ -156,40 +195,44 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   else workloadTrend = 'Estable';
 
   // Calcular recovery score basado en múltiples factores
-  const recoveryScore = Math.min(100, Math.max(0,
-    100 - (fatigueIndex * 0.6) - (recoveryDays > 2 ? (recoveryDays - 2) * 5 : 0)
-  ));
+  const recoveryScore = clamp(
+    100 - (fatigueIndex * 0.6) - (recoveryDays > 2 ? (recoveryDays - 2) * 5 : 0),
+    0, 100,
+  );
 
   // Calcular stress factors más realistas basados en niveles actuales
   const stressFactors: FatigueAnalysis['stressFactors'] = {
     // Volume stress: basado en el volumen actual relativo + cambios
-    volumeStress: Math.min(100, Math.max(0,
+    volumeStress: clamp(
       // Base stress por volumen semanal (normalizado)
       Math.min(60, (recentVolume / 1000) * 10) +
       // Stress adicional por aumentos súbitos
-      (volumeChange > 15 ? (volumeChange - 15) * 2 : 0)
-    )),
+      (volumeChange > 15 ? (volumeChange - 15) * 2 : 0),
+      0, 100,
+    ),
 
     // Frequency stress: basado en frecuencia actual
-    frequencyStress: Math.min(100, Math.max(0,
+    frequencyStress: clamp(
       weeklyFrequency <= 2 ? 10 :  // Muy poca frecuencia = bajo stress
         weeklyFrequency <= 3 ? 30 :  // Frecuencia normal = stress moderado
           weeklyFrequency <= 4 ? 50 :  // Frecuencia buena = stress medio-alto
             weeklyFrequency <= 5 ? 70 :  // Frecuencia alta = stress alto
               weeklyFrequency <= 6 ? 85 :  // Frecuencia muy alta = stress muy alto
-                100  // Entrenamiento diario = stress máximo
-    )),
+                100,  // Entrenamiento diario = stress máximo
+      0, 100,
+    ),
 
     // Intensity stress: basado en el índice de fatiga
-    intensityStress: Math.min(100, Math.max(0, fatigueIndex)),
+    intensityStress: clamp(fatigueIndex, 0, 100),
 
     // Recovery stress: basado en tiempo desde último entrenamiento
-    recoveryStress: Math.min(100, Math.max(0,
+    recoveryStress: clamp(
       recoveryDays === 0 ? 80 :      // Sin descanso = alto stress
         recoveryDays === 1 ? 40 :      // 1 día descanso = stress medio
           recoveryDays === 2 ? 20 :      // 2 días descanso = stress bajo
-            recoveryDays >= 3 ? 10 : 0     // 3+ días descanso = stress muy bajo
-    ))
+            recoveryDays >= 3 ? 10 : 0,     // 3+ días descanso = stress muy bajo
+      0, 100,
+    ),
   };
 
   // Recomendaciones de recuperación mejoradas
@@ -219,12 +262,13 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
   }
 
   // Tiempo estimado de recuperación más realista
-  const predictedRecoveryTime = Math.round(Math.max(8, Math.min(72,
-    (fatigueIndex / 100) * 48 + (recoveryDays === 0 ? 12 : 0)
-  )));
+  const predictedRecoveryTime = Math.round(clamp(
+    (fatigueIndex / 100) * 48 + (recoveryDays === 0 ? 12 : 0),
+    8, 72,
+  ));
 
   // Análisis de historial de fatiga usando semanas completas CON CONTEXTO
-  // CORRECCIÓN: Considerar si el aumento es progreso controlado o deterioro
+  // Considerar si el aumento es progreso controlado o deterioro
   let trend: FatigueAnalysis['fatigueHistory']['trend'];
 
   if (volumeChange > 25) {
@@ -245,7 +289,7 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
 
   const fatigueHistory: FatigueAnalysis['fatigueHistory'] = {
     trend,
-    consistency: Math.round(Math.min(100, Math.max(0, 100 - Math.abs(volumeChange))) * 10) / 10
+    consistency: roundToDecimals(Math.min(100, Math.max(0, 100 - Math.abs(volumeChange)))),
   };
 
   return {
@@ -261,6 +305,6 @@ export const analyzeFatigue = (records: WorkoutRecord[]): FatigueAnalysis => {
     stressFactors,
     recoveryRecommendations,
     predictedRecoveryTime,
-    fatigueHistory
+    fatigueHistory,
   };
-}; 
+};

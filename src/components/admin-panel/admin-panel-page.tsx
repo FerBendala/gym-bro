@@ -1,11 +1,13 @@
+import { AlertTriangle, Wifi, WifiOff } from 'lucide-react';
+import React from 'react';
+
+import { AdminContent, AdminTabs } from './components';
+import { useAdminDataLoader } from './hooks';
+
 import { OfflineWarning } from '@/components/offline-warning';
 import { URLPreview } from '@/components/url-preview';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
-import { AlertTriangle, Wifi, WifiOff } from 'lucide-react';
-import React from 'react';
-import { AdminContent, AdminTabs } from './components';
-import { useAdminDataLoader } from './hooks';
 
 /**
  * Panel de administración como página completa sin modal
@@ -73,4 +75,4 @@ export const AdminPanelPage: React.FC = () => {
       )}
     </div>
   );
-}; 
+};

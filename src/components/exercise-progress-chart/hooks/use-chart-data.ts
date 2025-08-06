@@ -1,8 +1,10 @@
+import { useMemo } from 'react';
+
+import type { ProcessedChartData, UseChartDataReturn } from '../types';
+
 import { THEME_CHART } from '@/constants/theme';
 import type { WorkoutRecord } from '@/interfaces';
 import { calculateDataRange } from '@/utils';
-import { useMemo } from 'react';
-import type { ProcessedChartData, UseChartDataReturn } from '../types';
 
 /**
  * Hook específico para procesar datos del ExerciseProgressChart
@@ -27,7 +29,7 @@ export const useChartData = (records: WorkoutRecord[]): UseChartDataReturn => {
     // Ordenar cada ejercicio por fecha
     Object.keys(exerciseData).forEach(exercise => {
       exerciseData[exercise] = exerciseData[exercise].sort((a, b) =>
-        new Date(a.date).getTime() - new Date(b.date).getTime()
+        new Date(a.date).getTime() - new Date(b.date).getTime(),
       );
     });
 
@@ -41,19 +43,19 @@ export const useChartData = (records: WorkoutRecord[]): UseChartDataReturn => {
     // Crear elementos de leyenda
     const legendItems = Object.keys(exerciseData).map((exerciseName, index) => ({
       label: exerciseName,
-      color: THEME_CHART.colors[index % THEME_CHART.colors.length]
+      color: THEME_CHART.colors[index % THEME_CHART.colors.length],
     }));
 
     return {
       exerciseData,
       weightRange,
       dateRange,
-      legendItems
+      legendItems,
     };
   }, [records]);
 
   return {
     chartData,
-    isEmpty: !chartData || records.length === 0
+    isEmpty: !chartData || records.length === 0,
   };
-}; 
+};

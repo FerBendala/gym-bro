@@ -1,6 +1,8 @@
-import type { DayOfWeek, Exercise } from '@/interfaces';
 import { useState } from 'react';
+
 import type { AdminPanelTab } from '../types';
+
+import type { DayOfWeek, Exercise } from '@/interfaces';
 
 /**
  * Hook para manejar el estado del panel de administraci n
@@ -39,6 +41,6 @@ export const useAdminState = () => {
     handleEditExercise,
     handleCancelEdit,
     handlePreviewUrl,
-    handleClosePreview
+    handleClosePreview,
   };
-}; 
+};

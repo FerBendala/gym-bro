@@ -1,8 +1,10 @@
-import { Input } from '@/components/input';
-import { formatNumberToString } from '@/utils';
 import { Trash2 } from 'lucide-react';
 import React from 'react';
+
 import type { EditMode } from '../types';
+
+import { Input } from '@/components/input';
+import { formatNumberToString } from '@/utils';
 
 interface AdvancedFormProps {
   editMode: EditMode;
@@ -17,7 +19,7 @@ export const AdvancedForm: React.FC<AdvancedFormProps> = ({
   onFieldChange,
   onIndividualSetAdd,
   onIndividualSetRemove,
-  onIndividualSetUpdate
+  onIndividualSetUpdate,
 }) => {
   return (
     <div className="mb-4">
@@ -82,4 +84,4 @@ export const AdvancedForm: React.FC<AdvancedFormProps> = ({
       </div>
     </div>
   );
-}; 
+};

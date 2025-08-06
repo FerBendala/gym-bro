@@ -1,8 +1,11 @@
+import { useCallback, useState } from 'react';
+
+import { DataChangeEventDetail } from '../types';
+
 import { createExerciseAssignment, deleteExerciseAssignment, getAssignmentsByDay } from '@/api/services';
 import type { DayOfWeek, Exercise, ExerciseAssignment } from '@/interfaces';
 import { useNotification } from '@/stores/notification';
-import { useCallback, useState } from 'react';
-import { DataChangeEventDetail } from '../types';
+import { logger } from '@/utils';
 
 // Evento personalizado para notificar cambios en datos
 const DATA_CHANGE_EVENT = 'followgym-data-change';
@@ -16,11 +19,11 @@ const emitDataChange = (type: 'assignments', data?: ExerciseAssignment | { delet
   const eventDetail: DataChangeEventDetail = {
     type,
     data,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   };
 
   window.dispatchEvent(new CustomEvent(DATA_CHANGE_EVENT, {
-    detail: eventDetail
+    detail: eventDetail,
   }));
 };
 
@@ -41,7 +44,7 @@ export const useAssignments = (selectedDay: DayOfWeek, exercises: Exercise[], is
 
     // Validar que selectedDay sea válido antes de hacer la consulta
     if (!selectedDay) {
-      console.warn('⚠️ selectedDay es undefined en useAssignments, saltando carga');
+      logger.warn('⚠️ selectedDay es undefined en useAssignments, saltando carga');
       return;
     }
 
@@ -49,7 +52,7 @@ export const useAssignments = (selectedDay: DayOfWeek, exercises: Exercise[], is
       const assignmentsData = await getAssignmentsByDay(selectedDay);
       const assignmentsWithExercises: ExerciseAssignment[] = assignmentsData.map((assignment: ExerciseAssignment) => ({
         ...assignment,
-        exercise: exercises.find((exercise: Exercise) => exercise.id === assignment.exerciseId)
+        exercise: exercises.find((exercise: Exercise) => exercise.id === assignment.exerciseId),
       }));
       setAssignments(assignmentsWithExercises);
     } catch (error: unknown) {
@@ -69,7 +72,7 @@ export const useAssignments = (selectedDay: DayOfWeek, exercises: Exercise[], is
       const exercise = exercises.find((ex: Exercise) => ex.id === exerciseId);
       const newAssignmentId = await createExerciseAssignment({
         exerciseId,
-        dayOfWeek
+        dayOfWeek,
       });
 
       // Crear el objeto ExerciseAssignment completo
@@ -77,12 +80,12 @@ export const useAssignments = (selectedDay: DayOfWeek, exercises: Exercise[], is
         id: newAssignmentId,
         exerciseId,
         dayOfWeek,
-        exercise
+        exercise,
       };
 
       showNotification(
         `"${exercise?.name}" asignado al ${dayOfWeek}`,
-        'success'
+        'success',
       );
 
       // Notificar cambio a otros componentes
@@ -129,6 +132,6 @@ export const useAssignments = (selectedDay: DayOfWeek, exercises: Exercise[], is
     loading,
     loadAssignments,
     handleCreateAssignment,
-    handleDeleteAssignment
+    handleDeleteAssignment,
   };
-}; 
+};

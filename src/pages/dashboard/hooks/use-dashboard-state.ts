@@ -1,4 +1,5 @@
 import { useState } from 'react';
+
 import { DEFAULT_DASHBOARD_TAB } from '../constants';
 import type { DashboardTab } from '../types';
 
@@ -7,6 +8,6 @@ export const useDashboardState = () => {
 
   return {
     activeTab,
-    setActiveTab
+    setActiveTab,
   };
-}; 
+};

@@ -1,11 +1,13 @@
-import { THEME_RESPONSIVE } from '@/constants/theme';
 import React from 'react';
+
 import type { TabContainerProps } from '../types';
 import { getDesktopContainerClasses, getMobileContainerClasses } from '../utils';
 
+import { THEME_RESPONSIVE } from '@/constants/theme';
+
 export const TabContainer: React.FC<TabContainerProps> = ({
   children,
-  isMobile = false
+  isMobile = false,
 }) => {
   const containerClasses = isMobile
     ? getMobileContainerClasses()
@@ -22,4 +24,4 @@ export const TabContainer: React.FC<TabContainerProps> = ({
       </div>
     </div>
   );
-}; 
+};

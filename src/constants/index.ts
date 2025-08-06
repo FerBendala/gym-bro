@@ -9,4 +9,3 @@ export * from './days.constants';
 export * from './exercise.constants';
 export * from './prediction-utils.constants';
 export * from './theme';
-

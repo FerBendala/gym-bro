@@ -1,6 +1,7 @@
-import { StatCard } from '@/components/stat-card';
 import { Activity, AlertTriangle, Shield, Target } from 'lucide-react';
 import React from 'react';
+
+import { StatCard } from '@/components/stat-card';
 
 interface AdvancedMetricsProps {
   analysis: {
@@ -53,4 +54,4 @@ export const AdvancedMetrics: React.FC<AdvancedMetricsProps> = ({ analysis }) =>
       />
     </div>
   );
-}; 
+};

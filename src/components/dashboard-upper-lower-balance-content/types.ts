@@ -45,6 +45,7 @@ export interface UpperLowerBalanceContentProps {
   categoryAnalysis: CategoryAnalysis;
   muscleBalance: MuscleBalanceItem[];
   onItemClick: (itemName: string) => void;
+  userVolumeDistribution: Record<string, number>;
 }
 
 export interface MetaCategoryData {
@@ -60,12 +61,12 @@ export interface MetaCategoryData {
 }
 
 export interface HorizontalBarChartProps {
-  data: Array<{
+  data: {
     name: string;
     value: number;
     ideal: number;
     color: string;
-  }>;
+  }[];
   onItemClick?: (itemName: string) => void;
 }
 
@@ -88,4 +89,4 @@ export interface MetaCategoryCardProps {
   muscleBalance: MuscleBalanceItem[];
 }
 
-export type TrendType = 'improving' | 'declining' | 'stable'; 
+export type TrendType = 'improving' | 'declining' | 'stable';

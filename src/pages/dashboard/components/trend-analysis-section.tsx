@@ -1,9 +1,10 @@
-import { Card, CardContent, CardHeader } from '@/components/card';
-import { InfoTooltip } from '@/components/tooltip';
 import { Activity, Brain, CheckCircle, Info, TrendingDown, TrendingUp } from 'lucide-react';
 import React from 'react';
+
 import { TrendAnalysisChart } from './trend-analysis-chart';
 
+import { Card, CardContent, CardHeader } from '@/components/card';
+import { InfoTooltip } from '@/components/tooltip';
 
 export interface TrendAnalysisSectionProps {
   centralizedMetrics: {
@@ -30,7 +31,7 @@ export interface TrendAnalysisSectionProps {
 export const TrendAnalysisSection: React.FC<TrendAnalysisSectionProps> = ({
   centralizedMetrics,
   predictionMetrics,
-  analysis
+  analysis,
 }) => {
   return (
     <Card>
@@ -105,7 +106,7 @@ export const TrendAnalysisSection: React.FC<TrendAnalysisSectionProps> = ({
             <div className="space-y-3 text-sm text-gray-300">
               {/* Explicación del Estado General */}
               <div className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-2 flex-shrink-0"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-2 flex-shrink-0" />
                 <div>
                   <span className="font-medium text-white">Estado "{centralizedMetrics.trendAnalysis.toUpperCase()}":</span>
                   <span className="ml-1">
@@ -114,7 +115,7 @@ export const TrendAnalysisSection: React.FC<TrendAnalysisSectionProps> = ({
                       centralizedMetrics.trendAnalysis === 'estable' ?
                         `Tu progreso se mantiene constante. La fuerza (${centralizedMetrics.strengthTrend > 0 ? '+' : ''}${centralizedMetrics.strengthTrend}kg/sem) y volumen muestran estabilidad, lo cual es normal en fases de consolidación o cambios de rutina.` :
                         centralizedMetrics.trendAnalysis === 'empeorando' ?
-                          `Se detectaron tendencias negativas en tus métricas. Esto puede deberse a fatiga acumulada, cambios en la rutina, o necesidad de descanso. Considera revisar tu programa.` :
+                          'Se detectaron tendencias negativas en tus métricas. Esto puede deberse a fatiga acumulada, cambios en la rutina, o necesidad de descanso. Considera revisar tu programa.' :
                           'Datos insuficientes para determinar una tendencia clara. Necesitas más entrenamientos consistentes para análisis precisos.'}
                   </span>
                 </div>
@@ -122,7 +123,7 @@ export const TrendAnalysisSection: React.FC<TrendAnalysisSectionProps> = ({
 
               {/* Explicación de Fuerza */}
               <div className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0" />
                 <div>
                   <span className="font-medium text-white">Tendencia de Fuerza ({centralizedMetrics.strengthTrend > 0 ? '+' : ''}{centralizedMetrics.strengthTrend}kg/sem):</span>
                   <span className="ml-1">
@@ -140,7 +141,7 @@ export const TrendAnalysisSection: React.FC<TrendAnalysisSectionProps> = ({
 
               {/* Explicación de Volumen */}
               <div className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0" />
                 <div>
                   <span className="font-medium text-white">Tendencia de Volumen ({centralizedMetrics.volumeTrend > 0 ? '+' : ''}{centralizedMetrics.volumeTrend}kg/sem):</span>
                   <span className="ml-1">
@@ -162,7 +163,7 @@ export const TrendAnalysisSection: React.FC<TrendAnalysisSectionProps> = ({
 
               {/* Explicación de Riesgo de Meseta */}
               <div className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-2 flex-shrink-0"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-2 flex-shrink-0" />
                 <div>
                   <span className="font-medium text-white">Riesgo de Meseta ({centralizedMetrics.plateauRisk}%):</span>
                   <span className="ml-1">
@@ -178,17 +179,17 @@ export const TrendAnalysisSection: React.FC<TrendAnalysisSectionProps> = ({
 
               {/* Explicación de Confianza */}
               <div className="flex items-start gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-2 flex-shrink-0"></div>
+                <div className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-2 flex-shrink-0" />
                 <div>
                   <span className="font-medium text-white">Confianza IA ({centralizedMetrics.confidenceLevel}%):</span>
                   <span className="ml-1">
                     {centralizedMetrics.confidenceLevel >= 80 ?
                       `Muy alta. Con ${predictionMetrics.dataQuality.validRecords} registros válidos y patrones claros, las predicciones son altamente confiables.` :
                       centralizedMetrics.confidenceLevel >= 60 ?
-                        `Buena. Suficientes datos para predicciones sólidas, pero más entrenamientos mejorarán la precisión.` :
+                        'Buena. Suficientes datos para predicciones sólidas, pero más entrenamientos mejorarán la precisión.' :
                         centralizedMetrics.confidenceLevel >= 40 ?
-                          `Moderada. Patrones detectados pero datos limitados. Continúa entrenando consistentemente para mejorar precisión.` :
-                          `Baja. Datos insuficientes o muy variables. Las predicciones son aproximaciones generales.`
+                          'Moderada. Patrones detectados pero datos limitados. Continúa entrenando consistentemente para mejorar precisión.' :
+                          'Baja. Datos insuficientes o muy variables. Las predicciones son aproximaciones generales.'
                     }
                   </span>
                 </div>
@@ -215,28 +216,28 @@ export const TrendAnalysisSection: React.FC<TrendAnalysisSectionProps> = ({
               {/* Recomendaciones basadas en tendencia de fuerza */}
               {centralizedMetrics.strengthTrend > 1.5 && (
                 <div className="flex items-start gap-2 p-2 bg-green-900/20 rounded-lg">
-                  <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0" />
                   <span><strong className="text-green-200">Mantén el momentum:</strong> Tu progreso en fuerza es excelente. Continúa con tu programa actual y asegúrate de la recuperación adecuada.</span>
                 </div>
               )}
 
               {centralizedMetrics.strengthTrend >= 0.5 && centralizedMetrics.strengthTrend <= 1.5 && (
                 <div className="flex items-start gap-2 p-2 bg-blue-900/20 rounded-lg">
-                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0" />
                   <span><strong className="text-blue-200">Progreso sostenible:</strong> Ritmo ideal. Considera aumentar gradualmente la intensidad o volumen cuando te sientas cómodo.</span>
                 </div>
               )}
 
               {centralizedMetrics.strengthTrend < 0.5 && centralizedMetrics.strengthTrend >= -0.5 && (
                 <div className="flex items-start gap-2 p-2 bg-yellow-900/20 rounded-lg">
-                  <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-2 flex-shrink-0"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-yellow-400 mt-2 flex-shrink-0" />
                   <span><strong className="text-yellow-200">Necesitas variación:</strong> Prueba nuevos ejercicios, cambia el rango de repeticiones, o incrementa la frecuencia de entrenamiento.</span>
                 </div>
               )}
 
               {centralizedMetrics.strengthTrend < -0.5 && (
                 <div className="flex items-start gap-2 p-2 bg-red-900/20 rounded-lg">
-                  <div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 flex-shrink-0"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-red-400 mt-2 flex-shrink-0" />
                   <span><strong className="text-red-200">Tiempo de descanso:</strong> Considera una semana de deload (50% volumen/intensidad) o evalúa tu recuperación (sueño, nutrición, estrés).</span>
                 </div>
               )}
@@ -244,7 +245,7 @@ export const TrendAnalysisSection: React.FC<TrendAnalysisSectionProps> = ({
               {/* Recomendaciones basadas en riesgo de meseta */}
               {centralizedMetrics.plateauRisk > 60 && (
                 <div className="flex items-start gap-2 p-2 bg-orange-900/20 rounded-lg">
-                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-2 flex-shrink-0"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-orange-400 mt-2 flex-shrink-0" />
                   <span><strong className="text-orange-200">Cambio urgente:</strong> Alto riesgo de meseta. Cambia ejercicios principales, prueba periodización diferente o consulta a un entrenador.</span>
                 </div>
               )}
@@ -252,7 +253,7 @@ export const TrendAnalysisSection: React.FC<TrendAnalysisSectionProps> = ({
               {/* Recomendaciones basadas en volumen */}
               {centralizedMetrics.volumeTrend > 15 && (
                 <div className="flex items-start gap-2 p-2 bg-purple-900/20 rounded-lg">
-                  <div className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-2 flex-shrink-0"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-purple-400 mt-2 flex-shrink-0" />
                   <span><strong className="text-purple-200">Monitorea la recuperación:</strong> Incremento de volumen muy alto. Asegúrate de dormir 7-9h, buena nutrición y gestión del estrés.</span>
                 </div>
               )}
@@ -260,7 +261,7 @@ export const TrendAnalysisSection: React.FC<TrendAnalysisSectionProps> = ({
               {/* Recomendaciones basadas en confianza */}
               {centralizedMetrics.confidenceLevel < 40 && (
                 <div className="flex items-start gap-2 p-2 bg-gray-700/30 rounded-lg">
-                  <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-gray-400 mt-2 flex-shrink-0" />
                   <span><strong className="text-gray-200">Más datos necesarios:</strong> Registra entrenamientos más consistentemente para obtener predicciones más precisas de la IA.</span>
                 </div>
               )}
@@ -268,7 +269,7 @@ export const TrendAnalysisSection: React.FC<TrendAnalysisSectionProps> = ({
               {/* Recomendación general basada en el crecimiento mensual */}
               {centralizedMetrics.monthlyGrowth > 8 && (
                 <div className="flex items-start gap-2 p-2 bg-emerald-900/20 rounded-lg">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 flex-shrink-0"></div>
+                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-2 flex-shrink-0" />
                   <span><strong className="text-emerald-200">¡Excelente!</strong> Tu crecimiento mensual de +{centralizedMetrics.monthlyGrowth}kg es outstanding. Documenta qué estás haciendo bien para mantener este ritmo.</span>
                 </div>
               )}
@@ -309,4 +310,4 @@ export const TrendAnalysisSection: React.FC<TrendAnalysisSectionProps> = ({
       </CardContent>
     </Card>
   );
-}; 
+};

@@ -1,7 +1,9 @@
+import React from 'react';
+
+import type { CalendarLegendProps } from '../types';
+
 import { THEME_CALENDAR } from '@/constants/theme';
 import { cn } from '@/utils';
-import React from 'react';
-import type { CalendarLegendProps } from '../types';
 
 export const CalendarLegend: React.FC<CalendarLegendProps> = ({ legendData }) => {
   return (
@@ -18,4 +20,4 @@ export const CalendarLegend: React.FC<CalendarLegendProps> = ({ legendData }) =>
       <span className={THEME_CALENDAR.legend.label}>Más</span>
     </div>
   );
-}; 
+};

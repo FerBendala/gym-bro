@@ -1,8 +1,10 @@
+import React from 'react';
+
+import { CardContent, CardHeader } from './components';
+
 import { THEME_CONTAINERS, THEME_RESPONSIVE } from '@/constants/theme';
 import type { UISize, UIVariant } from '@/interfaces';
 import { cn } from '@/utils';
-import React from 'react';
-import { CardContent, CardHeader } from './components';
 
 export interface CardProps {
   children: React.ReactNode;
@@ -13,6 +15,7 @@ export interface CardProps {
   onClick?: () => void;
   isClickable?: boolean;
   isActive?: boolean;
+  asButton?: boolean;
 }
 
 /**
@@ -28,9 +31,10 @@ export const Card: React.FC<CardProps> = ({
   header,
   onClick,
   isClickable = false,
-  isActive = false
+  isActive = false,
+  asButton = false,
 }) => {
-  const Component = onClick || isClickable ? 'button' : 'div';
+  const Component = asButton ? 'button' : 'div';
 
   const cardClasses = cn(
     THEME_CONTAINERS.card.base,
@@ -40,10 +44,10 @@ export const Card: React.FC<CardProps> = ({
     (onClick || isClickable) && [
       'cursor-pointer',
       'hover:scale-[1.02]',
-      'active:scale-95'
+      'active:scale-95',
     ],
     isActive && 'ring-2 ring-blue-500/50',
-    className
+    className,
   );
 
   if (header) {
@@ -97,7 +101,7 @@ export const StatsCard: React.FC<{
             {trend && (
               <p className={cn(
                 'text-xs mt-1',
-                trend.isPositive ? 'text-green-400' : 'text-red-400'
+                trend.isPositive ? 'text-green-400' : 'text-red-400',
               )}>
                 {trend.isPositive ? '↗' : '↘'} {trend.value}
               </p>
@@ -183,7 +187,7 @@ export const ExerciseCard: React.FC<{
             'px-4 py-2 rounded-lg text-sm font-medium',
             isCompleted
               ? 'bg-green-600 text-white'
-              : 'bg-blue-600 text-white hover:bg-blue-700'
+              : 'bg-blue-600 text-white hover:bg-blue-700',
           )}
         >
           {isCompleted ? 'Completado' : 'Empezar'}

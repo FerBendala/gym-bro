@@ -5,13 +5,7 @@
 import type { WorkoutRecord } from '@/interfaces';
 import type { ChartDimensions, DataRange } from '@/utils';
 import { getChartX, getChartY } from '@/utils';
-
-/**
- * Calcula el 1RM estimado usando la fórmula de Epley
- */
-export const calculateEstimated1RM = (weight: number, reps: number): number => {
-  return weight * (1 + Math.min(reps, 20) / 30);
-};
+import { calculateOptimal1RM } from '@/utils/functions/calculate-1rm.utils';
 
 /**
  * Obtiene las coordenadas del gráfico para un registro
@@ -20,9 +14,9 @@ export const getChartCoordinates = (
   record: WorkoutRecord,
   dateRange: DataRange,
   weightRange: DataRange,
-  dimensions: ChartDimensions
+  dimensions: ChartDimensions,
 ) => {
-  const estimated1RM = calculateEstimated1RM(record.weight, record.reps);
+  const estimated1RM = calculateOptimal1RM(record.weight, record.reps);
   const x = getChartX(record.date.getTime(), dateRange, dimensions);
   const y = getChartY(estimated1RM, weightRange, dimensions);
 
@@ -36,7 +30,7 @@ export const generateProgressPath = (
   records: WorkoutRecord[],
   dateRange: DataRange,
   weightRange: DataRange,
-  dimensions: ChartDimensions
+  dimensions: ChartDimensions,
 ): string => {
   return records.map((record, index) => {
     const { x, y } = getChartCoordinates(record, dateRange, weightRange, dimensions);
@@ -51,7 +45,7 @@ export const generateAreaPath = (
   records: WorkoutRecord[],
   dateRange: DataRange,
   weightRange: DataRange,
-  dimensions: ChartDimensions
+  dimensions: ChartDimensions,
 ): string => {
   const pathData = records.map((record, index) => {
     const { x, y } = getChartCoordinates(record, dateRange, weightRange, dimensions);
@@ -67,5 +61,5 @@ export const generateAreaPath = (
   const lastX = getChartX(lastRecord.date.getTime(), dateRange, dimensions);
   const bottomY = dimensions.height - dimensions.padding;
 
-  return pathData + ` L ${lastX} ${bottomY} Z`;
-}; 
+  return `${pathData  } L ${lastX} ${bottomY} Z`;
+};

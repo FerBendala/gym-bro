@@ -1,10 +1,13 @@
-import { MODERN_THEME } from '@/constants/theme';
-import { cn } from '@/utils';
 import { Shield } from 'lucide-react';
 import React from 'react';
+
 import { SettingsSection } from '../types';
+
 import { SettingsHeader } from './settings-header';
 import { SettingsList } from './settings-list';
+
+import { MODERN_THEME } from '@/constants/theme';
+import { cn } from '@/utils';
 
 interface MainSettingsProps {
   onItemClick: (section: SettingsSection) => void;
@@ -19,7 +22,7 @@ export const MainSettings: React.FC<MainSettingsProps> = ({ onItemClick }) => (
     {/* Información adicional */}
     <div className={cn(
       'mt-8 p-4 rounded-xl',
-      MODERN_THEME.components.card.base
+      MODERN_THEME.components.card.base,
     )}>
       <div className="flex items-center space-x-3 mb-3">
         <Shield className="w-5 h-5 text-green-500" />
@@ -31,4 +34,4 @@ export const MainSettings: React.FC<MainSettingsProps> = ({ onItemClick }) => (
       </p>
     </div>
   </div>
-); 
+);

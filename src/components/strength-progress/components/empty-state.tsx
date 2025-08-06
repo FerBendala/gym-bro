@@ -1,4 +1,5 @@
 import { TrendingUp } from 'lucide-react';
+
 import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
 
 export const EmptyState: React.FC = () => {
@@ -15,4 +16,4 @@ export const EmptyState: React.FC = () => {
       </p>
     </div>
   );
-}; 
+};

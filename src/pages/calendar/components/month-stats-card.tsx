@@ -1,12 +1,13 @@
+import type { MonthStatsCardProps } from '../types';
+
 import { Card, CardContent } from '@/components/card';
 import { InfoTooltip } from '@/components/tooltip';
-import type { MonthStatsCardProps } from '../types';
 
 export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({
   title,
   value,
   color,
-  tooltipContent
+  tooltipContent,
 }) => {
   return (
     <Card>
@@ -25,4 +26,4 @@ export const MonthStatsCard: React.FC<MonthStatsCardProps> = ({
       </CardContent>
     </Card>
   );
-}; 
+};

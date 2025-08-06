@@ -1,11 +1,15 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { useMemo, useState } from 'react';
+
 import { calculateBalanceAnalysis } from '../utils/balance-utils';
+
+import { useAppVolumeConfig } from '@/hooks';
+import type { WorkoutRecord } from '@/interfaces';
 
 export type BalanceSubTab = 'general' | 'balanceByGroup' | 'upperLower' | 'trends';
 
 export const useBalanceTab = (records: WorkoutRecord[]) => {
   const [activeSubTab, setActiveSubTab] = useState<BalanceSubTab>('general');
+  const { getVolumeDistribution } = useAppVolumeConfig();
 
   const balanceData = useMemo(() => {
     if (records.length === 0) {
@@ -17,12 +21,17 @@ export const useBalanceTab = (records: WorkoutRecord[]) => {
         muscleBalance: [],
         categoryAnalysis: {},
         upperLowerBalance: {},
-        selectedView: 'general' as const
+        selectedView: 'general' as const,
       };
     }
 
-    return calculateBalanceAnalysis(records);
-  }, [records]);
+    const customVolumeDistribution = getVolumeDistribution();
+    return calculateBalanceAnalysis(records, customVolumeDistribution);
+  }, [records, getVolumeDistribution]);
+
+  const userVolumeDistribution = useMemo(() => {
+    return getVolumeDistribution();
+  }, [getVolumeDistribution]);
 
   const handleViewChange = (view: 'general' | 'upperLower' | 'byGroup' | 'trends') => {
     // Esta función se puede expandir si necesitamos manejar cambios de vista
@@ -35,7 +44,7 @@ export const useBalanceTab = (records: WorkoutRecord[]) => {
       element.scrollIntoView({
         behavior: 'smooth',
         block: 'center',
-        inline: 'nearest'
+        inline: 'nearest',
       });
     }
   };
@@ -56,9 +65,10 @@ export const useBalanceTab = (records: WorkoutRecord[]) => {
     activeSubTab,
     setActiveSubTab,
     ...balanceData,
+    userVolumeDistribution,
     handleViewChange,
     handleBalanceItemClick,
     handleUpperLowerItemClick,
-    scrollToCard
+    scrollToCard,
   };
-}; 
+};

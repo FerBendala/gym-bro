@@ -1,8 +1,10 @@
-import { Tooltip } from '@/components/tooltip';
 import React from 'react';
+
 import { StatCardContent } from './components';
 import { STAT_CARD_DEFAULTS, STAT_CARD_TOOLTIP_CONFIG } from './constants';
 import type { StatCardProps } from './types';
+
+import { Tooltip } from '@/components/tooltip';
 
 /**
  * Componente genérico para mostrar tarjetas de estadísticas
@@ -18,7 +20,7 @@ export const StatCard: React.FC<StatCardProps> = ({
   size = STAT_CARD_DEFAULTS.size,
   className,
   tooltip,
-  tooltipPosition = STAT_CARD_DEFAULTS.tooltipPosition
+  tooltipPosition = STAT_CARD_DEFAULTS.tooltipPosition,
 }) => {
   const cardContent = (
     <StatCardContent
@@ -46,4 +48,4 @@ export const StatCard: React.FC<StatCardProps> = ({
   }
 
   return cardContent;
-}; 
+};

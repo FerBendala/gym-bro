@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { SelectFeedbackProps } from '../types';
 import { buildErrorClasses, buildHelperClasses } from '../utils';
 
@@ -20,4 +21,4 @@ export const SelectFeedback: React.FC<SelectFeedbackProps> = ({ error, helperTex
   }
 
   return null;
-}; 
+};

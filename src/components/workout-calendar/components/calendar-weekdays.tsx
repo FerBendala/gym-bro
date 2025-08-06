@@ -1,6 +1,8 @@
-import { THEME_CALENDAR } from '@/constants/theme';
 import React from 'react';
+
 import type { CalendarWeekdaysProps } from '../types';
+
+import { THEME_CALENDAR } from '@/constants/theme';
 
 export const CalendarWeekdays: React.FC<CalendarWeekdaysProps> = ({ weekdayLabels }) => {
   return (
@@ -12,4 +14,4 @@ export const CalendarWeekdays: React.FC<CalendarWeekdaysProps> = ({ weekdayLabel
       ))}
     </div>
   );
-}; 
+};

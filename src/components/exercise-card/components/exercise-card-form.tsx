@@ -1,13 +1,15 @@
-import type { WorkoutFormData, WorkoutFormDataAdvanced } from '@/interfaces';
 import React, { useState } from 'react';
 import type { UseFormReturn } from 'react-hook-form';
 import { useFieldArray } from 'react-hook-form';
 
 import { EXERCISE_CARD_CONSTANTS } from '../constants';
 import { exerciseCardUtils } from '../utils';
+
 import { AdvancedForm } from './advanced-form';
 import { ModeSelector } from './mode-selector';
 import { SimpleForm } from './simple-form';
+
+import type { WorkoutFormData, WorkoutFormDataAdvanced } from '@/interfaces';
 
 interface ExerciseCardFormProps {
   loading: boolean;
@@ -26,7 +28,7 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
   onSubmit,
   onCancel,
   formMethods,
-  advancedFormMethods
+  advancedFormMethods,
 }) => {
   const [isAdvancedMode, setIsAdvancedMode] = useState(false);
 
@@ -35,7 +37,7 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
 
   const { fields, append, remove } = useFieldArray({
     control: advancedControl,
-    name: "sets"
+    name: 'sets',
   });
 
   const addSet = () => append(EXERCISE_CARD_CONSTANTS.INDIVIDUAL_SETS.defaultSet);
@@ -49,13 +51,13 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
       if (simpleData.weight > 0 || simpleData.reps > 0 || simpleData.sets > 0) {
         const series = Array.from({ length: simpleData.sets || 1 }, () => ({
           weight: simpleData.weight || 0,
-          reps: simpleData.reps || 1
+          reps: simpleData.reps || 1,
         }));
         remove();
         series.forEach(set => append(set));
       }
     } else if (mode === 'simple' && fields.length > 0) {
-      const watchedSets = advancedWatch("sets");
+      const watchedSets = advancedWatch('sets');
       if (watchedSets?.length > 0) {
         const stats = exerciseCardUtils.calculateAdvancedFormStats(watchedSets);
         setValue('weight', stats.totalVolume / stats.totalReps);
@@ -65,13 +67,13 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
     }
   };
 
-  const watchedSets = advancedWatch("sets");
+  const watchedSets = advancedWatch('sets');
   const advancedStats = exerciseCardUtils.calculateAdvancedFormStats(watchedSets || []);
   const simpleData = watch(['weight', 'reps', 'sets']);
   const simpleStats = exerciseCardUtils.calculateFormStats(simpleData[0] || 0, simpleData[1] || 0, simpleData[2] || 0);
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-4">
       <ModeSelector
         isAdvancedMode={isAdvancedMode}
         onModeChange={handleModeChange}
@@ -99,4 +101,4 @@ export const ExerciseCardForm: React.FC<ExerciseCardFormProps> = ({
       )}
     </div>
   );
-}; 
+};

@@ -7,4 +7,4 @@ export const STAT_CARD_DEFAULTS = {
 export const STAT_CARD_TOOLTIP_CONFIG = {
   trigger: 'hover' as const,
   className: 'block',
-} as const; 
+} as const;

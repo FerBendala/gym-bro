@@ -63,7 +63,7 @@ export const calculateDataRange = (values: number[]): DataRange => {
 
   return {
     min: Math.max(0, min - margin),
-    max: max + margin
+    max: max + margin,
   };
 };
 
@@ -73,8 +73,8 @@ export const calculateDataRange = (values: number[]): DataRange => {
 export const generateGridPoints = (
   range: DataRange,
   dimensions: ChartDimensions,
-  divisions: number = 5
-): Array<{ x: number; y: number; value: number }> => {
+  divisions = 5,
+): { x: number; y: number; value: number }[] => {
   const points = [];
   const step = (range.max - range.min) / divisions;
 
@@ -85,4 +85,4 @@ export const generateGridPoints = (
   }
 
   return points;
-}; 
+};

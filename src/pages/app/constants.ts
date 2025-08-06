@@ -5,7 +5,7 @@ export const DAY_MAP: Record<string, string> = {
   'jueves': 'jueves',
   'viernes': 'viernes',
   'sábado': 'sábado',
-  'domingo': 'domingo'
+  'domingo': 'domingo',
 };
 
 export const PAGE_TITLES = {
@@ -14,12 +14,12 @@ export const PAGE_TITLES = {
   calendar: 'Calendario',
   settings: 'Configuración',
   history: 'Historial de Entrenamientos',
-  default: 'Gym Tracker'
+  default: 'Gym Tracker',
 } as const;
 
 export const PAGE_SUBTITLES = {
   progress: 'Análisis de rendimiento y mejoras',
   calendar: 'Vista mensual de entrenamientos',
   settings: 'Ejercicios y preferencias',
-  history: 'Resumen de tus entrenamientos'
-} as const; 
+  history: 'Resumen de tus entrenamientos',
+} as const;

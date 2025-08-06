@@ -1,5 +1,6 @@
-import { THEME_WORKOUTS } from '@/constants/theme';
 import React from 'react';
+
+import { THEME_WORKOUTS } from '@/constants/theme';
 
 interface WorkoutFooterProps {
   recordCount: number;
@@ -12,7 +13,7 @@ interface WorkoutFooterProps {
  */
 export const WorkoutFooter: React.FC<WorkoutFooterProps> = ({
   recordCount,
-  maxRecords = 10
+  maxRecords = 10,
 }) => {
   if (recordCount < maxRecords) return null;
 
@@ -23,4 +24,4 @@ export const WorkoutFooter: React.FC<WorkoutFooterProps> = ({
       </p>
     </div>
   );
-}; 
+};

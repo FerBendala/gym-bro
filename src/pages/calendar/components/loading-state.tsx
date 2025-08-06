@@ -12,4 +12,4 @@ export const LoadingState: React.FC = () => {
       </div>
     </Page>
   );
-}; 
+};

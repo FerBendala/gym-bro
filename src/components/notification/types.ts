@@ -1,5 +1,6 @@
-import type { NotificationType } from '@/stores/types';
 import { LucideIcon } from 'lucide-react';
+
+import type { NotificationType } from '@/stores/types';
 
 export interface NotificationProps {
   className?: string;
@@ -30,4 +31,4 @@ export interface NotificationUtils {
   getNotificationIcon: (type: NotificationType) => LucideIcon;
   getNotificationDuration: (type: NotificationType) => number;
   getNotificationBackground: (type: NotificationType) => string;
-} 
+}

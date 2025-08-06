@@ -5,7 +5,7 @@ import type { CategoryMetrics } from './category-analysis-types';
  */
 export const generateCategoryRecommendations = (
   category: string,
-  metrics: Partial<CategoryMetrics>
+  metrics: Partial<CategoryMetrics>,
 ): string[] => {
   const recommendations: string[] = [];
 
@@ -37,7 +37,7 @@ export const generateCategoryRecommendations = (
  */
 export const generateCategoryWarnings = (
   category: string,
-  metrics: Partial<CategoryMetrics>
+  metrics: Partial<CategoryMetrics>,
 ): string[] => {
   const warnings: string[] = [];
 
@@ -58,4 +58,4 @@ export const generateCategoryWarnings = (
   }
 
   return warnings;
-}; 
+};

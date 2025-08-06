@@ -1,11 +1,13 @@
+import React from 'react';
+
+import { AdminContent, AdminHeader, AdminTabs } from './components';
+import { useAdminDataLoader } from './hooks';
+import type { AdminPanelProps } from './types';
+
 import { URLPreview } from '@/components/url-preview';
 import { useModalOverflow } from '@/hooks';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
-import React from 'react';
-import { AdminContent, AdminHeader, AdminTabs } from './components';
-import { useAdminDataLoader } from './hooks';
-import type { AdminPanelProps } from './types';
 
 /**
  * Panel de administración responsive con sistema de tabs
@@ -34,7 +36,10 @@ export const AdminPanelModal: React.FC<AdminPanelProps> = ({ onClose, isPage = f
   };
 
   const content = (
-    <div className={isPage ? "w-full" : "bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl max-w-6xl w-full max-h-[95vh] overflow-hidden transform transition-all duration-300"}>
+    <div className={isPage
+      ? 'w-full'
+      : 'bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl w-full max-w-full overflow-hidden transform transition-all duration-300 max-h-[95vh] sm:max-w-6xl mx-auto'
+    }>
       {/* Header */}
       <AdminHeader
         isOnline={isOnline}
@@ -68,7 +73,7 @@ export const AdminPanelModal: React.FC<AdminPanelProps> = ({ onClose, isPage = f
 
   return (
     <div
-      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] p-4"
+      className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[70] p-2 sm:p-4"
       onClick={handleBackdropClick}
     >
       {content}

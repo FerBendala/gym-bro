@@ -1,192 +1,215 @@
 import type { WorkoutRecord } from '@/interfaces';
 import { analyzeMuscleBalance, calculateBalanceScore, calculateCategoryAnalysis } from '@/utils';
+import { generateCategoryRecommendations, generateCategoryWarnings } from '@/utils/functions/generate-category-recommendations';
+import { isValidRecord } from '@/utils/functions/is-valid-record.utils';
+import { calculateCategoryWeeklyData, processUserDataInSinglePass } from './balance-data-processor';
+import { calculateMonthlyVolume, calculateOptimizedGlobalMetrics, calculateSessionsAboveAverage } from './balance-metrics';
+import type { BalanceAnalysisResult } from './balance-types';
+import { calculateUpperLowerBalance } from './balance-upper-lower';
 
-// Constantes para meta-categorías (como en main)
-const META_CATEGORIES = {
-  UPPER_BODY: {
-    id: 'upper_body',
-    name: 'Tren Superior',
-    categories: ['Pecho', 'Espalda', 'Hombros', 'Brazos'],
-    idealPercentage: 60,
-    color: '#3B82F6'
-  },
-  LOWER_BODY: {
-    id: 'lower_body',
-    name: 'Tren Inferior',
-    categories: ['Piernas', 'Glúteos'],
-    idealPercentage: 35,
-    color: '#10B981'
-  },
-  CORE: {
-    id: 'core',
-    name: 'Core',
-    categories: ['Core'],
-    idealPercentage: 5,
-    color: '#8B5CF6'
-  }
-};
+/**
+ * Función principal para calcular análisis de balance muscular
+ * @param records - Registros de entrenamiento
+ * @param customVolumeDistribution - Configuración personalizada de volumen (opcional)
+ * @returns Análisis completo de balance con métricas globales y por categoría
+ */
+export const calculateBalanceAnalysis = (
+  records: WorkoutRecord[],
+  customVolumeDistribution?: Record<string, number>,
+): BalanceAnalysisResult => {
+  try {
+    if (records.length === 0) {
+      return getEmptyBalanceAnalysis();
+    }
 
-export const calculateBalanceAnalysis = (records: WorkoutRecord[]) => {
-  if (records.length === 0) {
+    // Validar que los datos sean consistentes usando utils generales
+    const validRecords = records.filter(isValidRecord);
+    if (validRecords.length === 0) {
+      return getEmptyBalanceAnalysis();
+    }
+
+    // Procesar todos los datos en una sola pasada para optimizar performance
+    const processedData = processUserDataInSinglePass(validRecords);
+
+    // Usar las funciones correctas de category-analysis
+    const categoryAnalysis = calculateCategoryAnalysis(validRecords, customVolumeDistribution);
+    const muscleBalance = analyzeMuscleBalance(validRecords, customVolumeDistribution);
+    const balanceScore = calculateBalanceScore(muscleBalance);
+
+    // Calcular balance superior/inferior usando la configuración del usuario
+    const upperLowerBalance = calculateUpperLowerBalance(
+      categoryAnalysis.categoryMetrics,
+      customVolumeDistribution || {},
+    );
+
+    // Calcular métricas globales optimizadas
+    const { consistency, intensity, frequency } = calculateOptimizedGlobalMetrics(processedData);
+
+    // Calcular datos semanales reales para cada categoría
+    const categoryWeeklyData = calculateCategoryWeeklyData(validRecords, processedData);
+
     return {
-      balanceScore: 0,
-      finalConsistency: 0,
-      avgIntensity: 0,
-      avgFrequency: 0,
-      muscleBalance: [],
+      balanceScore,
+      finalConsistency: consistency,
+      avgIntensity: intensity,
+      avgFrequency: frequency,
+      muscleBalance: muscleBalance.map(balance => {
+        const weeklyData = categoryWeeklyData.get(balance.category);
+        return {
+          ...balance,
+          totalVolume: balance.volume,
+          personalRecords: weeklyData?.personalRecords ? [{
+            id: `pr_${balance.category}`,
+            weight: weeklyData.personalRecords,
+            reps: 1,
+            date: weeklyData.lastWorkout || new Date(),
+            exerciseId: `${balance.category}_exercise`,
+          }] : [],
+          balanceHistory: {
+            ...balance.balanceHistory,
+            weeklyData: weeklyData?.weeklyData.map(w => ({
+              week: w.weekStart,
+              volume: w.volume,
+              percentage: w.volume > 0 ? (w.volume / (weeklyData?.currentWeekVolume || 1)) * 100 : 0,
+            })) || [],
+            lastWeekVolume: weeklyData?.lastWeekVolume || 0,
+            currentWeekVolume: weeklyData?.currentWeekVolume || 0,
+            changePercent: weeklyData?.changePercent || 0,
+          },
+        };
+      }),
       categoryAnalysis: {
-        categoryMetrics: []
+        categoryMetrics: categoryAnalysis.categoryMetrics.map(metric => {
+          const weeklyData = categoryWeeklyData.get(metric.category);
+          return {
+            ...metric,
+            lastWorkout: weeklyData?.lastWorkout || null,
+            totalSets: metric.avgSets * metric.workouts,
+            totalReps: metric.avgReps * metric.workouts,
+            personalRecords: metric.personalRecords, // Usar el valor calculado en calculateCategoryMetrics
+            daysSinceLastWorkout: weeklyData?.daysSinceLastWorkout || 0,
+            trend: metric.weightProgression > 0 ? 'improving' : 'stable',
+            strengthLevel: metric.estimatedOneRM > 100 ? 'advanced' : metric.estimatedOneRM > 50 ? 'intermediate' : 'beginner',
+            recentImprovement: metric.weightProgression > 0,
+            volumeDistribution: {
+              thisWeek: weeklyData?.currentWeekVolume || 0,
+              lastWeek: weeklyData?.lastWeekVolume || 0,
+              thisMonth: calculateMonthlyVolume(weeklyData?.weeklyData || [], 'current'),
+              lastMonth: calculateMonthlyVolume(weeklyData?.weeklyData || [], 'previous'),
+            },
+            performanceMetrics: {
+              bestSession: {
+                date: weeklyData?.lastWorkout || new Date(),
+                volume: metric.totalVolume,
+                maxWeight: metric.maxWeight,
+              },
+              averageSessionVolume: metric.totalVolume / Math.max(1, metric.workouts),
+              volumePerWorkout: metric.totalVolume / Math.max(1, metric.workouts),
+              sessionsAboveAverage: calculateSessionsAboveAverage(weeklyData?.weeklyData || [], metric.totalVolume / Math.max(1, metric.workouts)),
+            },
+            recommendations: generateCategoryRecommendations(metric.category, {
+              consistencyScore: metric.consistencyScore,
+              intensityScore: metric.intensityScore,
+              weightProgression: metric.weightProgression,
+              avgWorkoutsPerWeek: metric.avgWorkoutsPerWeek,
+              strengthLevel: metric.estimatedOneRM > 100 ? 'advanced' : metric.estimatedOneRM > 50 ? 'intermediate' : 'beginner',
+              workouts: metric.workouts,
+              daysSinceLastWorkout: weeklyData?.daysSinceLastWorkout || 0,
+              trend: metric.weightProgression > 0 ? 'improving' : 'stable',
+            }),
+            warnings: generateCategoryWarnings(metric.category, {
+              consistencyScore: metric.consistencyScore,
+              weightProgression: metric.weightProgression,
+              daysSinceLastWorkout: weeklyData?.daysSinceLastWorkout || 0,
+              trend: metric.weightProgression < -10 ? 'declining' : 'stable',
+              avgWorkoutsPerWeek: metric.avgWorkoutsPerWeek,
+            }),
+            volumeTrend: metric.volumeProgression,
+            frequency: metric.avgWorkoutsPerWeek,
+            intensity: metric.intensityScore,
+          };
+        }),
+        overallBalance: balanceScore,
+        recommendations: generateOverallRecommendations(balanceScore, consistency, intensity, frequency),
       },
-      upperLowerBalance: {
-        upperBody: { volume: 0, percentage: 0, categories: [] },
-        lowerBody: { volume: 0, percentage: 0, categories: [] },
-        core: { volume: 0, percentage: 0, categories: [] }
+      upperLowerBalance,
+      selectedView: 'general' as const,
+    };
+  } catch (error) {
+    // Log detallado del error para debugging
+    const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+    const errorStack = error instanceof Error ? error.stack : '';
+
+    // eslint-disable-next-line no-console
+    console.error('Error en cálculo de balance:', {
+      message: errorMessage,
+      stack: errorStack,
+      recordsCount: records.length,
+      timestamp: new Date().toISOString(),
+    });
+
+    // Retornar análisis vacío con información de error
+    return {
+      ...getEmptyBalanceAnalysis(),
+      error: {
+        message: errorMessage,
+        timestamp: new Date().toISOString(),
       },
-      selectedView: 'general' as const
     };
   }
-
-  // Usar las funciones correctas de category-analysis
-  const categoryAnalysis = calculateCategoryAnalysis(records);
-  const muscleBalance = analyzeMuscleBalance(records);
-  const balanceScore = calculateBalanceScore(muscleBalance);
-
-  // Calcular balance superior/inferior CORREGIDO: usando la misma lógica que main
-  const upperLowerBalance = calculateUpperLowerBalance(categoryAnalysis.categoryMetrics);
-
-  // Calcular consistencia
-  const consistency = calculateConsistency(records);
-
-  // Calcular intensidad promedio
-  const avgIntensity = records.length > 0
-    ? records.reduce((sum, r) => sum + r.weight, 0) / records.length
-    : 0;
-
-  // Calcular frecuencia promedio CORREGIDA: como en main, multiplicando por 33.33
-  const avgFrequency = Math.min(100, muscleBalance.reduce((sum, b) => sum + (b.weeklyFrequency || 0), 0) / muscleBalance.length * 33.33);
-
-  return {
-    balanceScore,
-    finalConsistency: consistency,
-    avgIntensity,
-    avgFrequency,
-    muscleBalance: muscleBalance.map(balance => ({
-      category: balance.category,
-      percentage: balance.percentage,
-      totalVolume: balance.volume,
-      idealPercentage: balance.idealPercentage,
-      intensityScore: balance.intensityScore,
-      weeklyFrequency: balance.weeklyFrequency,
-      isBalanced: balance.isBalanced,
-      priorityLevel: balance.priorityLevel,
-      progressTrend: balance.progressTrend,
-      personalRecords: categoryAnalysis.categoryMetrics.find(m => m.category === balance.category)?.personalRecords || [],
-      balanceHistory: balance.balanceHistory
-    })),
-    categoryAnalysis,
-    upperLowerBalance,
-    selectedView: 'general' as const
-  };
 };
 
-// NUEVA FUNCIÓN: Calcular balance tren superior vs inferior como en main
-const calculateUpperLowerBalance = (categoryMetrics: Array<{ category: string; percentage: number; totalVolume: number }>) => {
-  const upperBodyCategories = ['Pecho', 'Espalda', 'Hombros', 'Brazos'];
-  const lowerBodyCategories = ['Piernas'];
-  const coreCategories = ['Core'];
+/**
+ * Retorna análisis de balance vacío para casos edge
+ * @returns Análisis de balance con valores por defecto
+ */
+const getEmptyBalanceAnalysis = () => ({
+  balanceScore: 0,
+  finalConsistency: 0,
+  avgIntensity: 0,
+  avgFrequency: 0,
+  muscleBalance: [],
+  categoryAnalysis: {
+    categoryMetrics: [],
+    overallBalance: 0,
+    recommendations: [],
+  },
+  upperLowerBalance: {
+    upperBody: { volume: 0, percentage: 0, categories: [] },
+    lowerBody: { volume: 0, percentage: 0, categories: [] },
+    core: { volume: 0, percentage: 0, categories: [] },
+    isBalanced: true,
+    recommendation: 'Sin datos suficientes',
+  },
+  selectedView: 'general' as const,
+});
 
-  const upperBody = {
-    percentage: categoryMetrics
-      .filter(m => upperBodyCategories.includes(m.category))
-      .reduce((sum, m) => sum + m.percentage, 0),
-    volume: categoryMetrics
-      .filter(m => upperBodyCategories.includes(m.category))
-      .reduce((sum, m) => sum + m.totalVolume, 0),
-    categories: upperBodyCategories
-  };
+/**
+ * Genera recomendaciones generales basadas en métricas globales
+ * @param balanceScore - Score de balance
+ * @param consistency - Consistencia global
+ * @param intensity - Intensidad global
+ * @param frequency - Frecuencia global
+ * @returns Array de recomendaciones generales
+ */
+const generateOverallRecommendations = (balanceScore: number, consistency: number, intensity: number, frequency: number): string[] => {
+  const recommendations: string[] = [];
 
-  const lowerBody = {
-    percentage: categoryMetrics
-      .filter(m => lowerBodyCategories.includes(m.category))
-      .reduce((sum, m) => sum + m.percentage, 0),
-    volume: categoryMetrics
-      .filter(m => lowerBodyCategories.includes(m.category))
-      .reduce((sum, m) => sum + m.totalVolume, 0),
-    categories: lowerBodyCategories
-  };
-
-  const core = {
-    percentage: categoryMetrics
-      .filter(m => coreCategories.includes(m.category))
-      .reduce((sum, m) => sum + m.percentage, 0),
-    volume: categoryMetrics
-      .filter(m => coreCategories.includes(m.category))
-      .reduce((sum, m) => sum + m.totalVolume, 0),
-    categories: coreCategories
-  };
-
-  // Calcular balance basado en desviación de porcentajes individuales vs ideales
-  const upperBodyDeviation = Math.abs(upperBody.percentage - META_CATEGORIES.UPPER_BODY.idealPercentage);
-  const lowerBodyDeviation = Math.abs(lowerBody.percentage - META_CATEGORIES.LOWER_BODY.idealPercentage);
-  const coreDeviation = Math.abs(core.percentage - META_CATEGORIES.CORE.idealPercentage);
-
-  // Considerar balanceado si ninguna categoría se desvía más de 5% del ideal
-  const maxAcceptableDeviation = 5;
-  const isBalanced = upperBodyDeviation <= maxAcceptableDeviation &&
-    lowerBodyDeviation <= maxAcceptableDeviation &&
-    coreDeviation <= maxAcceptableDeviation;
-
-  // Generar recomendación basada en las mayores desviaciones
-  let recommendation = 'El balance entre tren superior e inferior es adecuado';
-
-  if (!isBalanced) {
-    const deviations = [
-      { category: 'Tren Superior', deviation: upperBodyDeviation, current: upperBody.percentage, ideal: META_CATEGORIES.UPPER_BODY.idealPercentage },
-      { category: 'Tren Inferior', deviation: lowerBodyDeviation, current: lowerBody.percentage, ideal: META_CATEGORIES.LOWER_BODY.idealPercentage },
-      { category: 'Core', deviation: coreDeviation, current: core.percentage, ideal: META_CATEGORIES.CORE.idealPercentage }
-    ];
-
-    // Ordenar por desviación descendente
-    deviations.sort((a, b) => b.deviation - a.deviation);
-
-    const worstDeviation = deviations[0];
-    if (worstDeviation.current > worstDeviation.ideal) {
-      recommendation = `Considera reducir el entrenamiento de ${worstDeviation.category} (${worstDeviation.current.toFixed(1)}% vs ${worstDeviation.ideal}% ideal)`;
-    } else {
-      recommendation = `Considera aumentar el entrenamiento de ${worstDeviation.category} (${worstDeviation.current.toFixed(1)}% vs ${worstDeviation.ideal}% ideal)`;
-    }
+  if (balanceScore < 60) {
+    recommendations.push('Considera equilibrar mejor el entrenamiento entre grupos musculares');
   }
 
-  return {
-    upperBody: {
-      percentage: upperBody.percentage,
-      volume: upperBody.volume,
-      categories: upperBody.categories
-    },
-    lowerBody: {
-      percentage: lowerBody.percentage,
-      volume: lowerBody.volume,
-      categories: lowerBody.categories
-    },
-    core: {
-      percentage: core.percentage,
-      volume: core.volume,
-      categories: core.categories
-    },
-    isBalanced,
-    recommendation
-  };
+  if (consistency < 70) {
+    recommendations.push('Mejora la consistencia de entrenamiento para mejores resultados');
+  }
+
+  if (intensity < 60) {
+    recommendations.push('Aumenta progresivamente la intensidad de tus entrenamientos');
+  }
+
+  if (frequency < 70) {
+    recommendations.push('Aumenta la frecuencia de entrenamiento a 3+ sesiones por semana');
+  }
+
+  return recommendations;
 };
-
-const calculateConsistency = (records: WorkoutRecord[]): number => {
-  if (records.length === 0) return 0;
-
-  const dates = records.map(r => r.date).sort((a, b) => a.getTime() - b.getTime());
-  const firstDate = dates[0];
-  const lastDate = dates[dates.length - 1];
-
-  const totalDays = Math.ceil((lastDate.getTime() - firstDate.getTime()) / (1000 * 60 * 60 * 24));
-  const workoutDays = new Set(records.map(r => r.date.toDateString())).size;
-
-  return totalDays > 0 ? (workoutDays / totalDays) * 100 : 0;
-}; 

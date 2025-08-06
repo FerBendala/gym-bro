@@ -1,289 +1,155 @@
-# 🏋️ GymBro
+# Follow Gym - Aplicación de Seguimiento de Entrenamiento
 
-**GymBro** es una aplicación web progressive de seguimiento de entrenamientos con arquitectura offline-first, construida con React 18, TypeScript, Firebase e IndexedDB.
+## 📋 Descripción
 
-## 🏗️ Arquitectura del Sistema
+Follow Gym es una aplicación web moderna para el seguimiento y análisis de entrenamientos de fuerza. Desarrollada con React, TypeScript y Vite, ofrece análisis avanzados, métricas detalladas y una interfaz intuitiva.
 
-### Stack Tecnológico
+## 🚀 Características Principales
 
-- **Frontend**: React 18 + TypeScript + Vite
-- **Base de Datos**: Firebase Firestore + IndexedDB (offline-first)
-- **Estilos**: Tailwind CSS + Sistema de diseño modular
-- **Formularios**: React Hook Form
-- **Drag & Drop**: @dnd-kit
-- **Estado**: React Context API
-- **Fechas**: date-fns
-- **Iconos**: Lucide React
+- **Seguimiento de Entrenamientos**: Registro detallado de ejercicios, series y pesos
+- **Análisis Avanzado**: Métricas de progreso, tendencias y predicciones
+- **Dashboard Interactivo**: Visualizaciones gráficas y estadísticas en tiempo real
+- **Exportación de Datos**: Funcionalidad completa de exportación en múltiples formatos
+- **Accesibilidad**: Cumplimiento de estándares WCAG
+- **Responsive Design**: Interfaz adaptativa para todos los dispositivos
 
-### Arquitectura Offline-First
+## 🛠️ Tecnologías
 
-El sistema implementa una arquitectura de datos híbrida que prioriza la respuesta local con sincronización en background:
+- **Frontend**: React 18, TypeScript, Vite
+- **UI**: Tailwind CSS, Lucide React
+- **Gráficos**: ApexCharts
+- **Estado**: Zustand
+- **Base de Datos**: IndexedDB + Firebase
+- **Linting**: ESLint con reglas estrictas
 
-- **Respuesta inmediata**: < 5ms desde IndexedDB
-- **Funcionalidad offline**: 100% operativa sin conexión
-- **Sincronización inteligente**: Auto-sync cada 5 minutos con reintentos exponenciales
-- **Resolución de conflictos**: Basada en timestamps
+## 📦 Instalación
+
+```bash
+# Clonar el repositorio
+git clone <repository-url>
+cd follow-gym
+
+# Instalar dependencias
+pnpm install
+
+# Ejecutar en modo desarrollo
+pnpm dev
+
+# Construir para producción
+pnpm build
+
+# Ejecutar linting
+pnpm lint
+
+# Ejecutar linting con corrección automática
+pnpm lint:fix
+```
+
+## 🔧 Configuración ESLint Estricta
+
+El proyecto incluye una configuración ESLint estricta que garantiza:
+
+### ✅ Reglas Implementadas
+
+#### TypeScript Estricto
+
+- Prohibición de `any` y `!` assertions
+- Uso obligatorio de `??` y `?.`
+- Detección de condiciones innecesarias
+- Manejo estricto de promesas
+
+#### Calidad de Código
+
+- Formato consistente (2 espacios, comillas simples)
+- Prevención de código peligroso (`eval`, `alert`)
+- Uso preferente de `const` y arrow functions
+- Template literals obligatorios
+
+#### Complejidad
+
+- Máximo 10 de complejidad ciclomática
+- Máximo 50 líneas por función
+- Máximo 300 líneas por archivo
+- Máximo 4 parámetros por función
+
+#### React Específico
+
+- Validación de props y keys
+- Prevención de APIs deprecadas
+- Mejores prácticas de componentes
+- Accesibilidad obligatoria
+
+#### Accesibilidad (jsx-a11y)
+
+- Alt text obligatorio en imágenes
+- Validación de enlaces y formularios
+- Props ARIA requeridas
+- Navegación por teclado
+
+### 📊 Estado Actual
+
+- **Errores críticos**: 0
+- **Advertencias**: 6 (console.log en logger.ts)
+- **Total de problemas**: 6
+
+### 🎯 Beneficios
+
+- **Código más limpio y mantenible**
+- **Detección temprana de errores**
+- **Mejor accesibilidad**
+- **TypeScript más seguro**
+- **React más robusto**
 
 ## 📁 Estructura del Proyecto
 
 ```
 src/
-├── api/                    # Capa de datos
-│   ├── database.ts         # CRUD operations Firebase
-│   ├── firebase.ts         # Configuración Firebase
-│   └── offline-database.ts # API offline-first
-├── components/             # Componentes modulares
-│   ├── admin-panel/        # Panel administración con tabs
-│   ├── dashboard/          # Estadísticas y análisis
-│   ├── exercise-card/      # Tarjeta ejercicio con series individuales
-│   ├── exercise-list/      # Lista con drag & drop y estados visuales
-│   ├── recent-workouts/    # Entrenamientos con eliminación
-│   └── ...                 # Otros componentes genéricos
-├── constants/              # Sistema de diseño y configuración
-│   ├── theme.ts            # 13 sub-sistemas de diseño
-│   ├── exercise-categories.ts
-│   └── days.ts
-├── hooks/                  # Hooks personalizados
-│   ├── use-online-status.ts
-│   └── use-offline-data.ts # Hook principal datos offline
-├── interfaces/             # Tipos TypeScript
-├── utils/                  # Utilidades genéricas
-│   ├── data/              # Sistema IndexedDB
-│   └── functions/         # 11 categorías de utilidades
-└── pages/app/             # Página principal
+├── components/          # Componentes reutilizables
+├── pages/              # Páginas de la aplicación
+├── stores/             # Estado global (Zustand)
+├── utils/              # Utilidades y funciones
+├── hooks/              # Custom hooks
+├── interfaces/         # Tipos TypeScript
+└── constants/          # Constantes de la aplicación
 ```
 
-## 🔄 Funcionalidades Principales
-
-### Gestión de Ejercicios
-
-- **AdminPanel organizado en tabs**: "Ejercicios" y "Asignaciones"
-- **CRUD completo**: Crear, editar, eliminar ejercicios
-- **Categorización**: Ejercicios organizados por categorías predefinidas
-- **Tabs de filtrado**: Navegación por categorías en tiempo real
-- **Vista previa de URLs**: Soporte para videos/imágenes de referencia
-
-### Sistema de Entrenamientos
-
-- **Series individuales**: Registro con pesos/repeticiones diferentes por serie
-- **Modo dual**: Formulario simple vs avanzado con series individuales
-- **Drag & drop**: Reordenamiento de ejercicios con persistencia
-- **Estados visuales**: Bordes verdes para ejercicios entrenados hoy
-- **Eliminación de registros**: Gestión completa de entrenamientos históricos
-
-### Dashboard y Análisis
-
-- **Estadísticas en tiempo real**: Volumen, peso máximo, frecuencia
-- **Gráficos de progreso**: Visualización temporal de mejoras
-- **Calendario de entrenamientos**: Vista mensual con intensidad
-- **Filtros avanzados**: Por ejercicio, tiempo y categoría
-- **Entrenamientos recientes**: Visualización detallada con eliminación
-
-### Sistema Offline-First
-
-- **Respuesta instantánea**: < 5ms desde cache local
-- **Funcionalidad completa offline**: Sin limitaciones sin conexión
-- **Sincronización automática**: Background sync cada 5 minutos
-- **Cola de operaciones**: Gestión inteligente de sincronización
-- **Resolución de conflictos**: Automática basada en timestamps
-
-## 🎨 Sistema de Diseño
-
-### Arquitectura Modular
-
-El proyecto utiliza un sistema de diseño consolidado con 13 sub-sistemas:
-
-```typescript
-// Principales sistemas de tema
-THEME_COLORS; // Paleta y variantes de componentes
-THEME_CONTAINERS; // Layouts y modales
-THEME_RESPONSIVE; // Sistema responsive completo
-THEME_TABS; // Sistema de navegación tabs
-THEME_WORKOUTS; // Estilos entrenamientos
-THEME_NOTIFICATION; // Sistema notificaciones
-THEME_CALENDAR; // Calendario y fechas
-// ... 6 sistemas adicionales
-```
-
-### Componentes Genéricos
-
-- **LoadingSpinner**: Sistema avanzado con múltiples tamaños
-- **StatCard**: Tarjetas estadísticas reutilizables
-- **ConnectionIndicator**: Estado de conexión visual
-- **OfflineWarning**: Banners de advertencia
-- **ChartLegend**: Leyendas para gráficos
-- **Notification**: Sistema completo de notificaciones
-
-## 🔧 Funcionalidades Técnicas Avanzadas
-
-### Gestión de Estado
-
-```typescript
-// Hook principal para datos offline
-const {
-  exercises,
-  workoutRecords,
-  assignments,
-  createExercise,
-  updateExercise,
-  deleteExercise,
-  loading,
-  error,
-  syncStatus,
-  isOnline,
-  forceSync,
-  clearQueue,
-  getSyncStats,
-} = useOfflineData();
-```
-
-### Sistema de Sincronización
-
-- **Cola priorizada**: CREATE > UPDATE > DELETE
-- **Reintentos exponenciales**: 1s, 2s, 4s, 8s, 16s (máx 5 intentos)
-- **Estados de operación**: pending, in_progress, completed, failed
-- **Metadatos de sync**: Timestamps, conflictos, estado local
-
-### Interfaces de Datos
-
-```typescript
-interface WorkoutRecord {
-  id: string;
-  exerciseId: string;
-  weight: number;
-  reps: number;
-  sets: number;
-  date: Date;
-  dayOfWeek: DayOfWeek;
-  individualSets?: WorkoutSet[]; // Series individuales
-  order?: number; // Para drag & drop
-}
-
-interface Exercise {
-  id: string;
-  name: string;
-  category: string;
-  description?: string;
-  url?: string; // Videos/imágenes referencia
-}
-
-interface ExerciseAssignment {
-  id: string;
-  exerciseId: string;
-  dayOfWeek: DayOfWeek;
-  order?: number;
-  exercise?: Exercise;
-}
-```
-
-## 🚀 Guía de Desarrollo
-
-### Instalación
+## 🚀 Scripts Disponibles
 
 ```bash
-git clone <repository>
-cd gymbro
-npm install
-npm run dev
+pnpm dev          # Desarrollo
+pnpm build        # Construcción
+pnpm preview      # Vista previa
+pnpm lint         # Linting
+pnpm lint:fix     # Linting con corrección
 ```
 
-### Scripts Disponibles
+## 📚 Documentación
 
-```bash
-npm run dev        # Servidor desarrollo
-npm run build      # Build producción
-npm run preview    # Preview build
-npm run lint       # ESLint
-```
+- [Reglas ESLint Estrictas](./docs/ESLINT_STRICT_RULES.md)
+- [Utilidades del Proyecto](./docs/UTILITIES_DOCUMENTATION.md)
+- [Integración Zustand](./docs/ZUSTAND_INTEGRATION.md)
 
-### Configuración
+## 🤝 Contribución
 
-1. **Firebase**: Configurar proyecto en `src/api/firebase.ts`
-2. **Categorías**: Personalizar en `src/constants/exercise-categories.ts`
-3. **Tema**: Ajustar colores en `src/constants/theme.ts`
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
 
-### Patrones de Desarrollo
+## 📄 Licencia
 
-#### Estructura de Componentes
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
 
-```
-component-name/
-├── components/     # Subcomponentes específicos
-├── hooks/         # Hooks específicos del componente
-├── types.ts       # Interfaces específicas
-└── index.tsx      # Componente principal orquestador
-```
+## 👥 Autores
 
-#### Utilidades Genéricas
+- **Tu Nombre** - _Desarrollo inicial_ - [TuUsuario](https://github.com/TuUsuario)
 
-- **Genérico**: `src/utils/` para funciones reutilizables
-- **Específico**: `component/hooks/` para lógica de componente
-- **Constantes**: `src/constants/` para configuración global
+## 🙏 Agradecimientos
 
-#### Sistema de Estilos
-
-```typescript
-// Uso del sistema de tema
-className={cn(
-  THEME_RESPONSIVE.container.base,
-  THEME_COLORS.variants.primary,
-  'custom-classes'
-)}
-```
-
-## 🔄 Flujo de Datos
-
-### Operaciones de Escritura
-
-1. **UI** → `useOfflineData` hook
-2. **IndexedDB** ← Guardado inmediato local
-3. **UI** ← Respuesta instantánea (< 5ms)
-4. **SyncQueue** ← Operación encolada
-5. **Firebase** ← Sincronización background
-6. **UI** ← Actualización estado sync
-
-### Operaciones de Lectura
-
-1. **UI** → Solicitud datos
-2. **IndexedDB** ← Consulta local instantánea
-3. **UI** ← Datos inmediatos
-4. **Firebase** ← Verificación background (opcional)
-5. **IndexedDB** ← Actualización si hay cambios
-6. **UI** ← Re-render automático
-
-## 📊 Métricas de Rendimiento
-
-| Aspecto               | Implementación | Mejora          |
-| --------------------- | -------------- | --------------- |
-| Tiempo respuesta      | < 5ms          | 100x más rápido |
-| Funcionalidad offline | ✅ Completa    | Nueva           |
-| Resistencia fallos    | ✅ Alta        | Dramática       |
-| Experiencia usuario   | ✅ Instantánea | Sin spinners    |
-| Costos Firebase       | ~20% requests  | 80% reducción   |
-
-## 🎯 Casos de Uso
-
-### Usuario Entrenando
-
-- **Registro inmediato**: Sin esperas en el gimnasio
-- **Offline funcional**: WiFi intermitente no afecta
-- **Reordenamiento**: Drag & drop de rutinas
-- **Estados visuales**: Ejercicios completados marcados
-
-### Análisis de Progreso
-
-- **Dashboards instantáneos**: Carga inmediata estadísticas
-- **Filtros dinámicos**: Por ejercicio, tiempo, categoría
-- **Visualización histórica**: Gráficos y calendarios
-- **Eliminación registros**: Corrección errores históricos
-
-### Gestión de Rutinas
-
-- **AdminPanel organizado**: Tabs por funcionalidad
-- **Categorización inteligente**: Filtros automáticos
-- **CRUD completo**: Gestión completa ejercicios
-- **Vista previa multimedia**: Videos/imágenes referencia
-
----
-
-**GymBro** combina la mejor experiencia de usuario con arquitectura técnica robusta, proporcionando una aplicación de fitness moderna, confiable y altamente performante.
+- [React](https://reactjs.org/)
+- [TypeScript](https://www.typescriptlang.org/)
+- [Vite](https://vitejs.dev/)
+- [Tailwind CSS](https://tailwindcss.com/)
+- [Zustand](https://github.com/pmndrs/zustand)
+- [ApexCharts](https://apexcharts.com/)

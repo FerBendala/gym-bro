@@ -1,11 +1,14 @@
-import { useModalOverflow } from '@/hooks';
 import React, { useEffect, useState } from 'react';
 import { createPortal } from 'react-dom';
+
 import type { FilterModalProps } from '../types';
+
 import { DateSorting } from './filter-date-sorting';
 import { FilterModalFooter } from './filter-modal-footer';
 import { FilterModalHeader } from './filter-modal-header';
 import { SearchFilters } from './filter-search-filters';
+
+import { useModalOverflow } from '@/hooks';
 
 export const FilterModal: React.FC<FilterModalProps> = ({
   isOpen,
@@ -25,7 +28,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   onDateToChange,
   onSortByChange,
   onSortOrderChange,
-  onClearFilters
+  onClearFilters,
 }) => {
   const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
 
@@ -56,7 +59,7 @@ export const FilterModal: React.FC<FilterModalProps> = ({
 
   const modalContent = (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-[80] p-4" onClick={handleBackdropClick}>
-      <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-gradient-to-br from-gray-900 via-gray-900 to-gray-800 rounded-2xl border border-gray-700/50 shadow-2xl max-w-6xl w-full max-h-[90vh] overflow-hidden">
         {/* Header del modal */}
         <FilterModalHeader onClose={onClose} />
 
@@ -98,4 +101,4 @@ export const FilterModal: React.FC<FilterModalProps> = ({
   );
 
   return createPortal(modalContent, portalContainer);
-}; 
+};

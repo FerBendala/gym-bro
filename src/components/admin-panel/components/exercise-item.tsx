@@ -1,12 +1,12 @@
+import { Edit2, ExternalLink, Percent, Trash2 } from 'lucide-react';
+import React from 'react';
+
 import { deleteExercise } from '@/api/services';
 import { Button } from '@/components/button';
-import { URLPreview } from '@/components/url-preview';
 import type { Exercise } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
-import { Edit2, Trash2 } from 'lucide-react';
-import React from 'react';
 
 interface ExerciseItemProps {
   exercise: Exercise;
@@ -15,7 +15,7 @@ interface ExerciseItemProps {
 
 export const ExerciseItem: React.FC<ExerciseItemProps> = ({
   exercise,
-  onPreviewUrl
+  onPreviewUrl,
 }) => {
   const isOnline = useOnlineStatus();
   const { showNotification } = useNotification();
@@ -25,12 +25,12 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
     setTab,
     setLoading,
     setError,
-    removeExerciseFromStore
+    removeExerciseFromStore,
   } = useAdminStore();
 
   const handleEditExercise = () => {
     setEditingExercise(exercise);
-    setTab('exercises');
+    setTab('create-exercise');
   };
 
   const handleDeleteExercise = async () => {
@@ -56,57 +56,79 @@ export const ExerciseItem: React.FC<ExerciseItemProps> = ({
   };
 
   return (
-    <div className="bg-gray-800 p-4 rounded-lg border border-gray-700/50 hover:border-gray-600/70 transition-all duration-200">
-      <div className="space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="min-w-0 flex-1">
-            <h4 className="text-white font-medium truncate">{exercise.name}</h4>
-            {exercise.categories && exercise.categories.length > 0 && (
-              <div className="flex flex-wrap gap-1 mt-1">
-                {exercise.categories.map((category) => (
-                  <span
-                    key={category}
-                    className="text-xs text-blue-300 bg-blue-500/15 px-2 py-1 rounded-full font-medium border border-blue-500/20"
-                  >
-                    {category}
+    <div className="bg-gray-800/50 hover:bg-gray-800/70 transition-colors rounded-lg p-2.5 sm:p-3 border border-gray-700/30 min-w-0">
+      <div className="flex items-center justify-between min-w-0">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center space-x-2 min-w-0">
+            <div className="flex-1 min-w-0 overflow-hidden">
+              <h4 className="text-sm font-medium text-white truncate">{exercise.name}</h4>
+            </div>
+            {exercise.url && (
+              <button
+                onClick={() => onPreviewUrl(exercise.url!)}
+                className="text-blue-400 hover:text-blue-300 transition-colors flex-shrink-0"
+                title="Ver URL"
+              >
+                <ExternalLink className="w-3 h-3" />
+              </button>
+            )}
+          </div>
+
+          {/* Mostrar porcentajes de categorías si están disponibles */}
+          {exercise.categoryPercentages && Object.keys(exercise.categoryPercentages).length > 0 && (
+            <div className="mt-1 flex items-center gap-1 min-w-0">
+              <div className="flex flex-wrap gap-1 min-w-0">
+                {Object.entries(exercise.categoryPercentages)
+                  .sort(([, a], [, b]) => b - a) // Ordenar de mayor a menor
+                  .slice(0, 2)
+                  .map(([category, percentage]) => (
+                    <span
+                      key={category}
+                      className="text-xs text-green-300 bg-green-500/15 px-1 py-0.5 rounded-full font-medium border border-green-500/20 flex items-center gap-1"
+                    >
+                      <span className="hidden sm:inline">{category}:</span>
+                      <span className="sm:hidden">{category}</span>
+                      {percentage}
+                      <Percent className="w-3 h-3 text-green-400 flex-shrink-0" />
+                    </span>
+                  ))}
+                {Object.keys(exercise.categoryPercentages).length > 2 && (
+                  <span className="text-xs text-gray-500 flex-shrink-0">
+                    +{Object.keys(exercise.categoryPercentages).length - 2} más
                   </span>
-                ))}
+                )}
               </div>
-            )}
-            {exercise.description && (
-              <p className="text-sm text-gray-500 mt-2 line-clamp-2">{exercise.description}</p>
-            )}
-          </div>
-          <div className="flex items-center space-x-2 ml-4">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleEditExercise}
-              disabled={!isOnline}
-              title="Editar ejercicio"
-            >
-              <Edit2 className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="danger"
-              size="sm"
-              onClick={handleDeleteExercise}
-              disabled={!isOnline}
-              title="Eliminar ejercicio"
-            >
-              <Trash2 className="w-4 h-4" />
-            </Button>
-          </div>
+            </div>
+          )}
+
+          {exercise.description && (
+            <p className="text-xs text-gray-500 mt-1 line-clamp-1 hidden sm:block">{exercise.description}</p>
+          )}
         </div>
 
-        {/* Vista previa de URL del ejercicio */}
-        {exercise.url && (
-          <URLPreview
-            url={exercise.url}
-            onClick={() => onPreviewUrl(exercise.url!)}
-          />
-        )}
+        <div className="flex items-center space-x-1 ml-2 flex-shrink-0">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={handleEditExercise}
+            disabled={!isOnline}
+            title="Editar ejercicio"
+            className="p-1"
+          >
+            <Edit2 className="w-3 h-3" />
+          </Button>
+          <Button
+            variant="danger"
+            size="sm"
+            onClick={handleDeleteExercise}
+            disabled={!isOnline}
+            title="Eliminar ejercicio"
+            className="p-1"
+          >
+            <Trash2 className="w-3 h-3" />
+          </Button>
+        </div>
       </div>
     </div>
   );
-}; 
+};

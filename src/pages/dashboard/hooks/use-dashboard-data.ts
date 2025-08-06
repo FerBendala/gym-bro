@@ -1,8 +1,10 @@
+import { useCallback, useEffect, useState } from 'react';
+
 import { deleteWorkoutRecord, getExercises, getWorkoutRecords } from '@/api/services';
 import type { Exercise, WorkoutRecord } from '@/interfaces';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
-import { useCallback, useEffect, useState } from 'react';
+import { logger } from '@/utils';
 
 export const useDashboardData = () => {
   const { showNotification } = useNotification();
@@ -22,7 +24,7 @@ export const useDashboardData = () => {
     try {
       const [recordsData, exercisesData] = await Promise.all([
         getWorkoutRecords(),
-        getExercises()
+        getExercises(),
       ]);
 
       // Enriquecer los registros con información del ejercicio
@@ -30,19 +32,19 @@ export const useDashboardData = () => {
         const exercise = exercisesData.find((ex: Exercise) => ex.id === record.exerciseId);
 
         if (!exercise) {
-          console.warn(`⚠️ Ejercicio no encontrado para record ${record.id} con exerciseId: ${record.exerciseId}`);
+          logger.warn(`Ejercicio no encontrado para record ${record.id} con exerciseId: ${record.exerciseId}`, { recordId: record.id, exerciseId: record.exerciseId }, 'DASHBOARD');
         }
 
         return {
           ...record,
-          exercise
+          exercise,
         };
       });
 
       setWorkoutRecords(enrichedRecords);
       setExercises(exercisesData);
     } catch (error: unknown) {
-      console.error('❌ Error cargando datos del dashboard:', error);
+      logger.error('Error cargando datos del dashboard:', error as Error, undefined, 'DASHBOARD');
       const errorMessage = error instanceof Error ? error.message : 'Error al cargar los datos del dashboard';
       showNotification(errorMessage, 'error');
     } finally {
@@ -65,7 +67,7 @@ export const useDashboardData = () => {
 
       // Actualizar el estado local inmediatamente
       setWorkoutRecords(prevRecords =>
-        prevRecords.filter(record => record.id !== recordId)
+        prevRecords.filter(record => record.id !== recordId),
       );
 
       // Mostrar notificación de éxito
@@ -73,7 +75,7 @@ export const useDashboardData = () => {
       showNotification(`Entrenamiento de ${exerciseName} eliminado exitosamente`, 'success');
 
     } catch (error: unknown) {
-      console.error('Error eliminando entrenamiento:', error);
+      logger.error('Error eliminando entrenamiento:', error as Error, { recordId }, 'DASHBOARD');
       const errorMessage = error instanceof Error ? error.message : 'Error al eliminar el entrenamiento';
       showNotification(errorMessage, 'error');
       throw error;
@@ -90,6 +92,6 @@ export const useDashboardData = () => {
     loading,
     isOnline,
     loadData,
-    handleDeleteRecord
+    handleDeleteRecord,
   };
-}; 
+};

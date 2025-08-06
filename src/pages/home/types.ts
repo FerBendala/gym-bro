@@ -13,12 +13,7 @@ export interface DayInfo {
   formattedDate: string;
 }
 
-export interface DaySelectorProps {
-  activeDay: DayOfWeek;
-  onDayChange: (day: DayOfWeek) => void;
-}
-
 export interface QuickDayNavigationProps {
   activeDay: DayOfWeek;
   onDayChange: (day: DayOfWeek) => void;
-} 
+}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+
 import { DATE_PICKER_DEFAULTS } from '../constants';
 import { DatePickerProps, DatePickerState } from '../types';
 import { formatDateForInput, isValidDate } from '../utils';
@@ -6,11 +7,11 @@ import { formatDateForInput, isValidDate } from '../utils';
 export const useDatePicker = ({
   value,
   onChange,
-  disabled = DATE_PICKER_DEFAULTS.DISABLED
+  disabled = DATE_PICKER_DEFAULTS.DISABLED,
 }: DatePickerProps) => {
   const [state, setState] = useState<DatePickerState>({
     showPicker: false,
-    inputValue: ''
+    inputValue: '',
   });
 
   // Inicializar valor del input cuando cambia el value prop
@@ -42,7 +43,7 @@ export const useDatePicker = ({
     setState(prev => ({
       ...prev,
       inputValue: formatDateForInput(today),
-      showPicker: false
+      showPicker: false,
     }));
   };
 
@@ -51,7 +52,7 @@ export const useDatePicker = ({
     setState(prev => ({
       ...prev,
       inputValue: '',
-      showPicker: false
+      showPicker: false,
     }));
   };
 
@@ -60,8 +61,8 @@ export const useDatePicker = ({
     handlers: {
       handleInputChange,
       handleTodayClick,
-      handleClearClick
+      handleClearClick,
     },
-    disabled
+    disabled,
   };
-}; 
+};

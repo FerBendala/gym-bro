@@ -1,8 +1,11 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { getHours } from 'date-fns';
+
 import { calculateDayMetrics } from './day-metrics';
+import { clamp, roundToDecimals } from './math-utils';
 import type { WorkoutHabits } from './trends-interfaces';
 import { calculateWorkoutStreaks } from './workout-streaks';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Analiza hábitos de entrenamiento
@@ -25,7 +28,7 @@ export const analyzeWorkoutHabits = (records: WorkoutRecord[]): WorkoutHabits =>
       workoutStreaks: { current: 0, longest: 0, average: 0 },
       behaviorInsights: [],
       recommendations: [],
-      riskFactors: []
+      riskFactors: [],
     };
   }
 
@@ -48,13 +51,14 @@ export const analyzeWorkoutHabits = (records: WorkoutRecord[]): WorkoutHabits =>
   });
 
   const preferredTime = Object.entries(hourCounts).reduce((a, b) =>
-    hourCounts[a[0]] > hourCounts[b[0]] ? a : b
+    hourCounts[a[0]] > hourCounts[b[0]] ? a : b,
   )?.[0] || 'N/A';
 
   // Duración promedio estimada (mejorado)
   const exerciseCount = records.length;
-  const avgExercisesPerSession = Math.max(1, Math.round(exerciseCount / Math.max(1, new Set(records.map(r => r.date)).size)));
-  const avgSessionDuration = Math.round(Math.max(30, Math.min(180, avgExercisesPerSession * 8 + 15))); // Entre 30-180 minutos
+  const uniqueSessions = new Set(records.map(r => r.date)).size;
+  const avgExercisesPerSession = Math.max(1, Math.round(exerciseCount / Math.max(1, uniqueSessions)));
+  const avgSessionDuration = Math.round(clamp(avgExercisesPerSession * 8 + 15, 30, 180)); // Entre 30-180 minutos
 
   // Score de consistencia (variabilidad entre días)
   const dayWorkouts = dayMetrics.map(d => d.workouts);
@@ -87,9 +91,10 @@ export const analyzeWorkoutHabits = (records: WorkoutRecord[]): WorkoutHabits =>
     weeklyData.set(weekKey, weeklyData.get(weekKey)! + 1);
   });
 
-  // Calcular promedio de entrenamientos por semana (no días)
-  const weeklyFrequency = weeklyData.size > 0
-    ? Math.round((Array.from(weeklyData.values()).reduce((sum, workouts) => sum + workouts, 0) / weeklyData.size) * 100) / 100
+  // Calcular frecuencia semanal promedio
+  const totalWorkouts = Array.from(weeklyData.values()).reduce((sum, workouts) => sum + workouts, 0);
+  const weeklyFrequency = totalWorkouts > 0
+    ? roundToDecimals((Array.from(weeklyData.values()).reduce((sum, workouts) => sum + workouts, 0) / weeklyData.size))
     : 0;
 
   // Calcular fuerza del hábito basado en consistencia y frecuencia
@@ -123,7 +128,7 @@ export const analyzeWorkoutHabits = (records: WorkoutRecord[]): WorkoutHabits =>
 
   // Mejor día y hora de rendimiento (basado en volumen promedio)
   const bestPerformanceDay = dayMetrics.length > 0 ? dayMetrics.reduce((best, current) =>
-    current.avgVolume > best.avgVolume ? current : best
+    current.avgVolume > best.avgVolume ? current : best,
   ).dayName : 'N/A';
 
   // Mejor hora de rendimiento basado en volumen por rango horario
@@ -223,6 +228,6 @@ export const analyzeWorkoutHabits = (records: WorkoutRecord[]): WorkoutHabits =>
     workoutStreaks,
     behaviorInsights,
     recommendations,
-    riskFactors
+    riskFactors,
   };
-}; 
+};

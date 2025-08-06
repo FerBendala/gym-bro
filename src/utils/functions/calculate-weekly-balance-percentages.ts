@@ -1,5 +1,6 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { calculateCategoryEffortDistribution } from './exercise-patterns';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula porcentajes de volumen por semana para análisis de balance
@@ -25,10 +26,17 @@ export const calculateWeeklyBalancePercentages = (categoryRecords: WorkoutRecord
     const recordCategories = record.exercise?.categories || [];
     const targetCategory = categoryRecords[0]?.exercise?.categories?.[0];
     if (recordCategories.includes(targetCategory || '')) {
-      // Usar distribución de esfuerzo si es multi-categoría
-      const effortDistribution = calculateCategoryEffortDistribution(recordCategories);
-      const categoryEffort = effortDistribution[targetCategory || ''] || 1;
-      weeklyData[weekKey].categoryVolume += recordVolume * categoryEffort;
+      // Usar distribución de esfuerzo solo si es multi-categoría
+      const recordVolume = record.weight * record.reps * record.sets;
+
+      if (recordCategories.length > 1) {
+        const effortDistribution = calculateCategoryEffortDistribution(recordCategories, record.exercise?.name, record.exercise);
+        const categoryEffort = effortDistribution[targetCategory || ''] || 1;
+        weeklyData[weekKey].categoryVolume += recordVolume * categoryEffort;
+      } else {
+        // Si es una sola categoría, usar volumen completo
+        weeklyData[weekKey].categoryVolume += recordVolume;
+      }
     }
   });
 
@@ -39,7 +47,7 @@ export const calculateWeeklyBalancePercentages = (categoryRecords: WorkoutRecord
       week,
       percentage: (data.categoryVolume / data.totalVolume) * 100,
       categoryVolume: data.categoryVolume,
-      totalVolume: data.totalVolume
+      totalVolume: data.totalVolume,
     }))
     .sort((a, b) => a.week.localeCompare(b.week));
 };
@@ -47,7 +55,7 @@ export const calculateWeeklyBalancePercentages = (categoryRecords: WorkoutRecord
 /**
  * Analiza la tendencia hacia el balance ideal
  */
-export const analyzeTrendTowardsIdeal = (weeklyData: Array<{ percentage: number }>, idealPercentage: number): number => {
+export const analyzeTrendTowardsIdeal = (weeklyData: { percentage: number }[], idealPercentage: number): number => {
   if (weeklyData.length < 3) return 0;
 
   const midpoint = Math.floor(weeklyData.length / 2);
@@ -63,4 +71,4 @@ export const analyzeTrendTowardsIdeal = (weeklyData: Array<{ percentage: number 
 
   // Retorna valor entre -1 (se aleja del ideal) y 1 (se acerca al ideal)
   return firstDeviation > 0 ? (firstDeviation - secondDeviation) / firstDeviation : 0;
-}; 
+};

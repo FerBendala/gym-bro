@@ -1,6 +1,8 @@
-import type { NotificationType } from '@/stores/types';
 import type { LucideIcon } from 'lucide-react';
+
 import { NOTIFICATION_BACKGROUNDS, NOTIFICATION_DURATIONS, NOTIFICATION_ICONS } from '../constants';
+
+import type { NotificationType } from '@/stores/types';
 
 /**
  * Obtiene el icono correspondiente al tipo de notificación
@@ -21,4 +23,4 @@ export const getNotificationDuration = (type: NotificationType): number => {
  */
 export const getNotificationBackground = (type: NotificationType): string => {
   return NOTIFICATION_BACKGROUNDS[type] || NOTIFICATION_BACKGROUNDS.info;
-}; 
+};

@@ -1,10 +1,13 @@
-import { UpperLowerBalanceContent } from '@/components/dashboard-upper-lower-balance-content';
-import type { WorkoutRecord } from '@/interfaces';
 import { BarChart3, Brain, PieChart, Scale } from 'lucide-react';
 import React from 'react';
-import { BalanceByGroupContent, GeneralContent, TrendsContent } from '.';
-import { useBalanceTab } from '../hooks/use-balance-tab';
 
+import { useBalanceTab } from '../hooks/use-balance-tab';
+import { EmptyState } from '../shared';
+
+import { BalanceByGroupContent, GeneralContent, TrendsContent } from '.';
+
+import { UpperLowerBalanceContent } from '@/components/dashboard-upper-lower-balance-content';
+import type { CategoryAnalysisData, UpperLowerBalanceData, WorkoutRecord } from '@/interfaces';
 
 interface BalanceTabProps {
   records: WorkoutRecord[];
@@ -21,51 +24,50 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
     muscleBalance,
     categoryAnalysis,
     upperLowerBalance,
+    userVolumeDistribution,
     handleBalanceItemClick,
-    handleUpperLowerItemClick
+    handleUpperLowerItemClick,
   } = useBalanceTab(records);
 
   if (records.length === 0) {
     return (
-      <div className="text-center py-12">
-        <div className="p-4 bg-gray-800 rounded-full w-16 h-16 mx-auto mb-4 flex items-center justify-center">
-          <span className="text-2xl">⚖️</span>
-        </div>
-        <h3 className="text-lg font-medium text-gray-300 mb-2">
-          Sin datos para análisis de balance
-        </h3>
-        <p className="text-gray-500">
-          Registra algunos entrenamientos para ver tu balance muscular
-        </p>
-      </div>
+      <EmptyState
+        icon={() => <span className="text-2xl">⚖️</span>}
+        title="Sin datos para análisis de balance"
+        description="Registra algunos entrenamientos para ver tu balance muscular"
+      />
     );
   }
 
   const subTabs = [
     {
       id: 'general' as const,
-      name: 'General',
+      name: 'Vista General',
+      shortName: 'Vista',
       icon: BarChart3,
-      description: 'Análisis general con Balance Radar'
+      description: 'Análisis general con Balance Radar',
     },
     {
       id: 'balanceByGroup' as const,
-      name: 'Balance por Grupo',
+      name: 'Por Categoría',
+      shortName: 'Categoría',
       icon: PieChart,
-      description: 'Análisis detallado por categorías'
+      description: 'Análisis detallado por categorías',
     },
     {
       id: 'upperLower' as const,
-      name: 'Tren Superior vs Inferior',
+      name: 'Superior vs Inferior',
+      shortName: 'Balance',
       icon: Scale,
-      description: 'Balance entre tren superior e inferior'
+      description: 'Balance entre tren superior e inferior',
     },
     {
       id: 'trends' as const,
-      name: 'Tendencias',
+      name: 'Análisis Temporal',
+      shortName: 'Temporal',
       icon: Brain,
-      description: 'Análisis de tendencias y predicciones'
-    }
+      description: 'Análisis de tendencias y predicciones',
+    },
   ];
 
   return (
@@ -90,7 +92,7 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
             >
               <Icon className="w-3 h-3 lg:w-4 lg:h-4 flex-shrink-0" />
               <span className="hidden md:block truncate">{tab.name}</span>
-              <span className="md:hidden truncate">{tab.name.split(' ')[0]}</span>
+              <span className="md:hidden truncate">{tab.shortName}</span>
             </button>
           );
         })}
@@ -109,23 +111,19 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
 
       {activeSubTab === 'balanceByGroup' && muscleBalance.length > 0 && (
         <BalanceByGroupContent
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          muscleBalance={muscleBalance as any}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          categoryAnalysis={categoryAnalysis as any}
+          muscleBalance={muscleBalance}
+          categoryAnalysis={categoryAnalysis as CategoryAnalysisData}
           onItemClick={handleBalanceItemClick}
         />
       )}
 
       {activeSubTab === 'upperLower' && Object.keys(upperLowerBalance).length > 0 && (
         <UpperLowerBalanceContent
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          upperLowerBalance={upperLowerBalance as any}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          categoryAnalysis={categoryAnalysis as any}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          muscleBalance={muscleBalance as any}
+          upperLowerBalance={upperLowerBalance as UpperLowerBalanceData}
+          categoryAnalysis={categoryAnalysis as CategoryAnalysisData}
+          muscleBalance={muscleBalance}
           onItemClick={handleUpperLowerItemClick}
+          userVolumeDistribution={userVolumeDistribution}
         />
       )}
 
@@ -134,4 +132,4 @@ export const BalanceTab: React.FC<BalanceTabProps> = ({ records }) => {
       )}
     </div>
   );
-}; 
+};

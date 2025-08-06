@@ -1,7 +1,10 @@
-import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants/exercise.constants';
 import React from 'react';
+
 import type { VolumeDistribution } from '../types';
+
 import { VolumeCategoryItem } from './volume-category-item';
+
+import { IDEAL_VOLUME_DISTRIBUTION } from '@/constants/exercise.constants';
 
 interface VolumeCategoriesListProps {
   volumeDistribution: VolumeDistribution;
@@ -29,4 +32,4 @@ export const VolumeCategoriesList: React.FC<VolumeCategoriesListProps> = ({
       })}
     </div>
   );
-}; 
+};

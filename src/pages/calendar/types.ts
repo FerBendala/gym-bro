@@ -10,4 +10,4 @@ export interface MonthStatsCardProps {
   value: string | number;
   color: string;
   tooltipContent: string;
-} 
+}

@@ -1,6 +1,7 @@
-import { Button } from '@/components/button';
 import { Filter } from 'lucide-react';
 import React from 'react';
+
+import { Button } from '@/components/button';
 
 interface FilterModalFooterProps {
   onClearFilters: () => void;
@@ -9,7 +10,7 @@ interface FilterModalFooterProps {
 
 export const FilterModalFooter: React.FC<FilterModalFooterProps> = ({
   onClearFilters,
-  onClose
+  onClose,
 }) => {
   return (
     <div className="border-t border-gray-700/50 p-6 bg-gray-800/30">
@@ -18,8 +19,8 @@ export const FilterModalFooter: React.FC<FilterModalFooterProps> = ({
           onClick={onClearFilters}
           variant="secondary"
           className="bg-red-600/20 hover:bg-red-600/30 border-red-500/30 text-red-300"
+          leftIcon={<Filter className="w-4 h-4 mr-2" />}
         >
-          <Filter className="w-4 h-4 mr-2" />
           Limpiar todos los filtros
         </Button>
         <div className="flex space-x-3">
@@ -39,4 +40,4 @@ export const FilterModalFooter: React.FC<FilterModalFooterProps> = ({
       </div>
     </div>
   );
-}; 
+};

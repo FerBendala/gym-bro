@@ -1,9 +1,10 @@
+import { Brain } from 'lucide-react';
+import React from 'react';
+
 import { Card, CardContent, CardHeader } from '@/components/card';
 import { InfoTooltip } from '@/components/tooltip';
 import { DASHBOARD_COLORS, OPTIMIZATION_CATEGORIES, PRIORITY_LABELS } from '@/constants';
 import type { OptimizationSuggestion } from '@/interfaces';
-import { Brain } from 'lucide-react';
-import React from 'react';
 
 interface OptimizationSuggestionsProps {
   suggestions: OptimizationSuggestion[];
@@ -17,6 +18,30 @@ export const OptimizationSuggestions: React.FC<OptimizationSuggestionsProps> = (
   const getPriorityBadge = (priority: string) => {
     return DASHBOARD_COLORS.PRIORITY_COLORS[priority as keyof typeof DASHBOARD_COLORS.PRIORITY_COLORS] || DASHBOARD_COLORS.PRIORITY_COLORS.low;
   };
+
+  // Validación de seguridad
+  if (!suggestions || !Array.isArray(suggestions)) {
+    return (
+      <Card>
+        <CardHeader>
+          <h3 className="text-lg font-semibold text-white flex items-center">
+            <Brain className="w-5 h-5 mr-2" />
+            Sugerencias de Optimización
+            <InfoTooltip
+              content="Recomendaciones personalizadas y priorizadas basadas en análisis detallado de tus datos de entrenamiento."
+              position="top"
+              className="ml-2"
+            />
+          </h3>
+        </CardHeader>
+        <CardContent>
+          <p className="text-gray-400 text-center py-4">
+            Cargando sugerencias de optimización...
+          </p>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>
@@ -45,7 +70,7 @@ export const OptimizationSuggestions: React.FC<OptimizationSuggestionsProps> = (
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-2">
                       <h4 className="font-medium text-sm mb-1 sm:mb-0">{suggestion.title}</h4>
                       <span className={`px-2 py-1 rounded-full text-xs font-bold ${getPriorityBadge(suggestion.priority)} w-fit`}>
-                        {PRIORITY_LABELS[suggestion.priority as keyof typeof PRIORITY_LABELS]}
+                        {PRIORITY_LABELS[suggestion.priority]}
                       </span>
                     </div>
                     <p className="text-xs opacity-90 mb-2">{suggestion.description}</p>
@@ -63,4 +88,4 @@ export const OptimizationSuggestions: React.FC<OptimizationSuggestionsProps> = (
       </CardContent>
     </Card>
   );
-}; 
+};

@@ -3,9 +3,10 @@
  * Funciones puras para operaciones con fechas
  */
 
-import type { WorkoutRecord } from '@/interfaces';
 import { endOfWeek, format, isThisWeek, isToday, isYesterday, startOfWeek } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 export type TimeFilter = 'week' | 'month' | 'all';
 
@@ -37,7 +38,7 @@ export interface CalendarStats {
  */
 export const filterRecordsByTime = <T extends { date: Date }>(
   records: T[],
-  timeFilter: TimeFilter
+  timeFilter: TimeFilter,
 ): T[] => {
   const now = new Date();
 
@@ -166,7 +167,7 @@ export const getCalendarDays = (date: Date): CalendarData => {
     monthStart,
     monthEnd,
     calendarStart,
-    calendarEnd
+    calendarEnd,
   };
 };
 
@@ -189,7 +190,7 @@ export const groupWorkoutsByDay = (records: WorkoutRecord[]): Record<string, Wor
  */
 export const getWorkoutsForDay = (
   date: Date,
-  workoutsByDay: Record<string, WorkoutRecord[]>
+  workoutsByDay: Record<string, WorkoutRecord[]>,
 ): WorkoutRecord[] => {
   const dateKey = format(date, 'yyyy-MM-dd');
   return workoutsByDay[dateKey] || [];
@@ -212,7 +213,7 @@ export const getIntensityColor = (workoutCount: number): string => {
 export const getDayData = (
   day: Date,
   currentDate: Date,
-  workoutsByDay: Record<string, WorkoutRecord[]>
+  workoutsByDay: Record<string, WorkoutRecord[]>,
 ): CalendarDayData => {
   const workouts = getWorkoutsForDay(day, workoutsByDay);
   const workoutCount = workouts.length;
@@ -224,7 +225,7 @@ export const getDayData = (
     isToday: isDateToday(day),
     workouts,
     intensity: getIntensityColor(workoutCount),
-    hasData: workoutCount > 0
+    hasData: workoutCount > 0,
   };
 };
 
@@ -234,13 +235,13 @@ export const getDayData = (
 export const getMonthStats = (
   records: WorkoutRecord[],
   currentDate: Date,
-  workoutsByDay: Record<string, WorkoutRecord[]>
+  workoutsByDay: Record<string, WorkoutRecord[]>,
 ): CalendarStats => {
   const monthStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
   const monthEnd = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
 
   const monthRecords = records.filter(record =>
-    record.date >= monthStart && record.date <= monthEnd
+    record.date >= monthStart && record.date <= monthEnd,
   );
 
   const daysWithWorkouts = Object.keys(workoutsByDay).filter(dateKey => {
@@ -250,7 +251,7 @@ export const getMonthStats = (
 
   return {
     daysWithWorkouts,
-    totalWorkouts: monthRecords.length
+    totalWorkouts: monthRecords.length,
   };
 };
 
@@ -293,7 +294,7 @@ export const getLegendData = () => {
     { color: 'bg-green-200', label: '1 entrenamiento' },
     { color: 'bg-green-400', label: '2 entrenamientos' },
     { color: 'bg-green-600', label: '3 entrenamientos' },
-    { color: 'bg-green-800', label: '4+ entrenamientos' }
+    { color: 'bg-green-800', label: '4+ entrenamientos' },
   ];
 };
 
@@ -320,7 +321,7 @@ export const getVisibleDateRange = (currentDate: Date): { start: Date; end: Date
 
   return {
     start: startOfWeek(monthStart, { locale: es }),
-    end: endOfWeek(monthEnd, { locale: es })
+    end: endOfWeek(monthEnd, { locale: es }),
   };
 };
 
@@ -337,7 +338,7 @@ export const getWeekdayLabels = (): readonly string[] => {
 export const isExerciseTrainedToday = (exerciseId: string, workoutRecords: WorkoutRecord[]): boolean => {
   return workoutRecords.some(record =>
     record.exerciseId === exerciseId &&
-    isDateToday(record.date)
+    isDateToday(record.date),
   );
 };
 
@@ -362,7 +363,7 @@ export const getCurrentDayOfWeek = (): string => {
 export const isExerciseTrainedTodayAndCorrectDay = (
   exerciseId: string,
   workoutRecords: WorkoutRecord[],
-  currentTabDay: string
+  currentTabDay: string,
 ): boolean => {
   const today = new Date();
   const todayDayName = format(today, 'EEEE', { locale: es });
@@ -376,7 +377,7 @@ export const isExerciseTrainedTodayAndCorrectDay = (
  */
 export const getExercisesTrainedTodayForCurrentDay = (
   workoutRecords: WorkoutRecord[],
-  currentTabDay: string
+  currentTabDay: string,
 ): string[] => {
   const today = new Date();
   const todayDayName = format(today, 'EEEE', { locale: es });
@@ -386,4 +387,4 @@ export const getExercisesTrainedTodayForCurrentDay = (
   }
 
   return getExercisesTrainedToday(workoutRecords);
-}; 
+};

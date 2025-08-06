@@ -1,6 +1,7 @@
-import { cn } from '@/utils';
 import { INPUT_CONSTANTS, INPUT_THEME } from '../constants';
 import type { InputClasses, InputProps, InputValidation } from '../types';
+
+import { cn } from '@/utils';
 
 /**
  * Valida y normaliza el tamaño del input
@@ -37,7 +38,7 @@ export const buildInputClasses = (
   sizeVariant: string,
   variant: string,
   validationState?: InputValidation,
-  className?: string
+  className?: string,
 ): string => {
   const validSize = validateInputSize(sizeVariant);
   const validVariant = validateInputVariant(variant);
@@ -50,11 +51,11 @@ export const buildInputClasses = (
     // Touch targets responsive para mobile
     validSize === 'sm' ? cn(
       INPUT_THEME.RESPONSIVE.touch.input.mobile,
-      INPUT_THEME.RESPONSIVE.touch.input.tablet
+      INPUT_THEME.RESPONSIVE.touch.input.tablet,
     ) : INPUT_THEME.INPUT.sizes[validSize],
     INPUT_THEME.INPUT.variants[validVariant],
     validationState && INPUT_THEME.INPUT.validation[validationState],
-    className
+    className,
   );
 };
 
@@ -68,7 +69,7 @@ export const buildLabelClasses = (sizeVariant: string, hasError: boolean): strin
   return cn(
     INPUT_THEME.FORM.label.base,
     INPUT_THEME.FORM.label.sizes[validSize],
-    INPUT_THEME.FORM.label.colors[labelColor]
+    INPUT_THEME.FORM.label.colors[labelColor],
   );
 };
 
@@ -80,7 +81,7 @@ export const buildErrorClasses = (sizeVariant: string): string => {
 
   return cn(
     INPUT_THEME.FORM.error.base,
-    INPUT_THEME.FORM.error.sizes[validSize]
+    INPUT_THEME.FORM.error.sizes[validSize],
   );
 };
 
@@ -92,7 +93,7 @@ export const buildHelperClasses = (sizeVariant: string): string => {
 
   return cn(
     INPUT_THEME.FORM.helper.base,
-    INPUT_THEME.FORM.helper.sizes[validSize]
+    INPUT_THEME.FORM.helper.sizes[validSize],
   );
 };
 
@@ -112,4 +113,4 @@ export const buildInputClassesObject = (props: InputProps): InputClasses => {
     error: buildErrorClasses(validSize),
     helper: buildHelperClasses(validSize),
   };
-}; 
+};

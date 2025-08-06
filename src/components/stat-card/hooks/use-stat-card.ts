@@ -1,10 +1,12 @@
-import type { ThemeStatCardSize, ThemeStatCardVariant } from '@/constants/theme';
 import { useMemo } from 'react';
+
 import { getStatCardStyles } from '../utils';
+
+import type { ThemeStatCardSize, ThemeStatCardVariant } from '@/constants/theme';
 
 export const useStatCard = (
   variant: ThemeStatCardVariant,
-  size: ThemeStatCardSize
+  size: ThemeStatCardSize,
 ) => {
   const styles = useMemo(() => {
     return getStatCardStyles(variant, size);
@@ -13,4 +15,4 @@ export const useStatCard = (
   return {
     styles,
   };
-}; 
+};

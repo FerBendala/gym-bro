@@ -1,8 +1,10 @@
+import React from 'react';
+
+import { getTotalStatus } from '../utils';
+
 import { Button } from '@/components/button';
 import { Card } from '@/components/card';
 import { cn } from '@/utils';
-import React from 'react';
-import { getTotalStatus } from '../utils';
 
 interface TotalPercentageCardProps {
   totalPercentage: number;
@@ -35,4 +37,4 @@ export const TotalPercentageCard: React.FC<TotalPercentageCardProps> = ({
       </div>
     </Card>
   );
-}; 
+};

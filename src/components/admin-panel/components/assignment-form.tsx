@@ -1,3 +1,10 @@
+import { Plus } from 'lucide-react';
+import React, { useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+
+import type { AssignmentFormData } from '../types';
+import { formatDayName } from '../utils';
+
 import { createExerciseAssignment } from '@/api/services';
 import { Button } from '@/components/button';
 import { Select } from '@/components/select';
@@ -6,17 +13,13 @@ import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
 import { groupExercisesByCategory } from '@/utils';
-import { Plus } from 'lucide-react';
-import React, { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
-import type { AssignmentFormData } from '../types';
-import { formatDayName } from '../utils';
 
 interface AssignmentFormProps {
   selectedDay: DayOfWeek;
+  onSuccess?: () => void;
 }
 
-export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) => {
+export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay, onSuccess }) => {
   const isOnline = useOnlineStatus();
   const { showNotification } = useNotification();
 
@@ -24,27 +27,35 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) =
     exercises,
     setLoading,
     setError,
-    addAssignment
+    addAssignment,
   } = useAdminStore();
 
   const {
-    register,
     handleSubmit,
     reset,
     setValue,
-    formState: { errors }
+    watch,
+    formState: { errors },
   } = useForm<AssignmentFormData>({
     mode: 'onChange',
     defaultValues: {
       exerciseId: '',
-      dayOfWeek: selectedDay
-    }
+      dayOfWeek: selectedDay,
+    },
   });
+
+  // Observar el valor del formulario
+  const exerciseId = watch('exerciseId');
 
   // Actualizar el formulario cuando cambie selectedDay
   useEffect(() => {
     setValue('dayOfWeek', selectedDay);
   }, [selectedDay, setValue]);
+
+  // Manejar el cambio del select manualmente
+  const handleExerciseChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setValue('exerciseId', e.target.value);
+  };
 
   const handleFormSubmit = async (data: AssignmentFormData) => {
     if (!isOnline) {
@@ -59,7 +70,7 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) =
       const exercise = exercises.find(ex => ex.id === data.exerciseId);
       const assignmentId = await createExerciseAssignment({
         exerciseId: data.exerciseId,
-        dayOfWeek: data.dayOfWeek
+        dayOfWeek: data.dayOfWeek,
       });
 
       // Crear objeto de asignación con datos del ejercicio
@@ -67,13 +78,14 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) =
         id: assignmentId,
         exerciseId: data.exerciseId,
         dayOfWeek: data.dayOfWeek,
-        exercise
+        exercise,
       };
 
       addAssignment(assignmentWithExercise);
 
       showNotification(`"${exercise?.name}" asignado al ${data.dayOfWeek}`, 'success');
       reset({ exerciseId: '', dayOfWeek: selectedDay });
+      onSuccess?.();
       return true;
     } catch (error: unknown) {
       const message = error instanceof Error ? error.message : 'Error al asignar el ejercicio';
@@ -89,35 +101,41 @@ export const AssignmentForm: React.FC<AssignmentFormProps> = ({ selectedDay }) =
   const exerciseGroups = groupExercisesByCategory(exercises);
 
   return (
-    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
-      <Select
-        label="Seleccionar ejercicio por categoría"
-        disabled={!isOnline}
-        placeholder={isOnline ? 'Selecciona un ejercicio...' : 'Sin conexión'}
-        groups={exerciseGroups}
-        {...register('exerciseId', { required: 'Selecciona un ejercicio' })}
-        error={errors.exerciseId?.message}
-      />
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-3">
+      <div className="flex items-end space-x-3">
+        <div className="flex-1">
+          <Select
+            disabled={!isOnline}
+            placeholder={isOnline ? 'Selecciona un ejercicio...' : 'Sin conexión'}
+            groups={exerciseGroups}
+            value={exerciseId}
+            onChange={handleExerciseChange}
+            error={errors.exerciseId?.message}
+          />
+        </div>
 
-      {/* Contador de ejercicios disponibles */}
+        <Button
+          type="submit"
+          loading={false}
+          disabled={!isOnline || exercises.length === 0 || !exerciseId}
+          leftIcon={<Plus className="w-4 h-4" />}
+          className="flex-shrink-0"
+        >
+          {isOnline ? 'Asignar' : 'Sin conexión'}
+        </Button>
+      </div>
+
+      {/* Información compacta */}
       {isOnline && exercises.length > 0 && (
-        <div className="text-xs text-gray-500">
-          {exercises.length} ejercicio{exercises.length !== 1 ? 's' : ''} disponible{exercises.length !== 1 ? 's' : ''}
-          en {exerciseGroups.length} categoría{exerciseGroups.length !== 1 ? 's' : ''}
+        <div className="flex items-center justify-between text-xs text-gray-500">
+          <span>
+            {exercises.length} ejercicio{exercises.length !== 1 ? 's' : ''} disponible{exercises.length !== 1 ? 's' : ''}
+          </span>
+          <span>
+            {formatDayName(selectedDay)}
+          </span>
         </div>
       )}
-
-      <Button
-        type="submit"
-        loading={false}
-        disabled={!isOnline || exercises.length === 0}
-      >
-        <Plus className="w-4 h-4 mr-2" />
-        {isOnline
-          ? `Asignar al ${formatDayName(selectedDay)}`
-          : 'Sin conexión'
-        }
-      </Button>
     </form>
   );
-}; 
+};

@@ -1,10 +1,16 @@
+import { calculateOptimal1RM } from './calculate-1rm.utils';
+import { clamp, roundToDecimals } from './math-utils';
+import { calculateVolume } from './volume-calculations';
+
 import type { WorkoutRecord } from '@/interfaces';
-import { calculateEstimated1RMStats } from './strength-stats-utils';
 
 /**
  * Calcula el crecimiento total basado en datos de timeline
+ * Refactorizado para usar funciones centralizadas
+ * MEJORADO: Ahora calcula crecimiento basado en volumen promedio por sesión
+ * ROBUSTO: Usa períodos para evitar sesgos por semanas atípicas
  */
-export const calculateTotalGrowth = (timelineData: Array<{ value: number; totalWorkouts: number }>): {
+export const calculateTotalGrowth = (timelineData: { value: number; totalWorkouts: number }[]): {
   absoluteGrowth: number;
   percentGrowth: number;
 } => {
@@ -12,30 +18,56 @@ export const calculateTotalGrowth = (timelineData: Array<{ value: number; totalW
     return { absoluteGrowth: 0, percentGrowth: 0 };
   }
 
-  const firstValue = timelineData[0].value;
-  const lastValue = timelineData[timelineData.length - 1].value;
+  // Para pocas semanas (≤3), usar primera vs última
+  if (timelineData.length <= 3) {
+    const firstWeek = timelineData[0];
+    const lastWeek = timelineData[timelineData.length - 1];
 
-  const absoluteGrowth = lastValue - firstValue;
-  const percentGrowth = firstValue > 0 ? (absoluteGrowth / firstValue) * 100 : 0;
+    const firstAvgVolumePerSession = firstWeek.totalWorkouts > 0 ? firstWeek.value / firstWeek.totalWorkouts : 0;
+    const lastAvgVolumePerSession = lastWeek.totalWorkouts > 0 ? lastWeek.value / lastWeek.totalWorkouts : 0;
+
+    const absoluteGrowth = lastAvgVolumePerSession - firstAvgVolumePerSession;
+    const percentGrowth = firstAvgVolumePerSession > 0 ? (absoluteGrowth / firstAvgVolumePerSession) * 100 : 0;
+
+    return {
+      absoluteGrowth: roundToDecimals(absoluteGrowth),
+      percentGrowth: roundToDecimals(percentGrowth),
+    };
+  }
+
+  // Para más semanas, usar períodos para mayor robustez
+  const firstPeriodSize = Math.min(2, Math.floor(timelineData.length / 3));
+  const lastPeriodSize = Math.min(2, Math.floor(timelineData.length / 3));
+
+  const firstPeriod = timelineData.slice(0, firstPeriodSize);
+  const lastPeriod = timelineData.slice(-lastPeriodSize);
+
+  // Calcular promedio de volumen por sesión para cada período
+  const firstPeriodAvgVolumePerSession = firstPeriod.reduce((sum, week) => {
+    const weekAvg = week.totalWorkouts > 0 ? week.value / week.totalWorkouts : 0;
+    return sum + weekAvg;
+  }, 0) / firstPeriod.length;
+
+  const lastPeriodAvgVolumePerSession = lastPeriod.reduce((sum, week) => {
+    const weekAvg = week.totalWorkouts > 0 ? week.value / week.totalWorkouts : 0;
+    return sum + weekAvg;
+  }, 0) / lastPeriod.length;
+
+  const absoluteGrowth = lastPeriodAvgVolumePerSession - firstPeriodAvgVolumePerSession;
+  const percentGrowth = firstPeriodAvgVolumePerSession > 0 ? (absoluteGrowth / firstPeriodAvgVolumePerSession) * 100 : 0;
+
+  // Limitar el crecimiento a un rango razonable para evitar valores extremos
+  const clampedPercentGrowth = clamp(percentGrowth, -100, 200);
 
   return {
-    absoluteGrowth: Math.round(absoluteGrowth * 100) / 100,
-    percentGrowth: Math.round(percentGrowth * 100) / 100
+    absoluteGrowth: roundToDecimals(absoluteGrowth),
+    percentGrowth: roundToDecimals(clampedPercentGrowth),
   };
 };
 
 /**
- * Calcula el volumen real de un registro
- */
-const calculateRealVolume = (record: WorkoutRecord): number => {
-  if (record.individualSets && record.individualSets.length > 0) {
-    return record.individualSets.reduce((total, set) => total + (set.weight * set.reps), 0);
-  }
-  return record.weight * record.reps * record.sets;
-};
-
-/**
  * Calcula el progreso de un ejercicio específico
+ * Refactorizado para usar funciones centralizadas
  */
 export const calculateExerciseProgress = (exerciseRecords: WorkoutRecord[]): {
   absoluteProgress: number;
@@ -43,64 +75,62 @@ export const calculateExerciseProgress = (exerciseRecords: WorkoutRecord[]): {
   first1RM: number;
   last1RM: number;
 } => {
-  if (exerciseRecords.length === 0) {
+  if (exerciseRecords.length < 3) {
     return { absoluteProgress: 0, percentProgress: 0, first1RM: 0, last1RM: 0 };
   }
 
   const sortedRecords = [...exerciseRecords].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-  let first1RM: number;
-  let last1RM: number;
-  let firstVolume: number;
-  let lastVolume: number;
-
-  if (sortedRecords.length === 1) {
-    // Para una sola sesión, usar el valor como referencia
-    const record = sortedRecords[0];
-    first1RM = calculateEstimated1RMStats(record.weight, record.reps);
-    last1RM = first1RM;
-    firstVolume = calculateRealVolume(record);
-    lastVolume = firstVolume;
-  } else if (sortedRecords.length === 2) {
-    // Para dos sesiones, comparar directamente
+  // Para pocos registros (≤5), usar primer y último
+  if (sortedRecords.length <= 5) {
     const firstRecord = sortedRecords[0];
-    const lastRecord = sortedRecords[1];
+    const lastRecord = sortedRecords[sortedRecords.length - 1];
 
-    first1RM = calculateEstimated1RMStats(firstRecord.weight, firstRecord.reps);
-    last1RM = calculateEstimated1RMStats(lastRecord.weight, lastRecord.reps);
-    firstVolume = calculateRealVolume(firstRecord);
-    lastVolume = calculateRealVolume(lastRecord);
-  } else {
-    // Para 3+ sesiones, usar lógica de períodos
-    const firstPeriodSize = Math.min(3, Math.floor(sortedRecords.length / 3));
-    const lastPeriodSize = Math.min(3, Math.floor(sortedRecords.length / 3));
+    // Usar función centralizada para calcular 1RM
+    const first1RM = calculateOptimal1RM(firstRecord.weight, firstRecord.reps);
+    const last1RM = calculateOptimal1RM(lastRecord.weight, lastRecord.reps);
 
-    // Asegurar que los períodos tengan al menos 1 elemento
-    const actualFirstPeriodSize = Math.max(1, firstPeriodSize);
-    const actualLastPeriodSize = Math.max(1, lastPeriodSize);
+    const absoluteProgress = last1RM - first1RM;
+    const percentProgress = first1RM > 0 ? (absoluteProgress / first1RM) * 100 : 0;
 
-    const firstPeriod = sortedRecords.slice(0, actualFirstPeriodSize);
-    const lastPeriod = sortedRecords.slice(-actualLastPeriodSize);
-
-    first1RM = firstPeriod.reduce((sum, r) => {
-      const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-      return sum + oneRM;
-    }, 0) / firstPeriod.length;
-
-    last1RM = lastPeriod.reduce((sum, r) => {
-      const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
-      return sum + oneRM;
-    }, 0) / lastPeriod.length;
-
-    // Calcular volumen total promedio por sesión usando volumen real
-    firstVolume = firstPeriod.reduce((sum, r) => {
-      return sum + calculateRealVolume(r);
-    }, 0) / firstPeriod.length;
-
-    lastVolume = lastPeriod.reduce((sum, r) => {
-      return sum + calculateRealVolume(r);
-    }, 0) / lastPeriod.length;
+    return {
+      absoluteProgress: roundToDecimals(absoluteProgress),
+      percentProgress: roundToDecimals(percentProgress),
+      first1RM: roundToDecimals(first1RM),
+      last1RM: roundToDecimals(last1RM),
+    };
   }
+
+  // Para más registros, usar períodos para mayor robustez
+  const firstPeriodSize = Math.min(3, Math.floor(sortedRecords.length / 3));
+  const lastPeriodSize = Math.min(3, Math.floor(sortedRecords.length / 3));
+
+  // Asegurar que los períodos tengan al menos 1 elemento
+  const actualFirstPeriodSize = Math.max(1, firstPeriodSize);
+  const actualLastPeriodSize = Math.max(1, lastPeriodSize);
+
+  const firstPeriod = sortedRecords.slice(0, actualFirstPeriodSize);
+  const lastPeriod = sortedRecords.slice(-actualLastPeriodSize);
+
+  // Usar función centralizada para calcular 1RM promedio
+  const first1RM = firstPeriod.reduce((sum, r) => {
+    const oneRM = calculateOptimal1RM(r.weight, r.reps);
+    return sum + oneRM;
+  }, 0) / firstPeriod.length;
+
+  const last1RM = lastPeriod.reduce((sum, r) => {
+    const oneRM = calculateOptimal1RM(r.weight, r.reps);
+    return sum + oneRM;
+  }, 0) / lastPeriod.length;
+
+  // Calcular volumen total promedio por sesión usando función centralizada
+  const firstVolume = firstPeriod.reduce((sum, r) => {
+    return sum + calculateVolume(r);
+  }, 0) / firstPeriod.length;
+
+  const lastVolume = lastPeriod.reduce((sum, r) => {
+    return sum + calculateVolume(r);
+  }, 0) / lastPeriod.length;
 
   let absoluteProgress = last1RM - first1RM;
   let rawPercentProgress = first1RM > 0 ? (absoluteProgress / first1RM) * 100 : 0;
@@ -129,14 +159,20 @@ export const calculateExerciseProgress = (exerciseRecords: WorkoutRecord[]): {
     return { absoluteProgress, percentProgress: 0, first1RM, last1RM };
   }
 
-  // Limitar progreso a un rango razonable (-80% a +300% para ejercicios individuales)
-  const percentProgress = Math.max(-80, Math.min(300, rawPercentProgress));
+  // Usar función centralizada para validar rango
+  const percentProgress = clamp(rawPercentProgress, -80, 300);
 
-  return { absoluteProgress, percentProgress, first1RM, last1RM };
+  return {
+    absoluteProgress: roundToDecimals(absoluteProgress),
+    percentProgress: roundToDecimals(percentProgress),
+    first1RM: roundToDecimals(first1RM),
+    last1RM: roundToDecimals(last1RM),
+  };
 };
 
 /**
  * Calcula el progreso de peso general usando múltiples períodos para mayor robustez
+ * Refactorizado para usar funciones centralizadas
  */
 export const calculateWeightProgress = (records: WorkoutRecord[]): {
   absoluteProgress: number;
@@ -157,14 +193,14 @@ export const calculateWeightProgress = (records: WorkoutRecord[]): {
   const firstPeriod = sortedRecords.slice(0, firstPeriodSize);
   const lastPeriod = sortedRecords.slice(-lastPeriodSize);
 
-  // Calcular 1RM promedio para cada período
+  // Calcular 1RM promedio para cada período usando función centralizada
   const firstAvg1RM = firstPeriod.reduce((sum, r) => {
-    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+    const oneRM = calculateOptimal1RM(r.weight, r.reps);
     return sum + oneRM;
   }, 0) / firstPeriod.length;
 
   const lastAvg1RM = lastPeriod.reduce((sum, r) => {
-    const oneRM = r.weight * (1 + Math.min(r.reps, 20) / 30);
+    const oneRM = calculateOptimal1RM(r.weight, r.reps);
     return sum + oneRM;
   }, 0) / lastPeriod.length;
 
@@ -177,8 +213,13 @@ export const calculateWeightProgress = (records: WorkoutRecord[]): {
 
   const rawPercentProgress = (absoluteProgress / firstAvg1RM) * 100;
 
-  // Limitar progreso a un rango razonable (-70% a +150% para progreso general)
-  const percentProgress = Math.max(-70, Math.min(150, rawPercentProgress));
+  // Usar función centralizada para validar rango
+  const percentProgress = clamp(rawPercentProgress, -70, 150);
 
-  return { absoluteProgress, percentProgress, firstAvg1RM, lastAvg1RM };
+  return {
+    absoluteProgress: roundToDecimals(absoluteProgress),
+    percentProgress: roundToDecimals(percentProgress),
+    firstAvg1RM: roundToDecimals(firstAvg1RM),
+    lastAvg1RM: roundToDecimals(lastAvg1RM),
+  };
 };

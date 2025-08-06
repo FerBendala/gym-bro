@@ -1,8 +1,10 @@
-import { StatCard } from '@/components/stat-card';
-import { formatNumberToString } from '@/utils';
 import { Target, TrendingUp, Zap } from 'lucide-react';
 import React from 'react';
+
 import type { MainStatsProps, StatConfig } from '../types';
+
+import { StatCard } from '@/components/stat-card';
+import { formatNumberToString } from '@/utils';
 
 /**
  * Estadísticas principales del ExerciseStats
@@ -17,7 +19,7 @@ export const MainStats: React.FC<MainStatsProps> = ({ stats }) => {
       value: stats.totalWorkouts.toString(),
       icon: Target,
       variant: 'primary',
-      tooltip: 'Número total de sesiones de entrenamiento registradas para este ejercicio'
+      tooltip: 'Número total de sesiones de entrenamiento registradas para este ejercicio',
     },
     {
       id: 'totalVolume',
@@ -25,7 +27,7 @@ export const MainStats: React.FC<MainStatsProps> = ({ stats }) => {
       value: `${formatNumberToString(stats.totalVolume)} kg`,
       icon: TrendingUp,
       variant: 'success',
-      tooltip: 'Suma total de peso levantado (peso × repeticiones × series) a lo largo de todos los entrenamientos'
+      tooltip: 'Suma total de peso levantado (peso × repeticiones × series) a lo largo de todos los entrenamientos',
     },
     {
       id: 'averageWeight',
@@ -33,7 +35,7 @@ export const MainStats: React.FC<MainStatsProps> = ({ stats }) => {
       value: `${formatNumberToString(stats.averageWeight)} kg`,
       icon: Zap,
       variant: 'warning',
-      tooltip: 'Peso promedio utilizado en todas las series de este ejercicio'
+      tooltip: 'Peso promedio utilizado en todas las series de este ejercicio',
     },
     {
       id: 'maxWeight',
@@ -41,8 +43,8 @@ export const MainStats: React.FC<MainStatsProps> = ({ stats }) => {
       value: `${formatNumberToString(stats.maxWeight)} kg`,
       icon: TrendingUp,
       variant: 'danger',
-      tooltip: 'Peso máximo levantado en una sola serie para este ejercicio'
-    }
+      tooltip: 'Peso máximo levantado en una sola serie para este ejercicio',
+    },
   ];
 
   return (
@@ -60,4 +62,4 @@ export const MainStats: React.FC<MainStatsProps> = ({ stats }) => {
       ))}
     </div>
   );
-}; 
+};

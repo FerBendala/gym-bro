@@ -1,7 +1,9 @@
-import { formatDayLabel } from '@/utils';
 import React from 'react';
+
 import type { TabButtonProps } from '../types';
 import { getTabButtonClasses } from '../utils';
+
+import { formatDayLabel } from '@/utils';
 
 export const TabButton: React.FC<TabButtonProps> = ({
   day,
@@ -9,7 +11,7 @@ export const TabButton: React.FC<TabButtonProps> = ({
   onClick,
   size,
   variant,
-  isMobile = false
+  isMobile = false,
 }) => {
   const handleClick = () => onClick(day);
 
@@ -17,7 +19,7 @@ export const TabButton: React.FC<TabButtonProps> = ({
     isActive,
     variant || { active: '', inactive: '' },
     size || '',
-    isMobile
+    isMobile,
   );
 
   return (
@@ -28,4 +30,4 @@ export const TabButton: React.FC<TabButtonProps> = ({
       {formatDayLabel(day)}
     </button>
   );
-}; 
+};

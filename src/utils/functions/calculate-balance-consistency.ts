@@ -1,5 +1,7 @@
-import type { WorkoutRecord } from '@/interfaces';
 import { groupRecordsByWeek, isSameWeek } from './group-records-by-week';
+import { clamp } from './math-utils';
+
+import type { WorkoutRecord } from '@/interfaces';
 
 /**
  * Calcula la consistencia específica del balance muscular
@@ -7,7 +9,7 @@ import { groupRecordsByWeek, isSameWeek } from './group-records-by-week';
  */
 export const calculateBalanceConsistency = (
   categoryRecords: WorkoutRecord[],
-  allRecords: WorkoutRecord[]
+  allRecords: WorkoutRecord[],
 ): number => {
   if (categoryRecords.length === 0 || allRecords.length === 0) return 0;
 
@@ -33,12 +35,9 @@ export const calculateBalanceConsistency = (
   const variance = weeklyPercentages.reduce((sum, val) => sum + Math.pow(val - mean, 2), 0) / weeklyPercentages.length;
   const stdDev = Math.sqrt(variance);
 
-  // Límites lógicos:
-  // - Si stdDev = 0 → score = 100 (perfecta consistencia)
-  // - Si stdDev > 20 → score = 0 (muy inconsistente)
-  // - Escala entre 0-20 de stdDev a 100-0 de score
-  const maxAcceptableStdDev = 20; // 20% de desviación es el límite
-  const score = Math.max(0, Math.min(100, 100 - (stdDev / maxAcceptableStdDev) * 100));
+  // Calcular score de consistencia (0-100)
+  const maxAcceptableStdDev = 0.5; // Desviación estándar máxima aceptable
+  const score = clamp(100 - (stdDev / maxAcceptableStdDev) * 100, 0, 100);
 
-  return Math.round(score);
-}; 
+  return score;
+};

@@ -1,4 +1,5 @@
 import React from 'react';
+
 import type { ChartProgressLinesProps } from '../types';
 import { generateProgressPath, getChartCoordinates } from '../utils';
 
@@ -11,7 +12,7 @@ export const ChartProgressLines: React.FC<ChartProgressLinesProps> = ({
   dimensions,
   weightRange,
   dateRange,
-  colors
+  colors,
 }) => {
   return (
     <>
@@ -67,4 +68,4 @@ export const ChartProgressLines: React.FC<ChartProgressLinesProps> = ({
       })}
     </>
   );
-}; 
+};

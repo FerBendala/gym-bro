@@ -1,6 +1,26 @@
-import { formatNumberToString } from '@/utils';
 import { Timer, TrendingDown, TrendingUp, Trophy } from 'lucide-react';
 import React from 'react';
+
+import { formatNumberToString } from '@/utils';
+import { clamp } from '@/utils/functions/math-utils';
+
+// Función para obtener un color más oscuro para el gradiente
+const getDarkerColor = (color: string): string => {
+  // Mapeo de colores a versiones más oscuras
+  const colorMap: Record<string, string> = {
+    '#3B82F6': '#1D4ED8', // Azul
+    '#10B981': '#059669', // Verde
+    '#F59E0B': '#D97706', // Naranja
+    '#EF4444': '#DC2626', // Rojo
+    '#8B5CF6': '#7C3AED', // Púrpura
+    '#F97316': '#EA580C', // Naranja oscuro
+    '#06B6D4': '#0891B2', // Cian
+    '#84CC16': '#65A30D', // Verde lima
+    '#6B7280': '#4B5563', // Gris
+  };
+
+  return colorMap[color] || color;
+};
 
 interface CategoryDashboardChartProps {
   data: {
@@ -16,17 +36,53 @@ interface CategoryDashboardChartProps {
 }
 
 export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ data, color }) => {
+  // Validación de datos
+  if (!data) {
+    return (
+      <div className="flex items-center justify-center p-4 text-gray-400">
+        <span>Datos no disponibles</span>
+      </div>
+    );
+  }
+
+  // Validar que todos los valores sean números válidos (permitir valores negativos para strength)
+  const isValidData = Object.entries(data).every(([key, value]) => {
+    // Ignorar propiedades que no son números (como 'trend')
+    if (key === 'trend') return true;
+    if (typeof value !== 'number' || isNaN(value)) return false;
+    // Permitir valores negativos solo para strength (puede indicar regresión)
+    if (key === 'strength') return true;
+    // Para otros valores, deben ser >= 0
+    return value >= 0;
+  });
+
+  if (!isValidData) {
+    // Debug: identificar qué valores son inválidos
+    const invalidValues = Object.entries(data).filter(([key, value]) => {
+      if (key === 'trend') return false; // trend es string, no número
+      if (typeof value !== 'number' || isNaN(value)) return true;
+      if (key === 'strength') return false; // strength puede ser negativo
+      return value < 0;
+    });
+
+    return (
+      <div className="flex items-center justify-center p-4 text-gray-400">
+        <span>Datos inválidos: {invalidValues.map(([key]) => key).join(', ')}</span>
+      </div>
+    );
+  }
+
   // Calcular valores dinámicos basados en datos reales
   const maxFrequency = Math.max(data.frequency, 3.5); // Máximo realista para frecuencia semanal
   const frequencyPercentage = (data.frequency / maxFrequency) * 100;
   const idealFrequencyPercentage = (2.5 / maxFrequency) * 100; // 2.5 veces por semana como ideal
 
-  // Normalizar fuerza: convertir progresión (-100 a +100) a escala 0-100
-  const normalizedStrength = Math.max(0, Math.min(100, ((data.strength + 100) / 2)));
+  // Normalizar valores para el gráfico
+  const normalizedStrength = clamp(((data.strength + 100) / 2), 0, 100);
   const strengthIdeal = 50; // 0% de progresión como punto neutral
 
-  // Calcular ideal de intensidad basado en datos disponibles
-  const intensityIdeal = Math.min(80, Math.max(60, data.intensity * 0.9)); // 10% menos que actual como objetivo conservador
+  // Calcular intensidad ideal (10% menos que actual como objetivo conservador)
+  const intensityIdeal = clamp(data.intensity * 0.9, 60, 80);
 
   const metrics = [
     {
@@ -35,7 +91,7 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
       max: Math.max(data.idealVolume * 1.5, data.volume, 100),
       ideal: data.idealVolume,
       unit: '%',
-      color: color
+      color,
     },
     {
       label: 'Intensidad',
@@ -43,7 +99,7 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
       max: 100,
       ideal: intensityIdeal,
       unit: '%',
-      color: '#3B82F6'
+      color: '#3B82F6',
     },
     {
       label: 'Frecuencia',
@@ -51,7 +107,7 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
       max: 100,
       ideal: idealFrequencyPercentage,
       unit: '/sem',
-      color: '#8B5CF6'
+      color: '#8B5CF6',
     },
     {
       label: 'Fuerza',
@@ -59,8 +115,8 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
       max: 100,
       ideal: strengthIdeal,
       unit: '%',
-      color: data.strength > 0 ? '#10B981' : data.strength < 0 ? '#EF4444' : '#6B7280'
-    }
+      color: data.strength > 0 ? '#10B981' : data.strength < 0 ? '#EF4444' : '#6B7280',
+    },
   ];
 
   return (
@@ -74,9 +130,9 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
               <div className="flex items-center space-x-2">
                 <span className="text-white font-bold">
                   {metric.label === 'Frecuencia'
-                    ? formatNumberToString(data.frequency, 1) + '/sem'
+                    ? `${formatNumberToString(data.frequency, 1)}/sem`
                     : metric.label === 'Fuerza'
-                      ? (data.strength > 0 ? '+' : '') + formatNumberToString(data.strength, 0) + '%'
+                      ? `${(data.strength > 0 ? '+' : '') + formatNumberToString(data.strength, 0)}%`
                       : formatNumberToString(metric.value, 0) + metric.unit
                   }
                 </span>
@@ -103,7 +159,7 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
                 className="h-full rounded-full transition-all duration-1000 ease-out relative"
                 style={{
                   width: `${Math.min(100, (metric.value / metric.max) * 100)}%`,
-                  backgroundColor: metric.color
+                  background: `linear-gradient(90deg, ${metric.color} 0%, ${getDarkerColor(metric.color)} 100%)`,
                 }}
               >
                 {/* Brillo sutil */}
@@ -147,4 +203,4 @@ export const CategoryDashboardChart: React.FC<CategoryDashboardChartProps> = ({ 
       </div>
     </div>
   );
-}; 
+};

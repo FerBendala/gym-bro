@@ -1,4 +1,5 @@
 import React from 'react';
+
 import { SelectLabelProps } from '../types';
 import { buildLabelClasses } from '../utils';
 
@@ -10,4 +11,4 @@ export const SelectLabel: React.FC<SelectLabelProps> = ({ label, size, hasError 
       {label}
     </label>
   );
-}; 
+};

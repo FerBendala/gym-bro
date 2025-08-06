@@ -1,17 +1,19 @@
+import React from 'react';
+
+import type { QuickDayNavigationProps } from '../types';
+import { getDayAbbreviation, isCurrentDay } from '../utils/date-utils';
+
 import { Section } from '@/components/layout';
 import { DAYS } from '@/constants/days.constants';
 import { MODERN_THEME } from '@/constants/theme';
 import { cn } from '@/utils';
-import React from 'react';
-import type { QuickDayNavigationProps } from '../types';
-import { getDayAbbreviation, isCurrentDay } from '../utils/date-utils';
 
 /**
  * Navegación rápida entre días
  */
 export const QuickDayNavigation: React.FC<QuickDayNavigationProps> = ({
   activeDay,
-  onDayChange
+  onDayChange,
 }) => {
   return (
     <Section title="" className="mt-8">
@@ -29,7 +31,7 @@ export const QuickDayNavigation: React.FC<QuickDayNavigationProps> = ({
                 MODERN_THEME.touch.tap,
                 isActive
                   ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30'
-                  : 'bg-gray-800/30 text-gray-400 hover:bg-gray-800/50 hover:text-gray-300'
+                  : 'bg-gray-800/30 text-gray-400 hover:bg-gray-800/50 hover:text-gray-300',
               )}
             >
               <span className="text-xs font-medium mb-1">
@@ -41,7 +43,7 @@ export const QuickDayNavigation: React.FC<QuickDayNavigationProps> = ({
               {!isToday && (
                 <div className={cn(
                   'w-2 h-2 rounded-full',
-                  isActive ? 'bg-blue-400' : 'bg-gray-600'
+                  isActive ? 'bg-blue-400' : 'bg-gray-600',
                 )} />
               )}
             </button>
@@ -50,4 +52,4 @@ export const QuickDayNavigation: React.FC<QuickDayNavigationProps> = ({
       </div>
     </Section>
   );
-}; 
+};

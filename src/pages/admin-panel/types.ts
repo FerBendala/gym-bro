@@ -19,4 +19,4 @@ export interface AdminPanelHookState {
   previewUrl: string | null;
   setTab: (tab: 'exercises' | 'assignments') => void;
   setPreviewUrl: (url: string | null) => void;
-} 
+}

@@ -1,9 +1,11 @@
-import { Card, CardContent } from '@/components/card';
-import { formatNumberToString } from '@/utils';
 import { Award, BarChart3, Target, TrendingUp } from 'lucide-react';
+
 import { STRENGTH_PROGRESS_CONSTANTS } from '../constants';
 import type { StrengthProgressAnalysis } from '../types';
 import { getRateColor } from '../utils';
+
+import { Card, CardContent } from '@/components/card';
+import { formatNumberToString } from '@/utils';
 
 interface MainMetricsProps {
   analysis: StrengthProgressAnalysis;
@@ -77,4 +79,4 @@ export const MainMetrics: React.FC<MainMetricsProps> = ({ analysis }) => {
       </Card>
     </div>
   );
-}; 
+};

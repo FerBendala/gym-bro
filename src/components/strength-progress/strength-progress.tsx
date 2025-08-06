@@ -1,14 +1,14 @@
 import React from 'react';
+
 import {
   ConsistencyAnalysis,
   EmptyState,
   GeneralProgress,
   Header,
   MainMetrics,
-  Predictions,
   QualityMetrics,
   RepRangeAnalysis,
-  TrainingRecommendations
+  TrainingRecommendations,
 } from './components';
 import { useStrengthProgress } from './hooks';
 import type { StrengthProgressProps } from './types';
@@ -30,7 +30,6 @@ export const StrengthProgress: React.FC<StrengthProgressProps> = ({ records }) =
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <GeneralProgress analysis={analysis} />
-        <Predictions analysis={analysis} />
       </div>
 
       <ConsistencyAnalysis analysis={analysis} />
@@ -39,4 +38,4 @@ export const StrengthProgress: React.FC<StrengthProgressProps> = ({ records }) =
       <QualityMetrics analysis={analysis} />
     </div>
   );
-}; 
+};

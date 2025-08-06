@@ -1,16 +1,17 @@
-import { ModernNavItem, NavigationType } from '@/components/layout/types';
 import { ModernLayoutStore } from './types';
+
+import { ModernNavItem, NavigationType } from '@/components/layout/types';
 
 // Acciones de navegación
 export const createModernLayoutNavigationActions = (
   set: (fn: (state: ModernLayoutStore) => Partial<ModernLayoutStore>) => void,
-  get: () => ModernLayoutStore
+  get: () => ModernLayoutStore,
 ) => ({
   setActiveTab: (tab: ModernNavItem) => {
     set(() => ({ activeTab: tab }));
   },
 
-  navigateTo: (tab: ModernNavItem) => {
+  navigateTo: (tab: ModernNavItem, params?: Record<string, any>) => {
     const { navigationHistory } = get();
     const newHistory = [...navigationHistory, tab];
 
@@ -18,6 +19,7 @@ export const createModernLayoutNavigationActions = (
       activeTab: tab,
       navigationHistory: newHistory,
       canGoBack: newHistory.length > 1,
+      navigationParams: params || {},
     }));
   },
 
@@ -32,6 +34,7 @@ export const createModernLayoutNavigationActions = (
         activeTab: previousTab,
         navigationHistory: newHistory,
         canGoBack: newHistory.length > 1,
+        navigationParams: {},
       }));
 
       return true;
@@ -45,13 +48,14 @@ export const createModernLayoutNavigationActions = (
     set(() => ({
       navigationHistory: [activeTab],
       canGoBack: false,
+      navigationParams: {},
     }));
   },
 });
 
 // Acciones de UI
 export const createModernLayoutUIActions = (
-  set: (fn: (state: ModernLayoutStore) => Partial<ModernLayoutStore>) => void
+  set: (fn: (state: ModernLayoutStore) => Partial<ModernLayoutStore>) => void,
 ) => ({
   setNavigationVisible: (visible: boolean) => {
     set(() => ({ isNavigationVisible: visible }));
@@ -68,7 +72,7 @@ export const createModernLayoutUIActions = (
 
 // Acciones de configuración
 export const createModernLayoutConfigActions = (
-  set: (fn: (state: ModernLayoutStore) => Partial<ModernLayoutStore>) => void
+  set: (fn: (state: ModernLayoutStore) => Partial<ModernLayoutStore>) => void,
 ) => ({
   setNavigationType: (type: NavigationType) => {
     set(() => ({ navigationType: type }));
@@ -89,8 +93,16 @@ export const createModernLayoutConfigActions = (
 
 // Acciones de utilidad
 export const createModernLayoutUtilityActions = (
-  set: (fn: (state: ModernLayoutStore) => Partial<ModernLayoutStore>) => void
+  set: (fn: (state: ModernLayoutStore) => Partial<ModernLayoutStore>) => void,
 ) => ({
+  setNavigationParams: (params: Record<string, any>) => {
+    set(() => ({ navigationParams: params }));
+  },
+
+  clearNavigationParams: () => {
+    set(() => ({ navigationParams: {} }));
+  },
+
   reset: () => {
     set(() => ({
       activeTab: 'home',
@@ -102,6 +114,7 @@ export const createModernLayoutUtilityActions = (
       subtitle: undefined,
       showBackButton: false,
       canGoBack: false,
+      navigationParams: {},
     }));
   },
-}); 
+});

@@ -13,7 +13,7 @@ export const STORES = {
   EXERCISES: 'exercises',
   WORKOUT_RECORDS: 'workoutRecords',
   SYNC_QUEUE: 'syncQueue',
-  METADATA: 'metadata'
+  METADATA: 'metadata',
 } as const;
 
 /**
@@ -23,18 +23,18 @@ export const INDEXES = {
   EXERCISES: {
     BY_CATEGORY: 'by_category',
     BY_NAME: 'by_name',
-    BY_UPDATED_AT: 'by_updated_at'
+    BY_UPDATED_AT: 'by_updated_at',
   },
   WORKOUT_RECORDS: {
     BY_EXERCISE_ID: 'by_exercise_id',
     BY_DATE: 'by_date',
-    BY_UPDATED_AT: 'by_updated_at'
+    BY_UPDATED_AT: 'by_updated_at',
   },
   SYNC_QUEUE: {
     BY_STATUS: 'by_status',
     BY_CREATED_AT: 'by_created_at',
-    BY_PRIORITY: 'by_priority'
-  }
+    BY_PRIORITY: 'by_priority',
+  },
 } as const;
 
 /**
@@ -45,7 +45,7 @@ export const SYNC_STATUS = {
   IN_PROGRESS: 'in_progress',
   COMPLETED: 'completed',
   FAILED: 'failed',
-  CANCELLED: 'cancelled'
+  CANCELLED: 'cancelled',
 } as const;
 
 /**
@@ -54,7 +54,7 @@ export const SYNC_STATUS = {
 export const SYNC_OPERATIONS = {
   CREATE: 'create',
   UPDATE: 'update',
-  DELETE: 'delete'
+  DELETE: 'delete',
 } as const;
 
 /**
@@ -63,7 +63,7 @@ export const SYNC_OPERATIONS = {
 export const SYNC_PRIORITY = {
   HIGH: 1,
   MEDIUM: 2,
-  LOW: 3
+  LOW: 3,
 } as const;
 
 /**
@@ -76,8 +76,8 @@ export const STORE_CONFIG = {
     indexes: [
       { name: INDEXES.EXERCISES.BY_CATEGORY, keyPath: 'category', unique: false },
       { name: INDEXES.EXERCISES.BY_NAME, keyPath: 'name', unique: false },
-      { name: INDEXES.EXERCISES.BY_UPDATED_AT, keyPath: 'updatedAt', unique: false }
-    ]
+      { name: INDEXES.EXERCISES.BY_UPDATED_AT, keyPath: 'updatedAt', unique: false },
+    ],
   },
   [STORES.WORKOUT_RECORDS]: {
     keyPath: 'id',
@@ -85,8 +85,8 @@ export const STORE_CONFIG = {
     indexes: [
       { name: INDEXES.WORKOUT_RECORDS.BY_EXERCISE_ID, keyPath: 'exerciseId', unique: false },
       { name: INDEXES.WORKOUT_RECORDS.BY_DATE, keyPath: 'date', unique: false },
-      { name: INDEXES.WORKOUT_RECORDS.BY_UPDATED_AT, keyPath: 'updatedAt', unique: false }
-    ]
+      { name: INDEXES.WORKOUT_RECORDS.BY_UPDATED_AT, keyPath: 'updatedAt', unique: false },
+    ],
   },
   [STORES.SYNC_QUEUE]: {
     keyPath: 'id',
@@ -94,17 +94,17 @@ export const STORE_CONFIG = {
     indexes: [
       { name: INDEXES.SYNC_QUEUE.BY_STATUS, keyPath: 'status', unique: false },
       { name: INDEXES.SYNC_QUEUE.BY_CREATED_AT, keyPath: 'createdAt', unique: false },
-      { name: INDEXES.SYNC_QUEUE.BY_PRIORITY, keyPath: 'priority', unique: false }
-    ]
+      { name: INDEXES.SYNC_QUEUE.BY_PRIORITY, keyPath: 'priority', unique: false },
+    ],
   },
   [STORES.METADATA]: {
     keyPath: 'key',
     autoIncrement: false,
-    indexes: []
-  }
+    indexes: [],
+  },
 } as const;
 
 export type SyncStatus = typeof SYNC_STATUS[keyof typeof SYNC_STATUS];
 export type SyncOperation = typeof SYNC_OPERATIONS[keyof typeof SYNC_OPERATIONS];
 export type SyncPriority = typeof SYNC_PRIORITY[keyof typeof SYNC_PRIORITY];
-export type StoreName = typeof STORES[keyof typeof STORES]; 
+export type StoreName = typeof STORES[keyof typeof STORES];

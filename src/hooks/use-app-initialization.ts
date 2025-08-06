@@ -1,5 +1,6 @@
-import { useInitializeConnection } from '@/stores/connection';
 import { useEffect, useRef } from 'react';
+
+import { useInitializeConnection } from '@/stores/connection';
 
 /**
  * Hook para inicializar el estado global de la aplicación
@@ -18,6 +19,6 @@ export const useAppInitialization = () => {
   }, [isInitialized, initializeConnection]); // Incluidas las dependencias necesarias
 
   return {
-    isInitialized
+    isInitialized,
   };
-}; 
+};

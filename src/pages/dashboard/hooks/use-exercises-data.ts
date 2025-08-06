@@ -1,6 +1,9 @@
+import { useEffect, useMemo, useState } from 'react';
+
+import { KNOWN_EXERCISE_DISTRIBUTIONS } from '@/constants/exercise.constants';
 import type { WorkoutRecord } from '@/interfaces';
+import { useNavigationParams } from '@/stores/modern-layout';
 import { calculateExerciseProgress } from '@/utils';
-import { useMemo, useState } from 'react';
 
 interface ExerciseAnalysis {
   name: string;
@@ -11,6 +14,7 @@ interface ExerciseAnalysis {
   progress: number;
   progressPercent: number;
   frequency: number;
+  intensity: number;
   firstWeight: number;
   lastWeight: number;
   lastDate: Date;
@@ -31,7 +35,31 @@ interface GlobalMetrics {
 }
 
 export const useExercisesData = (records: WorkoutRecord[]) => {
+  const navigationParams = useNavigationParams();
   const [selectedCategory, setSelectedCategory] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  // Actualizar searchTerm cuando cambien los parámetros de navegación
+  useEffect(() => {
+    if (navigationParams.filteredExercise) {
+      setSearchTerm(navigationParams.filteredExercise);
+    }
+  }, [navigationParams.filteredExercise]);
+
+  // Función para obtener la categoría dominante de un ejercicio
+  const getDominantCategory = (exerciseName: string): string => {
+    const distribution = KNOWN_EXERCISE_DISTRIBUTIONS[exerciseName];
+    if (distribution) {
+      // Encontrar la categoría con mayor porcentaje
+      const dominantCategory = Object.entries(distribution).reduce((max, [category, percentage]) =>
+        percentage > max.percentage ? { category, percentage } : max,
+        { category: 'Sin categoría', percentage: 0 },
+      );
+      return dominantCategory.category;
+    }
+    // Si no hay distribución conocida, usar la primera categoría
+    return 'Sin categoría';
+  };
 
   const exerciseAnalysis = useMemo((): ExerciseAnalysis[] => {
     if (records.length === 0) return [];
@@ -49,16 +77,23 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
     // Analizar cada ejercicio
     return Object.entries(exerciseGroups).map(([exerciseName, exerciseRecords]) => {
       const totalVolume = exerciseRecords.reduce((sum, record) =>
-        sum + (record.weight * record.reps * record.sets), 0
+        sum + (record.weight * record.reps * record.sets), 0,
       );
 
       const maxWeight = Math.max(...exerciseRecords.map(r => r.weight));
       const avgWeight = exerciseRecords.reduce((sum, r) => sum + r.weight, 0) / exerciseRecords.length;
 
+      // Calcular frecuencia como sesiones únicas por fecha
+      const uniqueSessions = new Set(exerciseRecords.map(r => r.date.toDateString()));
+      const frequency = uniqueSessions.size;
+
+      // Calcular intensidad correctamente (maxWeight / avgWeight * 100, pero limitado a 100%)
+      const intensity = Math.min((maxWeight / avgWeight) * 100, 100);
+
       const { absoluteProgress: progress, percentProgress: progressPercent } = calculateExerciseProgress(exerciseRecords);
 
-      const frequency = exerciseRecords.length;
-      const categories = exerciseRecords[0].exercise?.categories || ['Sin categoría'];
+      const dominantCategory = getDominantCategory(exerciseName);
+      const categories = [dominantCategory];
 
       return {
         name: exerciseName,
@@ -69,16 +104,17 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
         progress,
         progressPercent,
         frequency,
+        intensity,
         firstWeight: exerciseRecords[0].weight,
         lastWeight: exerciseRecords[exerciseRecords.length - 1].weight,
-        lastDate: new Date(Math.max(...exerciseRecords.map(r => r.date.getTime())))
+        lastDate: new Date(Math.max(...exerciseRecords.map(r => r.date.getTime()))),
       };
     }).sort((a, b) => b.totalVolume - a.totalVolume);
   }, [records]);
 
   const categoriesWithCount = useMemo((): CategoryWithCount[] => {
     const categories = [
-      { id: 'all', name: 'Todas', count: exerciseAnalysis.length }
+      { id: 'all', name: 'Todas', count: exerciseAnalysis.length },
     ];
 
     const uniqueCategories = Array.from(new Set(exerciseAnalysis.flatMap(ex => ex.categories)));
@@ -102,7 +138,7 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
   const allExercises = filteredExercises;
 
   const unknownRecords = records.filter(record =>
-    !record.exercise || !record.exercise.name || record.exercise.name === 'Ejercicio desconocido'
+    !record.exercise?.name || record.exercise.name === 'Ejercicio desconocido',
   );
 
   const globalMetrics = useMemo((): GlobalMetrics => {
@@ -117,7 +153,7 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
       avgProgress,
       exercisesImproving,
       maxWeightExercise,
-      totalSessions
+      totalSessions,
     };
   }, [allExercises]);
 
@@ -126,8 +162,10 @@ export const useExercisesData = (records: WorkoutRecord[]) => {
     categoriesWithCount,
     selectedCategory,
     setSelectedCategory,
+    searchTerm,
+    setSearchTerm,
     allExercises,
     unknownRecords,
-    globalMetrics
+    globalMetrics,
   };
-}; 
+};

@@ -4,7 +4,7 @@ export { useNotificationStore } from './store';
 // Exportar tipos
 export type {
   NotificationActions, NotificationItem, NotificationState,
-  NotificationStore, NotificationStoreActions, NotificationStoreState, NotificationType
+  NotificationStore, NotificationStoreActions, NotificationStoreState, NotificationType,
 } from './types';
 
 // Exportar utilidades
@@ -15,5 +15,5 @@ export { createNotificationActions } from './actions';
 
 // Exportar selectores optimizados
 export {
-  useCurrentNotification, useNotification, useNotificationsList
+  useCurrentNotification, useNotification, useNotificationsList,
 } from './selectors';

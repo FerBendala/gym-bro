@@ -33,4 +33,4 @@ export const VOLUME_SETTINGS_TIPS = [
   'Puedes usar el botón "Normalizar" para ajustar automáticamente a 100%',
   'Los valores por defecto están basados en principios de anatomía funcional',
   'Estos valores afectan el análisis de balance muscular en el dashboard',
-] as const; 
+] as const;

@@ -1,12 +1,14 @@
+import { useCallback, useEffect } from 'react';
+
 import {
   getAssignmentsByDay,
-  getExercises
+  getExercises,
 } from '@/api/services';
 import type { Exercise, ExerciseAssignment } from '@/interfaces';
 import { useAdminStore } from '@/stores/admin';
 import { useOnlineStatus } from '@/stores/connection';
 import { useNotification } from '@/stores/notification';
-import { useCallback, useEffect } from 'react';
+import { logger } from '@/utils';
 
 /**
  * Hook para cargar datos iniciales del admin panel
@@ -21,7 +23,7 @@ export const useAdminDataLoader = () => {
     setExercises,
     setAssignments,
     setLoading,
-    setError
+    setError,
   } = useAdminStore();
 
   // Cargar ejercicios
@@ -38,7 +40,7 @@ export const useAdminDataLoader = () => {
       const exercisesData = await getExercises();
       setExercises(exercisesData);
     } catch (error: unknown) {
-      console.error('❌ loadExercises - Error:', error);
+      logger.error('❌ loadExercises - Error:', error as Error);
       const message = error instanceof Error ? error.message : 'Error al cargar los ejercicios';
       setError('exercises', message);
       showNotification(message, 'error');
@@ -53,14 +55,14 @@ export const useAdminDataLoader = () => {
 
     // Validar que selectedDay sea válido antes de hacer la consulta
     if (!selectedDay) {
-      console.warn('⚠️ selectedDay es undefined, saltando carga de asignaciones');
+      logger.warn('⚠️ selectedDay es undefined, saltando carga de asignaciones');
       return;
     }
 
     // Validación adicional: asegurar que selectedDay sea un día válido
     const validDays = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'] as const;
     if (!validDays.includes(selectedDay as typeof validDays[number])) {
-      console.warn('⚠️ selectedDay no es un día válido:', selectedDay);
+      logger.warn('⚠️ selectedDay no es un día válido:', selectedDay);
       return;
     }
 
@@ -71,10 +73,10 @@ export const useAdminDataLoader = () => {
       const assignmentsData = await getAssignmentsByDay(selectedDay);
 
       // Enriquecer con datos de ejercicios
-      const exercises = useAdminStore.getState().exercises;
+      const { exercises } = useAdminStore.getState();
       const assignmentsWithExercises: ExerciseAssignment[] = assignmentsData.map((assignment) => ({
         ...assignment,
-        exercise: exercises.find((exercise: Exercise) => exercise.id === assignment.exerciseId)
+        exercise: exercises.find((exercise: Exercise) => exercise.id === assignment.exerciseId),
       }));
 
       setAssignments(assignmentsWithExercises);
@@ -101,6 +103,6 @@ export const useAdminDataLoader = () => {
 
   return {
     loadExercises,
-    loadAssignments
+    loadAssignments,
   };
-}; 
+};
