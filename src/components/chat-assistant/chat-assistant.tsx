@@ -3,6 +3,7 @@ import { Button } from '../button';
 import { Card } from '../card';
 import { Input } from '../input';
 import { LoadingSpinner } from '../loading-spinner';
+import { UserContextService } from '@/api/services/user-context-service';
 
 interface ChatAssistantProps {
   className?: string;
@@ -16,6 +17,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
+  const [userContext, setUserContext] = useState<string>('');
 
   const checkConnection = useCallback(async () => {
     try {
@@ -39,15 +41,29 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
     }
   }, []);
 
+  // Cargar contexto del usuario al iniciar
+  const loadUserContext = useCallback(async () => {
+    try {
+      const context = await UserContextService.getUserContext();
+      const contextSummary = UserContextService.generateContextSummary(context);
+      setUserContext(contextSummary);
+      console.log('✅ Contexto del usuario cargado');
+    } catch (error) {
+      console.error('❌ Error cargando contexto del usuario:', error);
+      setUserContext('No se pudo cargar el contexto del usuario.');
+    }
+  }, []);
+
   // Verificar conexión al cargar y cada 30 segundos
   useEffect(() => {
     checkConnection();
+    loadUserContext();
 
     // Verificar conexión cada 30 segundos
     const interval = setInterval(checkConnection, 30000);
 
     return () => clearInterval(interval);
-  }, [checkConnection]);
+  }, [checkConnection, loadUserContext]);
 
   const sendMessage = async (message: string) => {
     setLoading(true);
@@ -72,7 +88,8 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
         },
         body: JSON.stringify({
           message: message,
-          reasoning_level: 'high'
+          reasoning_level: 'high',
+          context: userContext
         }),
       });
 

@@ -31,9 +31,9 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Parsear el body de la request
-    const requestBody = JSON.parse(event.body);
-    const { message, context, reasoning_level = 'medium' } = requestBody;
+                    // Parsear el body de la request
+                const requestBody = JSON.parse(event.body);
+                const { message, context: userContext, reasoning_level = 'medium' } = requestBody;
 
     if (!message) {
       return {
@@ -46,17 +46,19 @@ exports.handler = async (event, context) => {
     // URL de la API externa de chat (puedes cambiar esto por tu API)
     const CHAT_API_URL = process.env.CHAT_API_URL || 'https://api.openai.com/v1/chat/completions';
 
-    // Configuración del prompt
-    const prompt = context
-      ? `[INST] Eres un experto en fitness y entrenamiento. Responde SOLO EN ESPAÑOL de manera completa y detallada.
+                    // Configuración del prompt con contexto del usuario
+                const prompt = userContext 
+                  ? `[INST] Eres un experto en fitness y entrenamiento. Responde SOLO EN ESPAÑOL de manera completa y detallada.
 
-Contexto: ${context}
-Pregunta: ${message}
+CONTEXTO DEL USUARIO:
+${userContext}
 
-Proporciona una respuesta completa y detallada con explicaciones, consejos prácticos y recomendaciones específicas. Responde únicamente en español y asegúrate de completar todas las ideas. Termina tu respuesta con un punto final. [/INST]`
-      : `[INST] Eres un experto en fitness y entrenamiento. Responde SOLO EN ESPAÑOL de manera completa y detallada.
+PREGUNTA: ${message}
 
-Pregunta: ${message}
+IMPORTANTE: Usa el contexto del usuario para dar respuestas personalizadas. Menciona ejercicios específicos que el usuario tiene, sus estadísticas, y adapta tus consejos a su rutina actual. Proporciona una respuesta completa y detallada con explicaciones, consejos prácticos y recomendaciones específicas. Responde únicamente en español y asegúrate de completar todas las ideas. Termina tu respuesta con un punto final. [/INST]`
+                  : `[INST] Eres un experto en fitness y entrenamiento. Responde SOLO EN ESPAÑOL de manera completa y detallada.
+
+PREGUNTA: ${message}
 
 Proporciona una respuesta completa y detallada con explicaciones, consejos prácticos y recomendaciones específicas. Responde únicamente en español y asegúrate de completar todas las ideas. Termina tu respuesta con un punto final. [/INST]`;
 
@@ -71,14 +73,16 @@ Proporciona una respuesta completa y detallada con explicaciones, consejos prác
         body: JSON.stringify({
           model: 'gpt-3.5-turbo',
           messages: [
-            {
-              role: 'system',
-              content: 'Eres un experto en fitness y entrenamiento. Responde siempre en español de manera completa y detallada.',
-            },
-            {
-              role: 'user',
-              content: message,
-            },
+                                    {
+                          role: 'system',
+                          content: userContext 
+                            ? `Eres un experto en fitness y entrenamiento. Responde siempre en español de manera completa y detallada. Usa el contexto del usuario para dar respuestas personalizadas: ${userContext}`
+                            : 'Eres un experto en fitness y entrenamiento. Responde siempre en español de manera completa y detallada.',
+                        },
+                        {
+                          role: 'user',
+                          content: message,
+                        },
           ],
           max_tokens: 1000,
           temperature: 0.7,

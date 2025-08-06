@@ -103,16 +103,18 @@ async def chat(request: ChatRequest):
             enhanced_prompt = f"""
 [INST] Eres un experto en fitness y entrenamiento. Responde SOLO EN ESPAÑOL de manera completa y detallada.
 
-Contexto: {request.context}
-Pregunta: {request.message}
+CONTEXTO DEL USUARIO:
+{request.context}
 
-Proporciona una respuesta completa y detallada con explicaciones, consejos prácticos y recomendaciones específicas. Responde únicamente en español y asegúrate de completar todas las ideas. Termina tu respuesta con un punto final. [/INST]
+PREGUNTA: {request.message}
+
+IMPORTANTE: Usa el contexto del usuario para dar respuestas personalizadas. Menciona ejercicios específicos que el usuario tiene, sus estadísticas, y adapta tus consejos a su rutina actual. Proporciona una respuesta completa y detallada con explicaciones, consejos prácticos y recomendaciones específicas. Responde únicamente en español y asegúrate de completar todas las ideas. Termina tu respuesta con un punto final. [/INST]
 """
         else:
             enhanced_prompt = f"""
 [INST] Eres un experto en fitness y entrenamiento. Responde SOLO EN ESPAÑOL de manera completa y detallada.
 
-Pregunta: {request.message}
+PREGUNTA: {request.message}
 
 Proporciona una respuesta completa y detallada con explicaciones, consejos prácticos y recomendaciones específicas. Responde únicamente en español y asegúrate de completar todas las ideas. Termina tu respuesta con un punto final. [/INST]
 """
