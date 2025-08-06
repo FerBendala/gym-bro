@@ -23,10 +23,12 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
 
       // Determinar la URL del health check según el entorno
       const isDevelopment = import.meta.env.DEV;
-      const healthUrl = isDevelopment
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const healthUrl = (isDevelopment && isLocalhost)
         ? 'http://localhost:8004/health'
         : '/api/health';
 
+      console.log('🌐 URL de health check:', healthUrl);
       const response = await fetch(healthUrl);
       const data = await response.json();
       console.log('✅ Conexión:', data);
@@ -56,9 +58,12 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
 
       // Determinar la URL del API según el entorno
       const isDevelopment = import.meta.env.DEV;
-      const apiUrl = isDevelopment
+      const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+      const apiUrl = (isDevelopment && isLocalhost)
         ? 'http://localhost:8004/chat'
         : '/api/chat';
+
+      console.log('🌐 URL de API:', apiUrl);
 
       const response = await fetch(apiUrl, {
         method: 'POST',
