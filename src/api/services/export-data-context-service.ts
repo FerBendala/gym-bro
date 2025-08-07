@@ -69,6 +69,17 @@ export class ExportDataContextService {
       });
 
       console.log(`🔗 Relaciones resueltas: ${workoutRecordsWithExercises.filter(r => r.exercise).length}/${workoutRecordsWithExercises.length} registros con ejercicios válidos`);
+      
+      // Debug: Mostrar algunos registros resueltos
+      const sampleRecords = workoutRecordsWithExercises.slice(0, 5);
+      console.log('📋 Muestra de registros resueltos:', sampleRecords.map(r => ({
+        date: r.date,
+        exercise: r.exercise?.name || 'No encontrado',
+        exerciseId: r.exerciseId,
+        weight: r.weight,
+        reps: r.reps,
+        sets: r.sets
+      })));
 
       // Generar datos de exportación usando la función real
       const exportData = await generateExportData(exercises, workoutRecordsWithExercises);
