@@ -44,7 +44,7 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
     try {
       const context = await ExportDataContextService.getUserContext();
       console.log('🔍 Contexto obtenido:', context);
-      
+
       const contextSummary = ExportDataContextService.generateContextSummary(context);
       console.log('📋 Resumen del contexto generado:', contextSummary.substring(0, 500) + '...');
 

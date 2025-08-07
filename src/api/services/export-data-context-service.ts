@@ -590,7 +590,7 @@ ${JSON.stringify(exportData, null, 2)}
 
     console.log('📋 Resumen generado (longitud):', summary.length);
     console.log('📋 Resumen generado (primeros 500 chars):', summary.substring(0, 500) + '...');
-    
+
     return summary;
   }
 
