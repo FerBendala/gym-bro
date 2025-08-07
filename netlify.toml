@@ -3,7 +3,7 @@
   publish = "dist"
   
   # Comando de construcción
-  command = "pnpm build && ./netlify/functions/build.sh"
+  command = "pnpm build"
   
   # Variables de entorno para el build
   [build.environment]
@@ -17,20 +17,13 @@
   
   # Variables de entorno para las funciones
   [functions.environment]
-    PYTHON_VERSION = "3.9"
     NODE_VERSION = "18"
-    PYTHONPATH = "netlify/functions"
-
-# Configuración específica para funciones Python
-[functions."chat-python"]
-  runtime = "python3.9"
-  included_files = ["netlify/functions/requirements.txt"]
 
 # Configuración de redirecciones
 [[redirects]]
   # Redirigir API calls a las funciones serverless
   from = "/api/chat"
-  to = "/.netlify/functions/chat-python"
+  to = "/.netlify/functions/chat"
   status = 200
   force = true
 
