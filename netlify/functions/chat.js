@@ -43,16 +43,14 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // URL de la API externa de chat (configurada para gpt-oss-20b)
-    const CHAT_API_URL = process.env.CHAT_API_URL || 'http://localhost:8004/chat';
+    // URL de la API externa de chat (configurada para gpt-oss-20b en Hugging Face)
+    const CHAT_API_URL = process.env.CHAT_API_URL || 'https://api-inference.huggingface.co/models/openai/gpt-oss-20b';
 
-    // Configuración para gpt-oss-20b
-    const GPT_OSS_CONFIG = {
-      model: 'openai/gpt-oss-20b',
-      reasoning_level: reasoning_level || 'medium', // low, medium, high
+    // Configuración para el modelo de chat
+    const CHAT_CONFIG = {
+      model: 'gpt-4o-mini', // Modelo más avanzado disponible en OpenAI API
       max_tokens: 1000,
-      temperature: 0.7,
-      harmony_format: true // Usar formato Harmony requerido por gpt-oss
+      temperature: 0.7
     };
 
     // Si tienes una API key de OpenAI, puedes usar esto:
@@ -102,23 +100,31 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Usar gpt-oss-20b a través del servidor local
+    // Usar gpt-oss-20b a través de Hugging Face API
     try {
       console.log('🤖 Usando gpt-oss-20b con configuración:', GPT_OSS_CONFIG);
+
+      // Formatear el prompt para gpt-oss-20b con formato Harmony
+      const systemPrompt = userContext 
+        ? `Eres un experto en fitness y entrenamiento llamado "GymBro". Responde siempre en español de manera completa y detallada. Usa el contexto del usuario para dar respuestas personalizadas. Reasoning: ${GPT_OSS_CONFIG.reasoning_level}. Contexto: ${userContext}`
+        : `Eres un experto en fitness y entrenamiento llamado "GymBro". Responde siempre en español de manera completa y detallada. Reasoning: ${GPT_OSS_CONFIG.reasoning_level}.`;
+
+      const harmonyPrompt = `<|im_start|>system\n${systemPrompt}<|im_end|>\n<|im_start|>user\n${message}<|im_end|>\n<|im_start|>assistant\n`;
 
       const response = await fetch(CHAT_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${process.env.HF_API_KEY || ''}`,
         },
         body: JSON.stringify({
-          model: GPT_OSS_CONFIG.model,
-          message: message,
-          reasoning_level: GPT_OSS_CONFIG.reasoning_level,
-          context: userContext,
-          harmony_format: GPT_OSS_CONFIG.harmony_format,
-          max_tokens: GPT_OSS_CONFIG.max_tokens,
-          temperature: GPT_OSS_CONFIG.temperature
+          inputs: harmonyPrompt,
+          parameters: {
+            max_new_tokens: GPT_OSS_CONFIG.max_tokens,
+            temperature: GPT_OSS_CONFIG.temperature,
+            do_sample: true,
+            return_full_text: false
+          }
         }),
       });
 
@@ -136,11 +142,23 @@ exports.handler = async (event, context) => {
         };
       }
 
+      // Extraer la respuesta del formato de Hugging Face
+      let responseText = '';
+      if (Array.isArray(data) && data.length > 0) {
+        responseText = data[0].generated_text || '';
+        // Remover el prompt original y extraer solo la respuesta del asistente
+        if (responseText.includes('<|im_start|>assistant\n')) {
+          responseText = responseText.split('<|im_start|>assistant\n')[1] || '';
+        }
+        // Remover cualquier token de fin
+        responseText = responseText.replace('<|im_end|>', '').trim();
+      }
+
       return {
         statusCode: 200,
         headers,
         body: JSON.stringify({
-          response: data.response,
+          response: responseText || 'No se pudo generar una respuesta',
         }),
       };
     } catch (error) {
