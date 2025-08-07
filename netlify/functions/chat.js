@@ -43,8 +43,17 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // URL de la API externa de chat (puedes cambiar esto por tu API)
+    // URL de la API externa de chat (configurada para gpt-oss-20b)
     const CHAT_API_URL = process.env.CHAT_API_URL || 'http://localhost:8004/chat';
+    
+    // Configuración para gpt-oss-20b
+    const GPT_OSS_CONFIG = {
+      model: 'openai/gpt-oss-20b',
+      reasoning_level: reasoning_level || 'medium', // low, medium, high
+      max_tokens: 1000,
+      temperature: 0.7,
+      harmony_format: true // Usar formato Harmony requerido por gpt-oss
+    };
 
     // Si tienes una API key de OpenAI, puedes usar esto:
     if (process.env.OPENAI_API_KEY) {
@@ -55,21 +64,22 @@ exports.handler = async (event, context) => {
           'Authorization': `Bearer ${process.env.OPENAI_API_KEY}`,
         },
         body: JSON.stringify({
-          model: 'gpt-3.5-turbo',
+          model: GPT_OSS_CONFIG.model,
           messages: [
             {
               role: 'system',
               content: userContext
-                ? `Eres un experto en fitness y entrenamiento. Responde siempre en español de manera completa y detallada. Usa el contexto del usuario para dar respuestas personalizadas: ${userContext}`
-                : 'Eres un experto en fitness y entrenamiento. Responde siempre en español de manera completa y detallada.',
+                ? `Eres un experto en fitness y entrenamiento llamado "GymBro". Responde siempre en español de manera completa y detallada. Usa el contexto del usuario para dar respuestas personalizadas. Reasoning: ${GPT_OSS_CONFIG.reasoning_level}. Contexto: ${userContext}`
+                : `Eres un experto en fitness y entrenamiento llamado "GymBro". Responde siempre en español de manera completa y detallada. Reasoning: ${GPT_OSS_CONFIG.reasoning_level}.`,
             },
             {
               role: 'user',
               content: message,
             },
           ],
-          max_tokens: 1000,
-          temperature: 0.7,
+          max_tokens: GPT_OSS_CONFIG.max_tokens,
+          temperature: GPT_OSS_CONFIG.temperature,
+          harmony_format: GPT_OSS_CONFIG.harmony_format,
         }),
       });
 
@@ -92,17 +102,23 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // Usar Phi-3 a través del servidor local
+    // Usar gpt-oss-20b a través del servidor local
     try {
+      console.log('🤖 Usando gpt-oss-20b con configuración:', GPT_OSS_CONFIG);
+      
       const response = await fetch(CHAT_API_URL, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          model: GPT_OSS_CONFIG.model,
           message: message,
-          reasoning_level: reasoning_level,
-          context: userContext
+          reasoning_level: GPT_OSS_CONFIG.reasoning_level,
+          context: userContext,
+          harmony_format: GPT_OSS_CONFIG.harmony_format,
+          max_tokens: GPT_OSS_CONFIG.max_tokens,
+          temperature: GPT_OSS_CONFIG.temperature
         }),
       });
 
@@ -128,7 +144,7 @@ exports.handler = async (event, context) => {
         }),
       };
     } catch (error) {
-      console.error('Error comunicándose con Phi-3:', error);
+      console.error('Error comunicándose con gpt-oss-20b:', error);
 
       // Fallback: Respuesta simulada para desarrollo
       const mockResponses = {
@@ -143,11 +159,11 @@ exports.handler = async (event, context) => {
         const lowerMessage = message.toLowerCase();
 
         // Preguntas sobre entrenamientos específicos por día
-        if (lowerMessage.includes('ayer') || lowerMessage.includes('hice') || lowerMessage.includes('ejercicios') || 
-            lowerMessage.includes('martes') || lowerMessage.includes('miércoles') || lowerMessage.includes('jueves') || 
-            lowerMessage.includes('viernes') || lowerMessage.includes('sábado') || lowerMessage.includes('domingo') ||
-            lowerMessage.includes('lunes') || lowerMessage.includes('anteayer')) {
-          
+        if (lowerMessage.includes('ayer') || lowerMessage.includes('hice') || lowerMessage.includes('ejercicios') ||
+          lowerMessage.includes('martes') || lowerMessage.includes('miércoles') || lowerMessage.includes('jueves') ||
+          lowerMessage.includes('viernes') || lowerMessage.includes('sábado') || lowerMessage.includes('domingo') ||
+          lowerMessage.includes('lunes') || lowerMessage.includes('anteayer')) {
+
           console.log('🔍 Procesando pregunta sobre entrenamientos específicos');
           console.log('📊 Contexto recibido (longitud):', userContext ? userContext.length : 0);
           console.log('📝 Mensaje original:', message);
@@ -245,7 +261,7 @@ exports.handler = async (event, context) => {
 
       // Generar respuesta contextual basada en el contexto del usuario
       let response = generateContextualResponse(message, userContext);
-      
+
       console.log('🤖 Respuesta generada:', response.substring(0, 200) + '...');
 
       // Simular delay para que parezca más realista
