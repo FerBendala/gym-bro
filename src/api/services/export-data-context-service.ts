@@ -1,39 +1,9 @@
+import { generateExportData } from '@/utils/functions';
+import { getExercises, getWorkoutRecords } from '@/api/services';
 import { logger } from '@/utils';
+import type { ExportData } from '@/utils/functions/export-interfaces';
 
-interface TrainingDay {
-  dayOfWeek: string;
-  dayName: string;
-  totalWorkouts: number;
-  totalVolume: number;
-  exercises: ExerciseData[];
-}
 
-interface ExerciseData {
-  exerciseName: string;
-  categories: string[];
-  totalVolume: number;
-  workoutCount: number;
-  averageWeight: number;
-  maxWeight: number;
-  lastWorkout: string;
-  weights: number[];
-}
-
-interface ExportData {
-  metadata: {
-    exportDate: string;
-    totalExercises: number;
-    totalWorkouts: number;
-    totalVolume: number;
-    invalidRecordsCount: number;
-    dateRange: {
-      from: string;
-      to: string;
-    };
-    appVersion: string;
-  };
-  trainingDays: TrainingDay[];
-}
 
 /**
  * Servicio para obtener contexto desde datos reales del usuario
@@ -41,7 +11,7 @@ interface ExportData {
  */
 export class ExportDataContextService {
   /**
-   * Obtiene el contexto completo desde los datos de exportación JSON
+   * Obtiene el contexto completo desde los datos reales del usuario
    */
   static async getUserContext(): Promise<{
     exercises: Array<{ name: string; category: string }>;
@@ -60,50 +30,28 @@ export class ExportDataContextService {
     };
   }> {
     try {
-      console.log('🔍 Obteniendo contexto desde datos de exportación JSON...');
+      console.log('🔍 Obteniendo contexto desde datos reales del usuario...');
 
-      // Cargar datos de exportación JSON
-      const exportData = await this.loadExportData();
+      // Cargar datos reales del usuario
+      const exercises = await getExercises();
+      const workoutRecords = await getWorkoutRecords();
 
-      if (!exportData) {
-        console.log('⚠️ No se pudieron cargar los datos de exportación');
-        return this.getDefaultContext();
-      }
+      console.log(`📊 Datos obtenidos: ${exercises.length} ejercicios, ${workoutRecords.length} entrenamientos`);
 
-      console.log(`📊 Datos obtenidos: ${exportData.metadata.totalExercises} ejercicios, ${exportData.metadata.totalWorkouts} entrenamientos`);
+      // Generar datos de exportación usando la función real
+      const exportData = await generateExportData(exercises, workoutRecords);
 
       // Procesar datos para el contexto
       const processedData = this.processExportData(exportData);
 
       return processedData;
     } catch (error) {
-      logger.error('Error obteniendo contexto desde exportación:', error as Error, undefined, 'EXPORT_CONTEXT');
+      logger.error('Error obteniendo contexto desde datos reales:', error as Error, undefined, 'REAL_CONTEXT');
       return this.getDefaultContext();
     }
   }
 
-  /**
-   * Carga los datos de exportación JSON
-   */
-  private static async loadExportData(): Promise<ExportData | null> {
-    try {
-      console.log('🔍 Intentando cargar datos de exportación...');
-      const response = await fetch('/gym-tracker-data_2025-08-07_08-53.json');
-      
-      console.log('📡 Respuesta del fetch:', response.status, response.statusText);
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      console.log('✅ Datos cargados correctamente:', data.metadata);
-      return data;
-    } catch (error) {
-      console.error('❌ Error cargando datos de exportación:', error);
-      return null;
-    }
-  }
+
 
   /**
    * Procesa los datos de exportación para el contexto
@@ -138,25 +86,23 @@ export class ExportDataContextService {
     const mostTrainedExercise = Array.from(exerciseCounts.entries())
       .reduce((max, [name, count]) => count > (max?.count || 0) ? { name, count } : max, null as { name: string; count: number } | null);
 
-    // Crear entrenamientos recientes basados en los últimos pesos de cada ejercicio
+    // Crear entrenamientos recientes basados en exercisesEvolution
     const recentWorkouts: any[] = [];
-    trainingDays.forEach(day => {
-      day.exercises.forEach(exercise => {
-        if (exercise.weights.length > 0) {
-          // Usar el último peso como entrenamiento más reciente
-          const lastWeight = exercise.weights[exercise.weights.length - 1];
-          recentWorkouts.push({
-            exerciseName: exercise.exerciseName,
-            weight: lastWeight,
-            date: new Date(exercise.lastWorkout.split('/').reverse().join('-')), // Convertir fecha
-            reps: 10, // Placeholder
-            sets: 3, // Placeholder
-            maxWeight: exercise.maxWeight,
-            averageWeight: exercise.averageWeight,
-            totalVolume: exercise.totalVolume
-          });
-        }
-      });
+    exportData.exercisesEvolution.forEach(exercise => {
+      if (exercise.sessions.length > 0) {
+        // Usar la sesión más reciente
+        const lastSession = exercise.sessions[exercise.sessions.length - 1];
+        recentWorkouts.push({
+          exerciseName: exercise.exerciseName,
+          weight: lastSession.weight,
+          date: new Date(lastSession.date.split('/').reverse().join('-')), // Convertir fecha
+          reps: lastSession.reps,
+          sets: lastSession.sets,
+          maxWeight: exercise.evolution.maxWeight,
+          averageWeight: exercise.evolution.averageWeight,
+          totalVolume: exercise.totalVolume
+        });
+      }
     });
 
     // Ordenar por fecha (más reciente primero)
