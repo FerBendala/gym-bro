@@ -19,12 +19,12 @@ export class ExportDataContextService {
     try {
       console.log('🔍 Obteniendo contexto desde datos reales del usuario...');
 
-      // Cargar datos reales del usuario
+            // Cargar datos reales del usuario
       const exercises = await getExercises();
       const workoutRecords = await getWorkoutRecords();
 
       console.log(`📊 Datos obtenidos: ${exercises.length} ejercicios, ${workoutRecords.length} entrenamientos`);
-
+      
       // Debug: Mostrar detalles de los datos cargados
       console.log('🏋️ Ejercicios cargados:', exercises.map(ex => ({ id: ex.id, name: ex.name, categories: ex.categories })));
       console.log('📅 Entrenamientos cargados:', workoutRecords.slice(0, 5).map(record => ({
@@ -36,8 +36,15 @@ export class ExportDataContextService {
         sets: record.sets
       })));
 
+      // Filtrar datos del usuario actual (por ahora usar todos los datos)
+      // TODO: Implementar filtro por usuario cuando se tenga autenticación
+      const userExercises = exercises;
+      const userWorkoutRecords = workoutRecords;
+
+      console.log(`👤 Datos del usuario: ${userExercises.length} ejercicios, ${userWorkoutRecords.length} entrenamientos`);
+
       // Generar datos de exportación usando la función real
-      const exportData = await generateExportData(exercises, workoutRecords);
+      const exportData = await generateExportData(userExercises, userWorkoutRecords);
 
       return { exportData };
     } catch (error) {
