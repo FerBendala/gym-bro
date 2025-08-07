@@ -5,7 +5,7 @@ echo "🔍 Debuggeando Firebase con curl..."
 
 # Configuración de Firebase
 PROJECT_ID="follow-gym-12345"
-API_KEY="AIzaSyBqXqXqXqXqXqXqXqXqXqXqXqXqXqXqXq"
+API_KEY="AIzaSyB4gZ-Q04-kQvu0Pd2kUp3sQA7oVMojY7E"
 
 echo "📊 EJERCICIOS:"
 curl -s "https://firestore.googleapis.com/v1/projects/$PROJECT_ID/databases/(default)/documents/exercises?key=$API_KEY" | jq '.documents | length'

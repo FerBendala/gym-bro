@@ -2,6 +2,8 @@ import { getExercises, getWorkoutRecords } from '@/api/services';
 import { logger } from '@/utils';
 import { generateExportData } from '@/utils/functions';
 import type { ExportData } from '@/utils/functions/export-interfaces';
+import { getAllItems } from '@/utils/data/indexeddb-utils';
+import { STORES } from '@/utils/data/indexeddb-config';
 
 
 
@@ -26,16 +28,32 @@ export class ExportDataContextService {
       let workoutRecords;
 
       try {
-        exercises = await getExercises();
-        console.log('✅ Ejercicios cargados exitosamente:', exercises.length);
+        // Intentar cargar desde IndexedDB primero
+        const exercisesResult = await getAllItems(STORES.EXERCISES);
+        if (exercisesResult.success && exercisesResult.data) {
+          exercises = exercisesResult.data;
+          console.log('✅ Ejercicios cargados desde IndexedDB:', exercises.length);
+        } else {
+          // Fallback a Firebase
+          exercises = await getExercises();
+          console.log('✅ Ejercicios cargados desde Firebase:', exercises.length);
+        }
       } catch (error) {
         console.error('❌ Error cargando ejercicios:', error);
         return this.getDefaultContext();
       }
 
       try {
-        workoutRecords = await getWorkoutRecords();
-        console.log('✅ Entrenamientos cargados exitosamente:', workoutRecords.length);
+        // Intentar cargar desde IndexedDB primero
+        const workoutRecordsResult = await getAllItems(STORES.WORKOUT_RECORDS);
+        if (workoutRecordsResult.success && workoutRecordsResult.data) {
+          workoutRecords = workoutRecordsResult.data;
+          console.log('✅ Entrenamientos cargados desde IndexedDB:', workoutRecords.length);
+        } else {
+          // Fallback a Firebase
+          workoutRecords = await getWorkoutRecords();
+          console.log('✅ Entrenamientos cargados desde Firebase:', workoutRecords.length);
+        }
       } catch (error) {
         console.error('❌ Error cargando entrenamientos:', error);
         return this.getDefaultContext();
