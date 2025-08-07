@@ -24,6 +24,17 @@ export class ExportDataContextService {
       const workoutRecords = await getWorkoutRecords();
 
       console.log(`📊 Datos obtenidos: ${exercises.length} ejercicios, ${workoutRecords.length} entrenamientos`);
+      
+      // Debug: Mostrar detalles de los datos cargados
+      console.log('🏋️ Ejercicios cargados:', exercises.map(ex => ({ id: ex.id, name: ex.name, categories: ex.categories })));
+      console.log('📅 Entrenamientos cargados:', workoutRecords.slice(0, 5).map(record => ({
+        id: record.id,
+        exercise: record.exercise?.name,
+        date: record.date,
+        weight: record.weight,
+        reps: record.reps,
+        sets: record.sets
+      })));
 
       // Generar datos de exportación usando la función real
       const exportData = await generateExportData(exercises, workoutRecords);
