@@ -28,6 +28,11 @@ export const generateExportData = async (
     );
   }
 
+  // Ordenar registros válidos por fecha
+  const sortedRecords = [...validRecords].sort((a, b) =>
+    new Date(a.date).getTime() - new Date(b.date).getTime(),
+  );
+
   // Log de todos los registros para debugging
   console.log('📊 Registros válidos encontrados:', sortedRecords.length);
   console.log('📅 Rango de fechas:', {
@@ -44,11 +49,6 @@ export const generateExportData = async (
     reps: r.reps,
     sets: r.sets
   })));
-
-  // Ordenar registros válidos por fecha
-  const sortedRecords = [...validRecords].sort((a, b) =>
-    new Date(a.date).getTime() - new Date(b.date).getTime(),
-  );
 
   // Metadata
   const totalVolume = sortedRecords.reduce((sum, record) =>
