@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 
 import { useHistoryFilter, usePageInfo } from '../hooks';
 import { getCurrentDayInfo } from '../utils';
@@ -20,6 +20,10 @@ export const AppContent = () => {
   const [showAdmin, setShowAdmin] = useState(false);
   const [activeDay, setActiveDay] = useState<DayOfWeek>(() => getCurrentDayInfo());
 
+  // Estado del chat
+  const [isChatLoading, setIsChatLoading] = useState(false);
+  const [isChatConnected, setIsChatConnected] = useState(true);
+
   const { historyFilter, handleGoToHistory } = useHistoryFilter(activeTab);
   const pageInfo = usePageInfo(activeTab, activeDay);
 
@@ -30,6 +34,16 @@ export const AppContent = () => {
     }
     navigateTo(tab as any);
   };
+
+  const handleChatMessage = useCallback((message: string) => {
+    console.log('Mensaje del chat recibido:', message);
+    // Aquí podrías manejar el envío del mensaje
+    setIsChatLoading(true);
+    // Simular envío de mensaje
+    setTimeout(() => {
+      setIsChatLoading(false);
+    }, 2000);
+  }, []);
 
   const renderContent = () => {
     switch (activeTab) {
@@ -72,6 +86,9 @@ export const AppContent = () => {
       subtitle={pageInfo.subtitle}
       showBackButton={canGoBack}
       onBackClick={goBack}
+      onChatMessage={activeTab === 'chat' ? handleChatMessage : undefined}
+      isChatLoading={activeTab === 'chat' ? isChatLoading : false}
+      isChatConnected={activeTab === 'chat' ? isChatConnected : true}
     >
       {renderContent()}
 

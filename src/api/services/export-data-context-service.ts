@@ -100,16 +100,16 @@ export class ExportDataContextService {
     }
   }
 
-    /**
-   * Procesa los datos de exportación para el contexto
-   */
+  /**
+ * Procesa los datos de exportación para el contexto
+ */
   private static processExportData(exportData: ExportData) {
     const { metadata, trainingDays } = exportData;
 
     // Obtener todos los ejercicios únicos con sus categorías
     const exerciseMap = new Map<string, string[]>();
     const exerciseCategories = new Set<string>();
-    
+
     trainingDays.forEach(day => {
       day.exercises.forEach(exercise => {
         exerciseMap.set(exercise.exerciseName, exercise.categories);
@@ -161,9 +161,9 @@ export class ExportDataContextService {
     const todayWorkouts: any[] = [];
 
     return {
-      exercises: Array.from(exerciseMap.entries()).map(([name, categories]) => ({ 
-        name, 
-        category: categories.join(', ') 
+      exercises: Array.from(exerciseMap.entries()).map(([name, categories]) => ({
+        name,
+        category: categories.join(', ')
       })),
       assignments: trainingDays.map(day => ({
         dayOfWeek: day.dayOfWeek,

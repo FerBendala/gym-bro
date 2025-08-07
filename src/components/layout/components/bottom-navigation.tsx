@@ -1,4 +1,5 @@
-import React from 'react';
+import { MoreHorizontal, RefreshCw, Send, Trash2, Wifi, WifiOff } from 'lucide-react';
+import React, { useState } from 'react';
 
 import { compactNavigationItems, moreMenuItems } from '../constants';
 import { ModernNavItem } from '../types';
@@ -11,6 +12,9 @@ interface BottomNavigationProps {
   activeTab?: ModernNavItem;
   onTabChange?: (tab: ModernNavItem) => void;
   isNavigationVisible?: boolean;
+  onChatMessage?: (message: string) => void;
+  isChatLoading?: boolean;
+  isChatConnected?: boolean;
 }
 
 // Componente para renderizar un item en el diseño compacto
@@ -92,10 +96,147 @@ const NavItemMore: React.FC<{
   );
 };
 
+// Componente de input para el chat
+const ChatInput: React.FC<{
+  onSendMessage: (message: string) => void;
+  isLoading?: boolean;
+  isConnected?: boolean;
+}> = ({ onSendMessage, isLoading = false, isConnected = true }) => {
+  const [inputValue, setInputValue] = useState('');
+  const [showMenu, setShowMenu] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inputValue.trim() || isLoading || !isConnected) return;
+
+    onSendMessage(inputValue.trim());
+    setInputValue('');
+  };
+
+  const handleClear = () => {
+    if ((window as any).handleChatClear) {
+      (window as any).handleChatClear();
+    }
+    setShowMenu(false);
+  };
+
+  const handleReconnect = () => {
+    if ((window as any).handleChatReconnect) {
+      (window as any).handleChatReconnect();
+    }
+    setShowMenu(false);
+  };
+
+  // Ajustar altura del textarea automáticamente
+  const adjustTextareaHeight = (element: HTMLTextAreaElement) => {
+    element.style.height = 'auto';
+    element.style.height = Math.min(element.scrollHeight, 120) + 'px';
+  };
+
+  // Cerrar menú al hacer clic fuera
+  React.useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Element;
+      if (!target.closest('.chat-menu-container')) {
+        setShowMenu(false);
+      }
+    };
+
+    if (showMenu) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [showMenu]);
+
+  return (
+    <div className="flex items-center space-x-3 w-full">
+      <div className="flex-1 relative flex items-center">
+        <textarea
+          value={inputValue}
+          onChange={(e) => {
+            setInputValue(e.target.value);
+            adjustTextareaHeight(e.target);
+          }}
+          placeholder="Pregunta lo que quieras..."
+          disabled={isLoading || !isConnected}
+          className="w-full h-full px-4 py-3 bg-transparent text-white placeholder-gray-400 focus:outline-none disabled:opacity-50 resize-none min-h-[48px] max-h-[120px]"
+          rows={1}
+          style={{
+            minHeight: '48px',
+            maxHeight: '120px',
+            lineHeight: '1.2'
+          }}
+        />
+      </div>
+
+      <button
+        type="submit"
+        onClick={handleSubmit}
+        disabled={isLoading || !isConnected || !inputValue.trim()}
+        className="flex-shrink-0 p-3 bg-gray-700 hover:bg-gray-600 disabled:bg-gray-800 rounded-full transition-colors"
+        aria-label="Enviar mensaje"
+      >
+        <Send className="w-4 h-4 text-white" />
+      </button>
+
+      {/* Menú de puntos suspensivos */}
+      <div className="relative chat-menu-container">
+        <button
+          onClick={() => setShowMenu(!showMenu)}
+          className="p-3 rounded-full hover:bg-gray-700/50 transition-colors"
+          aria-label="Menú de opciones"
+        >
+          <MoreHorizontal className="w-4 h-4 text-gray-400" />
+        </button>
+
+        {/* Menú desplegable */}
+        {showMenu && (
+          <div className="absolute bottom-full right-0 mb-2 w-48 bg-gray-800 border border-gray-700 rounded-lg shadow-lg z-50">
+            <div className="py-1">
+              <button
+                onClick={handleClear}
+                className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors"
+              >
+                <Trash2 className="w-4 h-4 mr-3" />
+                Limpiar chat
+              </button>
+              <button
+                onClick={handleReconnect}
+                className="flex items-center w-full px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 transition-colors"
+              >
+                <RefreshCw className="w-4 h-4 mr-3" />
+                Reconectar
+              </button>
+              <div className="flex items-center px-4 py-2 text-sm">
+                <div className="mr-3">
+                  {isConnected ? (
+                    <Wifi className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <WifiOff className="w-4 h-4 text-red-500" />
+                  )}
+                </div>
+                <span className={isConnected ? 'text-green-500' : 'text-red-500'}>
+                  {isConnected ? 'Conectado' : 'Desconectado'}
+                </span>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const BottomNavigation: React.FC<BottomNavigationProps> = ({
   activeTab: propActiveTab,
   onTabChange: propOnTabChange,
   isNavigationVisible: propIsNavigationVisible,
+  onChatMessage,
+  isChatLoading = false,
+  isChatConnected = true,
 }) => {
   // Usar selectores individuales del store de Zustand
   const storeActiveTab = useActiveTab();
@@ -121,6 +262,41 @@ export const BottomNavigation: React.FC<BottomNavigationProps> = ({
       }
     }
   };
+
+  // Función para manejar el envío de mensajes del chat
+  const handleChatMessage = (message: string) => {
+    // Usar la función global del chat si está disponible
+    if ((window as any).sendChatMessage) {
+      (window as any).sendChatMessage(message);
+    } else if (onChatMessage) {
+      onChatMessage(message);
+    }
+  };
+
+  // Obtener el estado del chat desde la función global
+  const chatLoading = (window as any).chatLoading || isChatLoading;
+  const chatConnected = (window as any).chatConnected !== undefined ? (window as any).chatConnected : isChatConnected;
+
+  // Si estamos en la página del chat, mostrar input
+  if (activeTab === 'chat') {
+    return (
+      <nav className={cn(
+        MODERN_THEME.navigation.bottomNavCompact.container,
+        isNavigationVisible ? 'translate-y-0' : 'translate-y-full',
+        MODERN_THEME.animations.transition.normal,
+      )}>
+        <div className="relative">
+          <div className="p-4">
+            <ChatInput
+              onSendMessage={handleChatMessage}
+              isLoading={chatLoading}
+              isConnected={chatConnected}
+            />
+          </div>
+        </div>
+      </nav>
+    );
+  }
 
   return (
     <nav className={cn(

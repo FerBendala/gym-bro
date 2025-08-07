@@ -23,6 +23,9 @@ export const Layout: React.FC<LayoutProps> = ({
   showBackButton = false,
   onBackClick,
   isNavigationVisible = true,
+  onChatMessage,
+  isChatLoading = false,
+  isChatConnected = true,
 }) => {
   const storeTitle = useTitle();
   const storeSubtitle = useSubtitle();
@@ -57,6 +60,9 @@ export const Layout: React.FC<LayoutProps> = ({
         activeTab={activeTab}
         onTabChange={onTabChange}
         isNavigationVisible={isNavigationVisible}
+        onChatMessage={onChatMessage}
+        isChatLoading={isChatLoading}
+        isChatConnected={isChatConnected}
       />
 
       {/* Overlay para modales */}

@@ -15,6 +15,10 @@ export interface LayoutProps {
   onBackClick?: () => void;
   navigationType?: NavigationType;
   isNavigationVisible?: boolean;
+  // Props para el chat
+  onChatMessage?: (message: string) => void;
+  isChatLoading?: boolean;
+  isChatConnected?: boolean;
 }
 
 export interface NavigationItem {

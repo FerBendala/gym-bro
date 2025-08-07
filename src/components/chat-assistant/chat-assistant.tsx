@@ -1,9 +1,5 @@
 import { ExportDataContextService } from '@/api/services/export-data-context-service';
-import React, { useCallback, useEffect, useState } from 'react';
-import { Button } from '../button';
-import { Card } from '../card';
-import { Input } from '../input';
-import { LoadingSpinner } from '../loading-spinner';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 interface ChatAssistantProps {
   className?: string;
@@ -12,12 +8,14 @@ interface ChatAssistantProps {
 export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   className = '',
 }) => {
-  const [inputValue, setInputValue] = useState('');
   const [messages, setMessages] = useState<Array<{ type: 'user' | 'assistant', content: string }>>([]);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [userContext, setUserContext] = useState<string>('');
+  const [isTyping, setIsTyping] = useState(false);
+  const fullResponseRef = useRef<string>('');
+  const currentIndexRef = useRef<number>(0);
 
   const checkConnection = useCallback(async () => {
     try {
@@ -65,9 +63,44 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
     return () => clearInterval(interval);
   }, [checkConnection, loadUserContext]);
 
+  // Efecto de escritura
+  useEffect(() => {
+    if (isTyping && fullResponseRef.current) {
+      const interval = setInterval(() => {
+        if (currentIndexRef.current < fullResponseRef.current.length) {
+          currentIndexRef.current += 1;
+
+          // Actualizar el último mensaje del asistente
+          setMessages(prev => {
+            const newMessages = [...prev];
+            if (newMessages.length > 0 && newMessages[newMessages.length - 1].type === 'assistant') {
+              newMessages[newMessages.length - 1] = {
+                ...newMessages[newMessages.length - 1],
+                content: fullResponseRef.current.substring(0, currentIndexRef.current)
+              };
+            }
+            return newMessages;
+          });
+        } else {
+          // Terminó de escribir
+          setIsTyping(false);
+          clearInterval(interval);
+        }
+      }, 30); // Velocidad de escritura
+
+      return () => clearInterval(interval);
+    }
+  }, [isTyping]);
+
   const sendMessage = async (message: string) => {
     setLoading(true);
     setError('');
+
+    // Agregar mensaje del usuario inmediatamente
+    setMessages(prev => [
+      ...prev,
+      { type: 'user', content: message }
+    ]);
 
     try {
       console.log('💬 Enviando mensaje:', message);
@@ -100,130 +133,146 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
 
       if (data.error) {
         setError(data.error);
-      } else {
-        // Agregar mensaje del usuario y respuesta del asistente
+        // Agregar mensaje de error como respuesta del asistente
         setMessages(prev => [
           ...prev,
-          { type: 'user', content: message },
-          { type: 'assistant', content: data.response }
+          { type: 'assistant', content: `Error: ${data.error}` }
+        ]);
+      } else {
+        // Iniciar efecto de escritura
+        fullResponseRef.current = data.response;
+        currentIndexRef.current = 0;
+        setIsTyping(true);
+
+        // Agregar mensaje vacío del asistente que se irá llenando
+        setMessages(prev => [
+          ...prev,
+          { type: 'assistant', content: '' }
         ]);
       }
     } catch (error) {
       console.error('❌ Error enviando mensaje:', error);
-      setError(error instanceof Error ? error.message : 'Error desconocido');
+      const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+      setError(errorMessage);
+      // Agregar mensaje de error como respuesta del asistente
+      setMessages(prev => [
+        ...prev,
+        { type: 'assistant', content: `Error: ${errorMessage}` }
+      ]);
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!inputValue.trim() || loading) return;
-
-    const message = inputValue.trim();
-    setInputValue('');
-    await sendMessage(message);
-  };
-
   const handleClear = () => {
     setMessages([]);
     setError('');
+    setIsTyping(false);
+    fullResponseRef.current = '';
+    currentIndexRef.current = 0;
   };
 
+  const handleReconnect = () => {
+    checkConnection();
+  };
+
+  // Conectar con el estado global del chat
+  useEffect(() => {
+    // Exponer la función sendMessage globalmente para que la navegación pueda usarla
+    (window as any).sendChatMessage = sendMessage;
+    (window as any).chatLoading = loading;
+    (window as any).chatConnected = isConnected;
+    (window as any).handleChatClear = handleClear;
+    (window as any).handleChatReconnect = handleReconnect;
+  }, [loading, isConnected]);
+
   return (
-    <div className={`chat-assistant ${className}`}>
-      <Card className="h-full flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-4 border-b border-gray-700/50">
-          <div className="flex items-center space-x-3">
-            <div className="w-3 h-3 rounded-full bg-green-500"></div>
-            <h3 className="text-lg font-semibold text-white">Asistente IA de Entrenamiento</h3>
+    <div className={`chat-assistant h-full flex flex-col ${className}`}>
+      {/* Messages - área de scroll */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+        {messages.length === 0 && (
+          <div className="text-center text-gray-400 py-8">
+            <p className="text-lg font-medium mb-2">¡Hola! Soy tu asistente de entrenamiento IA.</p>
+            <p className="text-sm">Pregúntame sobre ejercicios, nutrición, técnica o cualquier tema de fitness.</p>
           </div>
-          <div className="flex items-center space-x-2">
-            {!isConnected && (
-              <Button
-                variant="secondary"
-                onClick={checkConnection}
-                className="flex-shrink-0"
-              >
-                Reconectar
-              </Button>
-            )}
-            <Button
-              variant="ghost"
-              onClick={handleClear}
-              className="text-gray-400 hover:text-white"
-            >
-              Limpiar
-            </Button>
-          </div>
-        </div>
+        )}
 
-        {/* Messages */}
-        <div className="flex-1 overflow-y-auto p-4 space-y-4 max-h-96">
-          {messages.length === 0 && (
-            <div className="text-center text-gray-400 py-8">
-              <p>¡Hola! Soy tu asistente de entrenamiento IA.</p>
-              <p className="mt-2">Pregúntame sobre ejercicios, nutrición, técnica o cualquier tema de fitness.</p>
-            </div>
-          )}
-
-          {messages.map((message, index) => (
+        {messages.map((message, index) => (
+          <div
+            key={index}
+            className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+            style={{
+              animationDelay: `${index * 100}ms`,
+              animation: 'slideInFromBottom 0.3s ease-out forwards',
+              opacity: 0,
+              transform: 'translateY(20px)'
+            }}
+          >
             <div
-              key={index}
-              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'}`}
+              className={`max-w-xs lg:max-w-md px-4 py-3 rounded-lg ${message.type === 'user'
+                ? 'bg-blue-600 text-white'
+                : 'bg-gray-700 text-white'
+                }`}
             >
-              <div
-                className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${message.type === 'user'
-                  ? 'bg-blue-600 text-white'
-                  : 'bg-gray-700 text-white'
-                  }`}
-              >
-                <p className="whitespace-pre-wrap">{message.content}</p>
-              </div>
+              <p className="whitespace-pre-wrap text-sm leading-relaxed">
+                {message.content}
+              </p>
             </div>
-          ))}
+          </div>
+        ))}
 
-          {loading && (
-            <div className="flex justify-start">
-              <div className="bg-gray-700 text-white px-4 py-2 rounded-lg">
-                <div className="flex items-center space-x-2">
-                  <LoadingSpinner size="sm" />
-                  <span>Pensando...</span>
+        {/* Indicador de "pensando" con 3 puntos que saltan */}
+        {loading && (
+          <div
+            className="flex justify-start"
+            style={{
+              animation: 'slideInFromBottom 0.3s ease-out forwards',
+              opacity: 0,
+              transform: 'translateY(20px)'
+            }}
+          >
+            <div className="bg-gray-700 text-white px-4 py-3 rounded-lg">
+              <div className="flex items-center space-x-1">
+                <div className="flex space-x-1">
+                  <span className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></span>
+                  <span className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></span>
+                  <span className="w-1 h-1 bg-white rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></span>
                 </div>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-          {error && (
-            <div className="flex justify-start">
-              <div className="bg-red-600 text-white px-4 py-2 rounded-lg">
-                <p>Error: {error}</p>
-              </div>
+        {error && (
+          <div
+            className="flex justify-start"
+            style={{
+              animation: 'slideInFromBottom 0.3s ease-out forwards',
+              opacity: 0,
+              transform: 'translateY(20px)'
+            }}
+          >
+            <div className="bg-red-600 text-white px-4 py-3 rounded-lg">
+              <p className="text-sm">Error: {error}</p>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+      </div>
 
-        {/* Input */}
-        <div className="p-4 border-t border-gray-700/50">
-          <form onSubmit={handleSubmit} className="flex space-x-2">
-            <Input
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Escribe tu pregunta..."
-              disabled={loading || !isConnected}
-              className="flex-1"
-            />
-            <Button
-              type="submit"
-              disabled={loading || !isConnected || !inputValue.trim()}
-              className="flex-shrink-0"
-            >
-              Enviar
-            </Button>
-          </form>
-        </div>
-      </Card>
+      <style>
+        {`
+          @keyframes slideInFromBottom {
+            from {
+              opacity: 0;
+              transform: translateY(20px);
+            }
+            to {
+              opacity: 1;
+              transform: translateY(0);
+            }
+          }
+        `}
+      </style>
     </div>
   );
 }; 
