@@ -82,7 +82,7 @@ export const AppContent = () => {
     <Layout
       activeTab={activeTab}
       onTabChange={handleTabChange}
-      title={pageInfo.title}
+      title={activeTab === 'chat' ? 'GymBro - Entrenador Personal' : pageInfo.title}
       subtitle={pageInfo.subtitle}
       showBackButton={canGoBack}
       onBackClick={goBack}

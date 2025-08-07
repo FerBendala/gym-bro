@@ -44,11 +44,27 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
     try {
       const context = await ExportDataContextService.getUserContext();
       const contextSummary = ExportDataContextService.generateContextSummary(context);
-      setUserContext(contextSummary);
-      console.log('✅ Contexto del usuario cargado');
+
+      // Crear un contexto más amplio para un entrenador personal
+      const trainerContext = `Eres un entrenador personal experto y motivador. Tu nombre es "GymBro" y puedes responder a cualquier pregunta relacionada con fitness, nutrición, motivación, técnica de ejercicios, rutinas de entrenamiento, consejos de salud, y cualquier tema relacionado con el bienestar físico y mental.
+
+Contexto del usuario: ${contextSummary}
+
+Instrucciones importantes:
+- Responde de forma amigable y motivadora
+- Puedes responder a cualquier pregunta, no solo sobre entrenamientos
+- Si te preguntan tu nombre, di que eres "GymBro"
+- Si te preguntan sobre entrenamientos específicos, usa el contexto del usuario
+- Si no hay datos de entrenamientos, puedes dar consejos generales
+- Sé positivo y alentador en tus respuestas
+- Puedes dar consejos sobre nutrición, descanso, motivación, etc.
+- Mantén un tono profesional pero cercano`;
+
+      setUserContext(trainerContext);
+      console.log('✅ Contexto del entrenador personal cargado');
     } catch (error) {
       console.error('❌ Error cargando contexto del usuario:', error);
-      setUserContext('No se pudo cargar el contexto del usuario.');
+      setUserContext('Eres un entrenador personal experto llamado "GymBro". Puedes responder a cualquier pregunta sobre fitness, nutrición, motivación y bienestar. Mantén un tono amigable y motivador.');
     }
   }, []);
 
@@ -192,8 +208,8 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
           <div className="text-center text-gray-400 py-8">
-            <p className="text-lg font-medium mb-2">¡Hola! Soy tu asistente de entrenamiento IA.</p>
-            <p className="text-sm">Pregúntame sobre ejercicios, nutrición, técnica o cualquier tema de fitness.</p>
+            <p className="text-lg font-medium mb-2">¡Hola! Soy GymBro, tu entrenador personal.</p>
+            <p className="text-sm">Pregúntame sobre fitness, nutrición, motivación, técnica de ejercicios, rutinas de entrenamiento, consejos de salud o cualquier tema relacionado con tu bienestar físico y mental.</p>
           </div>
         )}
 
