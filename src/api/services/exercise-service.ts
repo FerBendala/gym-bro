@@ -27,7 +27,7 @@ function filterUndefinedFields<T extends PartialObject>(obj: T): Partial<T> {
  * Servicio para operaciones CRUD de ejercicios
  */
 export class ExerciseService {
-  private static readonly COLLECTION = 'exercises';
+  private static readonly COLLECTION = 'users/default-user/exercises';
 
   /**
    * Crea un nuevo ejercicio

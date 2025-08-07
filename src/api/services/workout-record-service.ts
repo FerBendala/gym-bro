@@ -8,7 +8,7 @@ import type { WorkoutRecord } from '@/interfaces';
  * Servicio para operaciones CRUD de registros de entrenamiento
  */
 export class WorkoutRecordService {
-  private static readonly COLLECTION = 'workoutRecords';
+  private static readonly COLLECTION = 'users/default-user/workoutRecords';
 
   /**
    * Crea un nuevo registro de entrenamiento en la base de datos.
