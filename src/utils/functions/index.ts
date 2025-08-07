@@ -112,5 +112,4 @@ export * from './clean-orphaned-records';
 // Test utilities
 export * from './test-category-mapping';
 export * from './test-chatbot-context';
-export * from './test-chatbot-unified-system';
 
