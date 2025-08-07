@@ -1,109 +1,109 @@
-# Configuración del Chat con OpenAI
+# Configuración del Chat con gpt-oss-20b
 
 ## 🚀 Configuración Rápida
 
-Para habilitar el chat con modelo de lenguaje real (OpenAI), sigue estos pasos:
+El chat ahora usa el modelo [gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b) de OpenAI, que es un modelo de código abierto gratuito con capacidades avanzadas de razonamiento.
 
-### 1. Obtener API Key de OpenAI
+### 🎯 Ventajas de gpt-oss-20b
 
-1. Ve a [OpenAI Platform](https://platform.openai.com/)
-2. Crea una cuenta o inicia sesión
-3. Ve a "API Keys" en el menú lateral
-4. Crea una nueva API key
-5. Copia la key (empieza con `sk-`)
+- ✅ **Completamente gratuito** (no hay costos de API)
+- ✅ **Código abierto** (Apache 2.0 license)
+- ✅ **Capacidades de razonamiento** configurable (low, medium, high)
+- ✅ **21B parámetros** con 3.6B parámetros activos
+- ✅ **Formato Harmony** para respuestas estructuradas
+- ✅ **Funciona localmente** o en servidores
 
-### 2. Configurar en Netlify
+### 🔧 Funcionamiento Automático
 
-#### Opción A: Variables de Entorno en Netlify Dashboard
+El sistema está configurado para funcionar automáticamente:
 
-1. Ve a tu proyecto en [Netlify Dashboard](https://app.netlify.com/)
-2. Ve a **Site settings** → **Environment variables**
-3. Agrega una nueva variable:
-   - **Key**: `OPENAI_API_KEY`
-   - **Value**: Tu API key de OpenAI (ej: `sk-...`)
-4. Guarda los cambios
-
-#### Opción B: Variables de Entorno Locales
-
-Crea un archivo `.env` en la raíz del proyecto:
-
-```bash
-OPENAI_API_KEY=sk-tu-api-key-aqui
-```
-
-### 3. Verificar Configuración
-
-Una vez configurado, el health check mostrará:
-
-```json
-{
-  "status": "healthy",
-  "mode": "openai",
-  "model": "gpt-3.5-turbo",
-  "openai_available": true
-}
-```
+1. **Descarga automática** del modelo desde Hugging Face
+2. **Instalación automática** de dependencias Python
+3. **Fallback inteligente** si el modelo no está disponible
+4. **Configuración de reasoning** (low, medium, high)
 
 ## 🔧 Funcionamiento
 
-### Modo OpenAI (Recomendado)
-- ✅ Respuestas libres y naturales
-- ✅ Contexto personalizado del usuario
-- ✅ Consejos específicos de fitness
-- ✅ Motivación personalizada
+### Modo gpt-oss-20b (Recomendado)
+- ✅ **Respuestas libres y naturales** usando el modelo local
+- ✅ **Contexto personalizado** basado en los datos del usuario
+- ✅ **Consejos específicos** de fitness y entrenamiento
+- ✅ **Motivación personalizada** según el historial del usuario
+- ✅ **Razonamiento configurable** según la complejidad de la pregunta
 
-### Modo Fallback (Sin OpenAI)
-- ✅ Respuestas inteligentes basadas en palabras clave
-- ✅ 15 categorías de respuestas predefinidas
-- ✅ Funciona sin configuración adicional
+### Modo Fallback (Sin modelo)
+- ✅ **15 categorías de respuestas** basadas en palabras clave
+- ✅ **Funciona sin configuración** adicional
+- ✅ **Respuestas inteligentes** para temas específicos
 
 ## 💰 Costos
 
-- **OpenAI GPT-3.5-turbo**: ~$0.002 por 1K tokens
-- **Uso típico**: ~$0.01-0.05 por conversación
-- **Fallback**: Gratis (sin costos adicionales)
+- **gpt-oss-20b**: **Completamente gratis** (modelo de código abierto)
+- **Uso típico**: **Sin costos** (se ejecuta localmente)
+- **Fallback**: **Gratis** (sin costos adicionales)
 
 ## 🛠️ Personalización
 
 ### Modificar el Prompt del Sistema
 
-Edita `netlify/functions/chat.js` y modifica la variable `systemPrompt`:
+Edita `netlify/functions/chat-python.py` y modifica la variable `system_content`:
+
+```python
+system_content = 'Eres un experto en fitness y entrenamiento llamado "GymBro".
+Instrucciones personalizadas aquí...'
+```
+
+### Configurar Nivel de Razonamiento
+
+El modelo soporta tres niveles de razonamiento:
+
+- **Low**: Respuestas rápidas para diálogo general
+- **Medium**: Velocidad y detalle balanceados (por defecto)
+- **High**: Análisis profundo y detallado
+
+Se puede configurar enviando `reasoning_level` en la request:
 
 ```javascript
-const systemPrompt = `Eres un entrenador personal experto llamado "GymBro".
-Instrucciones personalizadas aquí...`;
+{
+  "message": "¿Qué ejercicios me recomiendas?",
+  "reasoning_level": "high",
+  "context": "datos del usuario..."
+}
 ```
 
 ### Agregar Más Respuestas de Fallback
 
-En la función `generateFallbackResponse`, agrega más palabras clave:
+En la función `generate_fallback_response`, agrega más palabras clave:
 
-```javascript
-const responses = {
-  'nueva-palabra': 'Nueva respuesta personalizada',
-  // ... más respuestas
-};
+```python
+responses = {
+    'nueva-palabra': 'Nueva respuesta personalizada',
+    # ... más respuestas
+}
 ```
 
 ## 🔍 Troubleshooting
 
-### Error: "OpenAI API key no configurada"
-- Verifica que la variable `OPENAI_API_KEY` esté configurada
-- Asegúrate de que el valor sea correcto (empieza con `sk-`)
+### Error: "Dependencias de IA no disponibles"
+- El modelo se está descargando por primera vez
+- Espera unos minutos para que se complete la descarga
+- Verifica que hay suficiente espacio en disco
 
-### Error: "OpenAI API error: 401"
-- La API key es inválida o ha expirado
-- Genera una nueva key en OpenAI Platform
+### Error: "Modelo no disponible, usando fallback"
+- El modelo está en proceso de carga
+- La primera carga puede tomar varios minutos
+- Las siguientes cargas serán más rápidas
 
-### Error: "OpenAI API error: 429"
-- Has excedido el límite de rate limit
-- Espera unos minutos antes de hacer más preguntas
+### Error: "Error cargando modelo"
+- Verifica que hay suficiente memoria RAM (mínimo 16GB recomendado)
+- El modelo requiere aproximadamente 16GB de memoria
+- Considera usar un servidor con más recursos
 
 ## 📊 Monitoreo
 
 ### Logs de Netlify
-- Ve a **Functions** → **chat** en tu dashboard de Netlify
-- Revisa los logs para ver el funcionamiento
+- Ve a **Functions** → **chat-python** en tu dashboard de Netlify
+- Revisa los logs para ver el funcionamiento del modelo
 
 ### Health Check
 - Endpoint: `/api/health`
@@ -111,14 +111,20 @@ const responses = {
 
 ## 🔒 Seguridad
 
-- ✅ Las API keys nunca se exponen al frontend
-- ✅ Todas las llamadas pasan por Netlify Functions
-- ✅ Variables de entorno seguras en Netlify
-- ✅ Fallback automático si OpenAI falla
+- ✅ **Modelo local**: No hay llamadas a APIs externas
+- ✅ **Datos privados**: Todo se procesa localmente
+- ✅ **Código abierto**: Transparencia total del modelo
+- ✅ **Fallback automático**: Funciona sin configuración adicional
 
 ## 🚀 Próximos Pasos
 
-1. **Configura OpenAI** siguiendo los pasos arriba
-2. **Prueba el chat** con diferentes preguntas
-3. **Personaliza el prompt** según tus necesidades
-4. **Monitorea los costos** en tu dashboard de OpenAI 
+1. **Despliega la aplicación** - El modelo se descargará automáticamente
+2. **Prueba el chat** con diferentes tipos de preguntas
+3. **Personaliza el prompt** según tus necesidades específicas
+4. **Ajusta el reasoning_level** según la complejidad de las preguntas
+
+## 📚 Recursos Adicionales
+
+- [Documentación oficial de gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b)
+- [Formato Harmony](https://huggingface.co/openai/gpt-oss-20b#reasoning-levels)
+- [Capacidades de razonamiento](https://huggingface.co/openai/gpt-oss-20b#reasoning-levels) 
