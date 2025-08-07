@@ -43,7 +43,10 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   const loadUserContext = useCallback(async () => {
     try {
       const context = await ExportDataContextService.getUserContext();
+      console.log('🔍 Contexto obtenido:', context);
+      
       const contextSummary = ExportDataContextService.generateContextSummary(context);
+      console.log('📋 Resumen del contexto generado:', contextSummary.substring(0, 500) + '...');
 
       // Crear un contexto más amplio para un entrenador personal
       const trainerContext = `Eres un entrenador personal experto y motivador. Tu nombre es "GymBro" y puedes responder a cualquier pregunta relacionada con fitness, nutrición, motivación, técnica de ejercicios, rutinas de entrenamiento, consejos de salud, y cualquier tema relacionado con el bienestar físico y mental.
@@ -70,6 +73,7 @@ Instrucciones importantes:
 
       setUserContext(trainerContext);
       console.log('✅ Contexto del entrenador personal cargado');
+      console.log('📊 Contexto final (primeros 500 chars):', trainerContext.substring(0, 500) + '...');
     } catch (error) {
       console.error('❌ Error cargando contexto del usuario:', error);
       setUserContext('Eres un entrenador personal experto llamado "GymBro". Puedes responder a cualquier pregunta sobre fitness, nutrición, motivación y bienestar. Mantén un tono amigable y motivador.');
@@ -128,7 +132,8 @@ Instrucciones importantes:
 
     try {
       console.log('💬 Enviando mensaje:', message);
-      console.log('📊 Contexto del usuario:', userContext);
+      console.log('📊 Contexto del usuario (longitud):', userContext.length);
+      console.log('📊 Contexto del usuario (primeros 500 chars):', userContext.substring(0, 500) + '...');
 
       // Determinar la URL del API según el entorno
       const isDevelopment = import.meta.env.DEV;

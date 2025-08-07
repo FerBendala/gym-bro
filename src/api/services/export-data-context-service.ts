@@ -490,7 +490,9 @@ export class ExportDataContextService {
    * Genera un resumen de contexto desde datos reales del usuario
    */
   static generateContextSummary(context: Awaited<ReturnType<typeof this.getUserContext>>): string {
+    console.log('🔍 Generando resumen del contexto:', context);
     const { exportData } = context;
+    console.log('📊 ExportData recibido:', exportData);
 
     const summary = `
 CONTEXTO DEL USUARIO (DATOS REALES - SISTEMA UNIFICADO):
@@ -586,6 +588,9 @@ ${exportData.muscleGroupAnalysis.comparison.map((comp: any) =>
 ${JSON.stringify(exportData, null, 2)}
 `;
 
+    console.log('📋 Resumen generado (longitud):', summary.length);
+    console.log('📋 Resumen generado (primeros 500 chars):', summary.substring(0, 500) + '...');
+    
     return summary;
   }
 
