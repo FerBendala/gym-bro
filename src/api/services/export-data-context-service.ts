@@ -134,14 +134,31 @@ export class ExportDataContextService {
     
     const recentWorkouts = workoutRecords
       .filter(record => new Date(record.date) >= thirtyDaysAgo)
+      .map(record => ({
+        exerciseName: record.exerciseName || record.exercise?.name || 'Ejercicio sin nombre',
+        weight: record.weight || 0,
+        reps: record.reps || 0,
+        sets: record.sets || 0,
+        date: record.date,
+        maxWeight: record.maxWeight || record.weight || 0,
+        averageWeight: record.averageWeight || record.weight || 0
+      }))
       .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 
     // Obtener entrenamientos de hoy
     const today = new Date();
-    const todayWorkouts = workoutRecords.filter(record => {
-      const recordDate = new Date(record.date);
-      return recordDate.toDateString() === today.toDateString();
-    });
+    const todayWorkouts = workoutRecords
+      .filter(record => {
+        const recordDate = new Date(record.date);
+        return recordDate.toDateString() === today.toDateString();
+      })
+      .map(record => ({
+        exerciseName: record.exerciseName || record.exercise?.name || 'Ejercicio sin nombre',
+        weight: record.weight || 0,
+        reps: record.reps || 0,
+        sets: record.sets || 0,
+        date: record.date
+      }));
 
     // Calcular rango de fechas
     const dates = workoutRecords.map(record => new Date(record.date)).sort((a, b) => a.getTime() - b.getTime());
@@ -153,7 +170,7 @@ export class ExportDataContextService {
     // Procesar assignments por día
     const assignments = daysOfWeek.map((day, index) => ({
       dayOfWeek: day,
-      exercises: allAssignments[index] || [],
+      exercises: (allAssignments[index] || []).map(assignment => assignment.exerciseName || assignment.name || 'Ejercicio sin nombre'),
       totalWorkouts: 0, // No disponible en assignments
       totalVolume: 0 // No disponible en assignments
     }));
