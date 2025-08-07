@@ -17,14 +17,14 @@ export class ExportDataContextService {
     exportData: ExportData;
   }> {
     try {
-      console.log('🔍 Obteniendo contexto desde datos reales del usuario...');
+      console.log('🚨 DEBUGGING ACTIVADO - Obteniendo contexto desde datos reales del usuario...');
 
-            // Cargar datos reales del usuario
+      // Cargar datos reales del usuario
       console.log('🔍 Iniciando carga de datos...');
-      
+
       let exercises;
       let workoutRecords;
-      
+
       try {
         exercises = await getExercises();
         console.log('✅ Ejercicios cargados exitosamente:', exercises.length);
@@ -32,7 +32,7 @@ export class ExportDataContextService {
         console.error('❌ Error cargando ejercicios:', error);
         return this.getDefaultContext();
       }
-      
+
       try {
         workoutRecords = await getWorkoutRecords();
         console.log('✅ Entrenamientos cargados exitosamente:', workoutRecords.length);
@@ -42,7 +42,7 @@ export class ExportDataContextService {
       }
 
       console.log(`📊 Datos obtenidos: ${exercises.length} ejercicios, ${workoutRecords.length} entrenamientos`);
-      
+
       // Debug: Mostrar detalles de los datos cargados
       console.log('🏋️ Ejercicios cargados:', exercises.map(ex => ({ id: ex.id, name: ex.name, categories: ex.categories })));
       console.log('📅 Entrenamientos cargados:', workoutRecords.slice(0, 5).map(record => ({
