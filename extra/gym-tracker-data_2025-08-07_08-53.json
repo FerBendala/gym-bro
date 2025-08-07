@@ -1,0 +1,3139 @@
+{
+  "metadata": {
+    "exportDate": "07/08/2025 08:53",
+    "totalExercises": 24,
+    "totalWorkouts": 124,
+    "totalVolume": 145630,
+    "invalidRecordsCount": 0,
+    "dateRange": {
+      "from": "30/06/2025",
+      "to": "06/08/2025"
+    },
+    "appVersion": "1.0.0"
+  },
+  "trainingDays": [
+    {
+      "dayOfWeek": "lunes",
+      "dayName": "Lunes",
+      "totalWorkouts": 24,
+      "totalVolume": 39035,
+      "exercises": [
+        {
+          "exerciseName": "Sentadilla búlgara con mancuernas",
+          "categories": [
+            "Piernas",
+            "Core"
+          ],
+          "totalVolume": 4800,
+          "workoutCount": 6,
+          "averageWeight": 27.33,
+          "maxWeight": 32,
+          "lastWorkout": "04/08/2025",
+          "weights": [
+            24,
+            24,
+            24,
+            28,
+            32,
+            32
+          ]
+        },
+        {
+          "exerciseName": "Extensiones de cuádriceps en máquina",
+          "categories": [
+            "Piernas",
+            "Core"
+          ],
+          "totalVolume": 5660,
+          "workoutCount": 6,
+          "averageWeight": 47.5,
+          "maxWeight": 60,
+          "lastWorkout": "04/08/2025",
+          "weights": [
+            40,
+            40,
+            40,
+            50,
+            55,
+            60
+          ]
+        },
+        {
+          "exerciseName": "Press de pierna",
+          "categories": [
+            "Piernas",
+            "Core"
+          ],
+          "totalVolume": 18240,
+          "workoutCount": 6,
+          "averageWeight": 98.89,
+          "maxWeight": 140,
+          "lastWorkout": "04/08/2025",
+          "weights": [
+            60,
+            80,
+            93.33333333333333,
+            100,
+            120,
+            140
+          ]
+        },
+        {
+          "exerciseName": "Elevación de talones en prensa",
+          "categories": [
+            "Piernas",
+            "Core"
+          ],
+          "totalVolume": 10335,
+          "workoutCount": 6,
+          "averageWeight": 78.33,
+          "maxWeight": 85,
+          "lastWorkout": "04/08/2025",
+          "weights": [
+            70,
+            70,
+            80,
+            80,
+            85,
+            85
+          ]
+        }
+      ],
+      "muscleGroups": [
+        {
+          "group": "Piernas",
+          "volume": 39035,
+          "percentage": 100
+        },
+        {
+          "group": "Core",
+          "volume": 39035,
+          "percentage": 100
+        }
+      ]
+    },
+    {
+      "dayOfWeek": "martes",
+      "dayName": "Martes",
+      "totalWorkouts": 30,
+      "totalVolume": 38130,
+      "exercises": [
+        {
+          "exerciseName": "Extensión de tríceps en cuerda",
+          "categories": [
+            "Brazos",
+            "Core"
+          ],
+          "totalVolume": 5995,
+          "workoutCount": 6,
+          "averageWeight": 49.58,
+          "maxWeight": 55,
+          "lastWorkout": "05/08/2025",
+          "weights": [
+            45,
+            47.5,
+            50,
+            50,
+            50,
+            55
+          ]
+        },
+        {
+          "exerciseName": "Fondos en paralelas",
+          "categories": [
+            "Pecho",
+            "Brazos",
+            "Hombros",
+            "Core"
+          ],
+          "totalVolume": 12084,
+          "workoutCount": 6,
+          "averageWeight": 76,
+          "maxWeight": 76,
+          "lastWorkout": "05/08/2025",
+          "weights": [
+            76,
+            76,
+            76,
+            76,
+            76,
+            76
+          ]
+        },
+        {
+          "exerciseName": "Press banca inclinado con mancuernas",
+          "categories": [
+            "Pecho",
+            "Hombros",
+            "Brazos",
+            "Core"
+          ],
+          "totalVolume": 5508,
+          "workoutCount": 6,
+          "averageWeight": 43.33,
+          "maxWeight": 48,
+          "lastWorkout": "05/08/2025",
+          "weights": [
+            36,
+            40,
+            44,
+            44,
+            48,
+            48
+          ]
+        },
+        {
+          "exerciseName": "Cruces en polea alta",
+          "categories": [
+            "Pecho",
+            "Hombros",
+            "Brazos",
+            "Core"
+          ],
+          "totalVolume": 8155,
+          "workoutCount": 6,
+          "averageWeight": 64.33,
+          "maxWeight": 69,
+          "lastWorkout": "05/08/2025",
+          "weights": [
+            53,
+            57,
+            69,
+            69,
+            69,
+            69
+          ]
+        },
+        {
+          "exerciseName": "Press en banca con mancuernas",
+          "categories": [
+            "Pecho",
+            "Brazos",
+            "Hombros",
+            "Core"
+          ],
+          "totalVolume": 6388,
+          "workoutCount": 6,
+          "averageWeight": 50,
+          "maxWeight": 60,
+          "lastWorkout": "05/08/2025",
+          "weights": [
+            40,
+            44,
+            48,
+            52,
+            56,
+            60
+          ]
+        }
+      ],
+      "muscleGroups": [
+        {
+          "group": "Brazos",
+          "volume": 38130,
+          "percentage": 100
+        },
+        {
+          "group": "Core",
+          "volume": 38130,
+          "percentage": 100
+        },
+        {
+          "group": "Pecho",
+          "volume": 32135,
+          "percentage": 84.28
+        },
+        {
+          "group": "Hombros",
+          "volume": 32135,
+          "percentage": 84.28
+        }
+      ]
+    },
+    {
+      "dayOfWeek": "miércoles",
+      "dayName": "Miércoles",
+      "totalWorkouts": 30,
+      "totalVolume": 32911,
+      "exercises": [
+        {
+          "exerciseName": "Dominadas",
+          "categories": [
+            "Espalda",
+            "Brazos",
+            "Hombros",
+            "Core"
+          ],
+          "totalVolume": 8740,
+          "workoutCount": 6,
+          "averageWeight": 76,
+          "maxWeight": 76,
+          "lastWorkout": "06/08/2025",
+          "weights": [
+            76,
+            76,
+            76,
+            76,
+            76,
+            76
+          ]
+        },
+        {
+          "exerciseName": "Curl bíceps alterno en banco inclinado",
+          "categories": [
+            "Brazos",
+            "Core"
+          ],
+          "totalVolume": 3116,
+          "workoutCount": 6,
+          "averageWeight": 15,
+          "maxWeight": 16,
+          "lastWorkout": "06/08/2025",
+          "weights": [
+            14,
+            14,
+            14,
+            16,
+            16,
+            16
+          ]
+        },
+        {
+          "exerciseName": "Remo inclinado en banco con mancuernas (agarre prono)",
+          "categories": [
+            "Espalda",
+            "Hombros",
+            "Brazos",
+            "Core"
+          ],
+          "totalVolume": 5860,
+          "workoutCount": 6,
+          "averageWeight": 47.5,
+          "maxWeight": 60,
+          "lastWorkout": "06/08/2025",
+          "weights": [
+            40,
+            40,
+            45,
+            50,
+            50,
+            60
+          ]
+        },
+        {
+          "exerciseName": "Remo con mancuerna unilateral",
+          "categories": [
+            "Espalda",
+            "Brazos",
+            "Core",
+            "Hombros"
+          ],
+          "totalVolume": 7460,
+          "workoutCount": 6,
+          "averageWeight": 27.67,
+          "maxWeight": 32,
+          "lastWorkout": "06/08/2025",
+          "weights": [
+            24,
+            26,
+            26,
+            28,
+            30,
+            32
+          ]
+        },
+        {
+          "exerciseName": "Pullover con máquina",
+          "categories": [
+            "Espalda",
+            "Pecho",
+            "Hombros",
+            "Brazos",
+            "Core"
+          ],
+          "totalVolume": 7735,
+          "workoutCount": 6,
+          "averageWeight": 63.67,
+          "maxWeight": 77,
+          "lastWorkout": "06/08/2025",
+          "weights": [
+            49,
+            61,
+            61,
+            65,
+            69,
+            77
+          ]
+        }
+      ],
+      "muscleGroups": [
+        {
+          "group": "Espalda",
+          "volume": 29795,
+          "percentage": 90.53
+        },
+        {
+          "group": "Brazos",
+          "volume": 32911,
+          "percentage": 100
+        },
+        {
+          "group": "Hombros",
+          "volume": 29795,
+          "percentage": 90.53
+        },
+        {
+          "group": "Core",
+          "volume": 32911,
+          "percentage": 100
+        },
+        {
+          "group": "Pecho",
+          "volume": 7735,
+          "percentage": 23.5
+        }
+      ]
+    },
+    {
+      "dayOfWeek": "jueves",
+      "dayName": "Jueves",
+      "totalWorkouts": 15,
+      "totalVolume": 16626,
+      "exercises": [
+        {
+          "exerciseName": "Curl femoral en máquina",
+          "categories": [
+            "Piernas",
+            "Core"
+          ],
+          "totalVolume": 3600,
+          "workoutCount": 3,
+          "averageWeight": 55.83,
+          "maxWeight": 60,
+          "lastWorkout": "31/07/2025",
+          "weights": [
+            47.5,
+            60,
+            60
+          ]
+        },
+        {
+          "exerciseName": "Hip Thrust",
+          "categories": [
+            "Piernas",
+            "Espalda",
+            "Core"
+          ],
+          "totalVolume": 6720,
+          "workoutCount": 3,
+          "averageWeight": 93.33,
+          "maxWeight": 100,
+          "lastWorkout": "31/07/2025",
+          "weights": [
+            85,
+            95,
+            100
+          ]
+        },
+        {
+          "exerciseName": "Zancadas caminando con pesas",
+          "categories": [
+            "Piernas",
+            "Core"
+          ],
+          "totalVolume": 3872,
+          "workoutCount": 3,
+          "averageWeight": 29.33,
+          "maxWeight": 32,
+          "lastWorkout": "31/07/2025",
+          "weights": [
+            28,
+            28,
+            32
+          ]
+        },
+        {
+          "exerciseName": "Plancha abdominal",
+          "categories": [
+            "Core",
+            "Hombros"
+          ],
+          "totalVolume": 684,
+          "workoutCount": 3,
+          "averageWeight": 76,
+          "maxWeight": 76,
+          "lastWorkout": "31/07/2025",
+          "weights": [
+            76,
+            76,
+            76
+          ]
+        },
+        {
+          "exerciseName": "Elevaciones de piernas colgado",
+          "categories": [
+            "Core",
+            "Piernas"
+          ],
+          "totalVolume": 1750,
+          "workoutCount": 3,
+          "averageWeight": 25,
+          "maxWeight": 25,
+          "lastWorkout": "31/07/2025",
+          "weights": [
+            25,
+            25,
+            25
+          ]
+        }
+      ],
+      "muscleGroups": [
+        {
+          "group": "Piernas",
+          "volume": 15942,
+          "percentage": 95.89
+        },
+        {
+          "group": "Core",
+          "volume": 16626,
+          "percentage": 100
+        },
+        {
+          "group": "Espalda",
+          "volume": 6720,
+          "percentage": 40.42
+        },
+        {
+          "group": "Hombros",
+          "volume": 684,
+          "percentage": 4.11
+        }
+      ]
+    },
+    {
+      "dayOfWeek": "viernes",
+      "dayName": "Viernes",
+      "totalWorkouts": 25,
+      "totalVolume": 18928,
+      "exercises": [
+        {
+          "exerciseName": "Press militar con barra o mancuerna",
+          "categories": [
+            "Hombros",
+            "Brazos",
+            "Core"
+          ],
+          "totalVolume": 4000,
+          "workoutCount": 5,
+          "averageWeight": 44,
+          "maxWeight": 48,
+          "lastWorkout": "01/08/2025",
+          "weights": [
+            40,
+            40,
+            44,
+            48,
+            48
+          ]
+        },
+        {
+          "exerciseName": "Elevaciones laterales estrictas",
+          "categories": [
+            "Hombros",
+            "Core",
+            "Brazos"
+          ],
+          "totalVolume": 1546,
+          "workoutCount": 5,
+          "averageWeight": 14.8,
+          "maxWeight": 16,
+          "lastWorkout": "01/08/2025",
+          "weights": [
+            14,
+            14,
+            14,
+            16,
+            16
+          ]
+        },
+        {
+          "exerciseName": "Aperturas invertidas en máquina",
+          "categories": [
+            "Hombros",
+            "Espalda",
+            "Core",
+            "Brazos"
+          ],
+          "totalVolume": 5420,
+          "workoutCount": 5,
+          "averageWeight": 48.5,
+          "maxWeight": 55,
+          "lastWorkout": "01/08/2025",
+          "weights": [
+            40,
+            42.5,
+            50,
+            55,
+            55
+          ]
+        },
+        {
+          "exerciseName": "Elevaciones frontales con polea unilateral",
+          "categories": [
+            "Hombros",
+            "Brazos",
+            "Core"
+          ],
+          "totalVolume": 3090,
+          "workoutCount": 5,
+          "averageWeight": 15,
+          "maxWeight": 15,
+          "lastWorkout": "01/08/2025",
+          "weights": [
+            15,
+            15,
+            15,
+            15,
+            15
+          ]
+        },
+        {
+          "exerciseName": "Rueda abdominal de rodillas",
+          "categories": [
+            "Core",
+            "Brazos",
+            "Hombros"
+          ],
+          "totalVolume": 4872,
+          "workoutCount": 5,
+          "averageWeight": 42,
+          "maxWeight": 42,
+          "lastWorkout": "01/08/2025",
+          "weights": [
+            42,
+            42,
+            42,
+            42,
+            42
+          ]
+        }
+      ],
+      "muscleGroups": [
+        {
+          "group": "Hombros",
+          "volume": 18928,
+          "percentage": 100
+        },
+        {
+          "group": "Brazos",
+          "volume": 18928,
+          "percentage": 100
+        },
+        {
+          "group": "Core",
+          "volume": 18928,
+          "percentage": 100
+        },
+        {
+          "group": "Espalda",
+          "volume": 5420,
+          "percentage": 28.63
+        }
+      ]
+    },
+    {
+      "dayOfWeek": "sábado",
+      "dayName": "Sábado",
+      "totalWorkouts": 0,
+      "totalVolume": 0,
+      "exercises": [],
+      "muscleGroups": []
+    },
+    {
+      "dayOfWeek": "domingo",
+      "dayName": "Domingo",
+      "totalWorkouts": 0,
+      "totalVolume": 0,
+      "exercises": [],
+      "muscleGroups": []
+    }
+  ],
+  "exercisesEvolution": [
+    {
+      "exerciseName": "Sentadilla búlgara con mancuernas",
+      "categories": [
+        "Piernas",
+        "Core"
+      ],
+      "totalVolume": 4800,
+      "totalWorkouts": 6,
+      "sessions": [
+        {
+          "date": "30/06/2025",
+          "weight": 24,
+          "reps": 8,
+          "sets": 2,
+          "volume": 384,
+          "estimated1RM": 29.8,
+          "weekNumber": 27
+        },
+        {
+          "date": "07/07/2025",
+          "weight": 24,
+          "reps": 10,
+          "sets": 2,
+          "volume": 480,
+          "estimated1RM": 32.01,
+          "weekNumber": 28
+        },
+        {
+          "date": "14/07/2025",
+          "weight": 24,
+          "reps": 12,
+          "sets": 2,
+          "volume": 576,
+          "estimated1RM": 33.6,
+          "weekNumber": 29
+        },
+        {
+          "date": "21/07/2025",
+          "weight": 28,
+          "reps": 12,
+          "sets": 2,
+          "volume": 672,
+          "estimated1RM": 39.2,
+          "weekNumber": 30
+        },
+        {
+          "date": "28/07/2025",
+          "weight": 32,
+          "reps": 18,
+          "sets": 2,
+          "volume": 1152,
+          "estimated1RM": 51.2,
+          "weekNumber": 31
+        },
+        {
+          "date": "04/08/2025",
+          "weight": 32,
+          "reps": 24,
+          "sets": 2,
+          "volume": 1536,
+          "estimated1RM": 57.6,
+          "weekNumber": 32
+        }
+      ],
+      "evolution": {
+        "firstWeight": 24,
+        "lastWeight": 32,
+        "maxWeight": 32,
+        "progressPercentage": 33.33,
+        "averageWeight": 27.33,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 24,
+            "maxWeight": 24
+          },
+          {
+            "week": 28,
+            "averageWeight": 24,
+            "maxWeight": 24
+          },
+          {
+            "week": 29,
+            "averageWeight": 24,
+            "maxWeight": 24
+          },
+          {
+            "week": 30,
+            "averageWeight": 28,
+            "maxWeight": 28
+          },
+          {
+            "week": 31,
+            "averageWeight": 32,
+            "maxWeight": 32
+          },
+          {
+            "week": 32,
+            "averageWeight": 32,
+            "maxWeight": 32
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Extensiones de cuádriceps en máquina",
+      "categories": [
+        "Piernas",
+        "Core"
+      ],
+      "totalVolume": 5660,
+      "totalWorkouts": 6,
+      "sessions": [
+        {
+          "date": "30/06/2025",
+          "weight": 40,
+          "reps": 8,
+          "sets": 2,
+          "volume": 640,
+          "estimated1RM": 49.66,
+          "weekNumber": 27
+        },
+        {
+          "date": "07/07/2025",
+          "weight": 40,
+          "reps": 10,
+          "sets": 2,
+          "volume": 800,
+          "estimated1RM": 53.35,
+          "weekNumber": 28
+        },
+        {
+          "date": "14/07/2025",
+          "weight": 40,
+          "reps": 11,
+          "sets": 2,
+          "volume": 880,
+          "estimated1RM": 54.67,
+          "weekNumber": 29
+        },
+        {
+          "date": "21/07/2025",
+          "weight": 50,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1100,
+          "estimated1RM": 68.33,
+          "weekNumber": 30
+        },
+        {
+          "date": "28/07/2025",
+          "weight": 55,
+          "reps": 10,
+          "sets": 2,
+          "volume": 1100,
+          "estimated1RM": 73.35,
+          "weekNumber": 31
+        },
+        {
+          "date": "04/08/2025",
+          "weight": 60,
+          "reps": 10,
+          "sets": 2,
+          "volume": 1140,
+          "estimated1RM": 80.02,
+          "weekNumber": 32
+        }
+      ],
+      "evolution": {
+        "firstWeight": 40,
+        "lastWeight": 60,
+        "maxWeight": 60,
+        "progressPercentage": 50,
+        "averageWeight": 47.5,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 40,
+            "maxWeight": 40
+          },
+          {
+            "week": 28,
+            "averageWeight": 40,
+            "maxWeight": 40
+          },
+          {
+            "week": 29,
+            "averageWeight": 40,
+            "maxWeight": 40
+          },
+          {
+            "week": 30,
+            "averageWeight": 50,
+            "maxWeight": 50
+          },
+          {
+            "week": 31,
+            "averageWeight": 55,
+            "maxWeight": 55
+          },
+          {
+            "week": 32,
+            "averageWeight": 60,
+            "maxWeight": 60
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Press de pierna",
+      "categories": [
+        "Piernas",
+        "Core"
+      ],
+      "totalVolume": 18240,
+      "totalWorkouts": 6,
+      "sessions": [
+        {
+          "date": "30/06/2025",
+          "weight": 60,
+          "reps": 12,
+          "sets": 3,
+          "volume": 2160,
+          "estimated1RM": 84,
+          "weekNumber": 27
+        },
+        {
+          "date": "07/07/2025",
+          "weight": 80,
+          "reps": 12,
+          "sets": 3,
+          "volume": 2880,
+          "estimated1RM": 112,
+          "weekNumber": 28
+        },
+        {
+          "date": "14/07/2025",
+          "weight": 93.33333333333333,
+          "reps": 12,
+          "sets": 3,
+          "volume": 3360,
+          "estimated1RM": 130.67,
+          "weekNumber": 29
+        },
+        {
+          "date": "21/07/2025",
+          "weight": 100,
+          "reps": 12,
+          "sets": 3,
+          "volume": 3600,
+          "estimated1RM": 140,
+          "weekNumber": 30
+        },
+        {
+          "date": "28/07/2025",
+          "weight": 120,
+          "reps": 12,
+          "sets": 2,
+          "volume": 2880,
+          "estimated1RM": 168,
+          "weekNumber": 31
+        },
+        {
+          "date": "04/08/2025",
+          "weight": 140,
+          "reps": 12,
+          "sets": 2,
+          "volume": 3360,
+          "estimated1RM": 196,
+          "weekNumber": 32
+        }
+      ],
+      "evolution": {
+        "firstWeight": 60,
+        "lastWeight": 140,
+        "maxWeight": 140,
+        "progressPercentage": 133.33,
+        "averageWeight": 98.89,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 60,
+            "maxWeight": 60
+          },
+          {
+            "week": 28,
+            "averageWeight": 80,
+            "maxWeight": 80
+          },
+          {
+            "week": 29,
+            "averageWeight": 93.33,
+            "maxWeight": 93.33333333333333
+          },
+          {
+            "week": 30,
+            "averageWeight": 100,
+            "maxWeight": 100
+          },
+          {
+            "week": 31,
+            "averageWeight": 120,
+            "maxWeight": 120
+          },
+          {
+            "week": 32,
+            "averageWeight": 140,
+            "maxWeight": 140
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Elevación de talones en prensa",
+      "categories": [
+        "Piernas",
+        "Core"
+      ],
+      "totalVolume": 10335,
+      "totalWorkouts": 6,
+      "sessions": [
+        {
+          "date": "30/06/2025",
+          "weight": 70,
+          "reps": 10,
+          "sets": 2,
+          "volume": 1400,
+          "estimated1RM": 93.36,
+          "weekNumber": 27
+        },
+        {
+          "date": "07/07/2025",
+          "weight": 70,
+          "reps": 12,
+          "sets": 2,
+          "volume": 1680,
+          "estimated1RM": 98,
+          "weekNumber": 28
+        },
+        {
+          "date": "14/07/2025",
+          "weight": 80,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1760,
+          "estimated1RM": 109.33,
+          "weekNumber": 29
+        },
+        {
+          "date": "21/07/2025",
+          "weight": 80,
+          "reps": 12,
+          "sets": 2,
+          "volume": 1840,
+          "estimated1RM": 112,
+          "weekNumber": 30
+        },
+        {
+          "date": "28/07/2025",
+          "weight": 85,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1785,
+          "estimated1RM": 116.17,
+          "weekNumber": 31
+        },
+        {
+          "date": "04/08/2025",
+          "weight": 85,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1870,
+          "estimated1RM": 116.17,
+          "weekNumber": 32
+        }
+      ],
+      "evolution": {
+        "firstWeight": 70,
+        "lastWeight": 85,
+        "maxWeight": 85,
+        "progressPercentage": 21.43,
+        "averageWeight": 78.33,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 70,
+            "maxWeight": 70
+          },
+          {
+            "week": 28,
+            "averageWeight": 70,
+            "maxWeight": 70
+          },
+          {
+            "week": 29,
+            "averageWeight": 80,
+            "maxWeight": 80
+          },
+          {
+            "week": 30,
+            "averageWeight": 80,
+            "maxWeight": 80
+          },
+          {
+            "week": 31,
+            "averageWeight": 85,
+            "maxWeight": 85
+          },
+          {
+            "week": 32,
+            "averageWeight": 85,
+            "maxWeight": 85
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Extensión de tríceps en cuerda",
+      "categories": [
+        "Brazos",
+        "Core"
+      ],
+      "totalVolume": 5995,
+      "totalWorkouts": 6,
+      "sessions": [
+        {
+          "date": "01/07/2025",
+          "weight": 45,
+          "reps": 9,
+          "sets": 2,
+          "volume": 810,
+          "estimated1RM": 57.87,
+          "weekNumber": 27
+        },
+        {
+          "date": "08/07/2025",
+          "weight": 47.5,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1040,
+          "estimated1RM": 64.92,
+          "weekNumber": 28
+        },
+        {
+          "date": "15/07/2025",
+          "weight": 50,
+          "reps": 10,
+          "sets": 2,
+          "volume": 1000,
+          "estimated1RM": 66.68,
+          "weekNumber": 29
+        },
+        {
+          "date": "22/07/2025",
+          "weight": 50,
+          "reps": 10,
+          "sets": 2,
+          "volume": 1000,
+          "estimated1RM": 66.68,
+          "weekNumber": 30
+        },
+        {
+          "date": "29/07/2025",
+          "weight": 50,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1100,
+          "estimated1RM": 68.33,
+          "weekNumber": 31
+        },
+        {
+          "date": "05/08/2025",
+          "weight": 55,
+          "reps": 10,
+          "sets": 2,
+          "volume": 1045,
+          "estimated1RM": 73.35,
+          "weekNumber": 32
+        }
+      ],
+      "evolution": {
+        "firstWeight": 45,
+        "lastWeight": 55,
+        "maxWeight": 55,
+        "progressPercentage": 22.22,
+        "averageWeight": 49.58,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 45,
+            "maxWeight": 45
+          },
+          {
+            "week": 28,
+            "averageWeight": 47.5,
+            "maxWeight": 47.5
+          },
+          {
+            "week": 29,
+            "averageWeight": 50,
+            "maxWeight": 50
+          },
+          {
+            "week": 30,
+            "averageWeight": 50,
+            "maxWeight": 50
+          },
+          {
+            "week": 31,
+            "averageWeight": 50,
+            "maxWeight": 50
+          },
+          {
+            "week": 32,
+            "averageWeight": 55,
+            "maxWeight": 55
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Fondos en paralelas",
+      "categories": [
+        "Pecho",
+        "Brazos",
+        "Hombros",
+        "Core"
+      ],
+      "totalVolume": 12084,
+      "totalWorkouts": 6,
+      "sessions": [
+        {
+          "date": "01/07/2025",
+          "weight": 76,
+          "reps": 9,
+          "sets": 2,
+          "volume": 1368,
+          "estimated1RM": 97.74,
+          "weekNumber": 27
+        },
+        {
+          "date": "08/07/2025",
+          "weight": 76,
+          "reps": 12,
+          "sets": 2,
+          "volume": 1824,
+          "estimated1RM": 106.4,
+          "weekNumber": 28
+        },
+        {
+          "date": "15/07/2025",
+          "weight": 76,
+          "reps": 13,
+          "sets": 2,
+          "volume": 1976,
+          "estimated1RM": 108.93,
+          "weekNumber": 29
+        },
+        {
+          "date": "22/07/2025",
+          "weight": 76,
+          "reps": 15,
+          "sets": 2,
+          "volume": 2280,
+          "estimated1RM": 114,
+          "weekNumber": 30
+        },
+        {
+          "date": "29/07/2025",
+          "weight": 76,
+          "reps": 15,
+          "sets": 2,
+          "volume": 2280,
+          "estimated1RM": 114,
+          "weekNumber": 31
+        },
+        {
+          "date": "05/08/2025",
+          "weight": 76,
+          "reps": 16,
+          "sets": 2,
+          "volume": 2356,
+          "estimated1RM": 116.53,
+          "weekNumber": 32
+        }
+      ],
+      "evolution": {
+        "firstWeight": 76,
+        "lastWeight": 76,
+        "maxWeight": 76,
+        "progressPercentage": 0,
+        "averageWeight": 76,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 76,
+            "maxWeight": 76
+          },
+          {
+            "week": 28,
+            "averageWeight": 76,
+            "maxWeight": 76
+          },
+          {
+            "week": 29,
+            "averageWeight": 76,
+            "maxWeight": 76
+          },
+          {
+            "week": 30,
+            "averageWeight": 76,
+            "maxWeight": 76
+          },
+          {
+            "week": 31,
+            "averageWeight": 76,
+            "maxWeight": 76
+          },
+          {
+            "week": 32,
+            "averageWeight": 76,
+            "maxWeight": 76
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Press banca inclinado con mancuernas",
+      "categories": [
+        "Pecho",
+        "Hombros",
+        "Brazos",
+        "Core"
+      ],
+      "totalVolume": 5508,
+      "totalWorkouts": 6,
+      "sessions": [
+        {
+          "date": "01/07/2025",
+          "weight": 36,
+          "reps": 12,
+          "sets": 2,
+          "volume": 864,
+          "estimated1RM": 50.4,
+          "weekNumber": 27
+        },
+        {
+          "date": "08/07/2025",
+          "weight": 40,
+          "reps": 12,
+          "sets": 2,
+          "volume": 920,
+          "estimated1RM": 56,
+          "weekNumber": 28
+        },
+        {
+          "date": "15/07/2025",
+          "weight": 44,
+          "reps": 9,
+          "sets": 2,
+          "volume": 792,
+          "estimated1RM": 56.58,
+          "weekNumber": 29
+        },
+        {
+          "date": "22/07/2025",
+          "weight": 44,
+          "reps": 12,
+          "sets": 2,
+          "volume": 1012,
+          "estimated1RM": 61.6,
+          "weekNumber": 30
+        },
+        {
+          "date": "29/07/2025",
+          "weight": 48,
+          "reps": 10,
+          "sets": 2,
+          "volume": 912,
+          "estimated1RM": 64.02,
+          "weekNumber": 31
+        },
+        {
+          "date": "05/08/2025",
+          "weight": 48,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1008,
+          "estimated1RM": 65.6,
+          "weekNumber": 32
+        }
+      ],
+      "evolution": {
+        "firstWeight": 36,
+        "lastWeight": 48,
+        "maxWeight": 48,
+        "progressPercentage": 33.33,
+        "averageWeight": 43.33,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 36,
+            "maxWeight": 36
+          },
+          {
+            "week": 28,
+            "averageWeight": 40,
+            "maxWeight": 40
+          },
+          {
+            "week": 29,
+            "averageWeight": 44,
+            "maxWeight": 44
+          },
+          {
+            "week": 30,
+            "averageWeight": 44,
+            "maxWeight": 44
+          },
+          {
+            "week": 31,
+            "averageWeight": 48,
+            "maxWeight": 48
+          },
+          {
+            "week": 32,
+            "averageWeight": 48,
+            "maxWeight": 48
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Cruces en polea alta",
+      "categories": [
+        "Pecho",
+        "Hombros",
+        "Brazos",
+        "Core"
+      ],
+      "totalVolume": 8155,
+      "totalWorkouts": 6,
+      "sessions": [
+        {
+          "date": "01/07/2025",
+          "weight": 53,
+          "reps": 10,
+          "sets": 2,
+          "volume": 1060,
+          "estimated1RM": 70.69,
+          "weekNumber": 27
+        },
+        {
+          "date": "08/07/2025",
+          "weight": 57,
+          "reps": 12,
+          "sets": 2,
+          "volume": 1368,
+          "estimated1RM": 79.8,
+          "weekNumber": 28
+        },
+        {
+          "date": "15/07/2025",
+          "weight": 69,
+          "reps": 10,
+          "sets": 2,
+          "volume": 1311,
+          "estimated1RM": 92.02,
+          "weekNumber": 29
+        },
+        {
+          "date": "22/07/2025",
+          "weight": 69,
+          "reps": 10,
+          "sets": 2,
+          "volume": 1380,
+          "estimated1RM": 92.02,
+          "weekNumber": 30
+        },
+        {
+          "date": "29/07/2025",
+          "weight": 69,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1518,
+          "estimated1RM": 94.3,
+          "weekNumber": 31
+        },
+        {
+          "date": "05/08/2025",
+          "weight": 69,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1518,
+          "estimated1RM": 94.3,
+          "weekNumber": 32
+        }
+      ],
+      "evolution": {
+        "firstWeight": 53,
+        "lastWeight": 69,
+        "maxWeight": 69,
+        "progressPercentage": 30.19,
+        "averageWeight": 64.33,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 53,
+            "maxWeight": 53
+          },
+          {
+            "week": 28,
+            "averageWeight": 57,
+            "maxWeight": 57
+          },
+          {
+            "week": 29,
+            "averageWeight": 69,
+            "maxWeight": 69
+          },
+          {
+            "week": 30,
+            "averageWeight": 69,
+            "maxWeight": 69
+          },
+          {
+            "week": 31,
+            "averageWeight": 69,
+            "maxWeight": 69
+          },
+          {
+            "week": 32,
+            "averageWeight": 69,
+            "maxWeight": 69
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Press en banca con mancuernas",
+      "categories": [
+        "Pecho",
+        "Brazos",
+        "Hombros",
+        "Core"
+      ],
+      "totalVolume": 6388,
+      "totalWorkouts": 6,
+      "sessions": [
+        {
+          "date": "01/07/2025",
+          "weight": 40,
+          "reps": 12,
+          "sets": 2,
+          "volume": 456,
+          "estimated1RM": 56,
+          "weekNumber": 27
+        },
+        {
+          "date": "08/07/2025",
+          "weight": 44,
+          "reps": 12,
+          "sets": 2,
+          "volume": 1056,
+          "estimated1RM": 61.6,
+          "weekNumber": 28
+        },
+        {
+          "date": "15/07/2025",
+          "weight": 48,
+          "reps": 13,
+          "sets": 2,
+          "volume": 1200,
+          "estimated1RM": 68.8,
+          "weekNumber": 29
+        },
+        {
+          "date": "22/07/2025",
+          "weight": 52,
+          "reps": 13,
+          "sets": 2,
+          "volume": 1300,
+          "estimated1RM": 74.53,
+          "weekNumber": 30
+        },
+        {
+          "date": "29/07/2025",
+          "weight": 56,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1176,
+          "estimated1RM": 76.53,
+          "weekNumber": 31
+        },
+        {
+          "date": "05/08/2025",
+          "weight": 60,
+          "reps": 10,
+          "sets": 2,
+          "volume": 1200,
+          "estimated1RM": 80.02,
+          "weekNumber": 32
+        }
+      ],
+      "evolution": {
+        "firstWeight": 40,
+        "lastWeight": 60,
+        "maxWeight": 60,
+        "progressPercentage": 50,
+        "averageWeight": 50,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 40,
+            "maxWeight": 40
+          },
+          {
+            "week": 28,
+            "averageWeight": 44,
+            "maxWeight": 44
+          },
+          {
+            "week": 29,
+            "averageWeight": 48,
+            "maxWeight": 48
+          },
+          {
+            "week": 30,
+            "averageWeight": 52,
+            "maxWeight": 52
+          },
+          {
+            "week": 31,
+            "averageWeight": 56,
+            "maxWeight": 56
+          },
+          {
+            "week": 32,
+            "averageWeight": 60,
+            "maxWeight": 60
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Dominadas",
+      "categories": [
+        "Espalda",
+        "Brazos",
+        "Hombros",
+        "Core"
+      ],
+      "totalVolume": 8740,
+      "totalWorkouts": 6,
+      "sessions": [
+        {
+          "date": "02/07/2025",
+          "weight": 76,
+          "reps": 7,
+          "sets": 2,
+          "volume": 1064,
+          "estimated1RM": 91.21,
+          "weekNumber": 27
+        },
+        {
+          "date": "09/07/2025",
+          "weight": 76,
+          "reps": 9,
+          "sets": 2,
+          "volume": 1292,
+          "estimated1RM": 97.74,
+          "weekNumber": 28
+        },
+        {
+          "date": "16/07/2025",
+          "weight": 76,
+          "reps": 10,
+          "sets": 2,
+          "volume": 1444,
+          "estimated1RM": 101.36,
+          "weekNumber": 29
+        },
+        {
+          "date": "23/07/2025",
+          "weight": 76,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1596,
+          "estimated1RM": 103.87,
+          "weekNumber": 30
+        },
+        {
+          "date": "30/07/2025",
+          "weight": 76,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1596,
+          "estimated1RM": 103.87,
+          "weekNumber": 31
+        },
+        {
+          "date": "06/08/2025",
+          "weight": 76,
+          "reps": 12,
+          "sets": 2,
+          "volume": 1748,
+          "estimated1RM": 106.4,
+          "weekNumber": 32
+        }
+      ],
+      "evolution": {
+        "firstWeight": 76,
+        "lastWeight": 76,
+        "maxWeight": 76,
+        "progressPercentage": 0,
+        "averageWeight": 76,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 76,
+            "maxWeight": 76
+          },
+          {
+            "week": 28,
+            "averageWeight": 76,
+            "maxWeight": 76
+          },
+          {
+            "week": 29,
+            "averageWeight": 76,
+            "maxWeight": 76
+          },
+          {
+            "week": 30,
+            "averageWeight": 76,
+            "maxWeight": 76
+          },
+          {
+            "week": 31,
+            "averageWeight": 76,
+            "maxWeight": 76
+          },
+          {
+            "week": 32,
+            "averageWeight": 76,
+            "maxWeight": 76
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Curl bíceps alterno en banco inclinado",
+      "categories": [
+        "Brazos",
+        "Core"
+      ],
+      "totalVolume": 3116,
+      "totalWorkouts": 6,
+      "sessions": [
+        {
+          "date": "02/07/2025",
+          "weight": 14,
+          "reps": 15,
+          "sets": 2,
+          "volume": 420,
+          "estimated1RM": 21,
+          "weekNumber": 27
+        },
+        {
+          "date": "09/07/2025",
+          "weight": 14,
+          "reps": 18,
+          "sets": 2,
+          "volume": 504,
+          "estimated1RM": 22.4,
+          "weekNumber": 28
+        },
+        {
+          "date": "16/07/2025",
+          "weight": 14,
+          "reps": 20,
+          "sets": 2,
+          "volume": 560,
+          "estimated1RM": 23.33,
+          "weekNumber": 29
+        },
+        {
+          "date": "23/07/2025",
+          "weight": 16,
+          "reps": 16,
+          "sets": 2,
+          "volume": 512,
+          "estimated1RM": 24.53,
+          "weekNumber": 30
+        },
+        {
+          "date": "30/07/2025",
+          "weight": 16,
+          "reps": 17,
+          "sets": 2,
+          "volume": 544,
+          "estimated1RM": 25.07,
+          "weekNumber": 31
+        },
+        {
+          "date": "06/08/2025",
+          "weight": 16,
+          "reps": 18,
+          "sets": 2,
+          "volume": 576,
+          "estimated1RM": 25.6,
+          "weekNumber": 32
+        }
+      ],
+      "evolution": {
+        "firstWeight": 14,
+        "lastWeight": 16,
+        "maxWeight": 16,
+        "progressPercentage": 14.29,
+        "averageWeight": 15,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 14,
+            "maxWeight": 14
+          },
+          {
+            "week": 28,
+            "averageWeight": 14,
+            "maxWeight": 14
+          },
+          {
+            "week": 29,
+            "averageWeight": 14,
+            "maxWeight": 14
+          },
+          {
+            "week": 30,
+            "averageWeight": 16,
+            "maxWeight": 16
+          },
+          {
+            "week": 31,
+            "averageWeight": 16,
+            "maxWeight": 16
+          },
+          {
+            "week": 32,
+            "averageWeight": 16,
+            "maxWeight": 16
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Remo inclinado en banco con mancuernas (agarre prono)",
+      "categories": [
+        "Espalda",
+        "Hombros",
+        "Brazos",
+        "Core"
+      ],
+      "totalVolume": 5860,
+      "totalWorkouts": 6,
+      "sessions": [
+        {
+          "date": "02/07/2025",
+          "weight": 40,
+          "reps": 10,
+          "sets": 2,
+          "volume": 800,
+          "estimated1RM": 53.35,
+          "weekNumber": 27
+        },
+        {
+          "date": "09/07/2025",
+          "weight": 40,
+          "reps": 12,
+          "sets": 2,
+          "volume": 960,
+          "estimated1RM": 56,
+          "weekNumber": 28
+        },
+        {
+          "date": "16/07/2025",
+          "weight": 45,
+          "reps": 11,
+          "sets": 2,
+          "volume": 990,
+          "estimated1RM": 61.5,
+          "weekNumber": 29
+        },
+        {
+          "date": "23/07/2025",
+          "weight": 50,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1050,
+          "estimated1RM": 68.33,
+          "weekNumber": 30
+        },
+        {
+          "date": "30/07/2025",
+          "weight": 50,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1100,
+          "estimated1RM": 68.33,
+          "weekNumber": 31
+        },
+        {
+          "date": "06/08/2025",
+          "weight": 60,
+          "reps": 8,
+          "sets": 2,
+          "volume": 960,
+          "estimated1RM": 74.5,
+          "weekNumber": 32
+        }
+      ],
+      "evolution": {
+        "firstWeight": 40,
+        "lastWeight": 60,
+        "maxWeight": 60,
+        "progressPercentage": 50,
+        "averageWeight": 47.5,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 40,
+            "maxWeight": 40
+          },
+          {
+            "week": 28,
+            "averageWeight": 40,
+            "maxWeight": 40
+          },
+          {
+            "week": 29,
+            "averageWeight": 45,
+            "maxWeight": 45
+          },
+          {
+            "week": 30,
+            "averageWeight": 50,
+            "maxWeight": 50
+          },
+          {
+            "week": 31,
+            "averageWeight": 50,
+            "maxWeight": 50
+          },
+          {
+            "week": 32,
+            "averageWeight": 60,
+            "maxWeight": 60
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Remo con mancuerna unilateral",
+      "categories": [
+        "Espalda",
+        "Brazos",
+        "Core",
+        "Hombros"
+      ],
+      "totalVolume": 7460,
+      "totalWorkouts": 6,
+      "sessions": [
+        {
+          "date": "02/07/2025",
+          "weight": 24,
+          "reps": 22,
+          "sets": 2,
+          "volume": 1056,
+          "estimated1RM": 41.6,
+          "weekNumber": 27
+        },
+        {
+          "date": "09/07/2025",
+          "weight": 26,
+          "reps": 21,
+          "sets": 2,
+          "volume": 1092,
+          "estimated1RM": 44.2,
+          "weekNumber": 28
+        },
+        {
+          "date": "16/07/2025",
+          "weight": 26,
+          "reps": 24,
+          "sets": 2,
+          "volume": 1248,
+          "estimated1RM": 46.8,
+          "weekNumber": 29
+        },
+        {
+          "date": "23/07/2025",
+          "weight": 28,
+          "reps": 24,
+          "sets": 2,
+          "volume": 1344,
+          "estimated1RM": 50.4,
+          "weekNumber": 30
+        },
+        {
+          "date": "30/07/2025",
+          "weight": 30,
+          "reps": 24,
+          "sets": 2,
+          "volume": 1440,
+          "estimated1RM": 54,
+          "weekNumber": 31
+        },
+        {
+          "date": "06/08/2025",
+          "weight": 32,
+          "reps": 20,
+          "sets": 2,
+          "volume": 1280,
+          "estimated1RM": 53.33,
+          "weekNumber": 32
+        }
+      ],
+      "evolution": {
+        "firstWeight": 24,
+        "lastWeight": 32,
+        "maxWeight": 32,
+        "progressPercentage": 33.33,
+        "averageWeight": 27.67,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 24,
+            "maxWeight": 24
+          },
+          {
+            "week": 28,
+            "averageWeight": 26,
+            "maxWeight": 26
+          },
+          {
+            "week": 29,
+            "averageWeight": 26,
+            "maxWeight": 26
+          },
+          {
+            "week": 30,
+            "averageWeight": 28,
+            "maxWeight": 28
+          },
+          {
+            "week": 31,
+            "averageWeight": 30,
+            "maxWeight": 30
+          },
+          {
+            "week": 32,
+            "averageWeight": 32,
+            "maxWeight": 32
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Pullover con máquina",
+      "categories": [
+        "Espalda",
+        "Pecho",
+        "Hombros",
+        "Brazos",
+        "Core"
+      ],
+      "totalVolume": 7735,
+      "totalWorkouts": 6,
+      "sessions": [
+        {
+          "date": "02/07/2025",
+          "weight": 49,
+          "reps": 12,
+          "sets": 2,
+          "volume": 1176,
+          "estimated1RM": 68.6,
+          "weekNumber": 27
+        },
+        {
+          "date": "09/07/2025",
+          "weight": 61,
+          "reps": 9,
+          "sets": 2,
+          "volume": 1037,
+          "estimated1RM": 78.45,
+          "weekNumber": 28
+        },
+        {
+          "date": "16/07/2025",
+          "weight": 61,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1281,
+          "estimated1RM": 83.37,
+          "weekNumber": 29
+        },
+        {
+          "date": "23/07/2025",
+          "weight": 65,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1422,
+          "estimated1RM": 88.83,
+          "weekNumber": 30
+        },
+        {
+          "date": "30/07/2025",
+          "weight": 69,
+          "reps": 12,
+          "sets": 2,
+          "volume": 1587,
+          "estimated1RM": 96.6,
+          "weekNumber": 31
+        },
+        {
+          "date": "06/08/2025",
+          "weight": 77,
+          "reps": 8,
+          "sets": 2,
+          "volume": 1232,
+          "estimated1RM": 95.6,
+          "weekNumber": 32
+        }
+      ],
+      "evolution": {
+        "firstWeight": 49,
+        "lastWeight": 77,
+        "maxWeight": 77,
+        "progressPercentage": 57.14,
+        "averageWeight": 63.67,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 49,
+            "maxWeight": 49
+          },
+          {
+            "week": 28,
+            "averageWeight": 61,
+            "maxWeight": 61
+          },
+          {
+            "week": 29,
+            "averageWeight": 61,
+            "maxWeight": 61
+          },
+          {
+            "week": 30,
+            "averageWeight": 65,
+            "maxWeight": 65
+          },
+          {
+            "week": 31,
+            "averageWeight": 69,
+            "maxWeight": 69
+          },
+          {
+            "week": 32,
+            "averageWeight": 77,
+            "maxWeight": 77
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Press militar con barra o mancuerna",
+      "categories": [
+        "Hombros",
+        "Brazos",
+        "Core"
+      ],
+      "totalVolume": 4000,
+      "totalWorkouts": 5,
+      "sessions": [
+        {
+          "date": "04/07/2025",
+          "weight": 40,
+          "reps": 11,
+          "sets": 2,
+          "volume": 840,
+          "estimated1RM": 54.67,
+          "weekNumber": 27
+        },
+        {
+          "date": "11/07/2025",
+          "weight": 40,
+          "reps": 11,
+          "sets": 2,
+          "volume": 880,
+          "estimated1RM": 54.67,
+          "weekNumber": 28
+        },
+        {
+          "date": "18/07/2025",
+          "weight": 44,
+          "reps": 9,
+          "sets": 2,
+          "volume": 792,
+          "estimated1RM": 56.58,
+          "weekNumber": 29
+        },
+        {
+          "date": "25/07/2025",
+          "weight": 48,
+          "reps": 8,
+          "sets": 2,
+          "volume": 720,
+          "estimated1RM": 59.6,
+          "weekNumber": 30
+        },
+        {
+          "date": "01/08/2025",
+          "weight": 48,
+          "reps": 8,
+          "sets": 2,
+          "volume": 768,
+          "estimated1RM": 59.6,
+          "weekNumber": 31
+        }
+      ],
+      "evolution": {
+        "firstWeight": 40,
+        "lastWeight": 48,
+        "maxWeight": 48,
+        "progressPercentage": 20,
+        "averageWeight": 44,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 40,
+            "maxWeight": 40
+          },
+          {
+            "week": 28,
+            "averageWeight": 40,
+            "maxWeight": 40
+          },
+          {
+            "week": 29,
+            "averageWeight": 44,
+            "maxWeight": 44
+          },
+          {
+            "week": 30,
+            "averageWeight": 48,
+            "maxWeight": 48
+          },
+          {
+            "week": 31,
+            "averageWeight": 48,
+            "maxWeight": 48
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Elevaciones laterales estrictas",
+      "categories": [
+        "Hombros",
+        "Core",
+        "Brazos"
+      ],
+      "totalVolume": 1546,
+      "totalWorkouts": 5,
+      "sessions": [
+        {
+          "date": "04/07/2025",
+          "weight": 14,
+          "reps": 8,
+          "sets": 2,
+          "volume": 224,
+          "estimated1RM": 17.38,
+          "weekNumber": 27
+        },
+        {
+          "date": "11/07/2025",
+          "weight": 14,
+          "reps": 10,
+          "sets": 2,
+          "volume": 266,
+          "estimated1RM": 18.67,
+          "weekNumber": 28
+        },
+        {
+          "date": "18/07/2025",
+          "weight": 14,
+          "reps": 12,
+          "sets": 2,
+          "volume": 336,
+          "estimated1RM": 19.6,
+          "weekNumber": 29
+        },
+        {
+          "date": "25/07/2025",
+          "weight": 16,
+          "reps": 11,
+          "sets": 2,
+          "volume": 336,
+          "estimated1RM": 21.87,
+          "weekNumber": 30
+        },
+        {
+          "date": "01/08/2025",
+          "weight": 16,
+          "reps": 12,
+          "sets": 2,
+          "volume": 384,
+          "estimated1RM": 22.4,
+          "weekNumber": 31
+        }
+      ],
+      "evolution": {
+        "firstWeight": 14,
+        "lastWeight": 16,
+        "maxWeight": 16,
+        "progressPercentage": 14.29,
+        "averageWeight": 14.8,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 14,
+            "maxWeight": 14
+          },
+          {
+            "week": 28,
+            "averageWeight": 14,
+            "maxWeight": 14
+          },
+          {
+            "week": 29,
+            "averageWeight": 14,
+            "maxWeight": 14
+          },
+          {
+            "week": 30,
+            "averageWeight": 16,
+            "maxWeight": 16
+          },
+          {
+            "week": 31,
+            "averageWeight": 16,
+            "maxWeight": 16
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Aperturas invertidas en máquina",
+      "categories": [
+        "Hombros",
+        "Espalda",
+        "Core",
+        "Brazos"
+      ],
+      "totalVolume": 5420,
+      "totalWorkouts": 5,
+      "sessions": [
+        {
+          "date": "04/07/2025",
+          "weight": 40,
+          "reps": 11,
+          "sets": 2,
+          "volume": 880,
+          "estimated1RM": 54.67,
+          "weekNumber": 27
+        },
+        {
+          "date": "11/07/2025",
+          "weight": 42.5,
+          "reps": 12,
+          "sets": 2,
+          "volume": 1020,
+          "estimated1RM": 59.5,
+          "weekNumber": 28
+        },
+        {
+          "date": "18/07/2025",
+          "weight": 50,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1100,
+          "estimated1RM": 68.33,
+          "weekNumber": 29
+        },
+        {
+          "date": "25/07/2025",
+          "weight": 55,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1155,
+          "estimated1RM": 75.17,
+          "weekNumber": 30
+        },
+        {
+          "date": "01/08/2025",
+          "weight": 55,
+          "reps": 12,
+          "sets": 2,
+          "volume": 1265,
+          "estimated1RM": 77,
+          "weekNumber": 31
+        }
+      ],
+      "evolution": {
+        "firstWeight": 40,
+        "lastWeight": 55,
+        "maxWeight": 55,
+        "progressPercentage": 37.5,
+        "averageWeight": 48.5,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 40,
+            "maxWeight": 40
+          },
+          {
+            "week": 28,
+            "averageWeight": 42.5,
+            "maxWeight": 42.5
+          },
+          {
+            "week": 29,
+            "averageWeight": 50,
+            "maxWeight": 50
+          },
+          {
+            "week": 30,
+            "averageWeight": 55,
+            "maxWeight": 55
+          },
+          {
+            "week": 31,
+            "averageWeight": 55,
+            "maxWeight": 55
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Elevaciones frontales con polea unilateral",
+      "categories": [
+        "Hombros",
+        "Brazos",
+        "Core"
+      ],
+      "totalVolume": 3090,
+      "totalWorkouts": 5,
+      "sessions": [
+        {
+          "date": "04/07/2025",
+          "weight": 15,
+          "reps": 16,
+          "sets": 2,
+          "volume": 480,
+          "estimated1RM": 23,
+          "weekNumber": 27
+        },
+        {
+          "date": "11/07/2025",
+          "weight": 15,
+          "reps": 20,
+          "sets": 2,
+          "volume": 600,
+          "estimated1RM": 25,
+          "weekNumber": 28
+        },
+        {
+          "date": "18/07/2025",
+          "weight": 15,
+          "reps": 22,
+          "sets": 2,
+          "volume": 660,
+          "estimated1RM": 26,
+          "weekNumber": 29
+        },
+        {
+          "date": "25/07/2025",
+          "weight": 15,
+          "reps": 22,
+          "sets": 2,
+          "volume": 660,
+          "estimated1RM": 26,
+          "weekNumber": 30
+        },
+        {
+          "date": "01/08/2025",
+          "weight": 15,
+          "reps": 23,
+          "sets": 2,
+          "volume": 690,
+          "estimated1RM": 26.5,
+          "weekNumber": 31
+        }
+      ],
+      "evolution": {
+        "firstWeight": 15,
+        "lastWeight": 15,
+        "maxWeight": 15,
+        "progressPercentage": 0,
+        "averageWeight": 15,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 15,
+            "maxWeight": 15
+          },
+          {
+            "week": 28,
+            "averageWeight": 15,
+            "maxWeight": 15
+          },
+          {
+            "week": 29,
+            "averageWeight": 15,
+            "maxWeight": 15
+          },
+          {
+            "week": 30,
+            "averageWeight": 15,
+            "maxWeight": 15
+          },
+          {
+            "week": 31,
+            "averageWeight": 15,
+            "maxWeight": 15
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Rueda abdominal de rodillas",
+      "categories": [
+        "Core",
+        "Brazos",
+        "Hombros"
+      ],
+      "totalVolume": 4872,
+      "totalWorkouts": 5,
+      "sessions": [
+        {
+          "date": "04/07/2025",
+          "weight": 42,
+          "reps": 9,
+          "sets": 2,
+          "volume": 756,
+          "estimated1RM": 54.01,
+          "weekNumber": 27
+        },
+        {
+          "date": "11/07/2025",
+          "weight": 42,
+          "reps": 11,
+          "sets": 2,
+          "volume": 924,
+          "estimated1RM": 57.4,
+          "weekNumber": 28
+        },
+        {
+          "date": "18/07/2025",
+          "weight": 42,
+          "reps": 12,
+          "sets": 2,
+          "volume": 1008,
+          "estimated1RM": 58.8,
+          "weekNumber": 29
+        },
+        {
+          "date": "25/07/2025",
+          "weight": 42,
+          "reps": 12,
+          "sets": 2,
+          "volume": 1008,
+          "estimated1RM": 58.8,
+          "weekNumber": 30
+        },
+        {
+          "date": "01/08/2025",
+          "weight": 42,
+          "reps": 14,
+          "sets": 2,
+          "volume": 1176,
+          "estimated1RM": 61.6,
+          "weekNumber": 31
+        }
+      ],
+      "evolution": {
+        "firstWeight": 42,
+        "lastWeight": 42,
+        "maxWeight": 42,
+        "progressPercentage": 0,
+        "averageWeight": 42,
+        "weightProgression": [
+          {
+            "week": 27,
+            "averageWeight": 42,
+            "maxWeight": 42
+          },
+          {
+            "week": 28,
+            "averageWeight": 42,
+            "maxWeight": 42
+          },
+          {
+            "week": 29,
+            "averageWeight": 42,
+            "maxWeight": 42
+          },
+          {
+            "week": 30,
+            "averageWeight": 42,
+            "maxWeight": 42
+          },
+          {
+            "week": 31,
+            "averageWeight": 42,
+            "maxWeight": 42
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Curl femoral en máquina",
+      "categories": [
+        "Piernas",
+        "Core"
+      ],
+      "totalVolume": 3600,
+      "totalWorkouts": 3,
+      "sessions": [
+        {
+          "date": "17/07/2025",
+          "weight": 47.5,
+          "reps": 12,
+          "sets": 2,
+          "volume": 1140,
+          "estimated1RM": 66.5,
+          "weekNumber": 29
+        },
+        {
+          "date": "24/07/2025",
+          "weight": 60,
+          "reps": 10,
+          "sets": 2,
+          "volume": 1200,
+          "estimated1RM": 80.02,
+          "weekNumber": 30
+        },
+        {
+          "date": "31/07/2025",
+          "weight": 60,
+          "reps": 11,
+          "sets": 2,
+          "volume": 1260,
+          "estimated1RM": 82,
+          "weekNumber": 31
+        }
+      ],
+      "evolution": {
+        "firstWeight": 47.5,
+        "lastWeight": 60,
+        "maxWeight": 60,
+        "progressPercentage": 26.32,
+        "averageWeight": 55.83,
+        "weightProgression": [
+          {
+            "week": 29,
+            "averageWeight": 47.5,
+            "maxWeight": 47.5
+          },
+          {
+            "week": 30,
+            "averageWeight": 60,
+            "maxWeight": 60
+          },
+          {
+            "week": 31,
+            "averageWeight": 60,
+            "maxWeight": 60
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Hip Thrust",
+      "categories": [
+        "Piernas",
+        "Espalda",
+        "Core"
+      ],
+      "totalVolume": 6720,
+      "totalWorkouts": 3,
+      "sessions": [
+        {
+          "date": "17/07/2025",
+          "weight": 85,
+          "reps": 12,
+          "sets": 2,
+          "volume": 2040,
+          "estimated1RM": 119,
+          "weekNumber": 29
+        },
+        {
+          "date": "24/07/2025",
+          "weight": 95,
+          "reps": 12,
+          "sets": 2,
+          "volume": 2280,
+          "estimated1RM": 133,
+          "weekNumber": 30
+        },
+        {
+          "date": "31/07/2025",
+          "weight": 100,
+          "reps": 12,
+          "sets": 2,
+          "volume": 2400,
+          "estimated1RM": 140,
+          "weekNumber": 31
+        }
+      ],
+      "evolution": {
+        "firstWeight": 85,
+        "lastWeight": 100,
+        "maxWeight": 100,
+        "progressPercentage": 17.65,
+        "averageWeight": 93.33,
+        "weightProgression": [
+          {
+            "week": 29,
+            "averageWeight": 85,
+            "maxWeight": 85
+          },
+          {
+            "week": 30,
+            "averageWeight": 95,
+            "maxWeight": 95
+          },
+          {
+            "week": 31,
+            "averageWeight": 100,
+            "maxWeight": 100
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Zancadas caminando con pesas",
+      "categories": [
+        "Piernas",
+        "Core"
+      ],
+      "totalVolume": 3872,
+      "totalWorkouts": 3,
+      "sessions": [
+        {
+          "date": "17/07/2025",
+          "weight": 28,
+          "reps": 20,
+          "sets": 2,
+          "volume": 1120,
+          "estimated1RM": 46.67,
+          "weekNumber": 29
+        },
+        {
+          "date": "24/07/2025",
+          "weight": 28,
+          "reps": 24,
+          "sets": 2,
+          "volume": 1344,
+          "estimated1RM": 50.4,
+          "weekNumber": 30
+        },
+        {
+          "date": "31/07/2025",
+          "weight": 32,
+          "reps": 22,
+          "sets": 2,
+          "volume": 1408,
+          "estimated1RM": 55.47,
+          "weekNumber": 31
+        }
+      ],
+      "evolution": {
+        "firstWeight": 28,
+        "lastWeight": 32,
+        "maxWeight": 32,
+        "progressPercentage": 14.29,
+        "averageWeight": 29.33,
+        "weightProgression": [
+          {
+            "week": 29,
+            "averageWeight": 28,
+            "maxWeight": 28
+          },
+          {
+            "week": 30,
+            "averageWeight": 28,
+            "maxWeight": 28
+          },
+          {
+            "week": 31,
+            "averageWeight": 32,
+            "maxWeight": 32
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Plancha abdominal",
+      "categories": [
+        "Core",
+        "Hombros"
+      ],
+      "totalVolume": 684,
+      "totalWorkouts": 3,
+      "sessions": [
+        {
+          "date": "17/07/2025",
+          "weight": 76,
+          "reps": 1,
+          "sets": 3,
+          "volume": 228,
+          "estimated1RM": 76,
+          "weekNumber": 29
+        },
+        {
+          "date": "24/07/2025",
+          "weight": 76,
+          "reps": 1,
+          "sets": 3,
+          "volume": 228,
+          "estimated1RM": 76,
+          "weekNumber": 30
+        },
+        {
+          "date": "31/07/2025",
+          "weight": 76,
+          "reps": 1,
+          "sets": 3,
+          "volume": 228,
+          "estimated1RM": 76,
+          "weekNumber": 31
+        }
+      ],
+      "evolution": {
+        "firstWeight": 76,
+        "lastWeight": 76,
+        "maxWeight": 76,
+        "progressPercentage": 0,
+        "averageWeight": 76,
+        "weightProgression": [
+          {
+            "week": 29,
+            "averageWeight": 76,
+            "maxWeight": 76
+          },
+          {
+            "week": 30,
+            "averageWeight": 76,
+            "maxWeight": 76
+          },
+          {
+            "week": 31,
+            "averageWeight": 76,
+            "maxWeight": 76
+          }
+        ]
+      }
+    },
+    {
+      "exerciseName": "Elevaciones de piernas colgado",
+      "categories": [
+        "Core",
+        "Piernas"
+      ],
+      "totalVolume": 1750,
+      "totalWorkouts": 3,
+      "sessions": [
+        {
+          "date": "17/07/2025",
+          "weight": 25,
+          "reps": 9,
+          "sets": 2,
+          "volume": 450,
+          "estimated1RM": 32.15,
+          "weekNumber": 29
+        },
+        {
+          "date": "24/07/2025",
+          "weight": 25,
+          "reps": 12,
+          "sets": 2,
+          "volume": 600,
+          "estimated1RM": 35,
+          "weekNumber": 30
+        },
+        {
+          "date": "31/07/2025",
+          "weight": 25,
+          "reps": 14,
+          "sets": 2,
+          "volume": 700,
+          "estimated1RM": 36.67,
+          "weekNumber": 31
+        }
+      ],
+      "evolution": {
+        "firstWeight": 25,
+        "lastWeight": 25,
+        "maxWeight": 25,
+        "progressPercentage": 0,
+        "averageWeight": 25,
+        "weightProgression": [
+          {
+            "week": 29,
+            "averageWeight": 25,
+            "maxWeight": 25
+          },
+          {
+            "week": 30,
+            "averageWeight": 25,
+            "maxWeight": 25
+          },
+          {
+            "week": 31,
+            "averageWeight": 25,
+            "maxWeight": 25
+          }
+        ]
+      }
+    }
+  ],
+  "muscleGroupAnalysis": {
+    "totalVolume": 145630,
+    "definedPercentages": [
+      {
+        "group": "Pecho",
+        "targetPercentage": 20
+      },
+      {
+        "group": "Espalda",
+        "targetPercentage": 20
+      },
+      {
+        "group": "Piernas",
+        "targetPercentage": 25
+      },
+      {
+        "group": "Hombros",
+        "targetPercentage": 15
+      },
+      {
+        "group": "Bíceps",
+        "targetPercentage": 10
+      },
+      {
+        "group": "Tríceps",
+        "targetPercentage": 10
+      }
+    ],
+    "actualPercentages": [
+      {
+        "group": "Piernas",
+        "actualVolume": 54977,
+        "actualPercentage": 37.75,
+        "workoutCount": 36
+      },
+      {
+        "group": "Core",
+        "actualVolume": 145630,
+        "actualPercentage": 100,
+        "workoutCount": 124
+      },
+      {
+        "group": "Tríceps",
+        "actualVolume": 52466,
+        "actualPercentage": 36.03,
+        "workoutCount": 79
+      },
+      {
+        "group": "Pecho",
+        "actualVolume": 39870,
+        "actualPercentage": 27.38,
+        "workoutCount": 30
+      },
+      {
+        "group": "Hombros",
+        "actualVolume": 81542,
+        "actualPercentage": 55.99,
+        "workoutCount": 76
+      },
+      {
+        "group": "Bíceps",
+        "actualVolume": 37503,
+        "actualPercentage": 25.75,
+        "workoutCount": 73
+      },
+      {
+        "group": "Espalda",
+        "actualVolume": 41935,
+        "actualPercentage": 28.8,
+        "workoutCount": 32
+      }
+    ],
+    "comparison": [
+      {
+        "group": "Pecho",
+        "targetPercentage": 20,
+        "actualPercentage": 27.38,
+        "difference": 7.38,
+        "status": "above"
+      },
+      {
+        "group": "Espalda",
+        "targetPercentage": 20,
+        "actualPercentage": 28.8,
+        "difference": 8.8,
+        "status": "above"
+      },
+      {
+        "group": "Piernas",
+        "targetPercentage": 25,
+        "actualPercentage": 37.75,
+        "difference": 12.75,
+        "status": "above"
+      },
+      {
+        "group": "Hombros",
+        "targetPercentage": 15,
+        "actualPercentage": 55.99,
+        "difference": 40.99,
+        "status": "above"
+      },
+      {
+        "group": "Bíceps",
+        "targetPercentage": 10,
+        "actualPercentage": 25.75,
+        "difference": 15.75,
+        "status": "above"
+      },
+      {
+        "group": "Tríceps",
+        "targetPercentage": 10,
+        "actualPercentage": 36.03,
+        "difference": 26.03,
+        "status": "above"
+      }
+    ],
+    "recommendations": [
+      {
+        "group": "Pecho",
+        "message": "Reducir volumen de Pecho. Diferencia: 7.38%",
+        "priority": "medium"
+      },
+      {
+        "group": "Espalda",
+        "message": "Reducir volumen de Espalda. Diferencia: 8.8%",
+        "priority": "medium"
+      },
+      {
+        "group": "Piernas",
+        "message": "Reducir volumen de Piernas. Diferencia: 12.75%",
+        "priority": "medium"
+      },
+      {
+        "group": "Hombros",
+        "message": "Reducir volumen de Hombros. Diferencia: 40.99%",
+        "priority": "high"
+      },
+      {
+        "group": "Bíceps",
+        "message": "Reducir volumen de Bíceps. Diferencia: 15.75%",
+        "priority": "high"
+      },
+      {
+        "group": "Tríceps",
+        "message": "Reducir volumen de Tríceps. Diferencia: 26.03%",
+        "priority": "high"
+      }
+    ]
+  },
+  "performanceBalance": {
+    "overall": {
+      "totalVolume": 145630,
+      "totalWorkouts": 124,
+      "averageVolumePerWorkout": 1174.44,
+      "consistencyScore": 71.43,
+      "strengthProgress": 75,
+      "volumeProgress": 11.01
+    },
+    "strengthMetrics": {
+      "totalExercises": 24,
+      "exercisesWithProgress": 18,
+      "averageProgressPercentage": 75,
+      "topImprovements": [
+        {
+          "exerciseName": "Press de pierna",
+          "progressPercentage": 133.33,
+          "weightGain": 80
+        },
+        {
+          "exerciseName": "Pullover con máquina",
+          "progressPercentage": 57.14,
+          "weightGain": 28
+        },
+        {
+          "exerciseName": "Remo inclinado en banco con mancuernas (agarre prono)",
+          "progressPercentage": 50,
+          "weightGain": 20
+        },
+        {
+          "exerciseName": "Extensiones de cuádriceps en máquina",
+          "progressPercentage": 50,
+          "weightGain": 20
+        },
+        {
+          "exerciseName": "Press en banca con mancuernas",
+          "progressPercentage": 50,
+          "weightGain": 20
+        }
+      ]
+    },
+    "volumeMetrics": {
+      "weeklyAverage": 8090.56,
+      "monthlyTrend": "increasing",
+      "volumeDistribution": [
+        {
+          "category": "Piernas",
+          "volume": 54977,
+          "percentage": 37.75
+        },
+        {
+          "category": "Core",
+          "volume": 145630,
+          "percentage": 100
+        },
+        {
+          "category": "Brazos",
+          "volume": 89969,
+          "percentage": 61.78
+        },
+        {
+          "category": "Pecho",
+          "volume": 39870,
+          "percentage": 27.38
+        },
+        {
+          "category": "Hombros",
+          "volume": 81542,
+          "percentage": 55.99
+        },
+        {
+          "category": "Espalda",
+          "volume": 41935,
+          "percentage": 28.8
+        }
+      ]
+    },
+    "balanceScore": {
+      "score": 69,
+      "level": "good",
+      "description": "Buen rendimiento. Hay áreas de mejora.",
+      "recommendations": [
+        "Enfócate en ejercicios con menor progreso",
+        "Aumenta la frecuencia de entrenamiento"
+      ]
+    }
+  }
+}

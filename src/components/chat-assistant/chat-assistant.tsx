@@ -3,7 +3,7 @@ import { Button } from '../button';
 import { Card } from '../card';
 import { Input } from '../input';
 import { LoadingSpinner } from '../loading-spinner';
-import { UserContextService } from '@/api/services/user-context-service';
+import { ExportDataContextService } from '@/api/services/export-data-context-service';
 
 interface ChatAssistantProps {
   className?: string;
@@ -44,8 +44,8 @@ export const ChatAssistant: React.FC<ChatAssistantProps> = ({
   // Cargar contexto del usuario al iniciar
   const loadUserContext = useCallback(async () => {
     try {
-      const context = await UserContextService.getUserContext();
-      const contextSummary = UserContextService.generateContextSummary(context);
+      const context = await ExportDataContextService.getUserContext();
+      const contextSummary = ExportDataContextService.generateContextSummary(context);
       setUserContext(contextSummary);
       console.log('✅ Contexto del usuario cargado');
     } catch (error) {
