@@ -28,6 +28,23 @@ export const generateExportData = async (
     );
   }
 
+  // Log de todos los registros para debugging
+  console.log('📊 Registros válidos encontrados:', sortedRecords.length);
+  console.log('📅 Rango de fechas:', {
+    from: sortedRecords.length > 0 ? format(new Date(sortedRecords[0].date), 'dd/MM/yyyy', { locale: es }) : 'N/A',
+    to: sortedRecords.length > 0 ? format(new Date(sortedRecords[sortedRecords.length - 1].date), 'dd/MM/yyyy', { locale: es }) : 'N/A'
+  });
+  
+  // Mostrar los últimos 5 registros
+  const lastRecords = sortedRecords.slice(-5);
+  console.log('🔄 Últimos 5 registros:', lastRecords.map(r => ({
+    exercise: r.exercise?.name,
+    date: format(new Date(r.date), 'dd/MM/yyyy', { locale: es }),
+    weight: r.weight,
+    reps: r.reps,
+    sets: r.sets
+  })));
+
   // Ordenar registros válidos por fecha
   const sortedRecords = [...validRecords].sort((a, b) =>
     new Date(a.date).getTime() - new Date(b.date).getTime(),

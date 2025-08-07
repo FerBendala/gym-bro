@@ -37,7 +37,7 @@ export class ExportDataContextService {
 
 
 
-  
+
 
   /**
    * Genera un resumen de contexto desde datos reales del usuario
@@ -56,39 +56,39 @@ CONTEXTO DEL USUARIO (DATOS REALES):
 - Registros inválidos: ${(exportData.metadata as any).invalidRecordsCount || 0}
 
 🏋️ EJERCICIOS DISPONIBLES:
-${exportData.trainingDays.flatMap(day => 
-  day.exercises.map(ex => `- ${ex.exerciseName} (${ex.categories.join(', ')})`)
-).join('\n')}
+${exportData.trainingDays.flatMap(day =>
+      day.exercises.map(ex => `- ${ex.exerciseName} (${ex.categories.join(', ')})`)
+    ).join('\n')}
 
 📅 RUTINA SEMANAL:
 ${exportData.trainingDays.map(day =>
-  `${day.dayOfWeek}: ${day.exercises.length} ejercicios - ${day.exercises.map(ex => ex.exerciseName).join(', ')}`
-).join('\n')}
+      `${day.dayOfWeek}: ${day.exercises.length} ejercicios - ${day.exercises.map(ex => ex.exerciseName).join(', ')}`
+    ).join('\n')}
 
 🎯 CATEGORÍAS DE EJERCICIOS:
-${Array.from(new Set(exportData.trainingDays.flatMap(day => 
-  day.exercises.flatMap(ex => ex.categories)
-))).join(', ')}
+${Array.from(new Set(exportData.trainingDays.flatMap(day =>
+      day.exercises.flatMap(ex => ex.categories)
+    ))).join(', ')}
 
 📈 ÚLTIMOS ENTRENAMIENTOS (últimos 5):
 ${exportData.exercisesEvolution
-  .filter(ex => ex.sessions.length > 0)
-  .map(ex => {
-    const lastSession = ex.sessions[ex.sessions.length - 1];
-    return `- ${ex.exerciseName}: ${lastSession.weight}kg x ${lastSession.reps} reps (${lastSession.sets} sets) - ${lastSession.date}`;
-  })
-  .slice(0, 5)
-  .join('\n')}
+        .filter(ex => ex.sessions.length > 0)
+        .map(ex => {
+          const lastSession = ex.sessions[ex.sessions.length - 1];
+          return `- ${ex.exerciseName}: ${lastSession.weight}kg x ${lastSession.reps} reps (${lastSession.sets} sets) - ${lastSession.date}`;
+        })
+        .slice(0, 5)
+        .join('\n')}
 
 💪 PROGRESO POR DÍA:
 ${exportData.trainingDays.map(day =>
-  `${day.dayOfWeek}: ${day.totalWorkouts} entrenamientos, ${day.totalVolume.toLocaleString()} kg volumen`
-).join('\n')}
+          `${day.dayOfWeek}: ${day.totalWorkouts} entrenamientos, ${day.totalVolume.toLocaleString()} kg volumen`
+        ).join('\n')}
 
 📊 ANÁLISIS DE GRUPOS MUSCULARES:
 ${exportData.muscleGroupAnalysis.comparison.map(comp =>
-  `- ${comp.group}: ${comp.actualPercentage}% (objetivo: ${comp.targetPercentage}%) - ${comp.status}`
-).join('\n')}
+          `- ${comp.group}: ${comp.actualPercentage}% (objetivo: ${comp.targetPercentage}%) - ${comp.status}`
+        ).join('\n')}
 
 🎯 BALANCE DE RENDIMIENTO:
 - Score: ${exportData.performanceBalance.balanceScore.score}/100
