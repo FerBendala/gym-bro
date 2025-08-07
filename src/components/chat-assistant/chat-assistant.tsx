@@ -74,9 +74,13 @@ Instrucciones importantes:
       setUserContext(trainerContext);
       console.log('✅ Contexto del entrenador personal cargado');
       console.log('📊 Contexto final (primeros 500 chars):', trainerContext.substring(0, 500) + '...');
+      
+      return trainerContext;
     } catch (error) {
       console.error('❌ Error cargando contexto del usuario:', error);
-      setUserContext('Eres un entrenador personal experto llamado "GymBro". Puedes responder a cualquier pregunta sobre fitness, nutrición, motivación y bienestar. Mantén un tono amigable y motivador.');
+      const fallbackContext = 'Eres un entrenador personal experto llamado "GymBro". Puedes responder a cualquier pregunta sobre fitness, nutrición, motivación y bienestar. Mantén un tono amigable y motivador.';
+      setUserContext(fallbackContext);
+      return fallbackContext;
     }
   }, []);
 
@@ -132,8 +136,16 @@ Instrucciones importantes:
 
     try {
       console.log('💬 Enviando mensaje:', message);
-      console.log('📊 Contexto del usuario (longitud):', userContext.length);
-      console.log('📊 Contexto del usuario (primeros 500 chars):', userContext.substring(0, 500) + '...');
+      
+      // Si el contexto está vacío, recargarlo
+      let contextToUse = userContext;
+      if (!userContext || userContext.length === 0) {
+        console.log('⚠️ Contexto vacío, recargando...');
+        contextToUse = await loadUserContext();
+      }
+      
+      console.log('📊 Contexto del usuario (longitud):', contextToUse.length);
+      console.log('📊 Contexto del usuario (primeros 500 chars):', contextToUse.substring(0, 500) + '...');
 
       // Determinar la URL del API según el entorno
       const isDevelopment = import.meta.env.DEV;
@@ -152,7 +164,7 @@ Instrucciones importantes:
         body: JSON.stringify({
           message: message,
           reasoning_level: 'high',
-          context: userContext
+          context: contextToUse
         }),
       });
 
