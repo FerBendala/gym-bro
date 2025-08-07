@@ -221,8 +221,19 @@ function generateExercisesEvolutionData(records: WorkoutRecord[], exercises: Exe
 
   // Procesar registros por ejercicio
   records.forEach(record => {
-    const exerciseName = record.exercise?.name || 'Ejercicio no encontrado';
-    const categories = record.exercise?.categories || [];
+    // Intentar encontrar el ejercicio por ID si no está resuelto
+    let exerciseName = record.exercise?.name;
+    let categories = record.exercise?.categories || [];
+    
+    if (!exerciseName && record.exerciseId) {
+      const foundExercise = exercises.find(ex => ex.id === record.exerciseId);
+      if (foundExercise) {
+        exerciseName = foundExercise.name;
+        categories = foundExercise.categories;
+      }
+    }
+    
+    exerciseName = exerciseName || 'Ejercicio no encontrado';
     const volume = calculateVolume(record);
     const estimated1RM = calculateOptimal1RM(record.weight, record.reps);
     const weekNumber = getWeek(new Date(record.date), { locale: es });

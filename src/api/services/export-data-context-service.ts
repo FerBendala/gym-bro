@@ -99,15 +99,26 @@ ${Array.from(new Set(exportData.trainingDays.flatMap(day =>
       day.exercises.flatMap(ex => ex.categories)
     ))).join(', ')}
 
-📈 ÚLTIMOS ENTRENAMIENTOS (últimos 5):
-${exportData.exercisesEvolution
-        .filter(ex => ex.sessions.length > 0)
-        .map(ex => {
-          const lastSession = ex.sessions[ex.sessions.length - 1];
-          return `- ${ex.exerciseName}: ${lastSession.weight}kg x ${lastSession.reps} reps (${lastSession.sets} sets) - ${lastSession.date}`;
-        })
-        .slice(0, 5)
-        .join('\n')}
+📈 ÚLTIMOS ENTRENAMIENTOS (últimos 5 días):
+${(() => {
+  // Obtener todos los entrenamientos de los últimos 5 días
+  const allSessions = exportData.exercisesEvolution
+    .flatMap(ex => ex.sessions.map(session => ({
+      exerciseName: ex.exerciseName,
+      ...session
+    })))
+    .sort((a, b) => {
+      // Ordenar por fecha (más reciente primero)
+      const dateA = new Date(a.date.split('/').reverse().join('-'));
+      const dateB = new Date(b.date.split('/').reverse().join('-'));
+      return dateB.getTime() - dateA.getTime();
+    })
+    .slice(0, 10); // Mostrar hasta 10 entrenamientos más recientes
+
+  return allSessions.map(session => 
+    `- ${session.exerciseName}: ${session.weight}kg x ${session.reps} reps (${session.sets} sets) - ${session.date}`
+  ).join('\n');
+})()}
 
 💪 PROGRESO POR DÍA:
 ${exportData.trainingDays.map(day =>
