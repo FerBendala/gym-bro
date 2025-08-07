@@ -31,7 +31,7 @@
 [[redirects]]
   # Redirigir API calls a las funciones serverless
   from = "/api/chat"
-  to = "/.netlify/functions/chat-python"
+  to = "/.netlify/functions/chat"
   status = 200
   force = true
 
