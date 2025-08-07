@@ -66,7 +66,7 @@ export class ExportDataContextService {
 
       // Cargar datos de exportación
       const exportData = await this.loadExportData();
-      
+
       if (!exportData) {
         console.log('⚠️ No se pudieron cargar los datos de exportación');
         return this.getDefaultContext();
@@ -109,7 +109,7 @@ export class ExportDataContextService {
     // Obtener todos los ejercicios únicos
     const allExercises = new Set<string>();
     const exerciseCategories = new Set<string>();
-    
+
     trainingDays.forEach(day => {
       day.exercises.forEach(exercise => {
         allExercises.add(exercise.exerciseName);
@@ -136,9 +136,9 @@ export class ExportDataContextService {
     // Obtener entrenamientos recientes (últimos 30 días)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
-    const recentWorkouts = trainingDays.flatMap(day => 
-      day.exercises.flatMap(exercise => 
+
+    const recentWorkouts = trainingDays.flatMap(day =>
+      day.exercises.flatMap(exercise =>
         exercise.weights.map((weight, index) => ({
           exerciseName: exercise.exerciseName,
           weight,
@@ -196,31 +196,31 @@ CONTEXTO DEL USUARIO (DATOS DE EXPORTACIÓN):
 ${exercises.map(ex => `- ${ex.name} (${ex.category})`).join('\n')}
 
 📅 RUTINA SEMANAL (${assignments.length} días):
-${assignments.map(day => 
-  `${day.dayOfWeek}: ${day.exercises.length} ejercicios - ${day.exercises.join(', ')}`
-).join('\n')}
+${assignments.map(day =>
+      `${day.dayOfWeek}: ${day.exercises.length} ejercicios - ${day.exercises.join(', ')}`
+    ).join('\n')}
 
 🎯 CATEGORÍAS DE EJERCICIOS:
 ${statistics.exerciseCategories.join(', ')}
 
 ✅ ENTRENAMIENTOS DE HOY (${statistics.todayWorkouts.length}):
-${statistics.todayWorkouts.length > 0 
-  ? statistics.todayWorkouts.map(record => 
-      `- ${record.exerciseName}: ${record.weight}kg x ${record.reps} reps (${record.sets} sets)`
-    ).join('\n')
-  : 'No hay entrenamientos registrados hoy'
-}
+${statistics.todayWorkouts.length > 0
+        ? statistics.todayWorkouts.map(record =>
+          `- ${record.exerciseName}: ${record.weight}kg x ${record.reps} reps (${record.sets} sets)`
+        ).join('\n')
+        : 'No hay entrenamientos registrados hoy'
+      }
 
 📈 ÚLTIMOS ENTRENAMIENTOS (últimos 5):
-${statistics.recentWorkouts.slice(-5).map(record => 
-  `- ${record.exerciseName}: ${record.weight}kg x ${record.reps} reps (${record.sets} sets)`
-).join('\n')}
+${statistics.recentWorkouts.slice(-5).map(record =>
+        `- ${record.exerciseName}: ${record.weight}kg x ${record.reps} reps (${record.sets} sets)`
+      ).join('\n')}
 
 💪 PROGRESO POR DÍA:
 ${assignments.map(day => {
-  const dayData = day as any;
-  return `${dayData.dayOfWeek}: ${dayData.totalWorkouts || 0} entrenamientos, ${dayData.totalVolume || 0} kg volumen`;
-}).join('\n')}
+        const dayData = day as any;
+        return `${dayData.dayOfWeek}: ${dayData.totalWorkouts || 0} entrenamientos, ${dayData.totalVolume || 0} kg volumen`;
+      }).join('\n')}
 `;
 
     return summary;
