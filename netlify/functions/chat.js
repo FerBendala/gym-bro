@@ -116,8 +116,65 @@ Proporciona una respuesta completa y detallada con explicaciones, consejos prác
       'nutrición': 'Para una nutrición óptima en el entrenamiento:\n\n1. **Proteínas**: 1.6-2.2g por kg de peso corporal para ganancia muscular.\n\n2. **Carbohidratos**: 3-7g por kg de peso corporal, más en días de entrenamiento.\n\n3. **Grasas**: 0.8-1.2g por kg de peso corporal.\n\n4. **Hidratación**: 2-3 litros de agua al día, más durante el entrenamiento.\n\n5. **Timing**: Come proteínas y carbohidratos 1-2 horas antes y después del entrenamiento.',
     };
 
-    // Buscar respuesta específica o dar respuesta general
-    let response = 'Gracias por tu pregunta sobre entrenamiento. Como asistente de fitness, puedo ayudarte con:\n\n• Técnicas de ejercicios\n• Programas de entrenamiento\n• Nutrición deportiva\n• Prevención de lesiones\n• Consejos de motivación\n\n¿Hay algún tema específico sobre el que te gustaría que profundice?';
+    // Función para generar respuesta basada en el contexto del usuario
+    const generateContextualResponse = (message, userContext) => {
+      const lowerMessage = message.toLowerCase();
+      
+      // Preguntas sobre entrenamientos específicos
+      if (lowerMessage.includes('ayer') || lowerMessage.includes('hice') || lowerMessage.includes('ejercicios')) {
+        if (userContext && userContext.includes('ENTRENAMIENTOS DE HOY') && userContext.includes('No hay entrenamientos registrados hoy')) {
+          return 'Según tus datos, no tienes entrenamientos registrados ayer. ¿Te gustaría que te ayude a planificar tu próxima sesión de entrenamiento? Puedo recomendarte ejercicios basados en tu rutina actual.';
+        }
+        
+        if (userContext && userContext.includes('ÚLTIMOS ENTRENAMIENTOS')) {
+          const recentWorkoutsMatch = userContext.match(/📈 ÚLTIMOS ENTRENAMIENTOS \(últimos 5\):\n([\s\S]*?)(?=\n  💪|$)/);
+          if (recentWorkoutsMatch && recentWorkoutsMatch[1].trim() !== 'No hay entrenamientos recientes') {
+            return `Basándome en tu historial reciente:\n\n${recentWorkoutsMatch[1].trim()}\n\n¿Te gustaría que analice tu progreso o te ayude a planificar tu próximo entrenamiento?`;
+          }
+        }
+        
+        return 'No tengo información específica sobre tus entrenamientos de ayer. ¿Te gustaría que revise tu historial reciente o te ayude a planificar tu próxima sesión?';
+      }
+      
+      // Preguntas sobre progreso
+      if (lowerMessage.includes('progreso') || lowerMessage.includes('mejora') || lowerMessage.includes('evolución')) {
+        if (userContext && userContext.includes('Peso promedio')) {
+          const avgWeightMatch = userContext.match(/Peso promedio: ([\d.]+) kg/);
+          const totalWorkoutsMatch = userContext.match(/Total de entrenamientos: (\d+)/);
+          
+          if (avgWeightMatch && totalWorkoutsMatch) {
+            const avgWeight = avgWeightMatch[1];
+            const totalWorkouts = totalWorkoutsMatch[1];
+            return `Según tus datos:\n\n• Has completado ${totalWorkouts} entrenamientos\n• Tu peso promedio es ${avgWeight} kg\n• Estás mostrando consistencia en tu entrenamiento\n\n¡Excelente trabajo! ¿Te gustaría que analice áreas específicas de mejora o te ayude a establecer nuevos objetivos?`;
+          }
+        }
+      }
+      
+      // Preguntas sobre rutina
+      if (lowerMessage.includes('rutina') || lowerMessage.includes('programa') || lowerMessage.includes('plan')) {
+        if (userContext && userContext.includes('RUTINA SEMANAL')) {
+          const routineMatch = userContext.match(/📅 RUTINA SEMANAL \((\d+) días\):\n([\s\S]*?)(?=\n🎯|$)/);
+          if (routineMatch && routineMatch[2].trim() !== 'No hay rutina semanal configurada') {
+            return `Tu rutina semanal actual:\n\n${routineMatch[2].trim()}\n\n¿Te gustaría que ajuste algún día o añada nuevos ejercicios?`;
+          }
+        }
+      }
+      
+      // Preguntas sobre ejercicios específicos
+      if (userContext && userContext.includes('EJERCICIOS DISPONIBLES')) {
+        const exercisesMatch = userContext.match(/🏋️ EJERCICIOS DISPONIBLES \(\d+\):\n([\s\S]*?)(?=\n📅|$)/);
+        if (exercisesMatch && exercisesMatch[1].trim() !== 'No hay ejercicios registrados') {
+          const exercises = exercisesMatch[1].trim();
+          return `Tus ejercicios disponibles:\n\n${exercises}\n\n¿Sobre cuál te gustaría que te dé consejos específicos de técnica o progresión?`;
+        }
+      }
+      
+      // Respuesta por defecto con contexto
+      return 'Gracias por tu pregunta. Como tu entrenador personal GymBro, puedo ayudarte con:\n\n• Análisis de tu progreso actual\n• Recomendaciones de ejercicios\n• Mejoras en tu técnica\n• Planificación de rutinas\n• Consejos de nutrición y recuperación\n\n¿Hay algún aspecto específico sobre el que te gustaría que profundice?';
+    };
+
+    // Buscar respuesta específica o generar respuesta contextual
+    let response = generateContextualResponse(message, userContext);
 
     for (const [key, value] of Object.entries(mockResponses)) {
       if (message.toLowerCase().includes(key.toLowerCase())) {
