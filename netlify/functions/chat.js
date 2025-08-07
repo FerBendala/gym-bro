@@ -142,40 +142,68 @@ exports.handler = async (event, context) => {
       const generateContextualResponse = (message, userContext) => {
         const lowerMessage = message.toLowerCase();
 
-        // Preguntas sobre entrenamientos específicos
-        if (lowerMessage.includes('ayer') || lowerMessage.includes('hice') || lowerMessage.includes('ejercicios')) {
-          console.log('🔍 Procesando pregunta sobre entrenamientos de ayer');
-          console.log('📊 Contexto recibido (longitud):', userContext ? userContext.length : 0);
+        // Preguntas sobre entrenamientos específicos por día
+        if (lowerMessage.includes('ayer') || lowerMessage.includes('hice') || lowerMessage.includes('ejercicios') || 
+            lowerMessage.includes('martes') || lowerMessage.includes('miércoles') || lowerMessage.includes('jueves') || 
+            lowerMessage.includes('viernes') || lowerMessage.includes('sábado') || lowerMessage.includes('domingo') ||
+            lowerMessage.includes('lunes') || lowerMessage.includes('anteayer')) {
           
-          // Buscar sección específica de entrenamientos de ayer
-          if (userContext && userContext.includes('ENTRENAMIENTOS DE AYER')) {
-            const yesterdayMatch = userContext.match(/📅 ENTRENAMIENTOS DE AYER:\n([\s\S]*?)(?=\n💪|$)/);
-            console.log('🔍 Buscando sección de ayer:', yesterdayMatch ? 'encontrada' : 'no encontrada');
-            
-            if (yesterdayMatch) {
-              const yesterdayData = yesterdayMatch[1].trim();
-              console.log('📅 Datos de ayer:', yesterdayData);
-              
-              if (yesterdayData.includes('No hay entrenamientos registrados ayer')) {
-                return 'Según tus datos, no tienes entrenamientos registrados ayer. ¿Te gustaría que te ayude a planificar tu próxima sesión de entrenamiento? Puedo recomendarte ejercicios basados en tu rutina actual.';
+          console.log('🔍 Procesando pregunta sobre entrenamientos específicos');
+          console.log('📊 Contexto recibido (longitud):', userContext ? userContext.length : 0);
+          console.log('📝 Mensaje original:', message);
+
+          // Determinar qué día preguntan
+          let targetDay = 'ayer';
+          if (lowerMessage.includes('anteayer')) {
+            targetDay = 'anteayer';
+          } else if (lowerMessage.includes('martes')) {
+            targetDay = 'martes';
+          } else if (lowerMessage.includes('miércoles')) {
+            targetDay = 'miércoles';
+          } else if (lowerMessage.includes('jueves')) {
+            targetDay = 'jueves';
+          } else if (lowerMessage.includes('viernes')) {
+            targetDay = 'viernes';
+          } else if (lowerMessage.includes('sábado')) {
+            targetDay = 'sábado';
+          } else if (lowerMessage.includes('domingo')) {
+            targetDay = 'domingo';
+          } else if (lowerMessage.includes('lunes')) {
+            targetDay = 'lunes';
+          }
+
+          console.log('🎯 Día objetivo:', targetDay);
+
+          // Buscar en la sección de entrenamientos por día
+          if (userContext && userContext.includes('ENTRENAMIENTOS POR DÍA')) {
+            const dayMatch = userContext.match(new RegExp(`${targetDay.charAt(0).toUpperCase() + targetDay.slice(1)}: (\\d+) entrenamientos - ([\\s\\S]*?)(?=\\n[A-Z]|$)`, 'i'));
+            console.log('🔍 Buscando día específico:', dayMatch ? 'encontrado' : 'no encontrado');
+
+            if (dayMatch) {
+              const workoutCount = dayMatch[1];
+              const exercises = dayMatch[2];
+              console.log('📅 Datos del día:', { workoutCount, exercises });
+
+              if (workoutCount > 0) {
+                return `¡Perfecto! Según tus datos, el ${targetDay} realizaste ${workoutCount} entrenamientos:\n\n${exercises}\n\n¡Excelente trabajo! ¿Te gustaría que analice tu progreso o te ayude a planificar tu próximo entrenamiento?`;
               } else {
-                return `¡Perfecto! Según tus datos, ayer realizaste estos ejercicios:\n\n${yesterdayData}\n\n¡Excelente trabajo! ¿Te gustaría que analice tu progreso o te ayude a planificar tu próximo entrenamiento?`;
+                return `Según tus datos, no tienes entrenamientos registrados el ${targetDay}. ¿Te gustaría que te ayude a planificar tu próxima sesión de entrenamiento?`;
               }
             }
           }
-          
-          // Buscar entrenamientos recientes como fallback
+
+          // Buscar en entrenamientos recientes como fallback
           if (userContext && userContext.includes('ÚLTIMOS ENTRENAMIENTOS')) {
             const recentMatch = userContext.match(/📈 ÚLTIMOS ENTRENAMIENTOS \(últimos 5 días\):\n([\s\S]*?)(?=\n📅|$)/);
             console.log('🔍 Buscando entrenamientos recientes:', recentMatch ? 'encontrados' : 'no encontrados');
-            
+
             if (recentMatch && recentMatch[1].trim() !== 'No hay entrenamientos registrados recientemente.') {
               const recentWorkouts = recentMatch[1].trim();
               return `Basándome en tu historial reciente:\n\n${recentWorkouts}\n\n¿Te gustaría que analice tu progreso o te ayude a planificar tu próximo entrenamiento?`;
             }
           }
 
-          return 'No tengo información específica sobre tus entrenamientos de ayer. ¿Te gustaría que revise tu historial reciente o te ayude a planificar tu próxima sesión?';
+          return `No tengo información específica sobre tus entrenamientos del ${targetDay}. ¿Te gustaría que revise tu historial reciente o te ayude a planificar tu próxima sesión?`;
         }
 
         // Preguntas sobre progreso
@@ -215,15 +243,10 @@ exports.handler = async (event, context) => {
         return 'Gracias por tu pregunta. Como tu entrenador personal GymBro, puedo ayudarte con:\n\n• Análisis de tu progreso actual\n• Recomendaciones de ejercicios\n• Mejoras en tu técnica\n• Planificación de rutinas\n• Consejos de nutrición y recuperación\n\n¿Hay algún aspecto específico sobre el que te gustaría que profundice?';
       };
 
-      // Buscar respuesta específica o generar respuesta contextual
+      // Generar respuesta contextual basada en el contexto del usuario
       let response = generateContextualResponse(message, userContext);
-
-      for (const [key, value] of Object.entries(mockResponses)) {
-        if (message.toLowerCase().includes(key.toLowerCase())) {
-          response = value;
-          break;
-        }
-      }
+      
+      console.log('🤖 Respuesta generada:', response.substring(0, 200) + '...');
 
       // Simular delay para que parezca más realista
       await new Promise(resolve => setTimeout(resolve, 1000));
