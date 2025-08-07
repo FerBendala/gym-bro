@@ -39,7 +39,7 @@ class ChatResponse(BaseModel):
 
 # Configuración de Ollama
 OLLAMA_URL = "http://localhost:11434"
-MODEL_NAME = "phi3:mini"
+MODEL_NAME = "gpt-oss:20b"
 
 def check_ollama_available():
     """Verificar si Ollama está disponible"""
@@ -59,9 +59,12 @@ def generate_response_with_ollama(prompt: str) -> str:
             "options": {
                 "temperature": 0.7,
                 "top_p": 0.9,
-                "num_predict": 800,  # Optimizado para Phi3-mini
+                "num_predict": 1024,  # Optimizado para GPT-OSS-20B
                 "top_k": 40,
-                "repeat_penalty": 1.1
+                "repeat_penalty": 1.1,
+                "mirostat": 2,
+                "mirostat_tau": 5.0,
+                "mirostat_eta": 0.1
             }
         }
         
@@ -99,10 +102,14 @@ async def chat(request: ChatRequest):
         logger.info(f"Procesando mensaje: {request.message}")
         logger.info(f"Contexto recibido: {request.context[:200] if request.context else 'Sin contexto'}...")
         
+        reasoning_level = request.reasoning_level
+
         # Prompt optimizado para respuestas completas y en español
         if request.context:
             enhanced_prompt = f"""
-[INST] Eres un entrenador personal experto que conoce perfectamente el entrenamiento de tu cliente. Tienes acceso a todos sus datos de entrenamiento, ejercicios, y progreso.
+[INST] Eres un entrenador personal experto llamado "GymBro" que conoce perfectamente el entrenamiento de tu cliente. Tienes acceso a todos sus datos de entrenamiento, ejercicios, y progreso.
+
+Reasoning: {reasoning_level}
 
 CONTEXTO DEL USUARIO:
 {request.context}
@@ -119,13 +126,16 @@ IMPORTANTE:
 - Sé específico con los datos: pesos, repeticiones, series, fechas
 - NO inventes ejercicios que no están en los datos
 - NO mezcles ejercicios programados con ejercicios realizados
-- Responde de manera clara, directa y personalizada
+- Proporciona análisis detallado y recomendaciones personalizadas
+- Usa el reasoning level para ajustar la profundidad de tu respuesta
 
 Responde únicamente en español y asegúrate de completar todas las ideas. Termina tu respuesta con un punto final. [/INST]
 """
         else:
             enhanced_prompt = f"""
-[INST] Eres un entrenador personal experto. Responde SOLO EN ESPAÑOL de manera clara y directa.
+[INST] Eres un entrenador personal experto llamado "GymBro". Responde SOLO EN ESPAÑOL de manera clara y directa.
+
+Reasoning: {reasoning_level}
 
 PREGUNTA: {request.message}
 
@@ -135,6 +145,7 @@ IMPORTANTE:
 - Sé específico y práctico
 - NO inventes datos que no tienes
 - Si no tienes información específica, dilo claramente
+- Usa el reasoning level para ajustar la profundidad de tu respuesta
 
 Responde únicamente en español y asegúrate de completar todas las ideas. Termina tu respuesta con un punto final. [/INST]
 """
@@ -180,8 +191,9 @@ Sé específico y práctico. Responde únicamente en español. [/INST]
 
 if __name__ == "__main__":
     import uvicorn
-    print("🚀 Iniciando servidor rápido en http://localhost:8004")
+    print("�� Iniciando servidor GPT-OSS en http://localhost:8004")
     print(f"🧠 Usando modelo: {MODEL_NAME}")
-    print("⚡ Optimizado para respuestas rápidas")
+    print("⚡ Optimizado para respuestas inteligentes y reasoning")
     print("🇪🇸 Todas las respuestas en español")
+    print("🎯 Reasoning levels: low, medium, high")
     uvicorn.run(app, host="0.0.0.0", port=8004, reload=False) 

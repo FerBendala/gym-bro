@@ -129,7 +129,7 @@ exports.handler = async (event, context) => {
       };
     } catch (error) {
       console.error('Error comunicándose con Phi-3:', error);
-      
+
       // Fallback: Respuesta simulada para desarrollo
       const mockResponses = {
         'hola': '¡Hola! Soy tu asistente de entrenamiento IA. ¿En qué puedo ayudarte hoy?',
