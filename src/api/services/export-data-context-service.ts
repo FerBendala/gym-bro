@@ -20,8 +20,26 @@ export class ExportDataContextService {
       console.log('🔍 Obteniendo contexto desde datos reales del usuario...');
 
             // Cargar datos reales del usuario
-      const exercises = await getExercises();
-      const workoutRecords = await getWorkoutRecords();
+      console.log('🔍 Iniciando carga de datos...');
+      
+      let exercises;
+      let workoutRecords;
+      
+      try {
+        exercises = await getExercises();
+        console.log('✅ Ejercicios cargados exitosamente:', exercises.length);
+      } catch (error) {
+        console.error('❌ Error cargando ejercicios:', error);
+        return this.getDefaultContext();
+      }
+      
+      try {
+        workoutRecords = await getWorkoutRecords();
+        console.log('✅ Entrenamientos cargados exitosamente:', workoutRecords.length);
+      } catch (error) {
+        console.error('❌ Error cargando entrenamientos:', error);
+        return this.getDefaultContext();
+      }
 
       console.log(`📊 Datos obtenidos: ${exercises.length} ejercicios, ${workoutRecords.length} entrenamientos`);
       
@@ -36,15 +54,8 @@ export class ExportDataContextService {
         sets: record.sets
       })));
 
-      // Filtrar datos del usuario actual (por ahora usar todos los datos)
-      // TODO: Implementar filtro por usuario cuando se tenga autenticación
-      const userExercises = exercises;
-      const userWorkoutRecords = workoutRecords;
-
-      console.log(`👤 Datos del usuario: ${userExercises.length} ejercicios, ${userWorkoutRecords.length} entrenamientos`);
-
       // Generar datos de exportación usando la función real
-      const exportData = await generateExportData(userExercises, userWorkoutRecords);
+      const exportData = await generateExportData(exercises, workoutRecords);
 
       return { exportData };
     } catch (error) {
