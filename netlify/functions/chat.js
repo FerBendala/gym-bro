@@ -45,7 +45,7 @@ exports.handler = async (event, context) => {
 
     // URL de la API externa de chat (configurada para gpt-oss-20b)
     const CHAT_API_URL = process.env.CHAT_API_URL || 'http://localhost:8004/chat';
-    
+
     // Configuración para gpt-oss-20b
     const GPT_OSS_CONFIG = {
       model: 'openai/gpt-oss-20b',
@@ -105,7 +105,7 @@ exports.handler = async (event, context) => {
     // Usar gpt-oss-20b a través del servidor local
     try {
       console.log('🤖 Usando gpt-oss-20b con configuración:', GPT_OSS_CONFIG);
-      
+
       const response = await fetch(CHAT_API_URL, {
         method: 'POST',
         headers: {
@@ -255,8 +255,63 @@ exports.handler = async (event, context) => {
           }
         }
 
-        // Respuesta por defecto con contexto
-        return 'Gracias por tu pregunta. Como tu entrenador personal GymBro, puedo ayudarte con:\n\n• Análisis de tu progreso actual\n• Recomendaciones de ejercicios\n• Mejoras en tu técnica\n• Planificación de rutinas\n• Consejos de nutrición y recuperación\n\n¿Hay algún aspecto específico sobre el que te gustaría que profundice?';
+        // Preguntas personales sobre el chatbot
+        if (lowerMessage.includes('llamas') || lowerMessage.includes('nombre') || lowerMessage.includes('quien eres')) {
+          return '¡Hola! Me llamo **GymBro**, tu entrenador personal de IA. Soy un experto en fitness, nutrición y entrenamiento. Estoy aquí para ayudarte con cualquier pregunta sobre ejercicio, nutrición, motivación, técnica de ejercicios, rutinas de entrenamiento, consejos de salud, y cualquier tema relacionado con el bienestar físico y mental. ¿En qué puedo ayudarte hoy?';
+        }
+
+        // Preguntas sobre altura/peso/medidas
+        if (lowerMessage.includes('mido') || lowerMessage.includes('altura') || lowerMessage.includes('peso') || lowerMessage.includes('medidas')) {
+          return '¡Perfecto! Me has compartido información sobre tus medidas físicas. Esto me ayuda a darte recomendaciones más personalizadas. ¿Te gustaría que analice cómo estas medidas pueden influir en tu entrenamiento o que te dé consejos específicos basados en tu constitución física?';
+        }
+
+        // Preguntas sobre alimentación/nutrición
+        if (lowerMessage.includes('comer') || lowerMessage.includes('alimentación') || lowerMessage.includes('nutrición') || lowerMessage.includes('dieta') || lowerMessage.includes('comida')) {
+          return '¡Excelente! La nutrición es fundamental para el rendimiento y la recuperación. ¿Te gustaría que te ayude con:\n\n• Planificación de comidas pre/post entrenamiento\n• Calculadora de macronutrientes\n• Consejos de hidratación\n• Suplementación (si es necesaria)\n• Recetas saludables\n\n¿Qué aspecto de la nutrición te interesa más?';
+        }
+
+        // Preguntas sobre estado de ánimo/motivación
+        if (lowerMessage.includes('ánimo') || lowerMessage.includes('motivación') || lowerMessage.includes('estado') || lowerMessage.includes('cansado') || lowerMessage.includes('energía')) {
+          return 'Entiendo cómo te sientes. El estado de ánimo y la motivación son cruciales para mantener la consistencia en el entrenamiento. ¿Te gustaría que te ayude con:\n\n• Técnicas de motivación\n• Ajustes en la intensidad del entrenamiento\n• Estrategias de recuperación mental\n• Rutinas para mejorar el estado de ánimo\n• Consejos para mantener la energía\n\n¿Qué te parece más útil en este momento?';
+        }
+
+        // Preguntas sobre salud general
+        if (lowerMessage.includes('salud') || lowerMessage.includes('dolor') || lowerMessage.includes('lesión') || lowerMessage.includes('recuperación')) {
+          return 'La salud es lo más importante. ¿Te gustaría que te ayude con:\n\n• Evaluación de síntomas (siempre consulta con un profesional)\n• Ejercicios de rehabilitación\n• Prevención de lesiones\n• Técnicas de recuperación\n• Ajustes en el entrenamiento por salud\n\nRecuerda: para problemas de salud específicos, siempre consulta con un médico o fisioterapeuta.';
+        }
+
+        // Preguntas sobre objetivos/metas
+        if (lowerMessage.includes('objetivo') || lowerMessage.includes('meta') || lowerMessage.includes('lograr') || lowerMessage.includes('conseguir')) {
+          return '¡Me encanta que tengas objetivos claros! Los objetivos son la base de un entrenamiento efectivo. ¿Te gustaría que te ayude a:\n\n• Definir objetivos SMART\n• Crear un plan de acción\n• Establecer hitos intermedios\n• Medir el progreso\n• Ajustar objetivos según tu evolución\n\n¿Cuál es tu objetivo principal en este momento?';
+        }
+
+        // Preguntas sobre descanso/sueño
+        if (lowerMessage.includes('descanso') || lowerMessage.includes('sueño') || lowerMessage.includes('dormir') || lowerMessage.includes('recuperación')) {
+          return 'El descanso es fundamental para el progreso. ¿Te gustaría que te ayude con:\n\n• Técnicas para mejorar el sueño\n• Planificación de días de descanso\n• Estrategias de recuperación activa\n• Optimización del descanso entre series\n• Consejos para la recuperación muscular\n\n¿Qué aspecto del descanso te preocupa más?';
+        }
+
+        // Preguntas sobre técnica/formulario
+        if (lowerMessage.includes('técnica') || lowerMessage.includes('formulario') || lowerMessage.includes('postura') || lowerMessage.includes('ejecución')) {
+          return 'La técnica correcta es esencial para prevenir lesiones y maximizar resultados. ¿Te gustaría que te ayude con:\n\n• Análisis de tu técnica actual\n• Correcciones específicas\n• Progresiones para mejorar\n• Ejercicios de movilidad\n• Prevención de errores comunes\n\n¿Sobre qué ejercicio específico te gustaría que revisemos la técnica?';
+        }
+
+        // Preguntas sobre equipamiento/material
+        if (lowerMessage.includes('equipo') || lowerMessage.includes('material') || lowerMessage.includes('gimnasio') || lowerMessage.includes('máquina')) {
+          return 'El equipamiento adecuado puede hacer una gran diferencia. ¿Te gustaría que te ayude con:\n\n• Selección de equipamiento\n• Uso correcto de máquinas\n• Alternativas con peso libre\n• Equipamiento para casa\n• Optimización del espacio\n\n¿Qué tipo de equipamiento te interesa?';
+        }
+
+        // Preguntas sobre suplementación
+        if (lowerMessage.includes('suplemento') || lowerMessage.includes('proteína') || lowerMessage.includes('vitamina') || lowerMessage.includes('creatina')) {
+          return 'La suplementación puede complementar tu nutrición. ¿Te gustaría que te ayude con:\n\n• Evaluación de necesidades\n• Tipos de suplementos\n• Timing de suplementación\n• Seguridad y calidad\n• Alternativas naturales\n\nRecuerda: los suplementos complementan, no reemplazan una buena nutrición.';
+        }
+
+        // Preguntas sobre progresión/periodización
+        if (lowerMessage.includes('progresión') || lowerMessage.includes('periodización') || lowerMessage.includes('planificación') || lowerMessage.includes('programación')) {
+          return 'La progresión inteligente es clave para el progreso a largo plazo. ¿Te gustaría que te ayude con:\n\n• Diseño de programas progresivos\n• Periodización del entrenamiento\n• Ajustes según tu evolución\n• Variación de estímulos\n• Prevención de estancamientos\n\n¿Qué aspecto de la progresión te interesa más?';
+        }
+
+        // Respuesta por defecto - conversación general
+        return '¡Hola! Soy **GymBro**, tu entrenador personal de IA. Puedo ayudarte con cualquier tema relacionado con fitness, nutrición, motivación, técnica de ejercicios, rutinas de entrenamiento, consejos de salud, y bienestar físico y mental. ¿En qué puedo ayudarte hoy?';
       };
 
       // Generar respuesta contextual basada en el contexto del usuario
