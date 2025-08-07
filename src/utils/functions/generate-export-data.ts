@@ -224,7 +224,7 @@ function generateExercisesEvolutionData(records: WorkoutRecord[], exercises: Exe
     // Intentar encontrar el ejercicio por ID si no está resuelto
     let exerciseName = record.exercise?.name;
     let categories = record.exercise?.categories || [];
-    
+
     if (!exerciseName && record.exerciseId) {
       const foundExercise = exercises.find(ex => ex.id === record.exerciseId);
       if (foundExercise) {
@@ -232,7 +232,7 @@ function generateExercisesEvolutionData(records: WorkoutRecord[], exercises: Exe
         categories = foundExercise.categories;
       }
     }
-    
+
     exerciseName = exerciseName || 'Ejercicio no encontrado';
     const volume = calculateVolume(record);
     const estimated1RM = calculateOptimal1RM(record.weight, record.reps);
