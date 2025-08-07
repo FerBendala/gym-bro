@@ -41,8 +41,8 @@ export const generateExportData = async (
     to: sortedRecords.length > 0 ? format(new Date(sortedRecords[sortedRecords.length - 1].date), 'dd/MM/yyyy', { locale: es }) : 'N/A'
   });
 
-  // Mostrar los últimos 5 registros
-  const lastRecords = sortedRecords.slice(-5);
+  // Mostrar los últimos 5 registros (más recientes)
+  const lastRecords = sortedRecords.slice(0, 5);
   console.log('🔄 Últimos 5 registros:', lastRecords.map(r => ({
     exercise: r.exercise?.name,
     date: format(new Date(r.date), 'dd/MM/yyyy', { locale: es }),
