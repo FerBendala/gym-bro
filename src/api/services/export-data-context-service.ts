@@ -1,6 +1,6 @@
-import { logger } from '@/utils';
-import { getExercises, getWorkoutRecords, getAssignmentsByDay } from '@/api/services';
+import { getAssignmentsByDay, getExercises, getWorkoutRecords } from '@/api/services';
 import type { DayOfWeek } from '@/interfaces';
+import { logger } from '@/utils';
 
 interface TrainingDay {
   dayOfWeek: string;
@@ -67,7 +67,7 @@ export class ExportDataContextService {
       // Cargar datos reales del usuario
       const exercises = await getExercises();
       const workoutRecords = await getWorkoutRecords();
-      
+
       // Obtener assignments para todos los días de la semana
       const daysOfWeek: DayOfWeek[] = ['lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado', 'domingo'];
       const allAssignments = await Promise.all(
@@ -93,7 +93,7 @@ export class ExportDataContextService {
     // Calcular estadísticas básicas
     const totalExercises = exercises.length;
     const totalWorkouts = workoutRecords.length;
-    
+
     // Calcular volumen total y peso promedio
     let totalVolume = 0;
     let totalWeight = 0;
@@ -131,11 +131,11 @@ export class ExportDataContextService {
     // Obtener entrenamientos recientes (últimos 30 días)
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-    
+
     const recentWorkouts = workoutRecords
       .filter(record => new Date(record.date) >= thirtyDaysAgo)
       .map(record => ({
-        exerciseName: record.exerciseName || record.exercise?.name || 'Ejercicio sin nombre',
+        exerciseName: record.exercise?.name || exercises.find(ex => ex.id === record.exerciseId)?.name || 'Ejercicio sin nombre',
         weight: record.weight || 0,
         reps: record.reps || 0,
         sets: record.sets || 0,
@@ -153,7 +153,7 @@ export class ExportDataContextService {
         return recordDate.toDateString() === today.toDateString();
       })
       .map(record => ({
-        exerciseName: record.exerciseName || record.exercise?.name || 'Ejercicio sin nombre',
+        exerciseName: record.exercise?.name || exercises.find(ex => ex.id === record.exerciseId)?.name || 'Ejercicio sin nombre',
         weight: record.weight || 0,
         reps: record.reps || 0,
         sets: record.sets || 0,
@@ -170,7 +170,15 @@ export class ExportDataContextService {
     // Procesar assignments por día
     const assignments = daysOfWeek.map((day, index) => ({
       dayOfWeek: day,
-      exercises: (allAssignments[index] || []).map(assignment => assignment.exerciseName || assignment.name || 'Ejercicio sin nombre'),
+      exercises: (allAssignments[index] || []).map(assignment => {
+        // Si tiene el objeto exercise completo, usar su nombre
+        if (assignment.exercise?.name) {
+          return assignment.exercise.name;
+        }
+        // Si no, buscar el ejercicio por ID en la lista de ejercicios
+        const exercise = exercises.find(ex => ex.id === assignment.exerciseId);
+        return exercise?.name || 'Ejercicio sin nombre';
+      }),
       totalWorkouts: 0, // No disponible en assignments
       totalVolume: 0 // No disponible en assignments
     }));
@@ -216,24 +224,24 @@ CONTEXTO DEL USUARIO (DATOS REALES):
 - Ejercicio más entrenado: ${statistics.mostTrainedExercise || 'N/A'}
 
 🏋️ EJERCICIOS DISPONIBLES (${exercises.length}):
-${exercises.length > 0 
-      ? exercises.map(ex => `- ${ex.name} (${ex.category})`).join('\n')
-      : 'No hay ejercicios registrados'
-    }
+${exercises.length > 0
+        ? exercises.map(ex => `- ${ex.name} (${ex.category})`).join('\n')
+        : 'No hay ejercicios registrados'
+      }
 
 📅 RUTINA SEMANAL (${assignments.length} días):
 ${assignments.length > 0
-      ? assignments.map(day =>
+        ? assignments.map(day =>
           `${day.dayOfWeek}: ${day.exercises.length} ejercicios - ${day.exercises.join(', ')}`
         ).join('\n')
-      : 'No hay rutina semanal configurada'
-    }
+        : 'No hay rutina semanal configurada'
+      }
 
 🎯 CATEGORÍAS DE EJERCICIOS:
-${statistics.exerciseCategories.length > 0 
-      ? statistics.exerciseCategories.join(', ')
-      : 'No hay categorías definidas'
-    }
+${statistics.exerciseCategories.length > 0
+        ? statistics.exerciseCategories.join(', ')
+        : 'No hay categorías definidas'
+      }
 
 ✅ ENTRENAMIENTOS DE HOY (${statistics.todayWorkouts.length}):
 ${statistics.todayWorkouts.length > 0
@@ -254,9 +262,9 @@ ${statistics.recentWorkouts.slice(0, 5).length > 0
   💪 PROGRESO POR DÍA:
 ${assignments.length > 0
         ? assignments.map(day => {
-            const dayData = day as any;
-            return `${dayData.dayOfWeek}: ${dayData.exercises.length} ejercicios asignados`;
-          }).join('\n')
+          const dayData = day as any;
+          return `${dayData.dayOfWeek}: ${dayData.exercises.length} ejercicios asignados`;
+        }).join('\n')
         : 'No hay progreso por día disponible'
       }
 `;
