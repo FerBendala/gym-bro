@@ -3,7 +3,7 @@
   publish = "dist"
   
   # Comando de construcción
-  command = "pnpm build && ./netlify/functions/build.sh"
+  command = "pnpm build"
   
   # Variables de entorno para el build
   [build.environment]
@@ -17,15 +17,7 @@
   
   # Variables de entorno para las funciones
   [functions.environment]
-    PYTHON_VERSION = "3.9"
     NODE_VERSION = "18"
-    PYTHONPATH = "netlify/functions"
-    PYTHON_RUNTIME = "python3.9"
-
-# Configuración específica para funciones Python
-[functions."chat-python"]
-  runtime = "python3.9"
-  included_files = ["netlify/functions/requirements.txt"]
 
 # Configuración de redirecciones
 [[redirects]]

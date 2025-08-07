@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 // Función de fallback inteligente basada en palabras clave
 function generateFallbackResponse(message, userContext) {
   const messageLower = message.toLowerCase();
-  
+
   // Respuestas predefinidas basadas en palabras clave
   const responses = {
     'hola': '¡Hola! Soy GymBro, tu entrenador personal. ¿En qué puedo ayudarte hoy?',
@@ -25,14 +25,14 @@ function generateFallbackResponse(message, userContext) {
     'descanso': 'El descanso es tan importante como el entrenamiento. ¿Necesitas consejos sobre recuperación?',
     'progreso': 'El progreso requiere consistencia y paciencia. ¿Quieres evaluar tu progreso actual?'
   };
-  
+
   // Buscar palabras clave en el mensaje
   for (const [keyword, response] of Object.entries(responses)) {
     if (messageLower.includes(keyword)) {
       return response;
     }
   }
-  
+
   // Respuesta genérica si no se encuentra ninguna palabra clave
   return `¡Hola! Soy GymBro, tu entrenador personal.
 
