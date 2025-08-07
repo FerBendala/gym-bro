@@ -28,26 +28,36 @@ exports.handler = async (event, context) => {
       };
     }
 
-                    // Verificar si tenemos las variables de entorno necesarias
-                const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
-                const hasChatAPI = !!process.env.CHAT_API_URL;
+    // Verificar si tenemos las variables de entorno necesarias
+    const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
+    const hasChatAPI = !!process.env.CHAT_API_URL;
 
-                // En producción, siempre consideramos que el modelo está cargado
-                // ya que tenemos respuestas de fallback
-                const modelLoaded = true;
+    // Determinar el modo de funcionamiento
+    let mode, model;
+    if (hasOpenAIKey) {
+      mode = 'openai';
+      model = 'gpt-3.5-turbo';
+    } else if (hasChatAPI) {
+      mode = 'external';
+      model = 'external';
+    } else {
+      mode = 'fallback';
+      model = 'fallback-intelligent';
+    }
 
-                return {
-                  statusCode: 200,
-                  headers,
-                  body: JSON.stringify({
-                    status: 'healthy',
-                    model_loaded: modelLoaded,
-                    mode: hasOpenAIKey ? 'openai' : hasChatAPI ? 'external' : 'mock',
-                    model: hasOpenAIKey ? 'gpt-3.5-turbo' : hasChatAPI ? 'external' : 'mock',
-                    timestamp: new Date().toISOString(),
-                    environment: process.env.NODE_ENV || 'development',
-                  }),
-                };
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        status: 'healthy',
+        model_loaded: true,
+        mode: mode,
+        model: model,
+        openai_available: hasOpenAIKey,
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development',
+      }),
+    };
 
   } catch (error) {
     console.error('Error en health check:', error);

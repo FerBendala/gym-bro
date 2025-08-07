@@ -1,12 +1,12 @@
 // Función serverless de Netlify para el chat
-// Esta función proporciona respuestas inteligentes basadas en palabras clave
+// Esta función usa OpenAI cuando está disponible, con fallback inteligente
 
 const fetch = require('node-fetch');
 
 // Función de fallback inteligente basada en palabras clave
 function generateFallbackResponse(message, userContext) {
   const messageLower = message.toLowerCase();
-
+  
   // Respuestas predefinidas basadas en palabras clave
   const responses = {
     'hola': '¡Hola! Soy GymBro, tu entrenador personal. ¿En qué puedo ayudarte hoy?',
@@ -25,14 +25,14 @@ function generateFallbackResponse(message, userContext) {
     'descanso': 'El descanso es tan importante como el entrenamiento. ¿Necesitas consejos sobre recuperación?',
     'progreso': 'El progreso requiere consistencia y paciencia. ¿Quieres evaluar tu progreso actual?'
   };
-
+  
   // Buscar palabras clave en el mensaje
   for (const [keyword, response] of Object.entries(responses)) {
     if (messageLower.includes(keyword)) {
       return response;
     }
   }
-
+  
   // Respuesta genérica si no se encuentra ninguna palabra clave
   return `¡Hola! Soy GymBro, tu entrenador personal.
 
@@ -50,6 +50,65 @@ Mientras tanto, puedo ayudarte con preguntas básicas sobre:
 - Flexibilidad y descanso
 
 ¿En qué puedo asistirte?`;
+}
+
+// Función para llamar a OpenAI
+async function callOpenAI(message, userContext, reasoningLevel = 'medium') {
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+  
+  if (!OPENAI_API_KEY) {
+    console.log('⚠️ OpenAI API key no configurada, usando fallback');
+    return null;
+  }
+
+  try {
+    console.log('🤖 Llamando a OpenAI API...');
+    
+    const systemPrompt = `Eres un entrenador personal experto y motivador llamado "GymBro". 
+    Responde siempre en español de manera completa y detallada.
+    Usa el contexto del usuario para dar respuestas personalizadas.
+    
+    Contexto del usuario:
+    ${userContext || 'No hay contexto específico disponible.'}
+    
+    Instrucciones:
+    - Responde de manera amigable y motivadora
+    - Proporciona consejos prácticos y específicos
+    - Usa el contexto del usuario cuando sea relevante
+    - Mantén un tono profesional pero cercano`;
+
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: message }
+        ],
+        max_tokens: 1000,
+        temperature: 0.7,
+        top_p: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`OpenAI API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    console.log('✅ Respuesta de OpenAI recibida');
+    
+    return data.choices[0].message.content;
+  } catch (error) {
+    console.error('❌ Error llamando a OpenAI:', error);
+    return null;
+  }
 }
 
 exports.handler = async (event, context) => {
@@ -96,15 +155,23 @@ exports.handler = async (event, context) => {
     console.log('📝 Mensaje recibido:', message.substring(0, 100) + '...');
     console.log('📊 Contexto recibido (longitud):', userContext ? userContext.length : 0);
 
-    // Generar respuesta inteligente basada en palabras clave
-    const response = generateFallbackResponse(message, userContext);
+    // Intentar usar OpenAI primero
+    let response = await callOpenAI(message, userContext, reasoning_level);
+    let model = 'openai-gpt-3.5-turbo';
+
+    // Si OpenAI falla, usar fallback inteligente
+    if (!response) {
+      console.log('🔄 Usando fallback inteligente');
+      response = generateFallbackResponse(message, userContext);
+      model = 'fallback-intelligent';
+    }
 
     return {
       statusCode: 200,
       headers,
       body: JSON.stringify({
         response: response,
-        model: 'fallback-intelligent',
+        model: model,
         reasoning_level: reasoning_level
       }),
     };
