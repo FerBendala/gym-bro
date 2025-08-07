@@ -1,23 +1,18 @@
 #!/usr/bin/env python3
 """
-Servidor para gpt-oss-20b usando vLLM
+Función serverless de Netlify para chat con gpt-oss-20b
 Basado en la documentación oficial: https://huggingface.co/openai/gpt-oss-20b
 """
 
 import os
 import json
 import logging
-from flask import Flask, request, jsonify
-from flask_cors import CORS
-import torch
 from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
+import torch
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-app = Flask(__name__)
-CORS(app)
 
 # Configuración del modelo
 MODEL_ID = "openai/gpt-oss-20b"
@@ -118,45 +113,63 @@ def generate_response(messages, reasoning_level="medium", max_tokens=1000, tempe
         logger.error(f"❌ Error generando respuesta: {e}")
         return f"Error generando respuesta: {str(e)}"
 
-@app.route('/health', methods=['GET'])
-def health_check():
-    """Health check endpoint"""
-    return jsonify({
-        "status": "healthy",
-        "model_loaded": model is not None,
-        "model": MODEL_ID,
-        "device": DEVICE,
-        "mode": "gpt-oss-20b"
-    })
+def handler(event, context):
+    """Función principal de Netlify"""
+    # Configurar CORS
+    headers = {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Content-Type': 'application/json',
+    }
 
-@app.route('/chat', methods=['POST'])
-def chat():
-    """Endpoint principal del chat"""
+    # Manejar preflight requests
+    if event.get('httpMethod') == 'OPTIONS':
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': '',
+        }
+
     try:
-        data = request.get_json()
-        
-        if not data:
-            return jsonify({"error": "No data provided"}), 400
-        
-        message = data.get('message', '')
-        user_context = data.get('context', '')
-        reasoning_level = data.get('reasoning_level', 'medium')
-        max_tokens = data.get('max_tokens', 1000)
-        temperature = data.get('temperature', 0.7)
-        
+        # Solo permitir POST requests
+        if event.get('httpMethod') != 'POST':
+            return {
+                'statusCode': 405,
+                'headers': headers,
+                'body': json.dumps({'error': 'Method not allowed'}),
+            }
+
+        # Parsear el body de la request
+        body = json.loads(event.get('body', '{}'))
+        message = body.get('message', '')
+        user_context = body.get('context', '')
+        reasoning_level = body.get('reasoning_level', 'medium')
+        max_tokens = body.get('max_tokens', 1000)
+        temperature = body.get('temperature', 0.7)
+
         if not message:
-            return jsonify({"error": "Message is required"}), 400
-        
+            return {
+                'statusCode': 400,
+                'headers': headers,
+                'body': json.dumps({'error': 'Message is required'}),
+            }
+
         logger.info(f"📨 Mensaje recibido: {message[:100]}...")
         logger.info(f"📊 Contexto recibido (longitud): {len(user_context) if user_context else 0}")
-        
-        # Verificar que el modelo esté cargado
+
+        # Cargar modelo si no está cargado
         if model is None:
-            return jsonify({"error": "Model not loaded"}), 500
-        
+            if not load_model():
+                return {
+                    'statusCode': 500,
+                    'headers': headers,
+                    'body': json.dumps({'error': 'Model not loaded'}),
+                }
+
         # Preparar mensajes para el modelo
         messages = []
-        
+
         # Agregar contexto del usuario si existe
         if user_context:
             system_content = f"""Eres un experto en fitness y entrenamiento llamado "GymBro". 
@@ -167,17 +180,17 @@ def chat():
             {user_context}"""
         else:
             system_content = 'Eres un experto en fitness y entrenamiento llamado "GymBro". Responde siempre en español de manera completa y detallada.'
-        
+
         messages.append({
             "role": "system",
             "content": system_content
         })
-        
+
         messages.append({
             "role": "user",
             "content": message
         })
-        
+
         # Generar respuesta
         response = generate_response(
             messages, 
@@ -185,35 +198,24 @@ def chat():
             max_tokens=max_tokens,
             temperature=temperature
         )
-        
-        return jsonify({
-            "response": response,
-            "model": MODEL_ID,
-            "reasoning_level": reasoning_level
-        })
-        
-    except Exception as e:
-        logger.error(f"❌ Error en endpoint /chat: {e}")
-        return jsonify({"error": str(e)}), 500
 
-@app.route('/', methods=['GET'])
-def index():
-    """Página de inicio"""
-    return jsonify({
-        "message": "GPT-OSS-20B Chat Server",
-        "model": MODEL_ID,
-        "endpoints": {
-            "health": "/health",
-            "chat": "/chat (POST)"
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({
+                'response': response,
+                'model': MODEL_ID,
+                'reasoning_level': reasoning_level
+            }),
         }
-    })
 
-if __name__ == '__main__':
-    # Cargar modelo al iniciar
-    if load_model():
-        port = int(os.environ.get('PORT', 8004))
-        logger.info(f"🚀 Iniciando servidor en puerto {port}")
-        app.run(host='0.0.0.0', port=port, debug=False)
-    else:
-        logger.error("❌ No se pudo cargar el modelo. Saliendo...")
-        exit(1) 
+    except Exception as e:
+        logger.error(f"❌ Error en función: {e}")
+        return {
+            'statusCode': 500,
+            'headers': headers,
+            'body': json.dumps({
+                'error': 'Error interno del servidor',
+                'details': str(e) if os.environ.get('NODE_ENV') == 'development' else None,
+            }),
+        } 

@@ -18,6 +18,7 @@
   # Variables de entorno para las funciones
   [functions.environment]
     PYTHON_VERSION = "3.9"
+    NODE_VERSION = "18"
 
 # Plugin para instalar dependencias de funciones serverless
 [[plugins]]
