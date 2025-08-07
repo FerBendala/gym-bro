@@ -6,7 +6,7 @@ const fetch = require('node-fetch');
 // Función para llamar a Phi-3 usando Hugging Face Inference API
 async function callPhi3(message, userContext) {
   const HF_API_KEY = process.env.HF_API_KEY;
-  
+
   if (!HF_API_KEY) {
     console.log('⚠️ Hugging Face API key no configurada, usando fallback');
     return null;
@@ -14,7 +14,7 @@ async function callPhi3(message, userContext) {
 
   try {
     console.log('🤖 Llamando a Phi-3...');
-    
+
     const systemPrompt = `Eres un entrenador personal experto y motivador llamado "GymBro". 
     Responde siempre en español de manera completa y detallada.
     Usa el contexto del usuario para dar respuestas personalizadas.
@@ -57,7 +57,7 @@ ${message}
 
     const data = await response.json();
     console.log('✅ Respuesta de Phi-3 recibida');
-    
+
     return data[0].generated_text;
   } catch (error) {
     console.error('❌ Error llamando a Phi-3:', error);
@@ -68,7 +68,7 @@ ${message}
 // Función de fallback inteligente basada en palabras clave
 function generateFallbackResponse(message, userContext) {
   const messageLower = message.toLowerCase();
-  
+
   // Respuestas predefinidas basadas en palabras clave
   const responses = {
     'hola': '¡Hola! Soy GymBro, tu entrenador personal. ¿En qué puedo ayudarte hoy?',
@@ -87,14 +87,14 @@ function generateFallbackResponse(message, userContext) {
     'descanso': 'El descanso es tan importante como el entrenamiento. ¿Necesitas consejos sobre recuperación?',
     'progreso': 'El progreso requiere consistencia y paciencia. ¿Quieres evaluar tu progreso actual?'
   };
-  
+
   // Buscar palabras clave en el mensaje
   for (const [keyword, response] of Object.entries(responses)) {
     if (messageLower.includes(keyword)) {
       return response;
     }
   }
-  
+
   // Respuesta genérica si no se encuentra ninguna palabra clave
   return `¡Hola! Soy GymBro, tu entrenador personal.
 
