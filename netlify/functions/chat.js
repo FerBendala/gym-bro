@@ -150,21 +150,21 @@ exports.handler = async (event, context) => {
             if (recentWorkoutsMatch && recentWorkoutsMatch[1].trim() !== 'No hay entrenamientos recientes') {
               const recentWorkouts = recentWorkoutsMatch[1].trim();
 
-                              // Buscar entrenamientos de ayer específicamente
-                const today = new Date();
-                const yesterday = new Date(today);
-                yesterday.setDate(yesterday.getDate() - 1);
-                const yesterdayFormatted = yesterday.toLocaleDateString('es-ES');
-                
-                const yesterdayWorkouts = recentWorkouts.split('\n')
-                  .filter(line => line.includes(yesterdayFormatted) || line.includes('ayer'))
-                  .join('\n');
+              // Buscar entrenamientos de ayer específicamente
+              const today = new Date();
+              const yesterday = new Date(today);
+              yesterday.setDate(yesterday.getDate() - 1);
+              const yesterdayFormatted = yesterday.toLocaleDateString('es-ES');
 
-                              if (yesterdayWorkouts) {
-                  return `¡Perfecto! Según tus datos, ayer (${yesterdayFormatted}) realizaste estos ejercicios:\n\n${yesterdayWorkouts}\n\n¡Excelente trabajo! ¿Te gustaría que analice tu progreso o te ayude a planificar tu próximo entrenamiento?`;
-                } else {
-                  return `Basándome en tu historial reciente:\n\n${recentWorkouts}\n\nAunque no veo entrenamientos específicos de ayer, estos son tus últimos entrenamientos. ¿Te gustaría que analice tu progreso o te ayude a planificar tu próximo entrenamiento?`;
-                }
+              const yesterdayWorkouts = recentWorkouts.split('\n')
+                .filter(line => line.includes(yesterdayFormatted) || line.includes('ayer'))
+                .join('\n');
+
+              if (yesterdayWorkouts) {
+                return `¡Perfecto! Según tus datos, ayer (${yesterdayFormatted}) realizaste estos ejercicios:\n\n${yesterdayWorkouts}\n\n¡Excelente trabajo! ¿Te gustaría que analice tu progreso o te ayude a planificar tu próximo entrenamiento?`;
+              } else {
+                return `Basándome en tu historial reciente:\n\n${recentWorkouts}\n\nAunque no veo entrenamientos específicos de ayer, estos son tus últimos entrenamientos. ¿Te gustaría que analice tu progreso o te ayude a planificar tu próximo entrenamiento?`;
+              }
             }
           }
 

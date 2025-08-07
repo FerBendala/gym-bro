@@ -87,13 +87,20 @@ export class ExportDataContextService {
    */
   private static async loadExportData(): Promise<ExportData | null> {
     try {
-      const response = await fetch('/extra/gym-tracker-data_2025-08-07_08-53.json');
+      console.log('🔍 Intentando cargar datos de exportación...');
+      const response = await fetch('/gym-tracker-data_2025-08-07_08-53.json');
+      
+      console.log('📡 Respuesta del fetch:', response.status, response.statusText);
+      
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
       }
-      return await response.json();
+      
+      const data = await response.json();
+      console.log('✅ Datos cargados correctamente:', data.metadata);
+      return data;
     } catch (error) {
-      console.error('Error cargando datos de exportación:', error);
+      console.error('❌ Error cargando datos de exportación:', error);
       return null;
     }
   }
@@ -107,7 +114,7 @@ export class ExportDataContextService {
     // Obtener todos los ejercicios únicos con sus categorías
     const exerciseMap = new Map<string, string[]>();
     const exerciseCategories = new Set<string>();
-    
+
     trainingDays.forEach(day => {
       day.exercises.forEach(exercise => {
         exerciseMap.set(exercise.exerciseName, exercise.categories);
@@ -159,9 +166,9 @@ export class ExportDataContextService {
     const todayWorkouts: any[] = [];
 
     return {
-      exercises: Array.from(exerciseMap.entries()).map(([name, categories]) => ({ 
-        name, 
-        category: categories.join(', ') 
+      exercises: Array.from(exerciseMap.entries()).map(([name, categories]) => ({
+        name,
+        category: categories.join(', ')
       })),
       assignments: trainingDays.map(day => ({
         dayOfWeek: day.dayOfWeek,
