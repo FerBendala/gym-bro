@@ -1,0 +1,2 @@
+/api/chat /.netlify/functions/chat-python 200
+/api/health /.netlify/functions/health 200 

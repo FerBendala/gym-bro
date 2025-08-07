@@ -7,8 +7,20 @@ Basado en la documentación oficial: https://huggingface.co/openai/gpt-oss-20b
 import os
 import json
 import logging
-from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
-import torch
+import sys
+from pathlib import Path
+
+# Agregar el directorio de funciones al path para importar dependencias
+functions_dir = Path(__file__).parent
+sys.path.insert(0, str(functions_dir))
+
+try:
+    from transformers import pipeline, AutoTokenizer, AutoModelForCausalLM
+    import torch
+except ImportError as e:
+    logging.error(f"❌ Error importando dependencias: {e}")
+    # Fallback sin dependencias
+    pass
 
 # Configurar logging
 logging.basicConfig(level=logging.INFO)
@@ -16,7 +28,7 @@ logger = logging.getLogger(__name__)
 
 # Configuración del modelo
 MODEL_ID = "openai/gpt-oss-20b"
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+DEVICE = "cpu"  # Forzar CPU para Netlify
 
 # Variables globales para el modelo
 model = None
@@ -28,6 +40,11 @@ def load_model():
     global model, tokenizer, pipe
     
     try:
+        # Verificar si las dependencias están disponibles
+        if 'transformers' not in sys.modules:
+            logger.warning("⚠️ Dependencias de IA no disponibles, usando modo fallback")
+            return False
+            
         logger.info(f"🔄 Cargando modelo {MODEL_ID} en {DEVICE}...")
         
         # Cargar tokenizer y modelo
@@ -113,6 +130,45 @@ def generate_response(messages, reasoning_level="medium", max_tokens=1000, tempe
         logger.error(f"❌ Error generando respuesta: {e}")
         return f"Error generando respuesta: {str(e)}"
 
+def generate_fallback_response(message, user_context):
+    """Generar respuesta de fallback cuando el modelo no está disponible"""
+    message_lower = message.lower()
+    
+    # Respuestas predefinidas basadas en palabras clave
+    responses = {
+        'hola': '¡Hola! Soy GymBro, tu entrenador personal. ¿En qué puedo ayudarte hoy?',
+        'ejercicio': 'Los ejercicios son fundamentales para tu salud. ¿Qué tipo de entrenamiento te interesa?',
+        'peso': 'El control del peso es importante. ¿Te refieres a peso corporal o peso en ejercicios?',
+        'nutrición': 'La nutrición es clave para tus resultados. ¿Qué aspecto específico te interesa?',
+        'motivación': 'La motivación es esencial. Recuerda que cada entrenamiento te acerca a tus metas.',
+        'técnica': 'La técnica correcta es crucial para evitar lesiones y maximizar resultados.',
+        'rutina': 'Una buena rutina es la base del progreso. ¿Qué objetivos tienes?',
+        'salud': 'Tu salud es lo más importante. ¿Hay algo específico que te preocupe?',
+        'bienestar': 'El bienestar integral incluye ejercicio, nutrición y descanso.',
+        'entrenamiento': 'El entrenamiento consistente es la clave del éxito. ¿Qué te gustaría mejorar?'
+    }
+    
+    # Buscar palabras clave en el mensaje
+    for keyword, response in responses.items():
+        if keyword in message_lower:
+            return response
+    
+    # Respuesta genérica si no se encuentra ninguna palabra clave
+    return f"""¡Hola! Soy GymBro, tu entrenador personal.
+
+Veo que me has preguntado: "{message}"
+
+Actualmente estoy en modo de configuración mientras se carga mi modelo de IA avanzado. Por favor, intenta de nuevo en unos minutos cuando el sistema esté completamente operativo.
+
+Mientras tanto, puedo ayudarte con preguntas básicas sobre:
+- Ejercicios y técnicas
+- Nutrición y alimentación
+- Motivación y mentalidad
+- Rutinas de entrenamiento
+- Salud y bienestar
+
+¿En qué puedo asistirte?"""
+
 def handler(event, context):
     """Función principal de Netlify"""
     # Configurar CORS
@@ -161,10 +217,20 @@ def handler(event, context):
         # Cargar modelo si no está cargado
         if model is None:
             if not load_model():
+                # Fallback inteligente cuando el modelo no está disponible
+                logger.warning("⚠️ Modelo no disponible, usando respuesta de fallback")
+                
+                # Respuesta de fallback inteligente basada en el mensaje
+                fallback_response = generate_fallback_response(message, user_context)
+                
                 return {
-                    'statusCode': 500,
+                    'statusCode': 200,
                     'headers': headers,
-                    'body': json.dumps({'error': 'Model not loaded'}),
+                    'body': json.dumps({
+                        'response': fallback_response,
+                        'model': 'fallback',
+                        'reasoning_level': reasoning_level
+                    }),
                 }
 
         # Preparar mensajes para el modelo

@@ -43,69 +43,30 @@ exports.handler = async (event, context) => {
       };
     }
 
-    // URL de la función Python local
-    const CHAT_API_URL = process.env.CHAT_API_URL || '/.netlify/functions/chat-python';
+    // En Netlify Functions, no podemos hacer llamadas HTTP internas entre funciones
+    // Por ahora, devolvemos una respuesta de fallback mientras configuramos el modelo Python
+    console.log('🤖 Función de chat activada');
+    console.log('📝 Mensaje recibido:', message.substring(0, 100) + '...');
+    console.log('📊 Contexto recibido (longitud):', userContext ? userContext.length : 0);
 
-    // Configuración para gpt-oss-20b
-    const GPT_OSS_CONFIG = {
-      model: 'openai/gpt-oss-20b',
-      reasoning_level: reasoning_level || 'medium', // low, medium, high
-      max_tokens: 1000,
-      temperature: 0.7,
-      harmony_format: true // Usar formato Harmony requerido por gpt-oss
+    // Respuesta de fallback mientras configuramos el modelo Python
+    const fallbackResponse = `¡Hola! Soy GymBro, tu entrenador personal. 
+
+Veo que me has preguntado: "${message}"
+
+Actualmente estoy en modo de configuración mientras se carga mi modelo de IA avanzado. Por favor, intenta de nuevo en unos minutos cuando el sistema esté completamente operativo.
+
+Mientras tanto, puedo ayudarte con algunas preguntas básicas sobre fitness y entrenamiento. ¿En qué puedo asistirte?`;
+
+    return {
+      statusCode: 200,
+      headers,
+      body: JSON.stringify({
+        response: fallbackResponse,
+        model: 'fallback',
+        reasoning_level: reasoning_level
+      }),
     };
-
-    // Usar función Python local con gpt-oss-20b
-    try {
-      console.log('🤖 Usando función Python con gpt-oss-20b');
-
-      const response = await fetch(CHAT_API_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          message: message,
-          context: userContext,
-          reasoning_level: GPT_OSS_CONFIG.reasoning_level,
-          max_tokens: GPT_OSS_CONFIG.max_tokens,
-          temperature: GPT_OSS_CONFIG.temperature
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-
-      const data = await response.json();
-
-      if (data.error) {
-        return {
-          statusCode: 500,
-          headers,
-          body: JSON.stringify({ error: data.error }),
-        };
-      }
-
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          response: data.response,
-        }),
-      };
-    } catch (error) {
-      console.error('Error comunicándose con función Python:', error);
-
-      // Fallback: Respuesta simple cuando el modelo no está disponible
-      return {
-        statusCode: 200,
-        headers,
-        body: JSON.stringify({
-          response: 'Lo siento, el modelo de IA no está disponible en este momento. Por favor, intenta de nuevo más tarde.',
-        }),
-      };
-    }
 
   } catch (error) {
     console.error('Error en función de chat:', error);
