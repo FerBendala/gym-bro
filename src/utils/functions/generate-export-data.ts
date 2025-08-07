@@ -17,7 +17,8 @@ export const generateExportData = async (
 ): Promise<ExportData> => {
   const now = new Date();
 
-  // Filtrar registros que tengan ejercicios válidos
+  // Incluir TODOS los registros, no solo los "válidos"
+  const allRecords = workoutRecords;
   const validRecords = workoutRecords.filter(record => record.exercise);
   const invalidRecords = workoutRecords.filter(record => !record.exercise);
 
@@ -28,9 +29,9 @@ export const generateExportData = async (
     );
   }
 
-  // Ordenar registros válidos por fecha
-  const sortedRecords = [...validRecords].sort((a, b) =>
-    new Date(a.date).getTime() - new Date(b.date).getTime(),
+  // Ordenar TODOS los registros por fecha (más reciente primero)
+  const sortedRecords = [...allRecords].sort((a, b) =>
+    new Date(b.date).getTime() - new Date(a.date).getTime(),
   );
 
   // Log de todos los registros para debugging
