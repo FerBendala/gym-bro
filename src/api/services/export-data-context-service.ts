@@ -28,13 +28,16 @@ export class ExportDataContextService {
       let workoutRecords;
 
       try {
-        // Intentar cargar desde IndexedDB primero
+        // Debug: Verificar qué está pasando con IndexedDB
+        console.log('🔍 Intentando cargar desde IndexedDB...');
         const exercisesResult = await getAllItems(STORES.EXERCISES);
-        if (exercisesResult.success && exercisesResult.data) {
+        console.log('📊 Resultado IndexedDB ejercicios:', exercisesResult);
+        
+        if (exercisesResult.success && exercisesResult.data && exercisesResult.data.length > 0) {
           exercises = exercisesResult.data;
           console.log('✅ Ejercicios cargados desde IndexedDB:', exercises.length);
         } else {
-          // Fallback a Firebase
+          console.log('⚠️ IndexedDB vacío, intentando Firebase...');
           exercises = await getExercises();
           console.log('✅ Ejercicios cargados desde Firebase:', exercises.length);
         }
@@ -44,13 +47,16 @@ export class ExportDataContextService {
       }
 
       try {
-        // Intentar cargar desde IndexedDB primero
+        // Debug: Verificar qué está pasando con IndexedDB
+        console.log('🔍 Intentando cargar entrenamientos desde IndexedDB...');
         const workoutRecordsResult = await getAllItems(STORES.WORKOUT_RECORDS);
-        if (workoutRecordsResult.success && workoutRecordsResult.data) {
+        console.log('📊 Resultado IndexedDB entrenamientos:', workoutRecordsResult);
+        
+        if (workoutRecordsResult.success && workoutRecordsResult.data && workoutRecordsResult.data.length > 0) {
           workoutRecords = workoutRecordsResult.data;
           console.log('✅ Entrenamientos cargados desde IndexedDB:', workoutRecords.length);
         } else {
-          // Fallback a Firebase
+          console.log('⚠️ IndexedDB vacío, intentando Firebase...');
           workoutRecords = await getWorkoutRecords();
           console.log('✅ Entrenamientos cargados desde Firebase:', workoutRecords.length);
         }
