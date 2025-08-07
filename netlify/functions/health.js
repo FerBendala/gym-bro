@@ -29,12 +29,16 @@ exports.handler = async (event, context) => {
     }
 
     // Verificar si tenemos las variables de entorno necesarias
+    const hasHFKey = !!process.env.HF_API_KEY;
     const hasOpenAIKey = !!process.env.OPENAI_API_KEY;
     const hasChatAPI = !!process.env.CHAT_API_URL;
 
     // Determinar el modo de funcionamiento
     let mode, model;
-    if (hasOpenAIKey) {
+    if (hasHFKey) {
+      mode = 'phi-3';
+      model = 'phi-3-mini-4k-instruct';
+    } else if (hasOpenAIKey) {
       mode = 'openai';
       model = 'gpt-3.5-turbo';
     } else if (hasChatAPI) {
@@ -53,6 +57,7 @@ exports.handler = async (event, context) => {
         model_loaded: true,
         mode: mode,
         model: model,
+        phi3_available: hasHFKey,
         openai_available: hasOpenAIKey,
         timestamp: new Date().toISOString(),
         environment: process.env.NODE_ENV || 'development',

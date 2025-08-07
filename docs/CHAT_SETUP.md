@@ -1,108 +1,133 @@
-# Configuración del Chat con gpt-oss-20b
+# Configuración del Chat con Phi-3
 
 ## 🚀 Configuración Rápida
 
-El chat ahora usa el modelo [gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b) de OpenAI, que es un modelo de código abierto gratuito con capacidades avanzadas de razonamiento.
+El chat ahora usa **Phi-3-mini-4k-instruct** de Microsoft, que es un modelo de lenguaje avanzado y **completamente gratuito** a través de Hugging Face Inference API.
 
-### 🎯 Ventajas de gpt-oss-20b
+### 🎯 Ventajas de Phi-3
 
-- ✅ **Completamente gratuito** (no hay costos de API)
-- ✅ **Código abierto** (Apache 2.0 license)
-- ✅ **Capacidades de razonamiento** configurable (low, medium, high)
-- ✅ **21B parámetros** con 3.6B parámetros activos
-- ✅ **Formato Harmony** para respuestas estructuradas
-- ✅ **Funciona localmente** o en servidores
+- ✅ **Completamente gratuito** (hasta 30,000 requests/mes)
+- ✅ **Modelo avanzado** de Microsoft (3.8B parámetros)
+- ✅ **Respuestas naturales** y conversacionales
+- ✅ **Contexto de 4K tokens** para conversaciones largas
+- ✅ **Optimizado para instrucciones** y conversaciones
+- ✅ **Sin costos ocultos** ni límites estrictos
 
 ### 🔧 Funcionamiento Automático
 
 El sistema está configurado para funcionar automáticamente:
 
-1. **Descarga automática** del modelo desde Hugging Face
-2. **Instalación automática** de dependencias Python
-3. **Fallback inteligente** si el modelo no está disponible
-4. **Configuración de reasoning** (low, medium, high)
+1. **API de Hugging Face**: Usa la Inference API gratuita
+2. **Fallback inteligente**: Si la API no está disponible
+3. **Respuestas contextuales**: Basadas en los datos del usuario
+4. **Conversaciones naturales**: Como un entrenador personal real
 
 ## 🔧 Funcionamiento
 
-### Modo gpt-oss-20b (Recomendado)
-- ✅ **Respuestas libres y naturales** usando el modelo local
+### Modo Phi-3 (Recomendado)
+- ✅ **Respuestas libres y naturales** usando el modelo de Microsoft
 - ✅ **Contexto personalizado** basado en los datos del usuario
 - ✅ **Consejos específicos** de fitness y entrenamiento
 - ✅ **Motivación personalizada** según el historial del usuario
-- ✅ **Razonamiento configurable** según la complejidad de la pregunta
+- ✅ **Conversaciones fluidas** sobre cualquier tema de fitness
 
-### Modo Fallback (Sin modelo)
+### Modo Fallback (Sin API)
 - ✅ **15 categorías de respuestas** basadas en palabras clave
 - ✅ **Funciona sin configuración** adicional
 - ✅ **Respuestas inteligentes** para temas específicos
 
 ## 💰 Costos
 
-- **gpt-oss-20b**: **Completamente gratis** (modelo de código abierto)
-- **Uso típico**: **Sin costos** (se ejecuta localmente)
+- **Phi-3**: **Completamente gratis** (30,000 requests/mes)
+- **Uso típico**: **Sin costos** (dentro del límite gratuito)
 - **Fallback**: **Gratis** (sin costos adicionales)
+
+## 🛠️ Configuración
+
+### 1. Obtener API Key de Hugging Face
+
+1. Ve a [Hugging Face](https://huggingface.co/)
+2. Crea una cuenta o inicia sesión
+3. Ve a **Settings** → **Access Tokens**
+4. Crea un nuevo token
+5. Copia el token (empieza con `hf_`)
+
+### 2. Configurar en Netlify
+
+#### Opción A: Variables de Entorno en Netlify Dashboard
+
+1. Ve a tu proyecto en [Netlify Dashboard](https://app.netlify.com/)
+2. Ve a **Site settings** → **Environment variables**
+3. Agrega una nueva variable:
+   - **Key**: `HF_API_KEY`
+   - **Value**: Tu token de Hugging Face (ej: `hf_...`)
+4. Guarda los cambios
+
+#### Opción B: Variables de Entorno Locales
+
+Crea un archivo `.env` en la raíz del proyecto:
+
+```bash
+HF_API_KEY=hf-tu-token-aqui
+```
+
+### 3. Verificar Configuración
+
+Una vez configurado, el health check mostrará:
+
+```json
+{
+  "status": "healthy",
+  "mode": "phi-3",
+  "model": "phi-3-mini-4k-instruct",
+  "phi3_available": true
+}
+```
 
 ## 🛠️ Personalización
 
 ### Modificar el Prompt del Sistema
 
-Edita `netlify/functions/chat-python.py` y modifica la variable `system_content`:
-
-```python
-system_content = 'Eres un experto en fitness y entrenamiento llamado "GymBro".
-Instrucciones personalizadas aquí...'
-```
-
-### Configurar Nivel de Razonamiento
-
-El modelo soporta tres niveles de razonamiento:
-
-- **Low**: Respuestas rápidas para diálogo general
-- **Medium**: Velocidad y detalle balanceados (por defecto)
-- **High**: Análisis profundo y detallado
-
-Se puede configurar enviando `reasoning_level` en la request:
+Edita `netlify/functions/chat.js` y modifica la variable `systemPrompt`:
 
 ```javascript
-{
-  "message": "¿Qué ejercicios me recomiendas?",
-  "reasoning_level": "high",
-  "context": "datos del usuario..."
-}
+const systemPrompt = `Eres un entrenador personal experto llamado "GymBro".
+Instrucciones personalizadas aquí...`;
 ```
 
 ### Agregar Más Respuestas de Fallback
 
-En la función `generate_fallback_response`, agrega más palabras clave:
+En la función `generateFallbackResponse`, agrega más palabras clave:
 
-```python
-responses = {
-    'nueva-palabra': 'Nueva respuesta personalizada',
-    # ... más respuestas
-}
+```javascript
+const responses = {
+  'nueva-palabra': 'Nueva respuesta personalizada',
+  // ... más respuestas
+};
 ```
 
 ## 🔍 Troubleshooting
 
-### Error: "Dependencias de IA no disponibles"
-- El modelo se está descargando por primera vez
-- Espera unos minutos para que se complete la descarga
-- Verifica que hay suficiente espacio en disco
+### Error: "Hugging Face API key no configurada"
+- Verifica que la variable `HF_API_KEY` esté configurada
+- Asegúrate de que el valor sea correcto (empieza con `hf_`)
 
-### Error: "Modelo no disponible, usando fallback"
-- El modelo está en proceso de carga
-- La primera carga puede tomar varios minutos
-- Las siguientes cargas serán más rápidas
+### Error: "Hugging Face API error: 401"
+- El token es inválido o ha expirado
+- Genera un nuevo token en Hugging Face
 
-### Error: "Error cargando modelo"
-- Verifica que hay suficiente memoria RAM (mínimo 16GB recomendado)
-- El modelo requiere aproximadamente 16GB de memoria
-- Considera usar un servidor con más recursos
+### Error: "Hugging Face API error: 429"
+- Has excedido el límite de rate limit
+- Espera unos minutos antes de hacer más preguntas
+
+### Error: "Hugging Face API error: 503"
+- El modelo está cargando (primera vez)
+- Espera unos segundos y vuelve a intentar
 
 ## 📊 Monitoreo
 
 ### Logs de Netlify
-- Ve a **Functions** → **chat-python** en tu dashboard de Netlify
+- Ve a **Functions** → **chat** en tu dashboard de Netlify
 - Revisa los logs para ver el funcionamiento del modelo
 
 ### Health Check
@@ -111,20 +136,20 @@ responses = {
 
 ## 🔒 Seguridad
 
-- ✅ **Modelo local**: No hay llamadas a APIs externas
-- ✅ **Datos privados**: Todo se procesa localmente
-- ✅ **Código abierto**: Transparencia total del modelo
-- ✅ **Fallback automático**: Funciona sin configuración adicional
+- ✅ **API key segura**: Nunca se expone al frontend
+- ✅ **Todas las llamadas** pasan por Netlify Functions
+- ✅ **Variables de entorno** seguras en Netlify
+- ✅ **Fallback automático** si la API falla
 
 ## 🚀 Próximos Pasos
 
-1. **Despliega la aplicación** - El modelo se descargará automáticamente
+1. **Configura Hugging Face** siguiendo los pasos arriba
 2. **Prueba el chat** con diferentes tipos de preguntas
 3. **Personaliza el prompt** según tus necesidades específicas
-4. **Ajusta el reasoning_level** según la complejidad de las preguntas
+4. **Monitorea el uso** en tu dashboard de Hugging Face
 
 ## 📚 Recursos Adicionales
 
-- [Documentación oficial de gpt-oss-20b](https://huggingface.co/openai/gpt-oss-20b)
-- [Formato Harmony](https://huggingface.co/openai/gpt-oss-20b#reasoning-levels)
-- [Capacidades de razonamiento](https://huggingface.co/openai/gpt-oss-20b#reasoning-levels) 
+- [Phi-3-mini-4k-instruct en Hugging Face](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct)
+- [Hugging Face Inference API](https://huggingface.co/docs/api-inference/index)
+- [Documentación de Phi-3](https://huggingface.co/microsoft/Phi-3-mini-4k-instruct) 
