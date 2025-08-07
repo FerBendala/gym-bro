@@ -100,19 +100,19 @@ export class ExportDataContextService {
     }
   }
 
-  /**
+    /**
    * Procesa los datos de exportación para el contexto
    */
   private static processExportData(exportData: ExportData) {
     const { metadata, trainingDays } = exportData;
 
-    // Obtener todos los ejercicios únicos
-    const allExercises = new Set<string>();
+    // Obtener todos los ejercicios únicos con sus categorías
+    const exerciseMap = new Map<string, string[]>();
     const exerciseCategories = new Set<string>();
-
+    
     trainingDays.forEach(day => {
       day.exercises.forEach(exercise => {
-        allExercises.add(exercise.exerciseName);
+        exerciseMap.set(exercise.exerciseName, exercise.categories);
         exercise.categories.forEach(category => exerciseCategories.add(category));
       });
     });
@@ -133,30 +133,43 @@ export class ExportDataContextService {
     const mostTrainedExercise = Array.from(exerciseCounts.entries())
       .reduce((max, [name, count]) => count > (max?.count || 0) ? { name, count } : max, null as { name: string; count: number } | null);
 
-    // Obtener entrenamientos recientes (últimos 30 días)
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+    // Crear entrenamientos recientes basados en los últimos pesos de cada ejercicio
+    const recentWorkouts: any[] = [];
+    trainingDays.forEach(day => {
+      day.exercises.forEach(exercise => {
+        if (exercise.weights.length > 0) {
+          // Usar el último peso como entrenamiento más reciente
+          const lastWeight = exercise.weights[exercise.weights.length - 1];
+          recentWorkouts.push({
+            exerciseName: exercise.exerciseName,
+            weight: lastWeight,
+            date: new Date(exercise.lastWorkout.split('/').reverse().join('-')), // Convertir fecha
+            reps: 10, // Placeholder
+            sets: 3, // Placeholder
+            maxWeight: exercise.maxWeight,
+            averageWeight: exercise.averageWeight,
+            totalVolume: exercise.totalVolume
+          });
+        }
+      });
+    });
 
-    const recentWorkouts = trainingDays.flatMap(day =>
-      day.exercises.flatMap(exercise =>
-        exercise.weights.map((weight, index) => ({
-          exerciseName: exercise.exerciseName,
-          weight,
-          date: new Date(), // Placeholder - los datos de exportación no tienen fechas específicas
-          reps: 10, // Placeholder
-          sets: 3 // Placeholder
-        }))
-      )
-    );
+    // Ordenar por fecha (más reciente primero)
+    recentWorkouts.sort((a, b) => b.date.getTime() - a.date.getTime());
 
-    // Obtener entrenamientos de hoy (placeholder - no hay datos específicos de hoy)
+    // Obtener entrenamientos de hoy (no hay datos específicos de hoy en la exportación)
     const todayWorkouts: any[] = [];
 
     return {
-      exercises: Array.from(allExercises).map(name => ({ name, category: 'General' })),
+      exercises: Array.from(exerciseMap.entries()).map(([name, categories]) => ({ 
+        name, 
+        category: categories.join(', ') 
+      })),
       assignments: trainingDays.map(day => ({
         dayOfWeek: day.dayOfWeek,
-        exercises: day.exercises.map(ex => ex.exerciseName)
+        exercises: day.exercises.map(ex => ex.exerciseName),
+        totalWorkouts: day.totalWorkouts,
+        totalVolume: day.totalVolume
       })),
       workoutRecords: recentWorkouts,
       statistics: {
@@ -211,15 +224,15 @@ ${statistics.todayWorkouts.length > 0
         : 'No hay entrenamientos registrados hoy'
       }
 
-📈 ÚLTIMOS ENTRENAMIENTOS (últimos 5):
-${statistics.recentWorkouts.slice(-5).map(record =>
-        `- ${record.exerciseName}: ${record.weight}kg x ${record.reps} reps (${record.sets} sets)`
+  📈 ÚLTIMOS ENTRENAMIENTOS (últimos 5):
+${statistics.recentWorkouts.slice(0, 5).map(record =>
+        `- ${record.exerciseName}: ${record.weight}kg (máx: ${record.maxWeight}kg, prom: ${record.averageWeight.toFixed(1)}kg) - ${record.date.toLocaleDateString('es-ES')}`
       ).join('\n')}
 
-💪 PROGRESO POR DÍA:
+  💪 PROGRESO POR DÍA:
 ${assignments.map(day => {
         const dayData = day as any;
-        return `${dayData.dayOfWeek}: ${dayData.totalWorkouts || 0} entrenamientos, ${dayData.totalVolume || 0} kg volumen`;
+        return `${dayData.dayOfWeek}: ${dayData.totalWorkouts} entrenamientos, ${dayData.totalVolume.toLocaleString()} kg volumen`;
       }).join('\n')}
 `;
 
