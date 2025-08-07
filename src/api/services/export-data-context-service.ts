@@ -1,9 +1,10 @@
 import { getExercises, getWorkoutRecords } from '@/api/services';
 import { logger } from '@/utils';
-import { STORES } from '@/utils/data/indexeddb-config';
-import { getAllItems } from '@/utils/data/indexeddb-utils';
 import { generateExportData } from '@/utils/functions';
 import type { ExportData } from '@/utils/functions/export-interfaces';
+import { getAllItems } from '@/utils/data/indexeddb-utils';
+import { STORES } from '@/utils/data/indexeddb-config';
+import { initializeDB } from '@/utils/data/indexeddb-utils';
 
 
 
@@ -27,21 +28,44 @@ export class ExportDataContextService {
       let exercises;
       let workoutRecords;
 
-            try {
-        // Usar directamente Firebase (que sabemos que funciona)
-        console.log('🔍 Cargando ejercicios desde Firebase...');
-        exercises = await getExercises();
-        console.log('✅ Ejercicios cargados desde Firebase:', exercises.length);
+      try {
+        // Inicializar IndexedDB primero
+        console.log('🔍 Inicializando IndexedDB...');
+        await initializeDB();
+        console.log('✅ IndexedDB inicializado');
+
+        // Cargar ejercicios desde IndexedDB
+        console.log('🔍 Cargando ejercicios desde IndexedDB...');
+        const exercisesResult = await getAllItems(STORES.EXERCISES);
+        console.log('📊 Resultado ejercicios:', exercisesResult);
+        
+        if (exercisesResult.success && exercisesResult.data && exercisesResult.data.length > 0) {
+          exercises = exercisesResult.data;
+          console.log('✅ Ejercicios cargados desde IndexedDB:', exercises.length);
+        } else {
+          console.log('⚠️ IndexedDB vacío, intentando Firebase...');
+          exercises = await getExercises();
+          console.log('✅ Ejercicios cargados desde Firebase:', exercises.length);
+        }
       } catch (error) {
         console.error('❌ Error cargando ejercicios:', error);
         return this.getDefaultContext();
       }
 
       try {
-        // Usar directamente Firebase (que sabemos que funciona)
-        console.log('🔍 Cargando entrenamientos desde Firebase...');
-        workoutRecords = await getWorkoutRecords();
-        console.log('✅ Entrenamientos cargados desde Firebase:', workoutRecords.length);
+        // Cargar entrenamientos desde IndexedDB
+        console.log('🔍 Cargando entrenamientos desde IndexedDB...');
+        const workoutRecordsResult = await getAllItems(STORES.WORKOUT_RECORDS);
+        console.log('📊 Resultado entrenamientos:', workoutRecordsResult);
+        
+        if (workoutRecordsResult.success && workoutRecordsResult.data && workoutRecordsResult.data.length > 0) {
+          workoutRecords = workoutRecordsResult.data;
+          console.log('✅ Entrenamientos cargados desde IndexedDB:', workoutRecords.length);
+        } else {
+          console.log('⚠️ IndexedDB vacío, intentando Firebase...');
+          workoutRecords = await getWorkoutRecords();
+          console.log('✅ Entrenamientos cargados desde Firebase:', workoutRecords.length);
+        }
       } catch (error) {
         console.error('❌ Error cargando entrenamientos:', error);
         return this.getDefaultContext();
