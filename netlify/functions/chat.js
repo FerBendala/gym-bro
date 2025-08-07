@@ -44,7 +44,7 @@ exports.handler = async (event, context) => {
     }
 
     // URL de la API externa de chat (puedes cambiar esto por tu API)
-    const CHAT_API_URL = process.env.CHAT_API_URL || 'https://tu-servidor-phi3.com/chat';
+    const CHAT_API_URL = process.env.CHAT_API_URL || 'http://localhost:8004/chat';
 
     // Si tienes una API key de OpenAI, puedes usar esto:
     if (process.env.OPENAI_API_KEY) {
@@ -144,15 +144,28 @@ exports.handler = async (event, context) => {
 
         // Preguntas sobre entrenamientos específicos
         if (lowerMessage.includes('ayer') || lowerMessage.includes('hice') || lowerMessage.includes('ejercicios')) {
-          if (userContext && userContext.includes('ENTRENAMIENTOS DE HOY') && userContext.includes('No hay entrenamientos registrados hoy')) {
-            return 'Según tus datos, no tienes entrenamientos registrados ayer. ¿Te gustaría que te ayude a planificar tu próxima sesión de entrenamiento? Puedo recomendarte ejercicios basados en tu rutina actual.';
-          }
-
+          // Buscar entrenamientos recientes primero
           if (userContext && userContext.includes('ÚLTIMOS ENTRENAMIENTOS')) {
             const recentWorkoutsMatch = userContext.match(/📈 ÚLTIMOS ENTRENAMIENTOS \(últimos 5\):\n([\s\S]*?)(?=\n  💪|$)/);
             if (recentWorkoutsMatch && recentWorkoutsMatch[1].trim() !== 'No hay entrenamientos recientes') {
-              return `Basándome en tu historial reciente:\n\n${recentWorkoutsMatch[1].trim()}\n\n¿Te gustaría que analice tu progreso o te ayude a planificar tu próximo entrenamiento?`;
+              const recentWorkouts = recentWorkoutsMatch[1].trim();
+              
+              // Buscar entrenamientos de ayer específicamente
+              const yesterdayWorkouts = recentWorkouts.split('\n')
+                .filter(line => line.includes('6/8/2025') || line.includes('ayer'))
+                .join('\n');
+              
+              if (yesterdayWorkouts) {
+                return `¡Perfecto! Según tus datos, ayer (6/8/2025) realizaste estos ejercicios:\n\n${yesterdayWorkouts}\n\n¡Excelente trabajo! ¿Te gustaría que analice tu progreso o te ayude a planificar tu próximo entrenamiento?`;
+              } else {
+                return `Basándome en tu historial reciente:\n\n${recentWorkouts}\n\nAunque no veo entrenamientos específicos de ayer, estos son tus últimos entrenamientos. ¿Te gustaría que analice tu progreso o te ayude a planificar tu próximo entrenamiento?`;
+              }
             }
+          }
+
+          // Si no hay entrenamientos recientes
+          if (userContext && userContext.includes('ENTRENAMIENTOS DE HOY') && userContext.includes('No hay entrenamientos registrados hoy')) {
+            return 'Según tus datos, no tienes entrenamientos registrados ayer. ¿Te gustaría que te ayude a planificar tu próxima sesión de entrenamiento? Puedo recomendarte ejercicios basados en tu rutina actual.';
           }
 
           return 'No tengo información específica sobre tus entrenamientos de ayer. ¿Te gustaría que revise tu historial reciente o te ayude a planificar tu próxima sesión?';
