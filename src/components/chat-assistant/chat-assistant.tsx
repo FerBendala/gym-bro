@@ -74,7 +74,7 @@ Instrucciones importantes:
       setUserContext(trainerContext);
       console.log('✅ Contexto del entrenador personal cargado');
       console.log('📊 Contexto final (primeros 500 chars):', trainerContext.substring(0, 500) + '...');
-      
+
       return trainerContext;
     } catch (error) {
       console.error('❌ Error cargando contexto del usuario:', error);
@@ -136,14 +136,14 @@ Instrucciones importantes:
 
     try {
       console.log('💬 Enviando mensaje:', message);
-      
+
       // Si el contexto está vacío, recargarlo
       let contextToUse = userContext;
       if (!userContext || userContext.length === 0) {
         console.log('⚠️ Contexto vacío, recargando...');
         contextToUse = await loadUserContext();
       }
-      
+
       console.log('📊 Contexto del usuario (longitud):', contextToUse.length);
       console.log('📊 Contexto del usuario (primeros 500 chars):', contextToUse.substring(0, 500) + '...');
 
