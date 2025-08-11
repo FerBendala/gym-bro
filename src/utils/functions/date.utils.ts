@@ -200,11 +200,12 @@ export const getWorkoutsForDay = (
  * Obtiene el color de intensidad basado en el número de entrenamientos
  */
 export const getIntensityColor = (workoutCount: number): string => {
-  if (workoutCount === 0) return 'bg-gray-100';
-  if (workoutCount === 1) return 'bg-green-200';
-  if (workoutCount === 2) return 'bg-green-400';
-  if (workoutCount === 3) return 'bg-green-600';
-  return 'bg-green-800';
+  // Paleta sutil para dark mode
+  if (workoutCount === 0) return 'bg-gray-800/40';
+  if (workoutCount === 1) return 'bg-emerald-500/10';
+  if (workoutCount === 2) return 'bg-emerald-500/20';
+  if (workoutCount === 3) return 'bg-emerald-500/30';
+  return 'bg-emerald-500/50';
 };
 
 /**
@@ -290,11 +291,11 @@ export const getDayTooltip = (workoutCount: number): string => {
  */
 export const getLegendData = () => {
   return [
-    { color: 'bg-gray-100', label: 'Sin entrenamientos' },
-    { color: 'bg-green-200', label: '1 entrenamiento' },
-    { color: 'bg-green-400', label: '2 entrenamientos' },
-    { color: 'bg-green-600', label: '3 entrenamientos' },
-    { color: 'bg-green-800', label: '4+ entrenamientos' },
+    { className: 'bg-gray-800/40', label: 'Sin entrenamientos' },
+    { className: 'bg-emerald-500/10', label: '1 entrenamiento' },
+    { className: 'bg-emerald-500/20', label: '2 entrenamientos' },
+    { className: 'bg-emerald-500/30', label: '3 entrenamientos' },
+    { className: 'bg-emerald-500/50', label: '4+ entrenamientos' },
   ];
 };
 

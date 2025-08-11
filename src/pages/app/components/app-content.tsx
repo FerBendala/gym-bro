@@ -13,6 +13,7 @@ import { DashboardPage } from '@/pages/dashboard';
 import { ModernHome } from '@/pages/home';
 import { ModernSettings } from '@/pages/settings';
 import { WorkoutHistory } from '@/pages/workout-history';
+import { useNavigationParams } from '@/stores/modern-layout';
 
 export const AppContent = () => {
   const { activeTab, navigateTo, goBack, canGoBack, clearNavigationParams } = useModernNavigation();
@@ -20,6 +21,7 @@ export const AppContent = () => {
   const [activeDay, setActiveDay] = useState<DayOfWeek>(() => getCurrentDayInfo());
 
   const { historyFilter, handleGoToHistory } = useHistoryFilter(activeTab);
+  const navigationParams = useNavigationParams();
   const pageInfo = usePageInfo(activeTab, activeDay);
 
   const handleTabChange = (tab: string) => {
@@ -29,6 +31,16 @@ export const AppContent = () => {
     }
     navigateTo(tab as any);
   };
+
+  const initialHistoryFilter = historyFilter ?? (
+    navigationParams?.dateFrom && navigationParams?.dateTo
+      ? {
+        dateFrom: new Date(navigationParams.dateFrom),
+        dateTo: new Date(navigationParams.dateTo),
+        dateLabel: navigationParams.dateLabel as string | undefined,
+      }
+      : null
+  );
 
   const renderContent = () => {
     switch (activeTab) {
@@ -48,7 +60,7 @@ export const AppContent = () => {
       case 'settings':
         return <ModernSettings />;
       case 'history':
-        return <WorkoutHistory initialFilter={historyFilter} />;
+        return <WorkoutHistory initialFilter={initialHistoryFilter} />;
       default:
         return (
           <ModernHome

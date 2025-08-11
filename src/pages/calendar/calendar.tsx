@@ -3,7 +3,6 @@ import {
   EmptyState,
   ErrorState,
   LoadingState,
-  MonthStatsSection,
 } from './components';
 import { useCalendarData } from './hooks';
 import { getCurrentMonthStats } from './utils';
@@ -31,7 +30,7 @@ export const ModernCalendar: React.FC = () => {
       title="Calendario"
       subtitle="Vista mensual de entrenamientos"
     >
-      <MonthStatsSection monthStats={monthStats} />
+      {/* Resumen del Mes eliminado a petición del usuario */}
       <CalendarMainSection records={records} />
       {records.length === 0 && <EmptyState />}
     </Page>

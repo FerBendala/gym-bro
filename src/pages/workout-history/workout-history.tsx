@@ -1,4 +1,4 @@
-import { Filter } from 'lucide-react';
+import { AlertCircleIcon, Filter } from 'lucide-react';
 import React, { useEffect, useState } from 'react';
 
 import { FilterIndicator, FilterModal, WorkoutList } from './components';
@@ -34,6 +34,12 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
       }
       if (initialFilter.exerciseId) {
         updateFilter('selectedExercise', initialFilter.exerciseId);
+      }
+      if (initialFilter.dateFrom) {
+        updateFilter('dateFrom', initialFilter.dateFrom);
+      }
+      if (initialFilter.dateTo) {
+        updateFilter('dateTo', initialFilter.dateTo);
       }
     }
   }, [initialFilter, updateFilter]);
@@ -92,10 +98,14 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
     );
   }
 
+  const computedSubtitle = initialFilter?.dateFrom && initialFilter?.dateTo
+    ? `Entrenamientos del ${initialFilter?.dateLabel ?? 'día seleccionado'}`
+    : 'Gestiona y revisa tus entrenamientos realizados';
+
   return (
     <Page
       title="Historial de Entrenamientos"
-      subtitle="Gestiona y revisa tus entrenamientos realizados"
+      subtitle={computedSubtitle}
       headerActions={
         <div className="flex items-center space-x-3">
           <Button
@@ -103,13 +113,9 @@ export const WorkoutHistory: React.FC<WorkoutHistoryProps> = ({ initialFilter })
             variant="secondary"
             className="bg-blue-600/20 hover:bg-blue-600/30 border-blue-500/30"
             leftIcon={<Filter className="w-4 h-4 mr-2" />}
+            rightIcon={hasActiveFilters ? <AlertCircleIcon className="w-4 h-4" /> : null}
           >
             Filtros
-            {hasActiveFilters && (
-              <span className="ml-2 bg-blue-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                !
-              </span>
-            )}
           </Button>
         </div>
       }
