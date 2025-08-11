@@ -144,7 +144,7 @@ export const THEME_CALENDAR = {
     day: {
       base: 'relative p-2 h-12 text-center text-sm rounded-lg transition-colors',
       currentMonth: 'text-white',
-      otherMonth: 'text-gray-600',
+      otherMonth: 'text-white/60',
       today: 'ring-2 ring-blue-500',
       hasData: 'cursor-pointer hover:opacity-80',
       content: 'relative z-10',
@@ -163,7 +163,7 @@ export const THEME_CALENDAR = {
     container: 'flex items-center justify-between text-xs text-gray-400',
     label: '',
     dots: 'flex space-x-1',
-    dot: 'w-3 h-3 rounded',
+    dot: 'w-3 h-3 rounded border border-gray-700/40',
   },
   stats: {
     container: 'pt-4 border-t border-gray-700',

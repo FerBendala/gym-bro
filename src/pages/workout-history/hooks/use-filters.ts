@@ -3,13 +3,16 @@ import { useCallback, useMemo, useState } from 'react';
 import { WORKOUT_HISTORY_CONSTANTS } from '../constants';
 import type { FilterState, WorkoutRecordWithExercise } from '../types';
 
-export const useFilters = (records: WorkoutRecordWithExercise[], initialFilter?: { exerciseId?: string; exerciseName?: string } | null) => {
+export const useFilters = (
+  records: WorkoutRecordWithExercise[],
+  initialFilter?: { exerciseId?: string; exerciseName?: string; dateFrom?: Date; dateTo?: Date } | null,
+) => {
   const [filters, setFilters] = useState<FilterState>({
     searchTerm: initialFilter?.exerciseName || '',
     selectedExercise: initialFilter?.exerciseId || 'all',
     selectedCategory: 'all',
-    dateFrom: undefined,
-    dateTo: undefined,
+    dateFrom: initialFilter?.dateFrom,
+    dateTo: initialFilter?.dateTo,
     sortBy: 'date',
     sortOrder: 'desc',
   });

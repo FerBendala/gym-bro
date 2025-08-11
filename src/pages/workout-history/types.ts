@@ -4,6 +4,9 @@ export interface WorkoutHistoryProps {
   initialFilter?: {
     exerciseId?: string;
     exerciseName?: string;
+    dateFrom?: Date;
+    dateTo?: Date;
+    dateLabel?: string;
   } | null;
 }
 

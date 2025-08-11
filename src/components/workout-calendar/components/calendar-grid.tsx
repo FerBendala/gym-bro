@@ -21,14 +21,21 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
               : THEME_CALENDAR.grid.day.otherMonth,
             dayData.isToday && THEME_CALENDAR.grid.day.today,
             dayData.hasData && THEME_CALENDAR.grid.day.hasData,
-            dayData.hasData && dayData.intensity, // Solo aplicar intensidad si tiene datos
+            dayData.hasData && dayData.intensity,
+            'border border-gray-700/40 hover:border-gray-600/60 hover:shadow-md transition-all duration-150',
+            'hover:ring-1 hover:ring-emerald-400/30',
           )}
           onClick={() => onDayClick?.(dayData)}
           title={dayData.hasData ? `${dayData.workouts.length} entrenamientos` : ''}
         >
-          <span className={THEME_CALENDAR.grid.day.content}>
-            {dayData.dayNumber}
-          </span>
+          <div className="flex items-start justify-between">
+            <span className={THEME_CALENDAR.grid.day.content}>{dayData.dayNumber}</span>
+            {dayData.hasData && (
+              <span className="text-[10px] leading-4 px-1.5 py-0.5 rounded-full bg-emerald-600/70 text-white border border-emerald-300/20">
+                {dayData.workouts.length}
+              </span>
+            )}
+          </div>
           {dayData.hasData && (
             <div className={THEME_CALENDAR.grid.day.indicator}>
               <div className={THEME_CALENDAR.grid.day.dot} />
