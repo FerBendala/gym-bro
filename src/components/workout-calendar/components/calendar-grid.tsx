@@ -10,7 +10,12 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
   onDayClick,
 }) => {
   return (
-    <div className={THEME_CALENDAR.grid.container}>
+    <div
+      className={cn(
+        THEME_CALENDAR.grid.container,
+        'grid-cols-7 gap-1 sm:gap-1.5 md:gap-2',
+      )}
+    >
       {calendarDays.map((dayData, index) => (
         <div
           key={index}

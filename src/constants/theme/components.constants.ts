@@ -142,7 +142,7 @@ export const THEME_CALENDAR = {
   grid: {
     container: 'grid grid-cols-7 gap-1',
     day: {
-      base: 'relative p-2 h-12 text-center text-sm rounded-lg transition-colors',
+      base: 'relative p-2 h-12 sm:h-14 md:h-16 text-center text-sm rounded-lg transition-colors',
       currentMonth: 'text-white',
       otherMonth: 'text-white/60',
       today: 'ring-2 ring-blue-500',
