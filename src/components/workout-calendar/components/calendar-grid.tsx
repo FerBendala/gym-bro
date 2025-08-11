@@ -35,7 +35,7 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
         >
           <span className={THEME_CALENDAR.grid.day.content}>{dayData.dayNumber}</span>
           {dayData.hasData && (
-            <span className="absolute top-1 right-1 text-[10px] leading-4 px-1.5 py-0.5 rounded-full bg-emerald-600/70 text-white border border-emerald-300/20">
+            <span className="absolute -top-1 -right-1 sm:top-0 sm:right-0 text-[9px] sm:text-[10px] leading-4 px-1.5 py-0.5 rounded-full bg-emerald-600/70 text-white border border-emerald-300/20 shadow-sm">
               {dayData.workouts.length}
             </span>
           )}
