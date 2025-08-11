@@ -1,7 +1,5 @@
-import { Calendar } from 'lucide-react';
 
 import { Section } from '@/components/layout';
-import { InfoTooltip } from '@/components/tooltip';
 import { WorkoutCalendar } from '@/components/workout-calendar';
 import type { WorkoutRecord } from '@/interfaces';
 

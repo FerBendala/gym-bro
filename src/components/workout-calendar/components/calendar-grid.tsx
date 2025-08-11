@@ -33,14 +33,12 @@ export const CalendarGrid: React.FC<CalendarGridProps> = ({
           onClick={() => onDayClick?.(dayData)}
           title={dayData.hasData ? `${dayData.workouts.length} entrenamientos` : ''}
         >
-          <div className="flex items-start justify-between">
-            <span className={THEME_CALENDAR.grid.day.content}>{dayData.dayNumber}</span>
-            {dayData.hasData && (
-              <span className="text-[10px] leading-4 px-1.5 py-0.5 rounded-full bg-emerald-600/70 text-white border border-emerald-300/20">
-                {dayData.workouts.length}
-              </span>
-            )}
-          </div>
+          <span className={THEME_CALENDAR.grid.day.content}>{dayData.dayNumber}</span>
+          {dayData.hasData && (
+            <span className="absolute top-1 right-1 text-[10px] leading-4 px-1.5 py-0.5 rounded-full bg-emerald-600/70 text-white border border-emerald-300/20">
+              {dayData.workouts.length}
+            </span>
+          )}
           {dayData.hasData && (
             <div className={THEME_CALENDAR.grid.day.indicator}>
               <div className={THEME_CALENDAR.grid.day.dot} />
