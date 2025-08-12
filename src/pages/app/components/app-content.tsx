@@ -5,6 +5,7 @@ import { getCurrentDayInfo } from '../utils';
 
 import { AdminModal } from './admin-modal';
 
+import { ChatAssistant } from '@/components/chat-assistant';
 import { Layout, useModernNavigation } from '@/components/layout';
 import { Notification } from '@/components/notification';
 import type { DayOfWeek } from '@/interfaces';
@@ -61,6 +62,8 @@ export const AppContent = () => {
         return <ModernSettings />;
       case 'history':
         return <WorkoutHistory initialFilter={initialHistoryFilter} />;
+      case 'chat':
+        return <ChatAssistant />;
       default:
         return (
           <ModernHome

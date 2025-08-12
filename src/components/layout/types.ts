@@ -1,7 +1,7 @@
 import React from 'react';
 
 // Tipos para la navegación
-export type ModernNavItem = 'home' | 'progress' | 'calendar' | 'history' | 'settings' | 'more';
+export type ModernNavItem = 'home' | 'progress' | 'calendar' | 'history' | 'settings' | 'chat' | 'more';
 export type NavigationType = 'grid' | 'horizontal' | 'compact' | 'iconsOnly';
 
 export interface LayoutProps {

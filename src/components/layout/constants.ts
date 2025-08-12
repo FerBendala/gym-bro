@@ -1,4 +1,4 @@
-import { Calendar, ClipboardList, Home, MoreHorizontal, Settings, TrendingUp } from 'lucide-react';
+import { Calendar, ClipboardList, Home, MessageCircle, MoreHorizontal, Settings, TrendingUp } from 'lucide-react';
 
 import { NavigationItem } from './types';
 
@@ -66,6 +66,11 @@ export const moreMenuItems: NavigationItem[] = [
     id: 'settings',
     label: 'Configuración',
     icon: Settings,
+  },
+  {
+    id: 'chat',
+    label: 'Chat',
+    icon: MessageCircle,
   },
 ];
 
