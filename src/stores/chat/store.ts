@@ -25,11 +25,14 @@ export const useChatStore = create<ChatStore>()(
             await getUserContext();
 
             const { agentAnswer } = await import('@/utils/chat/agent');
+            console.log('🤖 Llamando a agentAnswer con:', message.content);
             const answer = await agentAnswer(get().messages, message.content);
+            console.log('🤖 Respuesta del agente:', answer);
 
             set((state) => ({ messages: [...state.messages, { role: 'assistant', content: answer }] }));
             set({ status: 'ready' });
           } catch (e) {
+            console.error('❌ Error en addMessage:', e);
             const fallback = 'No he podido responder ahora mismo.';
             set((state) => ({ messages: [...state.messages, { role: 'assistant', content: fallback }] }));
             set({ status: 'ready' });
