@@ -6,24 +6,31 @@ import { tools } from './tools';
 
 export const agentAnswer = async (history: ChatMessage[], userText: string): Promise<string> => {
   const intent = detectIntent(userText);
+  console.log('🔍 Intent detectado:', intent, 'para:', userText);
   
   // 1. QUERIES ESPECÍFICAS POR PATRÓN - Prioridad ABSOLUTA
   // Ejercicios de un día específico (debe ir ANTES que historyRange)
   if (/ayer|hoy|mañana|manana/i.test(userText) && /ejercici/i.test(userText)) {
+    console.log('📅 Ejecutando dayExercises...');
     const res = await (tools as any).dayExercises({ query: userText });
+    console.log('📅 Resultado dayExercises:', res);
     if (res?.ok) return res.content;
   }
 
   // Peso máximo de un ejercicio específico
   if (/cu[aá]nt[oa]\s+(peso\s+)?levanto/i.test(userText) || /m[aá]ximo/i.test(userText)) {
+    console.log('🏋️ Ejecutando exerciseMaxWeight...');
     const res = await (tools as any).exerciseMaxWeight({ query: userText });
+    console.log('🏋️ Resultado exerciseMaxWeight:', res);
     if (res?.ok) return res.content;
   }
 
   // Volumen de ejercicio específico (no categoría)
   if (/^volumen\s+de\s+/i.test(userText) || /volumen\s+[^de]/i.test(userText)) {
+    console.log('📊 Ejecutando exerciseVolume...');
     // Primero intentar como ejercicio específico
     const exRes = await (tools as any).exerciseVolume({ query: userText + ' últimas 4 semanas' });
+    console.log('📊 Resultado exerciseVolume:', exRes);
     if (exRes?.ok) return exRes.content;
     
     // Si falla, intentar como categoría
