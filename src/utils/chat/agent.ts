@@ -6,18 +6,96 @@ import { tools } from './tools';
 
 export const agentAnswer = async (history: ChatMessage[], userText: string): Promise<string> => {
   const intent = detectIntent(userText);
-  // En intents de datos, primero intentamos herramientas
-  if (intent === 'category-volume-range') {
-    const res = await tools.categoryVolume({ query: userText });
-    if (res.ok) return res.content;
+  
+  // 1. QUERIES ESPECÍFICAS POR PATRÓN - Prioridad ABSOLUTA
+  // Ejercicios de un día específico (debe ir ANTES que historyRange)
+  if (/ayer|hoy|mañana|manana/i.test(userText) && /ejercici/i.test(userText)) {
+    const res = await (tools as any).dayExercises({ query: userText });
+    if (res?.ok) return res.content;
   }
+
+  // Peso máximo de un ejercicio específico
+  if (/cu[aá]nt[oa]\s+(peso\s+)?levanto/i.test(userText) || /m[aá]ximo/i.test(userText)) {
+    const res = await (tools as any).exerciseMaxWeight({ query: userText });
+    if (res?.ok) return res.content;
+  }
+
+  // Volumen de ejercicio específico (no categoría)
+  if (/^volumen\s+de\s+/i.test(userText) || /volumen\s+[^de]/i.test(userText)) {
+    // Primero intentar como ejercicio específico
+    const exRes = await (tools as any).exerciseVolume({ query: userText + ' últimas 4 semanas' });
+    if (exRes?.ok) return exRes.content;
+    
+    // Si falla, intentar como categoría
+    const catRes = await tools.categoryVolume({ query: userText + ' últimas 4 semanas' });
+    if (catRes.ok) return catRes.content;
+  }
+
+  // 2. INTENTS ESPECÍFICOS - Prioridad alta
   if (intent === 'projection-request' || intent === 'projection-exercise') {
     const res = await tools.exerciseProjection({ query: userText });
     if (res.ok) return res.content;
   }
 
-  // Si no hay herramienta aplicable o falló, usar LLM con contexto si aplica.
-  // Sin WASM: si no hay WebGPU, respondo modo “sin modelo”.
+  // 3. INTENTS DE CATEGORÍA - Prioridad media
+  if (intent === 'category-volume-range') {
+    let res = await tools.categoryVolume({ query: userText });
+    if (!res.ok) {
+      res = await tools.categoryVolume({ query: userText + ' últimas 4 semanas' });
+    }
+    if (res.ok) return res.content;
+  }
+
+  // 4. QUERIES GENÉRICAS - Prioridad baja (solo si NO hay queries específicas)
+  // Solo ejecutar si NO contiene patrones específicos
+  if (!/ayer|hoy|mañana|manana|cu[aá]nt[oa]\s+(peso\s+)?levanto|m[aá]ximo|^volumen\s+de\s+|volumen\s+[^de]/i.test(userText)) {
+    if (/centralizad|tendencia|pr|meseta|confianza|fuerza/i.test(userText)) {
+      const res = await tools.centralizedMetrics();
+      if (res.ok) return res.content;
+    }
+
+    if (/historial|últim|ultima|rango/i.test(userText)) {
+      const res = await tools.historyRange({ query: userText });
+      if (res.ok) return res.content;
+    }
+
+    if (/asignacion|asignación|plan|semana/i.test(userText)) {
+      const res = await tools.assignments();
+      if (res.ok) return res.content;
+    }
+  }
+
+  // 5. AUTO-REFORMULACIÓN Y LLM
+  const ask = async (question: string) => {
+    const { centralizedMetrics, historyRange, assignments, exerciseProjection, categoryVolume } = tools;
+    if (/centralizad|tendencia|pr|meseta|confianza|fuerza|volumen/i.test(question)) {
+      const res = await centralizedMetrics();
+      if (res.ok) return res.content;
+    }
+    if (/historial|últim|ultima|rango/i.test(question)) {
+      const res = await historyRange({ query: question });
+      if (res.ok) return res.content;
+    }
+    if (/asignacion|asignación|plan|semana/i.test(question)) {
+      const res = await assignments();
+      if (res.ok) return res.content;
+    }
+    if (/proyecc|plan|programa/i.test(question)) {
+      const res = await exerciseProjection({ query: question });
+      if (res.ok) return res.content;
+    }
+    if (/volumen/i.test(question)) {
+      const res = await categoryVolume({ query: question });
+      if (res.ok) return res.content;
+    }
+    return '';
+  };
+
+  // Si no hay herramienta aplicable o falló, intentar auto-reformulación antes del LLM
+  const reformulated = await ask(userText + ' últimas 4 semanas');
+  if (reformulated) return reformulated;
+
+  // Sin WASM: si no hay WebGPU, respondo modo "sin modelo".
   const systemPrompt = [
     'Eres un asistente de fitness para Follow Gym. Responde SIEMPRE en español.',
     'No inventes números. Usa datos de herramientas si están disponibles.',
@@ -30,7 +108,6 @@ export const agentAnswer = async (history: ChatMessage[], userText: string): Pro
       { role: 'user', content: userText },
     ]);
   };
-  // Eliminado WASM por petición del usuario
 
   try {
     if (!supportsWebGPU()) {
